@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "ManagementIuranApp",
-    "slug": "ManagementIuranApp",
+    "name": "Warga Pintar",
+    "slug": "warga-pintar",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "managementiuranapp",
+    "scheme": "wargapintar",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
