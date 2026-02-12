@@ -10,7 +10,8 @@ export const HistoryStyles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 20,
-        paddingVertical: 15,
+        paddingTop: 50, // Increased top padding
+        paddingBottom: 15,
         backgroundColor: Colors.green1,
     },
     backButton: {
