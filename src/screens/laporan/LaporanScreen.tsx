@@ -31,13 +31,9 @@ export default function LaporanScreen() {
         }
     };
 
-    const getCategoryIcon = (category: string) => {
-        switch (category) {
-            case 'Fasilitas': return 'bulb-outline';
-            case 'Kebersihan': return 'trash-outline';
-            case 'Keamanan': return 'shield-checkmark-outline';
-            default: return 'document-text-outline';
-        }
+    const getCategoryIcon = (category: string): keyof typeof Ionicons.glyphMap => {
+        // User requested a default exclamation mark icon for all reports
+        return 'alert-circle-outline';
     };
 
     return (

@@ -51,13 +51,17 @@ export const CustomTabBar = ({ state, descriptors, navigation }: MaterialTopTabB
                 else if (route.name === 'laporan') iconName = isFocused ? 'heart' : 'heart-outline';
                 else if (route.name === 'profil') iconName = isFocused ? 'person' : 'person-outline';
 
-                // Skip utility routes if any
-                if (['sitemap', '+not-found'].includes(route.name)) return null;
+                // Skip utility routes or anything else not explicitly handled above if strict, 
+                // but effectively we just render what is passed. 
+                // Based on requirements, we only want the 4 main tabs.
+                // We also strictly hide 'explore' and 'scan' to ensure they don't appear as '?'
+                if (['sitemap', '+not-found', 'explore', 'scan'].includes(route.name)) return null;
 
                 const tabItem = (
                     <TouchableOpacity
                         key={route.key}
                         onPress={onPress}
+                        activeOpacity={0.6} // Immediate feedback
                         style={styles.tabItem}
                         accessibilityRole="button"
                         accessibilityState={isFocused ? { selected: true } : {}}

@@ -18,7 +18,7 @@ const MOCK_DETAIL = {
         { date: '09 Feb 2026 10:30', title: 'Sedang Diproses', description: 'Tim teknisi sedang menuju lokasi.' },
         { date: '09 Feb 2026 14:00', title: 'Selesai', description: 'Lampu telah diganti dan berfungsi normal.' },
     ],
-    image: 'https://via.placeholder.com/400x300/E8F5E9/043F2E?text=Bukti+Foto'
+    image: 'https://placehold.co/400x300/E8F5E9/043F2E?text=Bukti+Foto'
 };
 
 export default function ReportDetailScreen() {

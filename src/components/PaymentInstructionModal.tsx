@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Modal, StyleSheet, TouchableOpacity, Image, ScrollView, Platform } from 'react-native';
+import { View, Text, Modal, StyleSheet, TouchableOpacity, Image, ScrollView, Platform, Animated, PanResponder } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomButton } from './CustomButton';
@@ -16,6 +16,7 @@ interface PaymentInstructionModalProps {
 export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = ({ visible, onClose, method, amount, dueDate }) => {
     const router = useRouter();
     const [secondsLeft, setSecondsLeft] = useState(24 * 60 * 60); // 24 hours in seconds
+    const panY = React.useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         if (!visible) return;
@@ -23,6 +24,11 @@ export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = (
             setSecondsLeft(prev => (prev > 0 ? prev - 1 : 0));
         }, 1000);
         return () => clearInterval(timer);
+    }, [visible]);
+
+    // Reset panY when modal opens
+    useEffect(() => {
+        if (visible) panY.setValue(0);
     }, [visible]);
 
     const formatTime = (seconds: number) => {
@@ -37,6 +43,42 @@ export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = (
         router.replace('/(tabs)/iuran');
     };
 
+    const resetPosition = () => {
+        Animated.spring(panY, {
+            toValue: 0,
+            useNativeDriver: false,
+        }).start();
+    };
+
+    const closeWithAnimation = () => {
+        Animated.timing(panY, {
+            toValue: 1000,
+            duration: 300,
+            useNativeDriver: false,
+        }).start(() => onClose());
+    };
+
+    const panResponder = React.useRef(
+        PanResponder.create({
+            onStartShouldSetPanResponder: () => true,
+            onMoveShouldSetPanResponder: (_, gestureState) => {
+                return gestureState.dy > 5;
+            },
+            onPanResponderMove: (_, gestureState) => {
+                if (gestureState.dy > 0) {
+                    panY.setValue(gestureState.dy);
+                }
+            },
+            onPanResponderRelease: (_, gestureState) => {
+                if (gestureState.dy > 150) {
+                    closeWithAnimation();
+                } else {
+                    resetPosition();
+                }
+            },
+        })
+    ).current;
+
     const renderContent = () => {
         if (method === 'qris') {
             return (
@@ -45,7 +87,6 @@ export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = (
                     <Text style={styles.instructionSubtitle}>Scan kode di bawah ini untuk membayar</Text>
 
                     <View style={styles.qrContainer}>
-                        {/* Placeholder for QR Image - in real app use actual image source */}
                         <Image
                             source={{ uri: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=WargaPintarPayment' }}
                             style={styles.qrImage}
@@ -94,10 +135,17 @@ export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = (
     return (
         <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
             <View style={styles.overlay}>
-                <View style={styles.modalContainer}>
-                    <ScrollView contentContainerStyle={styles.scrollContent}>
+                <Animated.View
+                    style={[
+                        styles.modalContainer,
+                        { transform: [{ translateY: panY }] }
+                    ]}
+                >
+                    <View {...panResponder.panHandlers} style={styles.draggableArea}>
                         <View style={styles.handleBar} />
+                    </View>
 
+                    <ScrollView contentContainerStyle={styles.scrollContent}>
                         {renderContent()}
 
                         <View style={styles.instructionList}>
@@ -112,7 +160,7 @@ export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = (
                     <View style={styles.footer}>
                         <CustomButton title="Saya Sudah Bayar" onPress={handleDone} />
                     </View>
-                </View>
+                </Animated.View>
             </View>
         </Modal>
     );
@@ -137,7 +185,13 @@ const styles = StyleSheet.create({
         backgroundColor: '#CCC',
         borderRadius: 2.5,
         alignSelf: 'center',
-        marginBottom: 20,
+    },
+    draggableArea: {
+        width: '100%',
+        height: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'transparent',
     },
     scrollContent: {
         paddingHorizontal: 20,

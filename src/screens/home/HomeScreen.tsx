@@ -108,6 +108,10 @@ export default function HomeScreen() {
                         horizontal
                         showsHorizontalScrollIndicator={false}
                         nestedScrollEnabled={true}
+                        onTouchStart={(e) => {
+                            // This helps on Android to claim the touch event
+                            e.stopPropagation();
+                        }}
                     >
                         {newsItems.map((item) => (
                             <TouchableOpacity
