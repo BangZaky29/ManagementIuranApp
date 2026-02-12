@@ -1,35 +1,42 @@
-import { Tabs } from 'expo-router';
 import React from 'react';
-
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { MaterialTopTabs } from '../../src/components/navigation/SwipeableTabLayout';
+import { CustomTabBar } from '../../src/components/navigation/CustomTabBar';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
-    <Tabs
+    <MaterialTopTabs
+      tabBar={(props) => <CustomTabBar {...props} />}
+      tabBarPosition="bottom"
+      initialRouteName="index"
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      <Tabs.Screen
+        swipeEnabled: true,
+        animationEnabled: true,
+      }}
+    >
+      <MaterialTopTabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
-      <Tabs.Screen
-        name="explore"
+      <MaterialTopTabs.Screen
+        name="iuran"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Iuran',
         }}
       />
-    </Tabs>
+      <MaterialTopTabs.Screen
+        name="laporan"
+        options={{
+          title: 'Laporan',
+        }}
+      />
+      <MaterialTopTabs.Screen
+        name="profil"
+        options={{
+          title: 'Profil',
+        }}
+      />
+    </MaterialTopTabs>
   );
 }
