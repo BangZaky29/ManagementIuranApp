@@ -52,11 +52,8 @@ export default function IuranScreen() {
                             title="Bayar Sekarang"
                             onPress={handlePay}
                             variant="primary"
-                            style={{ flex: 1, marginRight: 10 }}
+                            style={{ flex: 1 }}
                         />
-                        <TouchableOpacity style={styles.secondaryButton}>
-                            <Ionicons name="download-outline" size={20} color={Colors.green5} />
-                        </TouchableOpacity>
                     </View>
                 </View>
 

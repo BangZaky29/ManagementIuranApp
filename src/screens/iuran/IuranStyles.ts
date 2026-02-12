@@ -186,14 +186,4 @@ export const IuranStyles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 20,
     },
-    secondaryButton: {
-        width: 48,
-        height: 48,
-        borderRadius: 12,
-        backgroundColor: Colors.white,
-        borderWidth: 1,
-        borderColor: Colors.green2,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
 });

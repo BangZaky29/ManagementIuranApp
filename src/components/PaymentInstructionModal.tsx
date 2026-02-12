@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Modal, StyleSheet, TouchableOpacity, Image, ScrollView, Platform, Animated, PanResponder } from 'react-native';
+import { View, Text, Modal, StyleSheet, TouchableOpacity, Image, ScrollView, Platform, Animated, PanResponder, Alert, ActivityIndicator } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomButton } from './CustomButton';
 import { useRouter } from 'expo-router';
+import { ToastNotification } from './ToastNotification';
+import * as Clipboard from 'expo-clipboard';
+import { documentDirectory, downloadAsync } from 'expo-file-system/legacy';
+import * as MediaLibrary from 'expo-media-library';
 
 interface PaymentInstructionModalProps {
     visible: boolean;
@@ -17,6 +21,76 @@ export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = (
     const router = useRouter();
     const [secondsLeft, setSecondsLeft] = useState(24 * 60 * 60); // 24 hours in seconds
     const panY = React.useRef(new Animated.Value(0)).current;
+    const [toast, setToast] = useState({ visible: false, message: '' });
+    const [isChecking, setIsChecking] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
+
+    const showToast = (message: string) => {
+        setToast({ visible: true, message });
+    };
+
+    const hideToast = () => {
+        setToast({ ...toast, visible: false });
+    };
+
+    const handleCopy = async () => {
+        await Clipboard.setStringAsync('8801 2345 6789 000');
+        showToast('Kode sudah disalin ke clipboard');
+    };
+
+    const handleDownloadQR = async () => {
+        if (Platform.OS === 'web') {
+            showToast('Download QR feature is limited on web');
+            return;
+        }
+
+        setIsDownloading(true);
+
+        try {
+            // Simulate delay for better UX
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            const { status } = await MediaLibrary.requestPermissionsAsync(true);
+            if (status !== 'granted') {
+                showToast('Izinkan akses galeri untuk menyimpan QR');
+                return;
+            }
+
+            if (!documentDirectory) {
+                showToast('Gagal mengakses penyimpanan');
+                return;
+            }
+
+            const fileUri = documentDirectory + 'qr-payment.png';
+            const { uri } = await downloadAsync(
+                'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=WargaPintarPayment',
+                fileUri
+            );
+
+            await MediaLibrary.saveToLibraryAsync(uri);
+            showToast('QR Code berhasil disimpan ke Galeri');
+        } catch (error) {
+            console.error(error);
+            showToast('Gagal menyimpan QR Code');
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
+    const handleCheckStatus = () => {
+        setIsChecking(true);
+        // Simulate API call
+        setTimeout(() => {
+            setIsChecking(false);
+            const isSuccess = Math.random() > 0.3; // 70% chance success mock
+            if (isSuccess) {
+                showToast('Pembayaran Dikonfirmasi Lunas');
+                // Automatically close and go to success screen if needed, or just refresh
+            } else {
+                showToast('Pembayaran Belum Diterima. Coba lagi nanti.');
+            }
+        }, 2000);
+    };
 
     useEffect(() => {
         if (!visible) return;
@@ -91,6 +165,23 @@ export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = (
                             source={{ uri: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=WargaPintarPayment' }}
                             style={styles.qrImage}
                         />
+                        <TouchableOpacity
+                            style={[
+                                styles.downloadQrButton,
+                                isDownloading && { backgroundColor: '#E0E0E0', borderColor: '#BDBDBD' }
+                            ]}
+                            onPress={handleDownloadQR}
+                            disabled={isDownloading}
+                        >
+                            {isDownloading ? (
+                                <ActivityIndicator size="small" color={Colors.green5} />
+                            ) : (
+                                <>
+                                    <Ionicons name="download-outline" size={18} color={Colors.green5} />
+                                    <Text style={styles.downloadQrText}>Download QR</Text>
+                                </>
+                            )}
+                        </TouchableOpacity>
                     </View>
 
                     <View style={styles.amountContainer}>
@@ -114,7 +205,7 @@ export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = (
                     <Text style={styles.vaLabel}>Nomor Virtual Account</Text>
                     <View style={styles.vaRow}>
                         <Text style={styles.vaNumber}>8801 2345 6789 000</Text>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={handleCopy}>
                             <Text style={styles.copyText}>SALIN</Text>
                         </TouchableOpacity>
                     </View>
@@ -158,10 +249,28 @@ export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = (
                     </ScrollView>
 
                     <View style={styles.footer}>
-                        <CustomButton title="Saya Sudah Bayar" onPress={handleDone} />
+                        <View style={{ flexDirection: 'row', gap: 10 }}>
+                            <CustomButton
+                                title="Cek Status"
+                                onPress={handleCheckStatus}
+                                style={{ flex: 1, backgroundColor: Colors.white, borderWidth: 1, borderColor: Colors.green5 }}
+                                textStyle={{ color: Colors.green5 }}
+                                loading={isChecking}
+                            />
+                            <CustomButton
+                                title="Sudah Bayar"
+                                onPress={handleDone}
+                                style={{ flex: 1 }}
+                            />
+                        </View>
                     </View>
                 </Animated.View>
             </View>
+            <ToastNotification
+                visible={toast.visible}
+                message={toast.message}
+                onHide={hideToast}
+            />
         </Modal>
     );
 };
@@ -226,6 +335,24 @@ const styles = StyleSheet.create({
     qrImage: {
         width: 200,
         height: 200,
+    },
+    downloadQrButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 16,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        backgroundColor: '#F1F8E9',
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: Colors.green2,
+    },
+    downloadQrText: {
+        marginLeft: 8,
+        color: Colors.green5,
+        fontWeight: 'bold',
+        fontSize: 14,
     },
     expiryText: {
         color: Colors.danger,

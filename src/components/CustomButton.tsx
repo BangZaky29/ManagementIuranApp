@@ -11,6 +11,7 @@ interface CustomButtonProps {
     loading?: boolean;
     isComingSoon?: boolean;
     icon?: React.ReactNode;
+    iconPosition?: 'left' | 'right';
 }
 
 export const CustomButton: React.FC<CustomButtonProps> = ({
@@ -21,7 +22,8 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
     textStyle,
     loading = false,
     isComingSoon = false,
-    icon
+    icon,
+    iconPosition = 'left'
 }) => {
 
     const handlePress = () => {
@@ -51,6 +53,12 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
         return Colors.white;
     };
 
+    const getSpinnerColor = () => {
+        // @ts-ignore
+        if (textStyle?.color) return textStyle.color;
+        return getTextColor();
+    };
+
     return (
         <TouchableOpacity
             style={[
@@ -64,13 +72,20 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
             disabled={loading}
         >
             {loading ? (
-                <ActivityIndicator color={getTextColor()} />
+                <ActivityIndicator color={getSpinnerColor()} />
             ) : (
                 <View style={styles.contentContainer}>
-                    {icon && <View style={styles.iconContainer}>{icon}</View>}
-                    <Text style={[styles.text, { color: getTextColor() }, textStyle]}>
+                    {icon && iconPosition === 'left' && (
+                        <View style={{ marginRight: 8 }}>{icon}</View>
+                    )}
+
+                    <Text style={[styles.text, { color: getTextColor(), textAlign: 'center' }, textStyle]}>
                         {title}
                     </Text>
+
+                    {icon && iconPosition === 'right' && (
+                        <View style={{ marginLeft: 8 }}>{icon}</View>
+                    )}
                 </View>
             )}
         </TouchableOpacity>

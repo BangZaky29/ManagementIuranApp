@@ -128,7 +128,8 @@ export default function PaymentDetailScreen() {
                     title="Konfirmasi Pembayaran"
                     onPress={handleConfirmPayment}
                     style={{ flex: 1, marginLeft: 20 }}
-                    icon={<Ionicons name="lock-closed-outline" size={18} color={Colors.white} style={{ marginRight: 6 }} />}
+                    icon={<Ionicons name="lock-closed-outline" size={18} color={Colors.white} />}
+                    iconPosition="right"
                 />
             </View>
 
@@ -152,7 +153,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 20,
-        paddingVertical: 15,
+        paddingTop: 50,
+        paddingBottom: 15,
         backgroundColor: Colors.green1,
     },
     backButton: {
