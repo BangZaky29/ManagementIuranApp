@@ -45,6 +45,10 @@ export async function signUpWithEmail({ email, password, fullName, phone, role, 
         email,
         password,
         options: {
+            emailRedirectTo: makeRedirectUri({
+                scheme: 'wargapintar',
+                path: 'auth/callback',
+            }),
             data: {
                 full_name: fullName,
                 phone,

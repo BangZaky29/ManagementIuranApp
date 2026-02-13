@@ -25,7 +25,12 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isLoading) return;
 
-    const inAuthGroup = segments[0] === 'login' || segments[0] === 'register' || segments[0] === 'forgot-password';
+    const inAuthGroup =
+      segments[0] === 'login' ||
+      segments[0] === 'register' ||
+      segments[0] === 'forgot-password' ||
+      segments[0] === 'register-admin' ||
+      segments[0] === 'login-warga';
 
     if (!isAuthenticated && !inAuthGroup) {
       // Not logged in → redirect to login
@@ -74,6 +79,8 @@ function RootLayoutInner() {
           <Stack.Screen name="login" options={{ headerShown: false }} />
           <Stack.Screen name="register" options={{ headerShown: false }} />
           <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
+          <Stack.Screen name="register-admin" options={{ headerShown: false }} />
+          <Stack.Screen name="login-warga" options={{ headerShown: false }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
           <Stack.Screen name="iuran" options={{ headerShown: false }} />
           <Stack.Screen name="profile" options={{ headerShown: false }} />

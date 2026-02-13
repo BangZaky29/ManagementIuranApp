@@ -135,12 +135,22 @@ export default function LoginScreen() {
                             <Text style={styles.forgotPasswordText}>Lupa Kata Sandi?</Text>
                         </TouchableOpacity>
 
-                        <CustomButton
-                            title="Masuk"
-                            onPress={handleLogin}
-                            loading={isLoading}
-                            style={styles.loginButton}
-                        />
+                        {/* Admin Action Buttons */}
+                        <View style={styles.authButtonsContainer}>
+                            <CustomButton
+                                title="Masuk"
+                                onPress={handleLogin}
+                                loading={isLoading}
+                                style={styles.loginButton}
+                            />
+                            <CustomButton
+                                title="Daftar"
+                                onPress={() => router.push('/register-admin')}
+                                style={styles.registerButton}
+                                textStyle={{ color: Colors.primary }} // Ensure text is visible on white background
+                                variant="outline" // Assuming CustomButton supports variant, otherwise style handles it
+                            />
+                        </View>
 
                         {/* Divider */}
                         <View style={styles.dividerContainer}>
@@ -149,18 +159,15 @@ export default function LoginScreen() {
                             <View style={styles.dividerLine} />
                         </View>
 
-                        {/* Google Login Button */}
-                        <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
-                            <Ionicons name="logo-google" size={20} color={Colors.green5} style={{ marginRight: 10 }} />
-                            <Text style={styles.googleButtonText}>Masuk dengan Google</Text>
+                        {/* Warga / Security Login Button */}
+                        <TouchableOpacity
+                            style={styles.wargaButton}
+                            onPress={() => router.push('/login-warga')}
+                        >
+                            <Ionicons name="people" size={20} color={Colors.green5} />
+                            <Text style={styles.wargaButtonText}>Masuk sebagai Warga / Security</Text>
                         </TouchableOpacity>
 
-                        <View style={styles.registerContainer}>
-                            <Text style={styles.registerText}>Belum punya akun? </Text>
-                            <TouchableOpacity onPress={navigateToRegister}>
-                                <Text style={styles.registerLink}>Daftar Sekarang</Text>
-                            </TouchableOpacity>
-                        </View>
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
@@ -244,14 +251,32 @@ const styles = StyleSheet.create({
         color: Colors.primary,
         fontWeight: '600',
     },
-    loginButton: {
-        marginTop: 10,
-        marginBottom: 16,
+
+    // Auth Buttons Container
+    authButtonsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 24,
     },
+    loginButton: {
+        flex: 1,
+        marginRight: 8,
+    },
+    registerButton: {
+        flex: 1,
+        marginLeft: 8,
+        backgroundColor: Colors.white,
+        borderWidth: 1,
+        borderColor: Colors.primary,
+    },
+    registerButtonText: {
+        color: Colors.primary, // Force text color for outlined button if CustomButton doesn't handle it well generally
+    },
+
     dividerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 16,
+        marginBottom: 24,
     },
     dividerLine: {
         flex: 1,
@@ -263,39 +288,27 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: Colors.textSecondary,
     },
-    googleButton: {
+
+    wargaButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: Colors.white,
         borderWidth: 1,
-        borderColor: Colors.green1,
+        borderColor: Colors.green3,
         borderRadius: 25,
         paddingVertical: 14,
-        marginBottom: 30,
+        marginBottom: 16,
         shadowColor: Colors.green3,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
-        elevation: 2,
+        elevation: 1,
     },
-    googleButtonText: {
-        fontSize: 16,
+    wargaButtonText: {
+        fontSize: 15,
         fontWeight: 'bold',
         color: Colors.green5,
-    },
-    registerContainer: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        marginTop: 10,
-    },
-    registerText: {
-        color: Colors.textSecondary,
-        fontSize: 15,
-    },
-    registerLink: {
-        color: Colors.primary,
-        fontWeight: 'bold',
-        fontSize: 15,
+        marginLeft: 8,
     },
 });
