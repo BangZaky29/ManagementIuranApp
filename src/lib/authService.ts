@@ -1,4 +1,7 @@
 import { supabase } from './supabaseConfig';
+import * as WebBrowser from 'expo-web-browser';
+import { makeRedirectUri } from 'expo-auth-session';
+import { Platform } from 'react-native';
 
 // ─── Types ─────────────────────────────────────────────
 export type UserRole = 'admin' | 'warga' | 'security';
@@ -67,27 +70,64 @@ export async function signInWithEmail({ email, password }: SignInData) {
 }
 
 /**
- * Sign in with Google OAuth.
- * Requires Google provider to be configured in Supabase Dashboard.
+ * Sign in with Google OAuth using expo-web-browser.
+ * Opens a browser for Google login, then handles the callback.
  */
 export async function signInWithGoogle() {
+    const redirectTo = makeRedirectUri({
+        scheme: 'wargapintar',
+        path: 'auth/callback',
+    });
+
+    // Get the OAuth URL from Supabase
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-            redirectTo: 'wargapintar://auth/callback',
+            redirectTo,
+            skipBrowserRedirect: true, // We handle browser manually
         },
     });
 
     if (error) throw error;
-    return data;
+    if (!data?.url) throw new Error('No OAuth URL returned from Supabase');
+
+    // Open the browser for OAuth
+    const result = await WebBrowser.openAuthSessionAsync(
+        data.url,
+        redirectTo,
+        { showInRecents: true }
+    );
+
+    if (result.type === 'success') {
+        const url = result.url;
+        // Extract tokens from URL fragment
+        const params = new URLSearchParams(url.split('#')[1] || url.split('?')[1] || '');
+        const accessToken = params.get('access_token');
+        const refreshToken = params.get('refresh_token');
+
+        if (accessToken && refreshToken) {
+            const { error: sessionError } = await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken,
+            });
+            if (sessionError) throw sessionError;
+        }
+    } else if (result.type === 'cancel' || result.type === 'dismiss') {
+        throw new Error('Login dibatalkan');
+    }
 }
 
 /**
  * Send password reset email.
  */
 export async function resetPassword(email: string) {
+    const redirectUrl = makeRedirectUri({
+        scheme: 'wargapintar',
+        path: 'auth/reset-password',
+    });
+
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'wargapintar://auth/reset-password',
+        redirectTo: redirectUrl,
     });
 
     if (error) throw error;
@@ -123,7 +163,31 @@ export async function getProfile(userId: string): Promise<UserProfile | null> {
 
     if (error) {
         if (error.code === 'PGRST116') return null; // Not found
-        throw error;
+        console.warn('Profile fetch error:', error.message);
+        return null; // Don't crash on RLS or other errors
+    }
+    return data as UserProfile;
+}
+
+/**
+ * Create profile manually (fallback if trigger didn't fire).
+ */
+export async function createProfile(userId: string, email: string, metadata: Record<string, any>) {
+    const { data, error } = await supabase
+        .from('profiles')
+        .insert({
+            id: userId,
+            full_name: metadata.full_name || '',
+            email: email,
+            phone: metadata.phone || null,
+            role: metadata.role || 'warga',
+        })
+        .select()
+        .single();
+
+    if (error) {
+        console.warn('Profile create error:', error.message);
+        return null;
     }
     return data as UserProfile;
 }

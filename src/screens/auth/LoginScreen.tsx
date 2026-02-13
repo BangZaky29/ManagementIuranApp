@@ -84,12 +84,12 @@ export default function LoginScreen() {
     const handleGoogleLogin = async () => {
         try {
             await signInWithGoogle();
+            // AuthGate will handle redirect
         } catch (error: any) {
-            showAlert(
-                'Segera Hadir',
-                'Login dengan Google memerlukan konfigurasi tambahan di Supabase Dashboard.',
-                'info'
-            );
+            const msg = error?.message === 'Login dibatalkan'
+                ? 'Login dengan Google dibatalkan.'
+                : (error?.message || 'Gagal login dengan Google. Pastikan Google OAuth sudah dikonfigurasi di Supabase.');
+            showAlert('Google Login', msg, error?.message === 'Login dibatalkan' ? 'info' : 'error');
         }
     };
 

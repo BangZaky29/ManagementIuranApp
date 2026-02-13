@@ -159,12 +159,12 @@ export default function RegisterScreen() {
     const handleGoogleRegister = async () => {
         try {
             await signInWithGoogle();
+            // AuthGate will handle redirect
         } catch (error: any) {
-            showAlert(
-                'Segera Hadir',
-                'Daftar dengan Google memerlukan konfigurasi tambahan di Supabase Dashboard.',
-                'info'
-            );
+            const msg = error?.message === 'Login dibatalkan'
+                ? 'Pendaftaran dengan Google dibatalkan.'
+                : (error?.message || 'Gagal daftar dengan Google. Pastikan Google OAuth sudah dikonfigurasi di Supabase.');
+            showAlert('Google Register', msg, error?.message === 'Login dibatalkan' ? 'info' : 'error');
         }
     };
 

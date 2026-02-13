@@ -7,6 +7,7 @@ import {
     resetPassword as _resetPassword,
     signInWithGoogle as _signInWithGoogle,
     getProfile,
+    createProfile,
     UserProfile,
     UserRole,
     SignUpData,
@@ -48,13 +49,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [session, setSession] = useState<Session | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Fetch profile when user changes
-    const fetchProfile = useCallback(async (userId: string) => {
+    // Fetch profile when user changes, create if missing (fallback)
+    const fetchProfile = useCallback(async (u: User) => {
         try {
-            const p = await getProfile(userId);
+            let p = await getProfile(u.id);
+
+            // Fallback: if trigger didn't create profile, create manually
+            if (!p && u.email) {
+                console.log('Profile not found, creating manually...');
+                p = await createProfile(u.id, u.email, u.user_metadata || {});
+            }
+
             setProfile(p);
         } catch (err) {
-            console.error('Failed to fetch profile:', err);
+            console.error('Failed to fetch/create profile:', err);
             setProfile(null);
         }
     }, []);
@@ -66,7 +74,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setSession(s);
             setUser(s?.user ?? null);
             if (s?.user) {
-                fetchProfile(s.user.id);
+                fetchProfile(s.user);
             }
             setIsLoading(false);
         });
@@ -77,7 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setSession(s);
                 setUser(s?.user ?? null);
                 if (s?.user) {
-                    await fetchProfile(s.user.id);
+                    await fetchProfile(s.user);
                 } else {
                     setProfile(null);
                 }
@@ -113,11 +121,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const signInWithGoogle = useCallback(async () => {
         await _signInWithGoogle();
+        // onAuthStateChange will handle state update after browser callback
     }, []);
 
     const refreshProfile = useCallback(async () => {
         if (user) {
-            await fetchProfile(user.id);
+            await fetchProfile(user);
         }
     }, [user, fetchProfile]);
 
