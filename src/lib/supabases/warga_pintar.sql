@@ -58,6 +58,9 @@ CREATE TABLE public.profiles (
   is_active boolean DEFAULT true,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
+  nik text UNIQUE,
+  username text,
+  wa_phone text,
   CONSTRAINT profiles_pkey PRIMARY KEY (id),
   CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
 );
@@ -74,4 +77,23 @@ CREATE TABLE public.reports (
   updated_at timestamp with time zone DEFAULT now(),
   CONSTRAINT reports_pkey PRIMARY KEY (id),
   CONSTRAINT reports_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
+);
+CREATE TABLE public.verified_residents (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  nik text NOT NULL UNIQUE,
+  full_name text NOT NULL,
+  address text,
+  rt_rw text DEFAULT '005/003'::text,
+  email text,
+  phone text,
+  access_token text NOT NULL DEFAULT upper(SUBSTRING(md5((random())::text) FROM 0 FOR 7)) UNIQUE,
+  is_claimed boolean DEFAULT false,
+  claimed_at timestamp with time zone,
+  claimed_by uuid,
+  created_at timestamp with time zone DEFAULT now(),
+  created_by uuid,
+  role USER-DEFINED DEFAULT 'warga'::user_role,
+  CONSTRAINT verified_residents_pkey PRIMARY KEY (id),
+  CONSTRAINT verified_residents_claimed_by_fkey FOREIGN KEY (claimed_by) REFERENCES public.profiles(id),
+  CONSTRAINT verified_residents_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id)
 );

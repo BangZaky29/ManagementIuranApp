@@ -8,15 +8,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { CustomAlertModal } from '../../components/CustomAlertModal';
 import { useAuth } from '../../contexts/AuthContext';
-import { UserRole } from '../../lib/authService';
 
 const { width } = Dimensions.get('window');
-
-const ROLES: { key: UserRole; label: string; icon: string }[] = [
-    { key: 'warga', label: 'Warga', icon: 'people-outline' },
-    { key: 'admin', label: 'Admin', icon: 'shield-checkmark-outline' },
-    { key: 'security', label: 'Security', icon: 'lock-closed-outline' },
-];
 
 export default function LoginScreen() {
     const router = useRouter();
@@ -24,7 +17,6 @@ export default function LoginScreen() {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [selectedRole, setSelectedRole] = useState<UserRole>('warga');
     const [isLoading, setIsLoading] = useState(false);
 
     // Alert State
@@ -117,35 +109,8 @@ export default function LoginScreen() {
                                 resizeMode="contain"
                             />
                         </View>
-                        <Text style={styles.welcomeText}>Selamat Datang!</Text>
+                        <Text style={styles.welcomeText}>Warga Pintar</Text>
                         <Text style={styles.subtitleText}>Masuk untuk mengelola iuran warga</Text>
-                    </View>
-
-                    {/* Role Selector */}
-                    <View style={styles.roleContainer}>
-                        {ROLES.map((role) => (
-                            <TouchableOpacity
-                                key={role.key}
-                                style={[
-                                    styles.roleTab,
-                                    selectedRole === role.key && styles.roleTabActive,
-                                ]}
-                                onPress={() => setSelectedRole(role.key)}
-                                activeOpacity={0.7}
-                            >
-                                <Ionicons
-                                    name={role.icon as any}
-                                    size={18}
-                                    color={selectedRole === role.key ? '#FFFFFF' : Colors.green4}
-                                />
-                                <Text style={[
-                                    styles.roleTabText,
-                                    selectedRole === role.key && styles.roleTabTextActive,
-                                ]}>
-                                    {role.label}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
                     </View>
 
                     <View style={styles.formContainer}>
@@ -238,7 +203,7 @@ const styles = StyleSheet.create({
     },
     headerContainer: {
         alignItems: 'center',
-        marginBottom: 24,
+        marginBottom: 40,
     },
     logoContainer: {
         width: 100,
@@ -268,46 +233,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: Colors.green4,
     },
-
-    // Role Selector
-    roleContainer: {
-        flexDirection: 'row',
-        backgroundColor: Colors.white,
-        borderRadius: 16,
-        padding: 4,
-        marginBottom: 24,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
-    },
-    roleTab: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 12,
-        borderRadius: 12,
-        gap: 6,
-    },
-    roleTabActive: {
-        backgroundColor: Colors.primary,
-        shadowColor: Colors.primary,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 3,
-    },
-    roleTabText: {
-        fontSize: 13,
-        fontWeight: '600',
-        color: Colors.green4,
-    },
-    roleTabTextActive: {
-        color: '#FFFFFF',
-    },
-
     formContainer: {
         width: '100%',
     },
@@ -323,8 +248,6 @@ const styles = StyleSheet.create({
         marginTop: 10,
         marginBottom: 16,
     },
-
-    // Divider
     dividerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -340,7 +263,6 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: Colors.textSecondary,
     },
-
     googleButton: {
         flexDirection: 'row',
         alignItems: 'center',

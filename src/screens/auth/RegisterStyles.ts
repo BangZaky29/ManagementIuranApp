@@ -23,113 +23,133 @@ export const styles = StyleSheet.create({
         opacity: 0.4,
     },
     headerContainer: {
+        flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 32,
+        marginBottom: 24,
     },
-    logoContainer: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
+    backButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
         backgroundColor: Colors.white,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 16,
-        shadowColor: Colors.green3,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 4,
+        marginRight: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        elevation: 2,
     },
-    title: {
+    titleContainer: {
+        flex: 1,
+    },
+    welcomeText: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: Colors.textPrimary,
-        marginBottom: 8,
-        textAlign: 'center',
+        color: Colors.green5,
     },
-    subtitle: {
+    subtitleText: {
         fontSize: 14,
-        color: Colors.textSecondary,
-        textAlign: 'center',
-        lineHeight: 20,
-        paddingHorizontal: 20,
+        color: Colors.green4,
     },
-    card: {
-        backgroundColor: Colors.white,
-        borderRadius: 24,
-        padding: 24,
-        shadowColor: Colors.green3,
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.1,
-        shadowRadius: 16,
-        elevation: 4,
-        width: '100%',
-    },
-    stepIndicator: {
+
+    // Step Indicator
+    stepContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 24,
+        marginBottom: 32,
     },
     stepDot: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
+        width: 12,
+        height: 12,
+        borderRadius: 6,
         backgroundColor: Colors.green2,
-        marginHorizontal: 4,
     },
     stepDotActive: {
         backgroundColor: Colors.primary,
-        width: 20,
+        width: 24, // Elongated when active
     },
-    stepTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: Colors.textPrimary,
+    stepLine: {
+        width: 40,
+        height: 2,
+        backgroundColor: Colors.green2,
+        marginHorizontal: 8,
+    },
+    stepLineActive: {
+        backgroundColor: Colors.primary,
+    },
+
+    formContainer: {
+        width: '100%',
+    },
+    infoBox: {
+        backgroundColor: '#E8F5E9',
+        padding: 12,
+        borderRadius: 8,
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        marginBottom: 20,
+        borderLeftWidth: 4,
+        borderLeftColor: Colors.primary,
+    },
+    infoText: {
+        flex: 1,
+        fontSize: 13,
+        color: Colors.textSecondary,
+        lineHeight: 18,
+    },
+    actionButton: {
+        marginTop: 16,
         marginBottom: 16,
-        textAlign: 'center',
     },
 
     // Verified User Card
     verifiedCard: {
-        backgroundColor: Colors.green1,
+        backgroundColor: Colors.white,
         borderRadius: 16,
         padding: 16,
         marginBottom: 24,
         borderWidth: 1,
         borderColor: Colors.green2,
-    },
-    verifiedHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 12,
+        shadowColor: Colors.green3,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 2,
     },
     verifiedTitle: {
         fontSize: 14,
         fontWeight: 'bold',
         color: Colors.primary,
-        marginLeft: 8,
+        marginBottom: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#EEE',
+        paddingBottom: 8,
     },
     verifiedRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         marginBottom: 8,
     },
     verifiedLabel: {
-        fontSize: 12,
+        fontSize: 13,
         color: Colors.textSecondary,
-        marginBottom: 2,
     },
     verifiedValue: {
-        fontSize: 15,
+        fontSize: 14,
         fontWeight: '600',
         color: Colors.textPrimary,
+        textAlign: 'right',
+        flex: 1,
+        marginLeft: 8,
     },
     roleBadge: {
         backgroundColor: Colors.primary,
-        alignSelf: 'flex-start',
         paddingHorizontal: 10,
         paddingVertical: 4,
         borderRadius: 12,
-        marginTop: 4,
     },
     roleBadgeText: {
         color: '#FFF',
@@ -137,43 +157,28 @@ export const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
 
-    button: {
-        marginTop: 16,
-        marginBottom: 16,
-    },
-    backToLoginButton: {
-        flexDirection: 'row',
+    backStepButton: {
         alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: 8,
+        padding: 10,
     },
-    backToLoginText: {
+    backStepText: {
         color: Colors.textSecondary,
-        marginRight: 4,
+        fontSize: 14,
+    },
+
+    loginContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 20,
+        marginBottom: 40,
+    },
+    loginText: {
+        color: Colors.textSecondary,
+        fontSize: 15,
     },
     loginLink: {
         color: Colors.primary,
         fontWeight: 'bold',
+        fontSize: 15,
     },
-    passwordStrengthContainer: {
-        flexDirection: 'row',
-        marginBottom: 10,
-        paddingLeft: 4,
-    },
-    passwordStrengthText: {
-        fontSize: 12,
-        color: Colors.textSecondary,
-    },
-    passwordStrengthValue: {
-        fontSize: 12,
-        fontWeight: 'bold',
-    },
-    inputHelper: {
-        fontSize: 12,
-        color: Colors.textSecondary,
-        marginLeft: 4,
-        marginBottom: 12,
-        marginTop: -8,
-        fontStyle: 'italic',
-    }
 });

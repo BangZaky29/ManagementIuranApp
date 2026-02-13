@@ -1,19 +1,14 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, TextInput, View, ViewStyle, TextStyle, TouchableOpacity, Platform } from 'react-native';
+import { StyleSheet, Text, TextInput, View, ViewStyle, TextStyle, TouchableOpacity, Platform, TextInputProps, StyleProp } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 
-interface CustomInputProps {
+interface CustomInputProps extends Omit<TextInputProps, 'style'> {
     label?: string;
-    placeholder?: string;
-    value: string;
-    onChangeText: (text: string) => void;
-    secureTextEntry?: boolean;
-    keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad';
-    style?: ViewStyle;
-    inputStyle?: TextStyle;
+    inputStyle?: StyleProp<TextStyle>;
     error?: string;
     iconName?: keyof typeof Ionicons.glyphMap;
+    style?: StyleProp<ViewStyle>; // Overwrite style from TextInputProps to be ViewStyle for container
 }
 
 export const CustomInput: React.FC<CustomInputProps> = ({
@@ -22,11 +17,11 @@ export const CustomInput: React.FC<CustomInputProps> = ({
     value,
     onChangeText,
     secureTextEntry = false,
-    keyboardType = 'default',
     style,
     inputStyle,
     error,
     iconName,
+    ...rest // Capture other TextInput props like autoCapitalize, keyboardType, etc.
 }) => {
     const [isPasswordVisible, setIsPasswordVisible] = useState(!secureTextEntry);
     const [isFocused, setIsFocused] = useState(false);
@@ -64,10 +59,10 @@ export const CustomInput: React.FC<CustomInputProps> = ({
                     value={value}
                     onChangeText={onChangeText}
                     secureTextEntry={!isPasswordVisible && secureTextEntry}
-                    keyboardType={keyboardType}
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
-                    autoCapitalize="none"
+                    autoCapitalize="none" // Default
+                    {...rest} // Apply rest props, allowing autoCapitalize override
                 />
                 {secureTextEntry && (
                     <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
