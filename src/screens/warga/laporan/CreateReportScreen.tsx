@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, Alert, Image } from 'react-native';
+import { View, Text, TextInput, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, Alert, Image, ActivityIndicator } from 'react-native';
 import { CreateReportStyles as styles } from './CreateReportStyles';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Colors } from '../../../constants/Colors';
@@ -219,7 +219,7 @@ export default function CreateReportScreen() {
                             </Text>
                         </View>
 
-                        <View style={{ flexDirection: 'row', gap: 10 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                             <TouchableOpacity
                                 style={{
                                     flex: 1,
@@ -230,9 +230,13 @@ export default function CreateReportScreen() {
                                     paddingVertical: 10,
                                     borderRadius: 8,
                                     borderWidth: 1,
-                                    borderColor: Colors.green4
+                                    borderColor: Colors.green4,
+                                    marginRight: 5
                                 }}
-                                onPress={handleGetCurrentLocation}
+                                onPress={() => {
+                                    console.log("Tombol Lokasi Saya ditekan");
+                                    handleGetCurrentLocation();
+                                }}
                                 disabled={locationStatus === 'fetching'}
                             >
                                 {locationStatus === 'fetching' ? (
@@ -255,9 +259,13 @@ export default function CreateReportScreen() {
                                     paddingVertical: 10,
                                     borderRadius: 8,
                                     borderWidth: 1,
-                                    borderColor: Colors.border
+                                    borderColor: '#E5E7EB',
+                                    marginLeft: 5
                                 }}
-                                onPress={() => setShowMapPicker(true)}
+                                onPress={() => {
+                                    console.log("Tombol Pilih di Peta ditekan");
+                                    setShowMapPicker(true);
+                                }}
                             >
                                 <Ionicons name="map-outline" size={18} color={Colors.textPrimary} style={{ marginRight: 6 }} />
                                 <Text style={{ color: Colors.textPrimary, fontWeight: '600', fontSize: 13 }}>Pilih di Peta</Text>
@@ -294,6 +302,12 @@ export default function CreateReportScreen() {
                     icon={!isLoading ? <Ionicons name="send" size={18} color={Colors.white} style={{ marginRight: 8 }} /> : undefined}
                 />
             </ScrollView>
+
+            <LocationPickerModal
+                visible={showMapPicker}
+                onClose={() => setShowMapPicker(false)}
+                onSelectLocation={handleSelectLocation}
+            />
 
             <CustomAlertModal
                 visible={alertVisible}
