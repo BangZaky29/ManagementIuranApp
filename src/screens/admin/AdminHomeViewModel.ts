@@ -11,7 +11,7 @@ export function useAdminHomeViewModel() {
     };
 
     const navigateToManageResidents = () => {
-        router.push('/admin/residents');
+        router.push('/admin/users');
     };
 
     return {
