@@ -1,9 +1,11 @@
-import { useState } from 'react';
-import { Alert } from 'react-native';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'expo-router';
+import { useAuth } from '../../contexts/AuthContext';
+import { fetchMyPayments, fetchActiveFees, calculateBillSummary, PaymentRecord } from '../../services/iuranService';
 
 export interface PaymentHistoryItem {
     id: string;
-    period: string;
+    period: string; // "Januari 2026"
     amount: string;
     status: 'Lunas' | 'Terlambat' | 'Pending';
     date: string;
@@ -11,62 +13,62 @@ export interface PaymentHistoryItem {
     isExpanded?: boolean;
 }
 
-import { useRouter } from 'expo-router';
-
 export const useIuranViewModel = () => {
     const router = useRouter();
-    const [currentMonth] = useState('Februari 2026');
-    const [amountDue] = useState('Rp 150.000');
-    const [isPaid, setIsPaid] = useState(false);
-    const [selectedMethod, setSelectedMethod] = useState<'transfer' | 'ewallet'>('transfer');
+    const { user } = useAuth();
 
-    const [history, setHistory] = useState<PaymentHistoryItem[]>([
-        {
-            id: '1',
-            period: 'Januari 2026',
-            amount: 'Rp 150.000',
-            status: 'Lunas',
-            date: '05 Jan 2026',
-            details: [
-                { label: 'Keamanan', value: 'Rp 100.000' },
-                { label: 'Sampah', value: 'Rp 50.000' }
-            ]
-        },
-        {
-            id: '2',
-            period: 'Desember 2025',
-            amount: 'Rp 150.000',
-            status: 'Lunas',
-            date: '02 Dec 2025',
-            details: [
-                { label: 'Keamanan', value: 'Rp 100.000' },
-                { label: 'Sampah', value: 'Rp 50.000' }
-            ]
-        },
-        {
-            id: '3',
-            period: 'November 2025',
-            amount: 'Rp 150.000',
-            status: 'Terlambat',
-            date: '10 Nov 2025',
-            details: [
-                { label: 'Keamanan', value: 'Rp 100.000' },
-                { label: 'Sampah', value: 'Rp 50.000' },
-                { label: 'Denda', value: 'Rp 15.000' } // Example late fee
-            ]
-        },
-        {
-            id: '4',
-            period: 'Oktober 2025',
-            amount: 'Rp 150.000',
-            status: 'Lunas',
-            date: '01 Oct 2025',
-            details: [
-                { label: 'Keamanan', value: 'Rp 100.000' },
-                { label: 'Sampah', value: 'Rp 50.000' }
-            ]
-        },
-    ]);
+    // State
+    const [currentMonth, setCurrentMonth] = useState('');
+    const [amountDue, setAmountDue] = useState('Rp 0');
+    const [isPaid, setIsPaid] = useState(false);
+
+    // Mapped history for UI
+    const [history, setHistory] = useState<PaymentHistoryItem[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Initial Load
+    useEffect(() => {
+        const date = new Date();
+        setCurrentMonth(date.toLocaleString('id-ID', { month: 'long', year: 'numeric' }));
+        loadData();
+    }, [user?.id]);
+
+    const loadData = async () => {
+        if (!user?.id) return;
+        setIsLoading(true);
+
+        try {
+            // 1. Get Bill Summary for current month
+            const bill = await calculateBillSummary(user.id);
+            setAmountDue(bill.isPaid ? 'Lunas' : `Rp ${bill.total.toLocaleString('id-ID')}`);
+            setIsPaid(!!bill.isPaid);
+
+            // 2. Get Payment History
+            const rawPayments = await fetchMyPayments();
+            const formattedHistory: PaymentHistoryItem[] = rawPayments.map(p => {
+                const dateObj = new Date(p.period);
+                const periodStr = dateObj.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+
+                return {
+                    id: p.id,
+                    period: periodStr,
+                    amount: `Rp ${p.amount.toLocaleString('id-ID')}`,
+                    status: p.status === 'paid' ? 'Lunas' : (p.status === 'overdue' ? 'Terlambat' : 'Pending'),
+                    date: p.paid_at ? new Date(p.paid_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-',
+                    details: [
+                        { label: 'Metode', value: p.payment_method || '-' },
+                        { label: 'Iuran', value: `Rp ${p.amount.toLocaleString('id-ID')}` }
+                    ],
+                    isExpanded: false
+                };
+            });
+            setHistory(formattedHistory);
+        } catch (error) {
+            console.error('Failed to load iuran data:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const [alertVisible, setAlertVisible] = useState(false);
     const [alertConfig, setAlertConfig] = useState({
@@ -79,6 +81,17 @@ export const useIuranViewModel = () => {
     const hideAlert = () => setAlertVisible(false);
 
     const handlePay = () => {
+        // For now, mock payment flow or navigate to detail
+        if (isPaid) {
+            setAlertConfig({
+                title: 'Info',
+                message: 'Tagihan bulan ini sudah lunas.',
+                type: 'info',
+                buttons: [{ text: 'OK', onPress: hideAlert }]
+            });
+            setAlertVisible(true);
+            return;
+        }
         router.push('/iuran/payment-detail');
     };
 
@@ -108,6 +121,8 @@ export const useIuranViewModel = () => {
         handleDownloadReceipt,
         alertVisible,
         alertConfig,
-        hideAlert
+        hideAlert,
+        isLoading,
+        refresh: loadData
     };
 };

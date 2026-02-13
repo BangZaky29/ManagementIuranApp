@@ -10,6 +10,7 @@ import { CustomAlertModal } from '../../components/CustomAlertModal';
 export default function HomeScreen() {
     const {
         userName,
+        avatarUrl,
         weather,
         billSummary,
         newsItems,
@@ -42,8 +43,12 @@ export default function HomeScreen() {
                         <Ionicons name="notifications-outline" size={24} color={colors.green5} />
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={[styles.profileImage, { backgroundColor: colors.green3 }]} onPress={() => handleNavigation('/(tabs)/profil')}>
-                        <Ionicons name="person" size={24} color={colors.backgroundCard} />
+                    <TouchableOpacity style={[styles.profileImage, { backgroundColor: colors.green3, overflow: 'hidden' }]} onPress={() => handleNavigation('/(tabs)/profil')}>
+                        {avatarUrl ? (
+                            <Image source={{ uri: avatarUrl }} style={{ width: '100%', height: '100%' }} />
+                        ) : (
+                            <Ionicons name="person" size={24} color={colors.backgroundCard} />
+                        )}
                     </TouchableOpacity>
                 </View>
             </View>

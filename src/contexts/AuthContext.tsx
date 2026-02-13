@@ -27,6 +27,7 @@ interface AuthContextType {
     resetPassword: (email: string) => Promise<void>;
     signInWithGoogle: () => Promise<void>;
     refreshProfile: () => Promise<void>;
+    updateUserProfile: (updates: Partial<UserProfile>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -41,6 +42,7 @@ const AuthContext = createContext<AuthContextType>({
     resetPassword: async () => { },
     signInWithGoogle: async () => { },
     refreshProfile: async () => { },
+    updateUserProfile: async () => { },
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -130,6 +132,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }, [user, fetchProfile]);
 
+    const updateUserProfile = useCallback(async (updates: Partial<UserProfile>) => {
+        if (!user) return;
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .update(updates)
+                .eq('id', user.id)
+                .select()
+                .single();
+
+            if (error) throw error;
+            setProfile(data as UserProfile);
+        } catch (error) {
+            console.error('Update profile error:', error);
+            throw error;
+        }
+    }, [user]);
+
     return (
         <AuthContext.Provider
             value={{
@@ -144,6 +164,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 resetPassword: resetPasswordFn,
                 signInWithGoogle,
                 refreshProfile,
+                updateUserProfile,
             }}
         >
             {children}

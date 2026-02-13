@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, Pressable } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, Pressable, Image, ActivityIndicator } from 'react-native';
 import Animated, { FadeInDown, useAnimatedStyle, withTiming, useSharedValue } from 'react-native-reanimated';
 import { useTheme } from '../../contexts/ThemeContext';
 import { CustomHeader } from '../../components/CustomHeader';
@@ -60,6 +60,8 @@ export default function ProfilScreen() {
         handleChangePassword,
         handleHelp,
         handleLogout,
+        handleAvatarUpdate,
+        isUploading,
         alertVisible,
         alertConfig,
         hideAlert
@@ -96,9 +98,30 @@ export default function ProfilScreen() {
 
                 {/* Profile Header Card */}
                 <Animated.View entering={FadeInDown.delay(100).duration(500)} style={[styles.headerCard, { backgroundColor: colors.backgroundCard }]}>
-                    <View style={[styles.avatarContainer, { backgroundColor: colors.green1, borderColor: colors.border }]}>
-                        <Ionicons name="person" size={50} color={colors.green4} />
-                    </View>
+                    <TouchableOpacity onPress={handleAvatarUpdate} disabled={isUploading} style={{ position: 'relative' }}>
+                        <View style={[styles.avatarContainer, { backgroundColor: colors.green1, borderColor: colors.border, overflow: 'hidden' }]}>
+                            {isUploading ? (
+                                <ActivityIndicator color={colors.primary} />
+                            ) : user.avatarUrl ? (
+                                <Image source={{ uri: user.avatarUrl }} style={{ width: '100%', height: '100%' }} />
+                            ) : (
+                                <Ionicons name="person" size={50} color={colors.green4} />
+                            )}
+                        </View>
+                        {/* Camera Icon Overlay - Moved outside to prevent clipping */}
+                        <View style={{
+                            position: 'absolute',
+                            bottom: 16, // Adjusting for the marginBottom of avatarContainer if needed, or just aligning to visual bottom
+                            right: 0,
+                            backgroundColor: colors.primary,
+                            borderRadius: 16,
+                            padding: 6,
+                            borderWidth: 2,
+                            borderColor: colors.backgroundCard
+                        }}>
+                            <Ionicons name="camera" size={14} color="#FFF" />
+                        </View>
+                    </TouchableOpacity>
                     <Text style={[styles.userName, { color: colors.green5 }]}>{user.name}</Text>
                     <Text style={[styles.userRole, { color: colors.green4, backgroundColor: colors.green1 }]}>Warga RT {user.rt_rw}</Text>
                 </Animated.View>
@@ -151,4 +174,3 @@ export default function ProfilScreen() {
         </SafeAreaView>
     );
 }
-

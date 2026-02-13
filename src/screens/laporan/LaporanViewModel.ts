@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
+import { fetchMyReports, Report } from '../../services/laporanService';
+import { useAuth } from '../../contexts/AuthContext'; // To re-fetch on auth change
 
 export interface ReportItem {
     id: string;
     title: string;
-    status: 'Diproses' | 'Selesai' | 'Menunggu';
+    status: 'Diproses' | 'Selesai' | 'Menunggu' | 'Ditolak';
     date: string;
     category: 'Fasilitas' | 'Kebersihan' | 'Keamanan' | 'Lainnya';
     description?: string;
@@ -12,13 +14,37 @@ export interface ReportItem {
 
 export const useLaporanViewModel = () => {
     const router = useRouter();
+    const { user } = useAuth();
     const [selectedFilter, setSelectedFilter] = useState<'Semua' | 'Diproses' | 'Selesai'>('Semua');
+    const [reports, setReports] = useState<ReportItem[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const [reports] = useState<ReportItem[]>([
-        { id: '1', title: 'Lampu Jalan Mati', status: 'Selesai', date: '08 Feb 2026', category: 'Fasilitas' },
-        { id: '2', title: 'Sampah Menumpuk', status: 'Diproses', date: '10 Feb 2026', category: 'Kebersihan' },
-        { id: '3', title: 'Pos Kamling Rusak', status: 'Menunggu', date: '11 Feb 2026', category: 'Keamanan' },
-    ]);
+    useEffect(() => {
+        loadReports();
+    }, [user?.id]); // Reload when user changes
+
+    const loadReports = async () => {
+        setIsLoading(true);
+        try {
+            const data = await fetchMyReports();
+
+            // Map Supabase data to UI model
+            const mappedReports: ReportItem[] = data.map(r => ({
+                id: r.id,
+                title: r.title,
+                status: r.status,
+                date: new Date(r.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }),
+                category: r.category,
+                description: r.description
+            }));
+
+            setReports(mappedReports);
+        } catch (error) {
+            console.error('Failed to load reports:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const filteredReports = reports.filter(item => {
         if (selectedFilter === 'Semua') return true;
@@ -41,6 +67,8 @@ export const useLaporanViewModel = () => {
         setSelectedFilter,
         filteredReports,
         handleCreateReport,
-        handleReportClick
+        handleReportClick,
+        isLoading,
+        refresh: loadReports
     };
 };

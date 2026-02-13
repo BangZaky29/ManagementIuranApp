@@ -16,9 +16,9 @@ export const unstable_settings = {
   anchor: '(tabs)',
 };
 
-// Auth gate — redirect based on auth state
+// Auth gate — redirect based on auth state & role
 function AuthGate({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, profile } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
@@ -28,13 +28,29 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     const inAuthGroup = segments[0] === 'login' || segments[0] === 'register' || segments[0] === 'forgot-password';
 
     if (!isAuthenticated && !inAuthGroup) {
-      // Not logged in and not on auth screen → redirect to login
+      // Not logged in → redirect to login
       router.replace('/login');
-    } else if (isAuthenticated && inAuthGroup) {
-      // Logged in but on auth screen → redirect to tabs
-      router.replace('/(tabs)');
+    } else if (isAuthenticated) {
+      const role = profile?.role || 'warga';
+
+      if (inAuthGroup) {
+        // Logged in but on auth screen → redirect based on role
+        if (role === 'admin') router.replace('/admin');
+        else if (role === 'security') router.replace('/security');
+        else router.replace('/(tabs)');
+      } else {
+        // Prevent Warga accessing Admin/Security & vice versa (Basic protection)
+        // Note: Middleware is better for this, but this works for client-side
+        const inAdmin = segments[0] === 'admin';
+        const inSecurity = segments[0] === 'security';
+        const inWarga = segments[0] === '(tabs)';
+
+        if (role === 'warga' && (inAdmin || inSecurity)) router.replace('/(tabs)');
+        if (role === 'admin' && (inWarga || inSecurity)) router.replace('/admin');
+        if (role === 'security' && (inWarga || inAdmin)) router.replace('/security');
+      }
     }
-  }, [isAuthenticated, isLoading, segments]);
+  }, [isAuthenticated, isLoading, segments, profile]);
 
   if (isLoading) {
     return (
@@ -63,6 +79,8 @@ function RootLayoutInner() {
           <Stack.Screen name="profile" options={{ headerShown: false }} />
           <Stack.Screen name="news" options={{ headerShown: false }} />
           <Stack.Screen name="laporan" options={{ headerShown: false }} />
+          <Stack.Screen name="admin/index" options={{ headerShown: false }} />
+          <Stack.Screen name="security/index" options={{ headerShown: false }} />
         </Stack>
       </AuthGate>
       <StatusBar style={isDark ? 'light' : 'dark'} />
