@@ -26,6 +26,7 @@ export interface SignUpData {
     fullName: string;
     phone: string;
     role: UserRole;
+    metadata?: Record<string, any>;
 }
 
 export interface SignInData {
@@ -39,7 +40,7 @@ export interface SignInData {
  * Register a new user with email, password, and role metadata.
  * The Supabase trigger will auto-create a profile row.
  */
-export async function signUpWithEmail({ email, password, fullName, phone, role }: SignUpData) {
+export async function signUpWithEmail({ email, password, fullName, phone, role, metadata }: SignUpData) {
     const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -48,6 +49,7 @@ export async function signUpWithEmail({ email, password, fullName, phone, role }
                 full_name: fullName,
                 phone,
                 role,
+                ...metadata,
             },
         },
     });
