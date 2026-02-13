@@ -38,7 +38,7 @@ export const AdminTabBar = ({ state, descriptors, navigation }: MaterialTopTabBa
                     case 'laporan':
                         iconName = isFocused ? 'document-text' : 'document-text-outline';
                         break;
-                    case 'news':
+                    case 'news-management':
                         iconName = isFocused ? 'newspaper' : 'newspaper-outline';
                         break;
                     case 'profile':
@@ -49,7 +49,7 @@ export const AdminTabBar = ({ state, descriptors, navigation }: MaterialTopTabBa
                 }
 
                 // Filter out any route that is not explicitly handled to avoid '?' icon
-                if (!['index', 'users', 'laporan', 'profile', 'news'].includes(route.name)) return null;
+                if (!['index', 'laporan', 'users', 'news-management', 'profile'].includes(route.name)) return null;
 
                 if (['sitemap', '+not-found', 'explore'].includes(route.name)) return null;
 

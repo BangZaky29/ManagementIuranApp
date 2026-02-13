@@ -37,6 +37,15 @@ export default function AdminLayout() {
                     title: 'Berita',
                 }}
             />
+            {/* Explicitly hide the phantom 'news' route */}
+            <MaterialTopTabs.Screen
+                name="news"
+                options={{
+                    title: '',
+                    href: null,
+                    tabBarItemStyle: { display: 'none' }
+                }}
+            />
             <MaterialTopTabs.Screen
                 name="profile"
                 options={{
