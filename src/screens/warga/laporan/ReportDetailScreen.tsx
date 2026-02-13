@@ -9,11 +9,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { fetchReportById, deleteReport, Report } from '../../../services/laporanService';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
 import { Alert, TouchableOpacity } from 'react-native';
+import { ReportLocationViewer } from '../../../components/ReportLocationViewer';
 
 export default function ReportDetailScreen() {
     const { id } = useLocalSearchParams();
     const router = useRouter();
     const [data, setData] = useState<Report | null>(null);
+
     const [loading, setLoading] = useState(true);
     const [imageAspectRatio, setImageAspectRatio] = useState<number>(4 / 3);
 
@@ -183,22 +185,10 @@ export default function ReportDetailScreen() {
                     <Text style={styles.title}>{data.title}</Text>
                     <Text style={styles.category}>{data.category}</Text>
 
-                    {data.location && (
-                        <TouchableOpacity
-                            style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                marginBottom: 16,
-                                backgroundColor: '#E0F7FA',
-                                padding: 10,
-                                borderRadius: 8
-                            }}
-                            onPress={handleOpenLocation}
-                        >
-                            <Ionicons name="map" size={18} color={Colors.primary} style={{ marginRight: 8 }} />
-                            <Text style={{ color: Colors.primary, fontWeight: 'bold' }}>Lihat Lokasi di Peta</Text>
-                        </TouchableOpacity>
-                    )}
+                    <ReportLocationViewer
+                        locationUrl={data.location}
+                        onOpenLocation={handleOpenLocation}
+                    />
 
                     <View style={styles.divider} />
 

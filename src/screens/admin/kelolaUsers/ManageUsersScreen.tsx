@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, SafeAreaView, FlatList, TouchableOpacity, TextInput, Alert, ActivityIndicator, Modal, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Text, SafeAreaView, FlatList, TouchableOpacity, TextInput, Alert, ActivityIndicator, Modal, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
@@ -176,6 +176,24 @@ export default function ManageUsersScreen() {
                 style={styles.card}
             >
                 <View style={styles.cardHeader}>
+                    {/* Avatar */}
+                    {/* Avatar */}
+                    {(() => {
+                        const user = item.user as any;
+                        const avatarUrl = Array.isArray(user) ? user[0]?.avatar_url : user?.avatar_url;
+
+                        return avatarUrl ? (
+                            <Image
+                                source={{ uri: avatarUrl }}
+                                style={{ width: 40, height: 40, borderRadius: 20, marginRight: 12, backgroundColor: '#eee' }}
+                                resizeMode="cover"
+                            />
+                        ) : (
+                            <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.green1, justifyContent: 'center', alignItems: 'center', marginRight: 12 }}>
+                                <Ionicons name="person" size={20} color={Colors.primary} />
+                            </View>
+                        );
+                    })()}
                     <View style={{ flex: 1 }}>
                         <Text style={styles.cardTitle}>{item.full_name}</Text>
                         {item.housing_complexes?.name && (
@@ -308,9 +326,14 @@ export default function ManageUsersScreen() {
                                     value={fullName}
                                     onChangeText={setFullName}
                                 />
-                                <TextInput
-                                    onChangeText={setRtRw}
-                                />
+                                {role === 'warga' && (
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="RT/RW atau BLOK"
+                                        value={rtRw}
+                                        onChangeText={setRtRw}
+                                    />
+                                )}
 
                                 <View style={{ marginBottom: 16 }}>
                                     <Text style={[styles.roleLabel, { marginBottom: 8 }]}>Cluster / Apartemen:</Text>

@@ -70,4 +70,9 @@ export const NewsDetailStyles = StyleSheet.create({
         color: Colors.textPrimary,
         lineHeight: 26,
     },
+    statusDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+    },
 });

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../../contexts/AuthContext';
-import { fetchPublishedNews, NewsItem } from '../../../services/newsService';
+import { fetchNews, NewsItem } from '../../../services/newsService';
 import { calculateBillSummary } from '../../../services/iuranService';
 import { triggerPanicButton } from '../../../services/panicService';
 
@@ -39,7 +39,7 @@ export const useHomeViewModel = () => {
         setIsLoading(true);
         try {
             // 1. Fetch News
-            const news = await fetchPublishedNews();
+            const news = await fetchNews(false);
             setNewsItems(news);
 
             // 2. Fetch Bill Summary

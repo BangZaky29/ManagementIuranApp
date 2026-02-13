@@ -16,10 +16,16 @@ export interface VerifiedResident {
     housing_complexes?: {
         name: string;
     } | null;
+    user?: {
+        avatar_url: string | null;
+    } | {
+        avatar_url: string | null;
+    }[] | null;
 }
 
 export const fetchVerifiedResidents = async () => {
-    const { data, error } = await supabase
+    // 1. Fetch Verified Residents
+    const { data: residentsData, error: residentsError } = await supabase
         .from('verified_residents')
         .select(`
             *,
@@ -29,8 +35,42 @@ export const fetchVerifiedResidents = async () => {
         `)
         .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return data as VerifiedResident[];
+    if (residentsError) throw residentsError;
+
+    if (!residentsData || residentsData.length === 0) {
+        return [] as VerifiedResident[];
+    }
+
+    // 2. Fetch Profiles for these residents (matching by NIK)
+    // We filter out null NIKs just in case, though schema implies importance
+    const niks = residentsData.map(r => r.nik).filter(n => n !== null);
+
+    let profilesMap: Record<string, string | null> = {};
+
+    if (niks.length > 0) {
+        const { data: profilesData, error: profilesError } = await supabase
+            .from('profiles')
+            .select('nik, avatar_url')
+            .in('nik', niks);
+
+        if (!profilesError && profilesData) {
+            profilesData.forEach(p => {
+                if (p.nik) {
+                    profilesMap[p.nik] = p.avatar_url;
+                }
+            });
+        }
+    }
+
+    // 3. Merge avatar_url into the result
+    const mergedData = residentsData.map(resident => ({
+        ...resident,
+        user: {
+            avatar_url: resident.nik ? profilesMap[resident.nik] || null : null
+        }
+    }));
+
+    return mergedData as VerifiedResident[];
 };
 
 export const createVerifiedResident = async (

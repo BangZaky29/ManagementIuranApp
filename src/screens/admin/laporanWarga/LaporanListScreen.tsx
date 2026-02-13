@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image, Alert, ActivityIndicator, Modal, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, RefreshControl, Alert, ActivityIndicator, ScrollView, Image, Modal } from 'react-native';
+import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../../lib/supabaseConfig';
@@ -23,19 +24,19 @@ type Report = {
     } | null;
 };
 
-const CATEGORIES = ['Semua', 'Fasilitas Umum', 'Keamanan', 'Kebersihan', 'Lainnya'];
+const CATEGORIES = ['Semua', 'Fasilitas', 'Keamanan', 'Kebersihan', 'Lainnya'];
 const STATUSES = ['Semua', 'Menunggu', 'Diproses', 'Selesai', 'Ditolak'];
 
 export default function LaporanListScreen() {
+    const router = useRouter();
     const [reports, setReports] = useState<Report[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [isUpdating, setIsUpdating] = useState<string | null>(null);
-    const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-    const [detailModalVisible, setDetailModalVisible] = useState(false);
 
     // Filters
     const [filterCategory, setFilterCategory] = useState('Semua');
     const [filterStatus, setFilterStatus] = useState('Semua');
+    const [showCategoryModal, setShowCategoryModal] = useState(false);
+    const [showStatusModal, setShowStatusModal] = useState(false);
 
     useEffect(() => {
         fetchReports();
@@ -63,35 +64,6 @@ export default function LaporanListScreen() {
         }
     };
 
-    const handleUpdateStatus = async (id: string, newStatus: string) => {
-        setIsUpdating(id);
-        try {
-            const { error } = await supabase
-                .from('reports')
-                .update({ status: newStatus, updated_at: new Date() })
-                .eq('id', id);
-
-            if (error) throw error;
-
-            // Optimistic update
-            const updatedReports = reports.map(item =>
-                item.id === id ? { ...item, status: newStatus } : item
-            );
-            setReports(updatedReports);
-
-            // Also update selected report if open
-            if (selectedReport && selectedReport.id === id) {
-                setSelectedReport({ ...selectedReport, status: newStatus });
-            }
-
-            Alert.alert('Sukses', `Status laporan diubah menjadi ${newStatus}`);
-        } catch (error) {
-            console.error('Error updating status:', error);
-            Alert.alert('Error', 'Gagal memperbarui status');
-        } finally {
-            setIsUpdating(null);
-        }
-    };
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -111,45 +83,45 @@ export default function LaporanListScreen() {
         });
     }, [reports, filterCategory, filterStatus]);
 
-    const openDetail = (report: Report) => {
-        setSelectedReport(report);
-        setDetailModalVisible(true);
+    const openDetail = (reportId: string) => {
+        router.push(`/admin/laporan/${reportId}` as any);
     };
 
     const renderItem = ({ item }: { item: Report }) => (
         <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={() => openDetail(item)}
+            activeOpacity={0.7}
+            onPress={() => openDetail(item.id)}
             style={styles.card}
         >
             <View style={styles.cardHeader}>
                 <View style={styles.userInfo}>
-                    <Text style={styles.userName}>{item.user?.full_name || 'Warga'}</Text>
-                    <Text style={styles.dateText}>
-                        {new Date(item.created_at).toLocaleDateString('id-ID', {
-                            day: 'numeric', month: 'long', year: 'numeric',
-                            hour: '2-digit', minute: '2-digit'
-                        })}
-                    </Text>
+                    {item.user?.avatar_url ? (
+                        <Image
+                            source={{ uri: item.user.avatar_url }}
+                            style={{ width: 32, height: 32, borderRadius: 16, marginRight: 8, backgroundColor: '#eee' }}
+                            resizeMode="cover"
+                        />
+                    ) : (
+                        <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: Colors.green1, justifyContent: 'center', alignItems: 'center', marginRight: 8 }}>
+                            <Ionicons name="person" size={16} color={Colors.primary} />
+                        </View>
+                    )}
+                    <View style={{ justifyContent: 'center' }}>
+                        <Text style={styles.userName}>{item.user?.full_name || 'Warga'}</Text>
+                        <Text style={styles.dateText}>
+                            {new Date(item.created_at).toLocaleDateString('id-ID', {
+                                day: 'numeric', month: 'short', year: 'numeric',
+                                hour: '2-digit', minute: '2-digit'
+                            })}
+                        </Text>
+                    </View>
                 </View>
                 <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
                     <Text style={styles.statusText}>{item.status}</Text>
                 </View>
             </View>
 
-            <View style={styles.cardBody}>
-                <Text style={styles.reportCategory}>{item.category}</Text>
-                <Text style={styles.reportTitle}>{item.title}</Text>
-                <Text style={styles.reportDescription} numberOfLines={3}>{item.description}</Text>
-
-                {item.image_url && (
-                    <Image source={{ uri: item.image_url }} style={{ width: '100%', height: 150, borderRadius: 8, marginTop: 8 }} resizeMode="cover" />
-                )}
-            </View>
-
-            <View style={styles.cardFooter}>
-                <Text style={styles.locationText}>Klik untuk detail & aksi</Text>
-            </View>
+            {/* Removed Description/Image/Footer as requested */}
         </TouchableOpacity>
     );
 
@@ -160,29 +132,114 @@ export default function LaporanListScreen() {
 
             {/* Filters */}
             <View style={styles.filterContainer}>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
-                    {CATEGORIES.map(cat => (
-                        <TouchableOpacity
-                            key={cat}
-                            style={[styles.filterChip, filterCategory === cat && styles.filterChipActive]}
-                            onPress={() => setFilterCategory(cat)}
-                        >
-                            <Text style={[styles.filterText, filterCategory === cat && styles.filterTextActive]}>{cat}</Text>
-                        </TouchableOpacity>
-                    ))}
-                </ScrollView>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.filterScroll, { marginTop: 8 }]}>
-                    {STATUSES.map(stat => (
-                        <TouchableOpacity
-                            key={stat}
-                            style={[styles.filterChip, filterStatus === stat && styles.filterChipActive]}
-                            onPress={() => setFilterStatus(stat)}
-                        >
-                            <Text style={[styles.filterText, filterStatus === stat && styles.filterTextActive]}>{stat}</Text>
-                        </TouchableOpacity>
-                    ))}
-                </ScrollView>
+                {/* Category Dropdown */}
+                <TouchableOpacity
+                    style={styles.dropdownButton}
+                    onPress={() => setShowCategoryModal(true)}
+                >
+                    <View>
+                        <Text style={styles.dropdownLabel}>Kategori</Text>
+                        <Text style={styles.dropdownText}>{filterCategory}</Text>
+                    </View>
+                    <Ionicons name="chevron-down" size={16} color={Colors.textSecondary} />
+                </TouchableOpacity>
+
+                {/* Status Dropdown */}
+                <TouchableOpacity
+                    style={styles.dropdownButton}
+                    onPress={() => setShowStatusModal(true)}
+                >
+                    <View>
+                        <Text style={styles.dropdownLabel}>Status</Text>
+                        <Text style={styles.dropdownText}>{filterStatus}</Text>
+                    </View>
+                    <Ionicons name="chevron-down" size={16} color={Colors.textSecondary} />
+                </TouchableOpacity>
             </View>
+
+            {/* Category Modal */}
+            <Modal
+                visible={showCategoryModal}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => setShowCategoryModal(false)}
+            >
+                <TouchableOpacity
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPress={() => setShowCategoryModal(false)}
+                >
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Pilih Kategori</Text>
+                            <TouchableOpacity onPress={() => setShowCategoryModal(false)} style={styles.modalClose}>
+                                <Ionicons name="close" size={24} color={Colors.textPrimary} />
+                            </TouchableOpacity>
+                        </View>
+                        <ScrollView>
+                            {CATEGORIES.map((cat) => (
+                                <TouchableOpacity
+                                    key={cat}
+                                    style={[styles.modalItem, filterCategory === cat && styles.modalItemActive]}
+                                    onPress={() => {
+                                        setFilterCategory(cat);
+                                        setShowCategoryModal(false);
+                                    }}
+                                >
+                                    <Text style={[styles.modalItemText, filterCategory === cat && styles.modalItemTextActive]}>
+                                        {cat}
+                                    </Text>
+                                    {filterCategory === cat && (
+                                        <Ionicons name="checkmark" size={20} color={Colors.primary} />
+                                    )}
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+
+            {/* Status Modal */}
+            <Modal
+                visible={showStatusModal}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => setShowStatusModal(false)}
+            >
+                <TouchableOpacity
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPress={() => setShowStatusModal(false)}
+                >
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Pilih Status</Text>
+                            <TouchableOpacity onPress={() => setShowStatusModal(false)} style={styles.modalClose}>
+                                <Ionicons name="close" size={24} color={Colors.textPrimary} />
+                            </TouchableOpacity>
+                        </View>
+                        <ScrollView>
+                            {STATUSES.map((stat) => (
+                                <TouchableOpacity
+                                    key={stat}
+                                    style={[styles.modalItem, filterStatus === stat && styles.modalItemActive]}
+                                    onPress={() => {
+                                        setFilterStatus(stat);
+                                        setShowStatusModal(false);
+                                    }}
+                                >
+                                    <Text style={[styles.modalItemText, filterStatus === stat && styles.modalItemTextActive]}>
+                                        {stat}
+                                    </Text>
+                                    {filterStatus === stat && (
+                                        <Ionicons name="checkmark" size={20} color={Colors.primary} />
+                                    )}
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
 
             {isLoading ? (
                 <View style={styles.centered}>
@@ -205,103 +262,6 @@ export default function LaporanListScreen() {
                     }
                 />
             )}
-
-            {/* Detail Modal */}
-            <Modal
-                visible={detailModalVisible}
-                animationType="slide"
-                onRequestClose={() => setDetailModalVisible(false)}
-            >
-                {selectedReport && (
-                    <View style={styles.modalContainer}>
-                        <View style={styles.modalHeader}>
-                            <TouchableOpacity onPress={() => setDetailModalVisible(false)} style={styles.closeButton}>
-                                <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
-                            </TouchableOpacity>
-                            <Text style={styles.modalTitle}>Detail Laporan</Text>
-                        </View>
-
-                        <ScrollView style={styles.modalContent}>
-                            {selectedReport.image_url && (
-                                <Image source={{ uri: selectedReport.image_url }} style={styles.modalImage} resizeMode="cover" />
-                            )}
-
-                            <View style={styles.modalBody}>
-                                <View style={styles.detailRow}>
-                                    <Text style={styles.detailLabel}>Pelapor</Text>
-                                    <Text style={styles.detailValue}>{selectedReport.user?.full_name || 'Warga'}</Text>
-                                </View>
-
-                                <View style={styles.detailRow}>
-                                    <Text style={styles.detailLabel}>Judul</Text>
-                                    <Text style={styles.detailValue}>{selectedReport.title}</Text>
-                                </View>
-
-                                <View style={styles.detailRow}>
-                                    <Text style={styles.detailLabel}>Status</Text>
-                                    <View style={{ flexDirection: 'row' }}>
-                                        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(selectedReport.status) }]}>
-                                            <Text style={styles.statusText}>{selectedReport.status}</Text>
-                                        </View>
-                                    </View>
-                                </View>
-
-                                <View style={styles.detailRow}>
-                                    <Text style={styles.detailLabel}>Kategori</Text>
-                                    <Text style={styles.detailValue}>{selectedReport.category}</Text>
-                                </View>
-
-                                <View style={styles.detailRow}>
-                                    <Text style={styles.detailLabel}>Deskripsi</Text>
-                                    <Text style={styles.detailValue}>{selectedReport.description}</Text>
-                                </View>
-
-                                {selectedReport.location && (
-                                    <View style={styles.detailRow}>
-                                        <Text style={styles.detailLabel}>Lokasi</Text>
-                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                            <Ionicons name="location" size={18} color={Colors.primary} />
-                                            <Text style={[styles.detailValue, { marginLeft: 6 }]}>{selectedReport.location}</Text>
-                                        </View>
-                                        <View style={styles.mapPlaceholder}>
-                                            <Text style={{ color: Colors.textSecondary }}>Peta Lokasi (Coming Soon)</Text>
-                                        </View>
-                                    </View>
-                                )}
-
-                                <View style={{ height: 20 }} />
-                                <Text style={styles.detailLabel}>Aksi Admin</Text>
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
-                                    {selectedReport.status === 'Menunggu' && (
-                                        <TouchableOpacity
-                                            style={[styles.actionButton, { backgroundColor: Colors.primary, flex: 1, justifyContent: 'center' }]}
-                                            onPress={() => { handleUpdateStatus(selectedReport.id, 'Diproses'); setDetailModalVisible(false); }}
-                                        >
-                                            <Text style={styles.actionText}>Proses Laporan</Text>
-                                        </TouchableOpacity>
-                                    )}
-                                    {selectedReport.status === 'Diproses' && (
-                                        <TouchableOpacity
-                                            style={[styles.actionButton, { backgroundColor: Colors.success, flex: 1, justifyContent: 'center' }]}
-                                            onPress={() => { handleUpdateStatus(selectedReport.id, 'Selesai'); setDetailModalVisible(false); }}
-                                        >
-                                            <Text style={styles.actionText}>Tandai Selesai</Text>
-                                        </TouchableOpacity>
-                                    )}
-                                    {(selectedReport.status === 'Menunggu' || selectedReport.status === 'Diproses') && (
-                                        <TouchableOpacity
-                                            style={[styles.actionButton, { backgroundColor: Colors.danger, flex: 1, justifyContent: 'center' }]}
-                                            onPress={() => { handleUpdateStatus(selectedReport.id, 'Ditolak'); setDetailModalVisible(false); }}
-                                        >
-                                            <Text style={styles.actionText}>Tolak</Text>
-                                        </TouchableOpacity>
-                                    )}
-                                </View>
-                            </View>
-                        </ScrollView>
-                    </View>
-                )}
-            </Modal>
         </View>
     );
 }

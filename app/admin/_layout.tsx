@@ -32,6 +32,12 @@ export default function AdminLayout() {
                 }}
             />
             <MaterialTopTabs.Screen
+                name="news-management"
+                options={{
+                    title: 'Berita',
+                }}
+            />
+            <MaterialTopTabs.Screen
                 name="profile"
                 options={{
                     title: 'Profil',

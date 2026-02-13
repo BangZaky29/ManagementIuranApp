@@ -18,73 +18,123 @@ export const styles = StyleSheet.create({
 
     // Filter
     filterContainer: {
+        flexDirection: 'row',
         paddingHorizontal: 16,
-        paddingTop: 12,
-        paddingBottom: 4,
+        paddingVertical: 12,
+        gap: 12,
     },
-    filterScroll: {
-        paddingRight: 16,
-    },
-    filterChip: {
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 20,
+    dropdownButton: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         backgroundColor: '#FFF',
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        borderRadius: 8,
         borderWidth: 1,
         borderColor: '#E0E0E0',
-        marginRight: 8,
     },
-    filterChipActive: {
-        backgroundColor: Colors.primary,
-        borderColor: Colors.primary,
+    dropdownText: {
+        fontSize: 13,
+        color: Colors.textPrimary,
+        fontWeight: '500',
     },
-    filterText: {
-        fontSize: 12,
-        fontWeight: '600',
+    dropdownLabel: {
+        fontSize: 10,
         color: Colors.textSecondary,
-    },
-    filterTextActive: {
-        color: '#FFF',
+        marginBottom: 2,
     },
 
-    // Card
-    card: {
-        backgroundColor: '#FFF',
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
-    },
-    cardHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 12,
-    },
-    userInfo: {
+    // Modal Selection
+    modalOverlay: {
         flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'flex-end',
     },
-    userName: {
-        fontSize: 14,
+    modalContent: {
+        backgroundColor: '#FFF',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        paddingBottom: Platform.OS === 'ios' ? 40 : 20,
+        maxHeight: '70%',
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F0F0F0',
+    },
+    modalTitle: {
+        fontSize: 16,
         fontWeight: 'bold',
         color: Colors.textPrimary,
     },
+    modalClose: {
+        padding: 4,
+    },
+    modalItem: {
+        paddingVertical: 14,
+        paddingHorizontal: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F5F5F5',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    modalItemText: {
+        fontSize: 14,
+        color: Colors.textPrimary,
+    },
+    modalItemActive: {
+        backgroundColor: '#F0F7FF',
+    },
+    modalItemTextActive: {
+        color: Colors.primary,
+        fontWeight: 'bold',
+    },
+    card: {
+        backgroundColor: '#FFF',
+        borderRadius: 12,
+        padding: 12,
+        marginBottom: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 1,
+    },
+    cardHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    userInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+    },
+    userName: {
+        fontSize: 13,
+        fontWeight: 'bold',
+        color: Colors.textPrimary,
+        marginBottom: 2,
+    },
     dateText: {
-        fontSize: 12,
+        fontSize: 10,
         color: Colors.textSecondary,
-        marginTop: 2,
     },
     statusBadge: {
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 8,
+        paddingHorizontal: 6,
+        paddingVertical: 3,
+        borderRadius: 6,
+        marginLeft: 8,
     },
     statusText: {
         color: '#FFF',
-        fontSize: 10,
+        fontSize: 9,
         fontWeight: 'bold',
         textTransform: 'uppercase',
     },
@@ -156,59 +206,4 @@ export const styles = StyleSheet.create({
         color: Colors.textSecondary,
     },
 
-    // Detailed Modal
-    modalContainer: {
-        flex: 1,
-        backgroundColor: '#FFF',
-    },
-    modalHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 16,
-        paddingTop: Platform.OS === 'ios' ? 50 : 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#F0F0F0',
-    },
-    closeButton: {
-        padding: 8,
-        marginRight: 8,
-    },
-    modalTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: Colors.textPrimary,
-    },
-    modalContent: {
-        flex: 1,
-    },
-    modalImage: {
-        width: '100%',
-        height: 300,
-        backgroundColor: '#F0F0F0',
-    },
-    modalBody: {
-        padding: 20,
-    },
-    detailRow: {
-        marginBottom: 16,
-    },
-    detailLabel: {
-        fontSize: 12,
-        color: Colors.textSecondary,
-        marginBottom: 4,
-        textTransform: 'uppercase',
-    },
-    detailValue: {
-        fontSize: 16,
-        color: Colors.textPrimary,
-        lineHeight: 24,
-    },
-    mapPlaceholder: {
-        height: 150,
-        backgroundColor: '#EEF2E3',
-        borderRadius: 12,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 8,
-    },
 });

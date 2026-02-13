@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, StatusBar, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, StatusBar, ActivityIndicator, Image } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
@@ -71,6 +71,13 @@ export default function NewsDetailScreen() {
             </View>
 
             <ScrollView contentContainerStyle={styles.contentContainer}>
+                {newsItem.image_url && (
+                    <Image
+                        source={{ uri: newsItem.image_url }}
+                        style={{ width: '100%', height: 250, borderRadius: 12, marginBottom: 16, backgroundColor: '#f0f0f0' }}
+                        resizeMode="contain"
+                    />
+                )}
                 <View style={[styles.badge, { backgroundColor: colors.accent }]}>
                     <Text style={[styles.badgeText, { color: colors.green5 }]}>{newsItem.category}</Text>
                 </View>
@@ -79,7 +86,9 @@ export default function NewsDetailScreen() {
 
                 <View style={styles.metaContainer}>
                     <Ionicons name="calendar-outline" size={14} color={colors.green4} />
-                    <Text style={[styles.date, { color: colors.green4 }]}>{newsItem.date}</Text>
+                    <Text style={[styles.date, { color: colors.green4 }]}>
+                        {new Date(newsItem.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    </Text>
                 </View>
 
                 {/* Divider */}
