@@ -15,6 +15,7 @@ export default function ReportDetailScreen() {
     const router = useRouter();
     const [data, setData] = useState<Report | null>(null);
     const [loading, setLoading] = useState(true);
+    const [imageAspectRatio, setImageAspectRatio] = useState<number>(4 / 3);
 
     // Alert State
     const [alertVisible, setAlertVisible] = useState(false);
@@ -38,6 +39,18 @@ export default function ReportDetailScreen() {
         };
         loadDetail();
     }, [id]);
+
+    React.useEffect(() => {
+        if (data?.image_url) {
+            Image.getSize(data.image_url, (width, height) => {
+                if (width && height) {
+                    setImageAspectRatio(width / height);
+                }
+            }, (error) => {
+                console.warn("Failed to get image size", error);
+            });
+        }
+    }, [data?.image_url]);
 
     const handleOpenLocation = () => {
         if (data?.location) {
@@ -192,7 +205,11 @@ export default function ReportDetailScreen() {
                     <Text style={styles.description}>{data.description}</Text>
 
                     {data.image_url && (
-                        <Image source={{ uri: data.image_url }} style={styles.image} resizeMode="cover" />
+                        <Image
+                            source={{ uri: data.image_url }}
+                            style={[styles.image, { height: undefined, aspectRatio: imageAspectRatio }]}
+                            resizeMode="contain"
+                        />
                     )}
                 </View>
 

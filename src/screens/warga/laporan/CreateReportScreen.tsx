@@ -21,6 +21,7 @@ export default function CreateReportScreen() {
     const [category, setCategory] = useState('');
     const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
     const [image, setImage] = useState<string | null>(imageUri as string || null);
+    const [imageAspectRatio, setImageAspectRatio] = useState<number>(4 / 3);
     const [isLoading, setIsLoading] = useState(false);
 
     // Location State
@@ -79,13 +80,16 @@ export default function CreateReportScreen() {
         try {
             const result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                allowsEditing: true,
-                aspect: [4, 3],
+                allowsEditing: false,
                 quality: 0.5,
             });
 
             if (!result.canceled && result.assets[0].uri) {
-                setImage(result.assets[0].uri);
+                const asset = result.assets[0];
+                setImage(asset.uri);
+                if (asset.width && asset.height) {
+                    setImageAspectRatio(asset.width / asset.height);
+                }
             }
         } catch (error) {
             console.error('Image picker error:', error);
@@ -118,7 +122,7 @@ export default function CreateReportScreen() {
                         text: 'OK',
                         onPress: () => {
                             hideAlert();
-                            router.back();
+                            router.navigate('/(tabs)/laporan');
                         }
                     }
                 ]
@@ -276,9 +280,16 @@ export default function CreateReportScreen() {
                     {/* Photo Upload Placeholder */}
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Lampirkan Foto (Opsional)</Text>
-                        <TouchableOpacity style={styles.uploadArea} onPress={handlePickImage} disabled={isLoading}>
+                        <TouchableOpacity
+                            style={[
+                                styles.uploadArea,
+                                image ? { height: undefined, aspectRatio: imageAspectRatio, padding: 0, borderWidth: 0 } : {}
+                            ]}
+                            onPress={handlePickImage}
+                            disabled={isLoading}
+                        >
                             {image ? (
-                                <Image source={{ uri: image }} style={{ width: '100%', height: '100%', borderRadius: 12 }} resizeMode="cover" />
+                                <Image source={{ uri: image }} style={{ width: '100%', height: '100%', borderRadius: 12 }} resizeMode="contain" />
                             ) : (
                                 <>
                                     <Ionicons name="camera-outline" size={32} color={Colors.green3} />
