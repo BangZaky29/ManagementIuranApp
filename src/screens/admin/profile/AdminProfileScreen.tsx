@@ -6,6 +6,7 @@ import { AdminProfileStyles as styles } from './AdminProfileStyles';
 import { CustomHeader } from '../../../components/CustomHeader';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
 import { Colors } from '../../../constants/Colors';
+import Constants from 'expo-constants';
 
 export default function AdminProfileScreen() {
     const {
@@ -106,7 +107,9 @@ export default function AdminProfileScreen() {
                     <Text style={styles.logoutText}>Keluar Admin</Text>
                 </TouchableOpacity>
 
-                <Text style={[styles.versionText, { color: Colors.textSecondary }]}>WargaPintar Admin v1.0.0</Text>
+                <Text style={[styles.versionText, { color: Colors.textSecondary }]}>
+                    WargaPintar Admin v{Constants.expoConfig?.version ?? '1.0.0'} (beta)
+                </Text>
 
             </ScrollView>
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, Pressable, Image, ActivityIndicator } from 'react-native';
 import Animated, { FadeInDown, useAnimatedStyle, withTiming, useSharedValue } from 'react-native-reanimated';
 import { useTheme } from '../../../contexts/ThemeContext';
+import Constants from 'expo-constants';
 import { CustomHeader } from '../../../components/CustomHeader';
 import { Ionicons } from '@expo/vector-icons';
 import { useProfilViewModel } from './ProfilViewModel';
@@ -160,7 +161,9 @@ export default function ProfilScreen() {
                     <Text style={[styles.logoutText, { color: colors.danger }]}>Keluar Aplikasi</Text>
                 </TouchableOpacity>
 
-                <Text style={[styles.versionText, { color: colors.textSecondary }]}>Versi 1.0.0 (Beta)</Text>
+                <Text style={[styles.versionText, { color: colors.textSecondary }]}>
+                    Versi {Constants.expoConfig?.version ?? '1.0.0'} (beta)
+                </Text>
 
             </ScrollView>
 
