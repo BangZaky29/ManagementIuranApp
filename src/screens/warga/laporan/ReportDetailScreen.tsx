@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, SafeAreaView, StatusBar, Image } from 'react-native';
 import { ReportDetailStyles as styles } from './ReportDetailStyles';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Colors } from '../../constants/Colors';
-import { CustomHeader } from '../../components/CustomHeader';
+import { Colors } from '../../../constants/Colors';
+import { CustomHeader } from '../../../components/CustomHeader';
 import { Ionicons } from '@expo/vector-icons';
 
 // Mock Data - In real app, fetch by ID

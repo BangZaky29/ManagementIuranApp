@@ -1,2 +1,2 @@
-import ReportDetailScreen from '../../src/screens/laporan/ReportDetailScreen';
+import ReportDetailScreen from '../../src/screens/warga/laporan/ReportDetailScreen';
 export default ReportDetailScreen;

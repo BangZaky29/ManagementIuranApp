@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity } from 'react-native';
-import { Colors } from '../../constants/Colors';
-import { CustomHeader } from '../../components/CustomHeader';
+import { Colors } from '../../../constants/Colors';
+import { CustomHeader } from '../../../components/CustomHeader';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function HelpScreen() {

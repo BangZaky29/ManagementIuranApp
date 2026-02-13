@@ -1,3 +1,3 @@
 
-import ProfilScreen from '../../src/screens/profile/ProfilScreen';
+import ProfilScreen from '../../src/screens/warga/profile/ProfilScreen';
 export default ProfilScreen;

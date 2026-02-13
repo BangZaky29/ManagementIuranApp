@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
-import { fetchMyReports, Report } from '../../services/laporanService';
-import { useAuth } from '../../contexts/AuthContext'; // To re-fetch on auth change
+import { fetchMyReports, Report } from '../../../services/laporanService';
+import { useAuth } from '../../../contexts/AuthContext'; // To re-fetch on auth change
 
 export interface ReportItem {
     id: string;

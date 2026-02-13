@@ -1,15 +1,15 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, Platform } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { useTheme } from '../../contexts/ThemeContext';
-import { CustomHeader } from '../../components/CustomHeader';
-import { CustomButton } from '../../components/CustomButton';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { CustomHeader } from '../../../components/CustomHeader';
+import { CustomButton } from '../../../components/CustomButton';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useIuranViewModel } from './IuranViewModel';
 import { IuranStyles as styles } from './IuranStyles';
 
-import { CustomAlertModal } from '../../components/CustomAlertModal';
+import { CustomAlertModal } from '../../../components/CustomAlertModal';
 
 export default function IuranScreen() {
     const router = useRouter();

@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, Platform } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { useTheme } from '../../contexts/ThemeContext';
-import { CustomHeader } from '../../components/CustomHeader';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { CustomHeader } from '../../../components/CustomHeader';
 import { Ionicons } from '@expo/vector-icons';
 import { useLaporanViewModel } from './LaporanViewModel';
 import { LaporanStyles as styles } from './LaporanStyles';

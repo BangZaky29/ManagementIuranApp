@@ -3,9 +3,9 @@ import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, Aler
 import { PaymentDetailStyles as styles } from './PaymentDetailStyles';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../constants/Colors';
-import { CustomButton } from '../../components/CustomButton';
-import { PaymentInstructionModal } from '../../components/PaymentInstructionModal';
+import { Colors } from '../../../constants/Colors';
+import { CustomButton } from '../../../components/CustomButton';
+import { PaymentInstructionModal } from '../../../components/PaymentInstructionModal';
 
 // Mock Data for the detail
 const PAYMENT_DETAIL = {

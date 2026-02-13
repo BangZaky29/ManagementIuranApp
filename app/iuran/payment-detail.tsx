@@ -1,3 +1,3 @@
-import PaymentDetailScreen from '../../src/screens/iuran/PaymentDetailScreen';
+import PaymentDetailScreen from '../../src/screens/warga/iuran/PaymentDetailScreen';
 
 export default PaymentDetailScreen;

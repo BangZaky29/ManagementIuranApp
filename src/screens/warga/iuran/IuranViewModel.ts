@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
-import { useAuth } from '../../contexts/AuthContext';
-import { fetchMyPayments, fetchActiveFees, calculateBillSummary, PaymentRecord } from '../../services/iuranService';
+import { useAuth } from '../../../contexts/AuthContext';
+import { fetchMyPayments, fetchActiveFees, calculateBillSummary, PaymentRecord } from '../../../services/iuranService';
 
 export interface PaymentHistoryItem {
     id: string;

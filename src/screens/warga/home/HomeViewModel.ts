@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'expo-router';
-import { useAuth } from '../../contexts/AuthContext';
-import { fetchPublishedNews, NewsItem } from '../../services/newsService';
-import { calculateBillSummary } from '../../services/iuranService';
-import { triggerPanicButton } from '../../services/panicService';
+import { useAuth } from '../../../contexts/AuthContext';
+import { fetchPublishedNews, NewsItem } from '../../../services/newsService';
+import { calculateBillSummary } from '../../../services/iuranService';
+import { triggerPanicButton } from '../../../services/panicService';
 
 export interface QuickAction {
     id: string;

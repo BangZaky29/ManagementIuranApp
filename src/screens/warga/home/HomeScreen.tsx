@@ -2,10 +2,10 @@ import React from 'react';
 import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, StatusBar, Image } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { useHomeViewModel } from './HomeViewModel';
 import { HomeStyles as styles } from './HomeStyles';
-import { CustomAlertModal } from '../../components/CustomAlertModal';
+import { CustomAlertModal } from '../../../components/CustomAlertModal';
 
 export default function HomeScreen() {
     const {

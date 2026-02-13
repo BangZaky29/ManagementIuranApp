@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, SafeAreaView, StatusBar, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../constants/Colors';
+import { Colors } from '../../../constants/Colors';
 import { useHistoryViewModel } from './HistoryViewModel';
 import { HistoryStyles as styles } from './HistoryStyles';
 
@@ -185,4 +185,4 @@ export default function PaymentHistoryScreen() {
 
 // Helper to use ScrollView in filterRow needs import 
 import { ScrollView } from 'react-native';
-import { FilterCalendar } from '../../components/FilterCalendar';
+import { FilterCalendar } from '../../../components/FilterCalendar';

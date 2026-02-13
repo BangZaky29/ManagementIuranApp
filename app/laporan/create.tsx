@@ -1,2 +1,2 @@
-import CreateReportScreen from '../../src/screens/laporan/CreateReportScreen';
+import CreateReportScreen from '../../src/screens/warga/laporan/CreateReportScreen';
 export default CreateReportScreen;

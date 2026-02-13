@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView, SafeAreaView, StatusBar, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Colors } from '../../constants/Colors';
-import { CustomHeader } from '../../components/CustomHeader';
-import { CustomButton } from '../../components/CustomButton';
+import { Colors } from '../../../constants/Colors';
+import { CustomHeader } from '../../../components/CustomHeader';
+import { CustomButton } from '../../../components/CustomButton';
 import { Ionicons } from '@expo/vector-icons';
 
-import { CustomAlertModal } from '../../components/CustomAlertModal';
+import { CustomAlertModal } from '../../../components/CustomAlertModal';
 
 export default function ChangePasswordScreen() {
     const router = useRouter();

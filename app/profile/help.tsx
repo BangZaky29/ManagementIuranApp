@@ -1,2 +1,2 @@
-import HelpScreen from '../../src/screens/profile/HelpScreen';
+import HelpScreen from '../../src/screens/warga/profile/HelpScreen';
 export default HelpScreen;

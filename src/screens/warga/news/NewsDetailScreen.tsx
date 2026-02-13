@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, StatusBar, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../constants/Colors';
-import { fetchNewsDetail, NewsItem } from '../../services/newsService';
+import { Colors } from '../../../constants/Colors';
+import { fetchNewsDetail, NewsItem } from '../../../services/newsService';
 import { NewsDetailStyles as styles } from './NewsDetailStyles';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 export default function NewsDetailScreen() {
     const { id } = useLocalSearchParams();

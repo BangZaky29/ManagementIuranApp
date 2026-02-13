@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, Alert, Image } from 'react-native';
 import { CreateReportStyles as styles } from './CreateReportStyles';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Colors } from '../../constants/Colors';
-import { CustomHeader } from '../../components/CustomHeader';
-import { CustomButton } from '../../components/CustomButton';
+import { Colors } from '../../../constants/Colors';
+import { CustomHeader } from '../../../components/CustomHeader';
+import { CustomButton } from '../../../components/CustomButton';
 import { Ionicons } from '@expo/vector-icons';
 
-import { CustomAlertModal } from '../../components/CustomAlertModal';
+import { CustomAlertModal } from '../../../components/CustomAlertModal';
 
 export default function CreateReportScreen() {
     const router = useRouter();

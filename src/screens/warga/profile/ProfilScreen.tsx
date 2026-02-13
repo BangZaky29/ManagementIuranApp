@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, Pressable, Image, ActivityIndicator } from 'react-native';
 import Animated, { FadeInDown, useAnimatedStyle, withTiming, useSharedValue } from 'react-native-reanimated';
-import { useTheme } from '../../contexts/ThemeContext';
-import { CustomHeader } from '../../components/CustomHeader';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { CustomHeader } from '../../../components/CustomHeader';
 import { Ionicons } from '@expo/vector-icons';
 import { useProfilViewModel } from './ProfilViewModel';
 import { ProfilStyles as styles } from './ProfilStyles';
-import { CustomAlertModal } from '../../components/CustomAlertModal';
+import { CustomAlertModal } from '../../../components/CustomAlertModal';
 
 /* ───── Custom Toggle ───── */
 const ThemeToggle = ({ isDark, onToggle, colors }: { isDark: boolean; onToggle: () => void; colors: any }) => {

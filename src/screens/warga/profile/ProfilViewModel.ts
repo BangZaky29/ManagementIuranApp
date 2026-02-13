@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../../contexts/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
-import { supabase } from '../../lib/supabaseConfig';
+import { supabase } from '../../../lib/supabaseConfig';
 import { decode } from 'base64-arraybuffer';
 
 export const useProfilViewModel = () => {
