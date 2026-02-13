@@ -4,7 +4,7 @@ export interface VerifiedResident {
     id: string;
     nik: string;
     full_name: string;
-    address: string;
+    address: string | null;
     rt_rw: string;
     role: 'warga' | 'security';
     description?: string;
@@ -44,4 +44,31 @@ export const deleteVerifiedResident = async (id: string) => {
         .eq('id', id);
 
     if (error) throw error;
+};
+
+export const getDashboardStats = async () => {
+    const { count: wargaCount, error: wargaError } = await supabase
+        .from('verified_residents')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'warga');
+
+    const { count: securityCount, error: securityError } = await supabase
+        .from('verified_residents')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'security');
+
+    const { count: claimedCount, error: claimedError } = await supabase
+        .from('verified_residents')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_claimed', true);
+
+    if (wargaError) throw wargaError;
+    if (securityError) throw securityError;
+    if (claimedError) throw claimedError;
+
+    return {
+        warga: wargaCount || 0,
+        security: securityCount || 0,
+        activeUsers: claimedCount || 0,
+    };
 };

@@ -1,2 +1,2 @@
-import AdminHomeScreen from '../../src/screens/admin/AdminHomeScreen';
-export default AdminHomeScreen;
+import AdminDashboardScreen from '../../src/screens/admin/dashboardAnalitic/AdminDashboardScreen';
+export default AdminDashboardScreen;
