@@ -25,6 +25,7 @@ export const useProfilViewModel = () => {
         phone: profile?.phone || '-',
         role: profile?.role || 'warga',
         avatarUrl: profile?.avatar_url || null,
+        housingComplexName: profile?.housing_complexes?.name || null,
     };
 
     // Alert State

@@ -82,7 +82,7 @@ export default function AdminProfileScreen() {
 
                     <Text style={styles.userName}>{user.name}</Text>
                     <Text style={[styles.userRole, { backgroundColor: '#E3F2FD', color: '#1565C0' }]}>
-                        {user.role} • RT {user.rt_rw}
+                        {user.role} • {user.housingComplexName ? user.housingComplexName : `RT ${user.rt_rw}`}
                     </Text>
                 </View>
 

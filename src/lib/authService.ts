@@ -18,6 +18,10 @@ export interface UserProfile {
     is_active: boolean;
     created_at: string;
     updated_at: string;
+    housing_complex_id?: number | null;
+    housing_complexes?: {
+        name: string;
+    } | null;
 }
 
 export interface SignUpData {
@@ -157,13 +161,15 @@ export async function getCurrentSession() {
     return session;
 }
 
-/**
- * Fetch user profile from the profiles table.
- */
 export async function getProfile(userId: string): Promise<UserProfile | null> {
     const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(`
+            *,
+            housing_complexes (
+                name
+            )
+        `)
         .eq('id', userId)
         .single();
 

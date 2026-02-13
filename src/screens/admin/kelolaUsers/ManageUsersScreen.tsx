@@ -3,14 +3,17 @@ import { View, Text, SafeAreaView, FlatList, TouchableOpacity, TextInput, Alert,
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { fetchVerifiedResidents, createVerifiedResident, deleteVerifiedResident, VerifiedResident } from '../../../services/adminService';
+import { fetchVerifiedResidents, createVerifiedResident, deleteVerifiedResident, updateVerifiedResident, fetchHousingComplexes, VerifiedResident } from '../../../services/adminService';
+import { useAuth } from '../../../contexts/AuthContext';
 import { CustomHeader } from '../../../components/CustomHeader';
 import { Colors } from '../../../constants/Colors';
 import { styles } from './ManageUsersStyles';
 
 export default function ManageUsersScreen() {
     const router = useRouter();
+    const { profile } = useAuth(); // Get logged in admin profile
     const [residents, setResidents] = useState<VerifiedResident[]>([]);
+    const [housingComplexes, setHousingComplexes] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -24,25 +27,56 @@ export default function ManageUsersScreen() {
     // Address Removed as per user request
     const [rtRw, setRtRw] = useState('');
     const [role, setRole] = useState<'warga' | 'security'>('warga');
+    const [selectedComplexId, setSelectedComplexId] = useState<number | null>(null);
+
+    const [expandedId, setExpandedId] = useState<string | null>(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editId, setEditId] = useState<string | null>(null);
 
     useEffect(() => {
-        loadResidents();
+        loadData();
     }, []);
 
-    const loadResidents = async () => {
+    const loadData = async () => {
         setIsLoading(true);
         try {
-            const data = await fetchVerifiedResidents();
-            setResidents(data);
+            const [residentsData, complexesData] = await Promise.all([
+                fetchVerifiedResidents(),
+                fetchHousingComplexes()
+            ]);
+            setResidents(residentsData);
+            setHousingComplexes(complexesData);
         } catch (error) {
-            console.error('Failed to load residents:', error);
-            Alert.alert('Error', 'Gagal memuat data warga');
+            console.error('Failed to load data:', error);
+            Alert.alert('Error', 'Gagal memuat data');
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleAddResident = async () => {
+    // Auto-set complex ID when opening form for ADD
+    useEffect(() => {
+        if (showForm && !isEditing && profile?.housing_complex_id) {
+            setSelectedComplexId(profile.housing_complex_id);
+        }
+    }, [showForm, isEditing, profile]);
+
+    const toggleExpand = (id: string) => {
+        setExpandedId(prev => prev === id ? null : id);
+    };
+
+    const handleEdit = (item: VerifiedResident) => {
+        setNik(item.nik);
+        setFullName(item.full_name);
+        setRtRw(item.rt_rw);
+        setRole(item.role);
+        setSelectedComplexId(item.housing_complex_id || null);
+        setEditId(item.id);
+        setIsEditing(true);
+        setShowForm(true);
+    };
+
+    const handleSave = async () => {
         if (!nik || !fullName) {
             Alert.alert('Peringatan', 'NIK dan Nama Lengkap wajib diisi');
             return;
@@ -50,20 +84,41 @@ export default function ManageUsersScreen() {
 
         setIsSubmitting(true);
         try {
-            await createVerifiedResident({
-                nik,
-                full_name: fullName,
-                address: null, // User request: remove address input, let user update it later
-                rt_rw: rtRw || '005/003',
-                role,
-            });
-            Alert.alert('Sukses', 'Data warga berhasil ditambahkan');
+            if (isEditing && editId) {
+                // Update
+                // We'll allow updating housing_complex_id if we had a dropdown, but for now just basic info
+                // Per requirement: housing complex is "input manual aja untuk nam cluster admin login ini" in the DB.
+                // So we won't update it from here unless we add a specific field. 
+                // Currently user only asked to display it.
+                await updateVerifiedResident(editId, {
+                    nik,
+                    full_name: fullName,
+                    rt_rw: rtRw,
+                    role,
+                    housing_complex_id: selectedComplexId,
+                });
+                Alert.alert('Sukses', 'Data warga berhasil diperbarui');
+            } else {
+                // Create
+                // If the current admin has a housing_complex_id, ideally we'd assign it here.
+                // But since we don't have the admin's profile data fetched here explicitly,
+                // we'll rely on the default behavior or manual DB update as per user instruction.
+                await createVerifiedResident({
+                    nik,
+                    full_name: fullName,
+                    address: null,
+                    rt_rw: rtRw || '005/003',
+                    role,
+                    housing_complex_id: selectedComplexId,
+                });
+                Alert.alert('Sukses', 'Data warga berhasil ditambahkan');
+            }
             setShowForm(false);
             resetForm();
-            loadResidents();
+            loadData(); // Reload both to be safe
         } catch (error: any) {
-            console.error('Failed to add resident:', error);
-            Alert.alert('Gagal', error.message || 'Gagal menambahkan warga');
+            console.error('Failed to save resident:', error);
+            Alert.alert('Gagal', error.message || 'Gagal menyimpan data');
         } finally {
             setIsSubmitting(false);
         }
@@ -81,7 +136,7 @@ export default function ManageUsersScreen() {
                     onPress: async () => {
                         try {
                             await deleteVerifiedResident(id);
-                            loadResidents();
+                            loadData();
                         } catch (error) {
                             Alert.alert('Error', 'Gagal menghapus data');
                         }
@@ -96,6 +151,9 @@ export default function ManageUsersScreen() {
         setFullName('');
         setRtRw('');
         setRole('warga');
+        setIsEditing(false);
+        setEditId(null);
+        setSelectedComplexId(null);
     };
 
     const filteredResidents = useMemo(() => {
@@ -108,44 +166,65 @@ export default function ManageUsersScreen() {
         );
     }, [residents, searchQuery]);
 
-    const renderItem = ({ item }: { item: VerifiedResident }) => (
-        <View style={styles.card}>
-            <View style={styles.cardHeader}>
-                <View>
-                    <Text style={styles.cardTitle}>{item.full_name}</Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
-                        <View style={[styles.roleBadge, { backgroundColor: item.role === 'security' ? '#2196F3' : Colors.green3 }]}>
-                            <Text style={styles.roleBadgeText}>{item.role === 'security' ? 'Security' : 'Warga'}</Text>
+    const renderItem = ({ item }: { item: VerifiedResident }) => {
+        const isExpanded = expandedId === item.id;
+
+        return (
+            <TouchableOpacity
+                activeOpacity={0.9}
+                onPress={() => toggleExpand(item.id)}
+                style={styles.card}
+            >
+                <View style={styles.cardHeader}>
+                    <View style={{ flex: 1 }}>
+                        <Text style={styles.cardTitle}>{item.full_name}</Text>
+                        {item.housing_complexes?.name && (
+                            <Text style={styles.clusterName}>{item.housing_complexes.name}</Text>
+                        )}
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
+                            <View style={[styles.roleBadge, { backgroundColor: item.role === 'security' ? '#2196F3' : Colors.green3 }]}>
+                                <Text style={styles.roleBadgeText}>{item.role === 'security' ? 'Security' : 'Warga'}</Text>
+                            </View>
+                            <Text style={[styles.cardSubtitle, { marginLeft: 8 }]}>NIK: {item.nik}</Text>
                         </View>
-                        <Text style={[styles.cardSubtitle, { marginLeft: 8 }]}>NIK: {item.nik}</Text>
+                    </View>
+                    <View style={[styles.statusBadge, { backgroundColor: item.is_claimed ? Colors.success : Colors.warning }]}>
+                        <Text style={styles.statusText}>{item.is_claimed ? 'Aktif' : 'Belum Daftar'}</Text>
                     </View>
                 </View>
-                <View style={[styles.statusBadge, { backgroundColor: item.is_claimed ? Colors.success : Colors.warning }]}>
-                    <Text style={styles.statusText}>{item.is_claimed ? 'Aktif' : 'Belum Daftar'}</Text>
-                </View>
-            </View>
 
-            <View style={styles.cardBody}>
-                <Text style={styles.cardText}>RT/RW: {item.rt_rw}</Text>
-                {/* Note: Address is usually null now for new users until they register/update */}
+                {isExpanded && (
+                    <View style={styles.cardBody}>
+                        <Text style={styles.cardText}>RT/RW: {item.rt_rw}</Text>
+                        {/* Note: Address is usually null now for new users until they register/update */}
 
-                <View style={styles.tokenContainer}>
-                    <Text style={styles.tokenLabel}>Kode Akses:</Text>
-                    <Text style={styles.tokenValue}>{item.access_token}</Text>
-                </View>
-            </View>
+                        <View style={styles.tokenContainer}>
+                            <Text style={styles.tokenLabel}>Kode Akses:</Text>
+                            <Text style={styles.tokenValue}>{item.access_token}</Text>
+                        </View>
 
-            <View style={styles.cardFooter}>
-                <TouchableOpacity
-                    onPress={() => handleDelete(item.id)}
-                    style={styles.deleteButton}
-                >
-                    <Ionicons name="trash-outline" size={18} color={Colors.danger} />
-                    <Text style={styles.deleteText}>Hapus</Text>
-                </TouchableOpacity>
-            </View>
-        </View>
-    );
+                        <View style={styles.cardFooter}>
+                            <TouchableOpacity
+                                onPress={() => handleEdit(item)}
+                                style={[styles.actionButton, styles.editButton]}
+                            >
+                                <Ionicons name="pencil" size={16} color="#1565C0" />
+                                <Text style={styles.editText}>Edit</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                onPress={() => handleDelete(item.id)}
+                                style={[styles.actionButton, styles.deleteButton]}
+                            >
+                                <Ionicons name="trash-outline" size={16} color={Colors.danger} />
+                                <Text style={styles.deleteText}>Hapus</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                )}
+            </TouchableOpacity>
+        );
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -192,7 +271,7 @@ export default function ManageUsersScreen() {
             {/* FAB */}
             <TouchableOpacity
                 style={styles.fab}
-                onPress={() => setShowForm(true)}
+                onPress={() => { resetForm(); setShowForm(true); }}
                 activeOpacity={0.8}
             >
                 <Ionicons name="add" size={32} color="#FFF" />
@@ -212,7 +291,9 @@ export default function ManageUsersScreen() {
                                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                                 style={styles.formContainer}
                             >
-                                <Text style={styles.formTitle}>Tambah User Baru</Text>
+                                <Text style={styles.formTitle}>
+                                    {isEditing ? 'Edit Data User' : 'Tambah User Baru'}
+                                </Text>
 
                                 <TextInput
                                     style={styles.input}
@@ -228,11 +309,50 @@ export default function ManageUsersScreen() {
                                     onChangeText={setFullName}
                                 />
                                 <TextInput
-                                    style={styles.input}
-                                    placeholder="RT/RW (Contoh: 005/003)"
-                                    value={rtRw}
                                     onChangeText={setRtRw}
                                 />
+
+                                <View style={{ marginBottom: 16 }}>
+                                    <Text style={[styles.roleLabel, { marginBottom: 8 }]}>Cluster / Apartemen:</Text>
+                                    <View style={{
+                                        backgroundColor: '#F5F7FA',
+                                        borderRadius: 12,
+                                        borderWidth: 1,
+                                        borderColor: '#E0E0E0',
+                                        overflow: 'hidden'
+                                    }}>
+                                        {housingComplexes.map((complex) => (
+                                            <TouchableOpacity
+                                                key={complex.id}
+                                                onPress={() => setSelectedComplexId(complex.id)}
+                                                style={{
+                                                    padding: 12,
+                                                    flexDirection: 'row',
+                                                    justifyContent: 'space-between',
+                                                    alignItems: 'center',
+                                                    backgroundColor: selectedComplexId === complex.id ? '#E3F2FD' : 'transparent',
+                                                    borderBottomWidth: 1,
+                                                    borderBottomColor: '#EEE'
+                                                }}
+                                            >
+                                                <Text style={{
+                                                    color: selectedComplexId === complex.id ? Colors.primary : Colors.textPrimary,
+                                                    fontWeight: selectedComplexId === complex.id ? 'bold' : 'normal'
+                                                }}>
+                                                    {complex.name}
+                                                </Text>
+                                                {selectedComplexId === complex.id && (
+                                                    <Ionicons name="checkmark" size={16} color={Colors.primary} />
+                                                )}
+                                            </TouchableOpacity>
+                                        ))}
+                                        {housingComplexes.length === 0 && (
+                                            <Text style={{ padding: 12, color: Colors.textSecondary, fontStyle: 'italic' }}>
+                                                Belum ada data cluster. Hubungi Super Admin.
+                                            </Text>
+                                        )}
+                                    </View>
+                                </View>
 
                                 <View style={styles.roleContainer}>
                                     <Text style={styles.roleLabel}>Peran:</Text>
@@ -263,7 +383,7 @@ export default function ManageUsersScreen() {
                                     </TouchableOpacity>
                                     <TouchableOpacity
                                         style={[styles.button, styles.saveButton]}
-                                        onPress={handleAddResident}
+                                        onPress={handleSave}
                                         disabled={isSubmitting}
                                     >
                                         {isSubmitting ? (

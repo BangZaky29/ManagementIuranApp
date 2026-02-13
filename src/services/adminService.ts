@@ -12,12 +12,21 @@ export interface VerifiedResident {
     is_claimed: boolean;
     claimed_at?: string;
     created_at: string;
+    housing_complex_id?: number | null;
+    housing_complexes?: {
+        name: string;
+    } | null;
 }
 
 export const fetchVerifiedResidents = async () => {
     const { data, error } = await supabase
         .from('verified_residents')
-        .select('*')
+        .select(`
+            *,
+            housing_complexes (
+                name
+            )
+        `)
         .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -25,7 +34,7 @@ export const fetchVerifiedResidents = async () => {
 };
 
 export const createVerifiedResident = async (
-    data: Omit<VerifiedResident, 'id' | 'access_token' | 'is_claimed' | 'created_at'>
+    data: Omit<VerifiedResident, 'id' | 'access_token' | 'is_claimed' | 'created_at' | 'housing_complexes'>
 ) => {
     const { data: newResident, error } = await supabase
         .from('verified_residents')
@@ -35,6 +44,21 @@ export const createVerifiedResident = async (
 
     if (error) throw error;
     return newResident as VerifiedResident;
+};
+
+export const updateVerifiedResident = async (
+    id: string,
+    updates: Partial<Omit<VerifiedResident, 'id' | 'created_at' | 'housing_complexes'>>
+) => {
+    const { data, error } = await supabase
+        .from('verified_residents')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+    if (error) throw error;
+    return data as VerifiedResident;
 };
 
 export const deleteVerifiedResident = async (id: string) => {
@@ -71,4 +95,14 @@ export const getDashboardStats = async () => {
         security: securityCount || 0,
         activeUsers: claimedCount || 0,
     };
+};
+
+export const fetchHousingComplexes = async () => {
+    const { data, error } = await supabase
+        .from('housing_complexes')
+        .select('*')
+        .order('name');
+
+    if (error) throw error;
+    return data;
 };

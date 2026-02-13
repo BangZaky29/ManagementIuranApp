@@ -67,6 +67,12 @@ export const styles = StyleSheet.create({
         alignItems: 'flex-start',
         marginBottom: 12,
     },
+    clusterName: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: Colors.primary,
+        marginBottom: 2,
+    },
     cardTitle: {
         fontSize: 16,
         fontWeight: 'bold',
@@ -100,14 +106,16 @@ export const styles = StyleSheet.create({
     },
     cardBody: {
         backgroundColor: '#F9FAFB',
-        borderRadius: 8,
-        padding: 12,
-        marginBottom: 12,
+        borderBottomLeftRadius: 16,
+        borderBottomRightRadius: 16,
+        padding: 16,
+        borderTopWidth: 1,
+        borderTopColor: '#F0F0F0',
     },
     cardText: {
         fontSize: 13,
         color: Colors.textSecondary,
-        marginBottom: 4,
+        marginBottom: 8,
     },
     tokenContainer: {
         flexDirection: 'row',
@@ -115,7 +123,7 @@ export const styles = StyleSheet.create({
         marginTop: 8,
         paddingTop: 8,
         borderTopWidth: 1,
-        borderTopColor: '#EEE',
+        borderTopColor: '#EBEBEB',
     },
     tokenLabel: {
         fontSize: 12,
@@ -131,11 +139,28 @@ export const styles = StyleSheet.create({
     cardFooter: {
         flexDirection: 'row',
         justifyContent: 'flex-end',
+        paddingTop: 12,
+        marginTop: 4,
     },
-    deleteButton: {
+    actionButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 8,
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 8,
+        marginLeft: 8,
+    },
+    editButton: {
+        backgroundColor: '#E3F2FD',
+    },
+    deleteButton: {
+        backgroundColor: '#FEE2E2',
+    },
+    editText: {
+        color: '#1565C0',
+        fontSize: 12,
+        fontWeight: '600',
+        marginLeft: 4,
     },
     deleteText: {
         color: Colors.danger,

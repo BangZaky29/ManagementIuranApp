@@ -23,6 +23,7 @@ export const useAdminProfileViewModel = () => {
         rt_rw: profile?.rt_rw || '005/003',
         avatarUrl: profile?.avatar_url || null,
         isActive: profile?.is_active || false,
+        housingComplexName: profile?.housing_complexes?.name || null,
     };
 
     // Alert State

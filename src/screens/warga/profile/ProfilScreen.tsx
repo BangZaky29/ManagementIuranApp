@@ -123,7 +123,9 @@ export default function ProfilScreen() {
                         </View>
                     </TouchableOpacity>
                     <Text style={[styles.userName, { color: colors.green5 }]}>{user.name}</Text>
-                    <Text style={[styles.userRole, { color: colors.green4, backgroundColor: colors.green1 }]}>Warga RT {user.rt_rw}</Text>
+                    <Text style={[styles.userRole, { color: colors.green4, backgroundColor: colors.green1 }]}>
+                        {user.housingComplexName ? user.housingComplexName : `Warga RT ${user.rt_rw}`}
+                    </Text>
                 </Animated.View>
 
                 {/* Personal Info */}
