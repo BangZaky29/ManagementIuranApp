@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useRouter } from 'expo-router';
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { fetchMyReports, Report } from '../../../services/laporanService';
 import { useAuth } from '../../../contexts/AuthContext'; // To re-fetch on auth change
 
@@ -19,9 +19,17 @@ export const useLaporanViewModel = () => {
     const [reports, setReports] = useState<ReportItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    // Initial load
     useEffect(() => {
         loadReports();
-    }, [user?.id]); // Reload when user changes
+    }, [user?.id]);
+
+    // Reload when screen is focused (e.g. returning from detail or create)
+    useFocusEffect(
+        useCallback(() => {
+            loadReports();
+        }, [])
+    );
 
     const loadReports = async () => {
         setIsLoading(true);

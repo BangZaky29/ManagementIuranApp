@@ -12,6 +12,7 @@ interface CustomButtonProps {
     isComingSoon?: boolean;
     icon?: React.ReactNode;
     iconPosition?: 'left' | 'right';
+    disabled?: boolean;
 }
 
 export const CustomButton: React.FC<CustomButtonProps> = ({
@@ -23,7 +24,8 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
     loading = false,
     isComingSoon = false,
     icon,
-    iconPosition = 'left'
+    iconPosition = 'left',
+    disabled = false
 }) => {
 
     const handlePress = () => {
@@ -69,7 +71,7 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
             ]}
             onPress={handlePress}
             activeOpacity={0.7}
-            disabled={loading}
+            disabled={loading || disabled}
         >
             {loading ? (
                 <ActivityIndicator color={getSpinnerColor()} />

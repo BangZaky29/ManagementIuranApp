@@ -23,11 +23,59 @@ export const fetchMyReports = async (): Promise<Report[]> => {
     return data as Report[];
 };
 
+export const fetchReportById = async (id: string): Promise<Report | null> => {
+    const { data, error } = await supabase
+        .from('reports')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (error) {
+        console.error('Error fetching report:', error);
+        return null;
+    }
+    return data as Report;
+};
+
+export const deleteReport = async (reportId: string): Promise<void> => {
+    // 1. Get the report to find image_url
+    const report = await fetchReportById(reportId);
+    if (!report) return;
+
+    const promises = [];
+
+    // 2. Queue image deletion if exists
+    if (report.image_url) {
+        const fileName = report.image_url.split('/').pop();
+        if (fileName) {
+            promises.push(
+                supabase.storage
+                    .from('wargaPintar')
+                    .remove([`reports/${fileName}`])
+                    .catch(err => console.warn('Failed to delete image:', err))
+            );
+        }
+    }
+
+    // 3. Queue record deletion
+    promises.push(
+        supabase
+            .from('reports')
+            .delete()
+            .eq('id', reportId)
+            .then(({ error }) => { if (error) throw error; })
+    );
+
+    // 4. Run in parallel
+    await Promise.all(promises);
+};
+
 export const createReport = async (
     title: string,
     description: string,
     category: string,
-    imageUri?: string
+    imageUri?: string,
+    location?: string // Google Maps Link or coordinates
 ) => {
     let imageUrl = null;
 
@@ -66,6 +114,7 @@ export const createReport = async (
             description,
             category,
             image_url: imageUrl,
+            location: location || null,
             status: 'Menunggu' // Default
         })
         .select()
