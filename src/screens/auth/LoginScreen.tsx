@@ -6,15 +6,25 @@ import { CustomButton } from '../../components/CustomButton';
 import { CustomInput } from '../../components/CustomInput';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
+import { CustomAlertModal } from '../../components/CustomAlertModal';
+import { useAuth } from '../../contexts/AuthContext';
+import { UserRole } from '../../lib/authService';
 
 const { width } = Dimensions.get('window');
 
-import { CustomAlertModal } from '../../components/CustomAlertModal';
+const ROLES: { key: UserRole; label: string; icon: string }[] = [
+    { key: 'warga', label: 'Warga', icon: 'people-outline' },
+    { key: 'admin', label: 'Admin', icon: 'shield-checkmark-outline' },
+    { key: 'security', label: 'Security', icon: 'lock-closed-outline' },
+];
 
 export default function LoginScreen() {
     const router = useRouter();
+    const { signIn, signInWithGoogle } = useAuth();
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [selectedRole, setSelectedRole] = useState<UserRole>('warga');
     const [isLoading, setIsLoading] = useState(false);
 
     // Alert State
@@ -28,28 +38,63 @@ export default function LoginScreen() {
 
     const hideAlert = () => setAlertVisible(false);
 
-    const handleLogin = () => {
+    const showAlert = (title: string, message: string, type: 'success' | 'info' | 'warning' | 'error') => {
+        setAlertConfig({
+            title,
+            message,
+            type,
+            buttons: [{ text: 'OK', onPress: hideAlert }]
+        });
+        setAlertVisible(true);
+    };
+
+    const handleLogin = async () => {
+        if (!email.trim()) {
+            showAlert('Perhatian', 'Email wajib diisi', 'warning');
+            return;
+        }
+        if (!password) {
+            showAlert('Perhatian', 'Kata sandi wajib diisi', 'warning');
+            return;
+        }
+
         setIsLoading(true);
-        // Simulate login delay
-        setTimeout(() => {
-            Keyboard.dismiss();
+        Keyboard.dismiss();
+
+        try {
+            await signIn({ email: email.trim(), password });
+            // AuthGate in _layout.tsx will handle redirect to (tabs)
+        } catch (error: any) {
+            let message = 'Terjadi kesalahan. Silakan coba lagi.';
+
+            if (error?.message?.includes('Invalid login credentials')) {
+                message = 'Email atau kata sandi salah. Silakan coba lagi.';
+            } else if (error?.message?.includes('Email not confirmed')) {
+                message = 'Email belum dikonfirmasi. Silakan cek inbox email Anda.';
+            } else if (error?.message) {
+                message = error.message;
+            }
+
+            showAlert('Login Gagal', message, 'error');
+        } finally {
             setIsLoading(false);
-            router.replace('/(tabs)');
-        }, 1500);
+        }
+    };
+
+    const handleGoogleLogin = async () => {
+        try {
+            await signInWithGoogle();
+        } catch (error: any) {
+            showAlert(
+                'Segera Hadir',
+                'Login dengan Google memerlukan konfigurasi tambahan di Supabase Dashboard.',
+                'info'
+            );
+        }
     };
 
     const navigateToRegister = () => {
         router.push('/register');
-    };
-
-    const showFeatureUnavailable = (feature: string) => {
-        setAlertConfig({
-            title: 'Segera Hadir',
-            message: `Fitur ${feature} sedang dalam tahap pengembangan.`,
-            type: 'info',
-            buttons: [{ text: 'OK', onPress: hideAlert }]
-        });
-        setAlertVisible(true);
     };
 
     return (
@@ -76,9 +121,36 @@ export default function LoginScreen() {
                         <Text style={styles.subtitleText}>Masuk untuk mengelola iuran warga</Text>
                     </View>
 
+                    {/* Role Selector */}
+                    <View style={styles.roleContainer}>
+                        {ROLES.map((role) => (
+                            <TouchableOpacity
+                                key={role.key}
+                                style={[
+                                    styles.roleTab,
+                                    selectedRole === role.key && styles.roleTabActive,
+                                ]}
+                                onPress={() => setSelectedRole(role.key)}
+                                activeOpacity={0.7}
+                            >
+                                <Ionicons
+                                    name={role.icon as any}
+                                    size={18}
+                                    color={selectedRole === role.key ? '#FFFFFF' : Colors.green4}
+                                />
+                                <Text style={[
+                                    styles.roleTabText,
+                                    selectedRole === role.key && styles.roleTabTextActive,
+                                ]}>
+                                    {role.label}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+
                     <View style={styles.formContainer}>
                         <CustomInput
-                            label="Email / Nomor HP"
+                            label="Email"
                             placeholder="contoh@email.com"
                             value={email}
                             onChangeText={setEmail}
@@ -105,8 +177,15 @@ export default function LoginScreen() {
                             style={styles.loginButton}
                         />
 
+                        {/* Divider */}
+                        <View style={styles.dividerContainer}>
+                            <View style={styles.dividerLine} />
+                            <Text style={styles.dividerText}>atau</Text>
+                            <View style={styles.dividerLine} />
+                        </View>
+
                         {/* Google Login Button */}
-                        <TouchableOpacity style={styles.googleButton} onPress={() => showFeatureUnavailable('Login Google')}>
+                        <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
                             <Ionicons name="logo-google" size={20} color={Colors.green5} style={{ marginRight: 10 }} />
                             <Text style={styles.googleButtonText}>Masuk dengan Google</Text>
                         </TouchableOpacity>
@@ -136,7 +215,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.green1, // Soft Green Background
+        backgroundColor: Colors.green1,
     },
     keyboardView: {
         flex: 1,
@@ -159,7 +238,7 @@ const styles = StyleSheet.create({
     },
     headerContainer: {
         alignItems: 'center',
-        marginBottom: 40,
+        marginBottom: 24,
     },
     logoContainer: {
         width: 100,
@@ -189,7 +268,46 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: Colors.green4,
     },
-    // formCard style removed
+
+    // Role Selector
+    roleContainer: {
+        flexDirection: 'row',
+        backgroundColor: Colors.white,
+        borderRadius: 16,
+        padding: 4,
+        marginBottom: 24,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    roleTab: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 12,
+        borderRadius: 12,
+        gap: 6,
+    },
+    roleTabActive: {
+        backgroundColor: Colors.primary,
+        shadowColor: Colors.primary,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    roleTabText: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: Colors.green4,
+    },
+    roleTabTextActive: {
+        color: '#FFFFFF',
+    },
+
     formContainer: {
         width: '100%',
     },
@@ -203,8 +321,26 @@ const styles = StyleSheet.create({
     },
     loginButton: {
         marginTop: 10,
-        marginBottom: 20,
+        marginBottom: 16,
     },
+
+    // Divider
+    dividerContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    dividerLine: {
+        flex: 1,
+        height: 1,
+        backgroundColor: Colors.green2,
+    },
+    dividerText: {
+        marginHorizontal: 12,
+        fontSize: 13,
+        color: Colors.textSecondary,
+    },
+
     googleButton: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -212,7 +348,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.white,
         borderWidth: 1,
         borderColor: Colors.green1,
-        borderRadius: 25, // pill shape
+        borderRadius: 25,
         paddingVertical: 14,
         marginBottom: 30,
         shadowColor: Colors.green3,

@@ -43,3 +43,70 @@ export const Colors = {
         tabIconSelected: '#78C51C',
     },
 };
+
+/**
+ * Dynamic theme colors — use with ThemeContext
+ */
+export interface ThemeColors {
+    background: string;
+    backgroundCard: string;
+    textPrimary: string;
+    textSecondary: string;
+    primary: string;
+    accent: string;
+    border: string;
+    white: string;
+    green1: string;
+    green2: string;
+    green3: string;
+    green4: string;
+    green5: string;
+    danger: string;
+    success: string;
+    warning: string;
+    statusBar: 'dark-content' | 'light-content';
+}
+
+export const getColors = (scheme: 'light' | 'dark'): ThemeColors => {
+    if (scheme === 'dark') {
+        return {
+            background: '#0A1F18',
+            backgroundCard: '#122A22',
+            textPrimary: '#EEF2E3',
+            textSecondary: '#A8C9A0',
+            primary: '#78C51C',
+            accent: '#C8F169',
+            border: '#1E4035',
+            white: '#122A22',
+            green1: '#0A1F18',
+            green2: '#1E4035',
+            green3: '#78C51C',
+            green4: '#A8C9A0',
+            green5: '#EEF2E3',
+            danger: '#FF6B6B',
+            success: '#78C51C',
+            warning: '#FFCC00',
+            statusBar: 'light-content',
+        };
+    }
+    return {
+        background: '#EEF2E3',
+        backgroundCard: '#FFFFFF',
+        textPrimary: '#043F2E',
+        textSecondary: '#2A6F2B',
+        primary: '#78C51C',
+        accent: '#C8F169',
+        border: '#C8F169',
+        white: '#FFFFFF',
+        green1: '#EEF2E3',
+        green2: '#C8F169',
+        green3: '#78C51C',
+        green4: '#2A6F2B',
+        green5: '#043F2E',
+        danger: '#FF6B6B',
+        success: '#78C51C',
+        warning: '#FFCC00',
+        statusBar: 'dark-content',
+    };
+};
+

@@ -2,24 +2,25 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { MaterialTopTabBarProps } from '@react-navigation/material-top-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../constants/Colors';
 import { handleCameraCapture } from '../../features/camera/CameraUtils';
 import { useRouter } from 'expo-router';
+import { useTheme } from '../../contexts/ThemeContext';
 
-const ScanButton = ({ onPress }: { onPress: () => void }) => (
+const ScanButton = ({ onPress, colors }: { onPress: () => void; colors: any }) => (
     <TouchableOpacity
         style={styles.scanButtonContainer}
         onPress={onPress}
         activeOpacity={0.8}
     >
-        <View style={styles.scanButton}>
-            <Ionicons name="camera" size={28} color={Colors.green5} />
+        <View style={[styles.scanButton, { backgroundColor: colors.backgroundCard }]}>
+            <Ionicons name="camera" size={28} color={colors.green5} />
         </View>
     </TouchableOpacity>
 );
 
 export const CustomTabBar = ({ state, descriptors, navigation }: MaterialTopTabBarProps) => {
     const router = useRouter();
+    const { colors } = useTheme();
 
     const handleScan = () => {
         handleCameraCapture((uri) => {
@@ -28,7 +29,7 @@ export const CustomTabBar = ({ state, descriptors, navigation }: MaterialTopTabB
     };
 
     return (
-        <View style={styles.tabBarContainer}>
+        <View style={[styles.tabBarContainer, { backgroundColor: colors.green5 }]}>
             {state.routes.map((route, index) => {
                 const { options } = descriptors[route.key];
                 const isFocused = state.index === index;
@@ -51,34 +52,29 @@ export const CustomTabBar = ({ state, descriptors, navigation }: MaterialTopTabB
                 else if (route.name === 'laporan') iconName = isFocused ? 'heart' : 'heart-outline';
                 else if (route.name === 'profil') iconName = isFocused ? 'person' : 'person-outline';
 
-                // Skip utility routes or anything else not explicitly handled above if strict, 
-                // but effectively we just render what is passed. 
-                // Based on requirements, we only want the 4 main tabs.
-                // We also strictly hide 'explore' and 'scan' to ensure they don't appear as '?'
                 if (['sitemap', '+not-found', 'explore', 'scan'].includes(route.name)) return null;
 
                 const tabItem = (
                     <TouchableOpacity
                         key={route.key}
                         onPress={onPress}
-                        activeOpacity={0.6} // Immediate feedback
+                        activeOpacity={0.6}
                         style={styles.tabItem}
                         accessibilityRole="button"
                         accessibilityState={isFocused ? { selected: true } : {}}
                         accessibilityLabel={options.tabBarAccessibilityLabel}
                     >
                         <View style={[styles.iconContainer, isFocused && styles.activeIconContainer]}>
-                            <Ionicons name={iconName} size={24} color={isFocused ? Colors.green2 : Colors.green4} />
-                            {isFocused && <View style={styles.activeDot} />}
+                            <Ionicons name={iconName} size={24} color={isFocused ? colors.accent : colors.green4} />
+                            {isFocused && <View style={[styles.activeDot, { backgroundColor: colors.accent }]} />}
                         </View>
                     </TouchableOpacity>
                 );
 
-                // Insert Scan Button before Laporan (index 2)
                 if (route.name === 'laporan') {
                     return (
                         <React.Fragment key="scan-fragment">
-                            <ScanButton onPress={handleScan} />
+                            <ScanButton onPress={handleScan} colors={colors} />
                             {tabItem}
                         </React.Fragment>
                     );
@@ -93,7 +89,6 @@ export const CustomTabBar = ({ state, descriptors, navigation }: MaterialTopTabB
 const styles = StyleSheet.create({
     tabBarContainer: {
         flexDirection: 'row',
-        backgroundColor: Colors.green5,
         elevation: 10,
         height: 60,
         position: 'absolute',
@@ -103,10 +98,10 @@ const styles = StyleSheet.create({
         borderRadius: 30,
         borderCurve: 'continuous',
         alignItems: 'center',
-        justifyContent: 'space-around', // Distribute space
+        justifyContent: 'space-around',
         ...Platform.select({
             ios: {
-                shadowColor: Colors.green5,
+                shadowColor: '#000',
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.3,
                 shadowRadius: 10,
@@ -131,14 +126,11 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
     },
-    activeIconContainer: {
-        // Optional active bg
-    },
+    activeIconContainer: {},
     activeDot: {
         width: 4,
         height: 4,
         borderRadius: 2,
-        backgroundColor: Colors.green2,
         marginTop: 4,
     },
     scanButtonContainer: {
@@ -148,16 +140,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         width: 60,
-        height: 60, // Ensure touch area
+        height: 60,
     },
     scanButton: {
         width: 60,
         height: 60,
         borderRadius: 30,
-        backgroundColor: Colors.white,
         justifyContent: 'center',
         alignItems: 'center',
-        // Shadow for the button
         ...Platform.select({
             ios: {
                 shadowColor: "#000",
@@ -174,3 +164,4 @@ const styles = StyleSheet.create({
         }),
     },
 });
+

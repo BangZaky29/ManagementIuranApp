@@ -1,19 +1,21 @@
 import { useState } from 'react';
-import { Alert, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useAuth } from '../../contexts/AuthContext';
 
 export const useProfilViewModel = () => {
     const router = useRouter();
+    const { profile, signOut } = useAuth();
 
-    // Mock User Data
-    const [user] = useState({
-        name: 'Budi Santoso',
-        address: 'Jl. Merpati No. 12',
-        rt_rw: '005/012',
-        email: 'budi.santoso@email.com',
-        phone: '0812-3456-7890',
-        avatarUrl: null // Placeholder for now
-    });
+    // Use real profile data from Supabase, with fallbacks
+    const user = {
+        name: profile?.full_name || 'Pengguna',
+        address: profile?.address || 'Belum diatur',
+        rt_rw: profile?.rt_rw || '005/003',
+        email: profile?.email || '-',
+        phone: profile?.phone || '-',
+        role: profile?.role || 'warga',
+        avatarUrl: profile?.avatar_url || null,
+    };
 
     // Alert State
     const [alertVisible, setAlertVisible] = useState(false);
@@ -52,12 +54,14 @@ export const useProfilViewModel = () => {
                 {
                     text: 'Keluar',
                     style: 'destructive',
-                    onPress: () => {
+                    onPress: async () => {
                         hideAlert();
-                        // Slight delay to allow modal to close smoothly
-                        setTimeout(() => {
-                            router.replace('/register');
-                        }, 300);
+                        try {
+                            await signOut();
+                            // AuthGate in _layout.tsx will redirect to /login
+                        } catch (error) {
+                            console.error('Logout error:', error);
+                        }
                     }
                 }
             ]

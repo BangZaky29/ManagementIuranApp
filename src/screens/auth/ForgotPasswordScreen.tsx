@@ -1,84 +1,161 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Colors } from '../../constants/Colors';
 import { CustomInput } from '../../components/CustomInput';
 import { CustomButton } from '../../components/CustomButton';
 import { Ionicons } from '@expo/vector-icons';
+import { StatusBar } from 'expo-status-bar';
+import { CustomAlertModal } from '../../components/CustomAlertModal';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function ForgotPasswordScreen() {
     const router = useRouter();
-    const [phone, setPhone] = useState('');
+    const { resetPassword } = useAuth();
+
+    const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleSendCode = () => {
-        if (!phone) {
-            Alert.alert('Error', 'Mohon masukkan nomor WhatsApp anda');
+    // Alert State
+    const [alertVisible, setAlertVisible] = useState(false);
+    const [alertConfig, setAlertConfig] = useState({
+        title: '',
+        message: '',
+        type: 'info' as 'success' | 'info' | 'warning' | 'error',
+        buttons: [] as any[]
+    });
+
+    const hideAlert = () => setAlertVisible(false);
+
+    const showAlert = (title: string, message: string, type: 'success' | 'info' | 'warning' | 'error', buttons?: any[]) => {
+        setAlertConfig({
+            title,
+            message,
+            type,
+            buttons: buttons || [{ text: 'OK', onPress: hideAlert }]
+        });
+        setAlertVisible(true);
+    };
+
+    const handleSendResetLink = async () => {
+        if (!email.trim()) {
+            showAlert('Perhatian', 'Mohon masukkan email Anda', 'warning');
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email.trim())) {
+            showAlert('Perhatian', 'Format email tidak valid', 'warning');
             return;
         }
 
         setIsLoading(true);
-        // Simulate API call
-        setTimeout(() => {
-            setIsLoading(false);
-            Alert.alert(
-                'Kode Terkirim',
-                `Kode verifikasi telah dikirim ke WhatsApp ${phone}. Silakan cek pesan anda.`,
-                [{ text: 'OK', onPress: () => router.back() }] // In real app, navigate to OTP input
+        Keyboard.dismiss();
+
+        try {
+            await resetPassword(email.trim());
+
+            showAlert(
+                'Link Terkirim',
+                `Link reset password telah dikirim ke ${email.trim()}. Silakan cek inbox dan folder spam email Anda.`,
+                'success',
+                [{
+                    text: 'Kembali ke Login',
+                    onPress: () => {
+                        hideAlert();
+                        router.replace('/login');
+                    }
+                }]
             );
-        }, 1500);
+        } catch (error: any) {
+            let message = 'Terjadi kesalahan. Silakan coba lagi.';
+
+            if (error?.message?.includes('rate limit')) {
+                message = 'Terlalu banyak permintaan. Silakan tunggu beberapa menit.';
+            } else if (error?.message) {
+                message = error.message;
+            }
+
+            showAlert('Gagal', message, 'error');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
-        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-            <View style={styles.container}>
-                {/* Back Button */}
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color={Colors.green5} />
-                </TouchableOpacity>
+        <View style={styles.container}>
+            <StatusBar style="dark" />
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={styles.container}
+            >
+                <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
 
-                {/* Header Section */}
-                <View style={styles.header}>
-                    <View style={styles.iconContainer}>
-                        <Ionicons name="lock-open" size={40} color={Colors.green5} />
+                    {/* Back Button */}
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                        <Ionicons name="arrow-back" size={24} color={Colors.green5} />
+                    </TouchableOpacity>
+
+                    {/* Header Section */}
+                    <View style={styles.header}>
+                        <View style={styles.iconContainer}>
+                            <Ionicons name="lock-open" size={40} color={Colors.green5} />
+                        </View>
+                        <Text style={styles.title}>Lupa Kata Sandi?</Text>
+                        <Text style={styles.subtitle}>
+                            Jangan khawatir! Masukkan email yang terdaftar dan kami akan mengirimkan link untuk reset kata sandi Anda.
+                        </Text>
                     </View>
-                    <Text style={styles.title}>Lupa Kata Sandi?</Text>
-                    <Text style={styles.subtitle}>
-                        Jangan khawatir! Masukkan nomor WhatsApp yang terdaftar dan kami akan mengirimkan kode verifikasi.
-                    </Text>
-                </View>
 
-                {/* Form Section */}
-                <View style={styles.formContainer}>
-                    <CustomInput
-                        label="Nomor WhatsApp"
-                        placeholder="Contoh: 08123456789"
-                        value={phone}
-                        onChangeText={setPhone}
-                        keyboardType="phone-pad"
-                        iconName="logo-whatsapp"
-                    />
+                    {/* Form Section */}
+                    <View style={styles.formContainer}>
+                        <CustomInput
+                            label="Email"
+                            placeholder="contoh@email.com"
+                            value={email}
+                            onChangeText={setEmail}
+                            keyboardType="email-address"
+                            iconName="mail-outline"
+                        />
 
-                    <CustomButton
-                        title="Kirim Kode Verifikasi"
-                        onPress={handleSendCode}
-                        loading={isLoading}
-                        style={styles.sendButton}
-                    />
-                </View>
+                        <CustomButton
+                            title="Kirim Link Reset"
+                            onPress={handleSendResetLink}
+                            loading={isLoading}
+                            style={styles.sendButton}
+                        />
 
-            </View>
-        </ScrollView>
+                        <TouchableOpacity
+                            style={styles.backToLoginButton}
+                            onPress={() => router.replace('/login')}
+                        >
+                            <Ionicons name="arrow-back" size={16} color={Colors.primary} />
+                            <Text style={styles.backToLoginText}>Kembali ke Login</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                </ScrollView>
+            </KeyboardAvoidingView>
+
+            <CustomAlertModal
+                visible={alertVisible}
+                title={alertConfig.title}
+                message={alertConfig.message}
+                type={alertConfig.type}
+                buttons={alertConfig.buttons}
+                onClose={hideAlert}
+            />
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    scrollContent: {
-        flexGrow: 1,
-        backgroundColor: Colors.green1,
-    },
     container: {
         flex: 1,
+        backgroundColor: Colors.green1,
+    },
+    scrollContent: {
+        flexGrow: 1,
         padding: 24,
         paddingTop: 60,
     },
@@ -130,5 +207,17 @@ const styles = StyleSheet.create({
     },
     sendButton: {
         marginTop: 10,
+    },
+    backToLoginButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 24,
+        gap: 6,
+    },
+    backToLoginText: {
+        color: Colors.primary,
+        fontWeight: '600',
+        fontSize: 15,
     },
 });

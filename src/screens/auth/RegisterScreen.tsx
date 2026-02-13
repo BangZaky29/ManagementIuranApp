@@ -1,23 +1,31 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Dimensions, Keyboard } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Colors } from '../../constants/Colors';
 import { CustomButton } from '../../components/CustomButton';
 import { CustomInput } from '../../components/CustomInput';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-
-const { width } = Dimensions.get('window');
-
 import { CustomAlertModal } from '../../components/CustomAlertModal';
+import { useAuth } from '../../contexts/AuthContext';
+import { UserRole } from '../../lib/authService';
+
+const ROLES: { key: UserRole; label: string; icon: string }[] = [
+    { key: 'warga', label: 'Warga', icon: 'people-outline' },
+    { key: 'admin', label: 'Admin', icon: 'shield-checkmark-outline' },
+    { key: 'security', label: 'Security', icon: 'lock-closed-outline' },
+];
 
 export default function RegisterScreen() {
     const router = useRouter();
+    const { signUp, signInWithGoogle } = useAuth();
+
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [selectedRole, setSelectedRole] = useState<UserRole>('warga');
     const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -31,6 +39,16 @@ export default function RegisterScreen() {
     });
 
     const hideAlert = () => setAlertVisible(false);
+
+    const showAlert = (title: string, message: string, type: 'success' | 'info' | 'warning' | 'error', buttons?: any[]) => {
+        setAlertConfig({
+            title,
+            message,
+            type,
+            buttons: buttons || [{ text: 'OK', onPress: hideAlert }]
+        });
+        setAlertVisible(true);
+    };
 
     const validate = () => {
         let isValid = true;
@@ -65,6 +83,9 @@ export default function RegisterScreen() {
         if (!password) {
             newErrors.password = 'Kata sandi wajib diisi';
             isValid = false;
+        } else if (password.length < 6) {
+            newErrors.password = 'Kata sandi minimal 6 karakter';
+            isValid = false;
         }
 
         if (password !== confirmPassword) {
@@ -76,46 +97,79 @@ export default function RegisterScreen() {
         return isValid;
     };
 
-    const handleRegister = () => {
+    const handleRegister = async () => {
         if (!validate()) return;
 
         setIsLoading(true);
-        // Simulate register delay
-        setTimeout(() => {
-            Keyboard.dismiss();
-            setIsLoading(false);
+        Keyboard.dismiss();
 
-            // Show Success Alert
-            setAlertConfig({
-                title: 'Registrasi Berhasil',
-                message: 'Akun anda berhasil dibuat. Silakan masuk.',
-                type: 'success',
-                buttons: [
-                    {
+        try {
+            const { needsConfirmation } = await signUp({
+                email: email.trim(),
+                password,
+                fullName: name.trim(),
+                phone: phone.trim(),
+                role: selectedRole,
+            });
+
+            if (needsConfirmation) {
+                showAlert(
+                    'Verifikasi Email',
+                    'Akun berhasil dibuat! Silakan cek inbox email Anda untuk konfirmasi sebelum bisa login.',
+                    'success',
+                    [{
                         text: 'OK',
                         onPress: () => {
                             hideAlert();
                             router.replace('/login');
                         }
-                    }
-                ]
-            });
-            setAlertVisible(true);
-        }, 1500);
+                    }]
+                );
+            } else {
+                showAlert(
+                    'Registrasi Berhasil',
+                    'Akun Anda berhasil dibuat. Anda akan diarahkan ke halaman utama.',
+                    'success',
+                    [{
+                        text: 'OK',
+                        onPress: () => {
+                            hideAlert();
+                            // AuthGate will redirect automatically
+                        }
+                    }]
+                );
+            }
+        } catch (error: any) {
+            let message = 'Terjadi kesalahan saat mendaftar. Silakan coba lagi.';
+
+            if (error?.message?.includes('already registered')) {
+                message = 'Email ini sudah terdaftar. Silakan gunakan email lain atau login.';
+            } else if (error?.message?.includes('Password should be')) {
+                message = 'Kata sandi terlalu lemah. Gunakan minimal 6 karakter.';
+            } else if (error?.message) {
+                message = error.message;
+            }
+
+            showAlert('Registrasi Gagal', message, 'error');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleGoogleRegister = async () => {
+        try {
+            await signInWithGoogle();
+        } catch (error: any) {
+            showAlert(
+                'Segera Hadir',
+                'Daftar dengan Google memerlukan konfigurasi tambahan di Supabase Dashboard.',
+                'info'
+            );
+        }
     };
 
     const navigateToLogin = () => {
         router.push('/login');
-    };
-
-    const showFeatureUnavailable = (feature: string) => {
-        setAlertConfig({
-            title: 'Segera Hadir',
-            message: `Fitur ${feature} sedang dalam tahap pengembangan.`,
-            type: 'info',
-            buttons: [{ text: 'OK', onPress: hideAlert }]
-        });
-        setAlertVisible(true);
     };
 
     return (
@@ -139,6 +193,33 @@ export default function RegisterScreen() {
                             <Text style={styles.welcomeText}>Buat Akun</Text>
                             <Text style={styles.subtitleText}>Bergabung dengan Warga Pintar</Text>
                         </View>
+                    </View>
+
+                    {/* Role Selector */}
+                    <View style={styles.roleContainer}>
+                        {ROLES.map((role) => (
+                            <TouchableOpacity
+                                key={role.key}
+                                style={[
+                                    styles.roleTab,
+                                    selectedRole === role.key && styles.roleTabActive,
+                                ]}
+                                onPress={() => setSelectedRole(role.key)}
+                                activeOpacity={0.7}
+                            >
+                                <Ionicons
+                                    name={role.icon as any}
+                                    size={18}
+                                    color={selectedRole === role.key ? '#FFFFFF' : Colors.green4}
+                                />
+                                <Text style={[
+                                    styles.roleTabText,
+                                    selectedRole === role.key && styles.roleTabTextActive,
+                                ]}>
+                                    {role.label}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
                     </View>
 
                     <View style={styles.formContainer}>
@@ -179,7 +260,7 @@ export default function RegisterScreen() {
                         />
                         <CustomInput
                             label="Kata Sandi"
-                            placeholder="Masukkan kata sandi"
+                            placeholder="Minimal 6 karakter"
                             value={password}
                             onChangeText={(text) => {
                                 setPassword(text);
@@ -189,6 +270,7 @@ export default function RegisterScreen() {
                             iconName="lock-closed-outline"
                             error={errors.password}
                         />
+
                         {/* Password Strength Indicator */}
                         {password.length > 0 && (
                             <View style={styles.passwordStrengthContainer}>
@@ -226,14 +308,21 @@ export default function RegisterScreen() {
                         )}
 
                         <CustomButton
-                            title="Daftar"
+                            title={`Daftar sebagai ${ROLES.find(r => r.key === selectedRole)?.label}`}
                             onPress={handleRegister}
                             loading={isLoading}
                             style={styles.registerButton}
                         />
 
+                        {/* Divider */}
+                        <View style={styles.dividerContainer}>
+                            <View style={styles.dividerLine} />
+                            <Text style={styles.dividerText}>atau</Text>
+                            <View style={styles.dividerLine} />
+                        </View>
+
                         {/* Google Register Button */}
-                        <TouchableOpacity style={styles.googleButton} onPress={() => showFeatureUnavailable('Register Google')}>
+                        <TouchableOpacity style={styles.googleButton} onPress={handleGoogleRegister}>
                             <Ionicons name="logo-google" size={20} color={Colors.green5} style={{ marginRight: 10 }} />
                             <Text style={styles.googleButtonText}>Daftar dengan Google</Text>
                         </TouchableOpacity>
@@ -284,7 +373,7 @@ const styles = StyleSheet.create({
     headerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 30,
+        marginBottom: 20,
         marginTop: 10,
     },
     backButton: {
@@ -312,16 +401,73 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: Colors.green4,
     },
-    // formCard style removed
+
+    // Role Selector
+    roleContainer: {
+        flexDirection: 'row',
+        backgroundColor: Colors.white,
+        borderRadius: 16,
+        padding: 4,
+        marginBottom: 24,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    roleTab: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 12,
+        borderRadius: 12,
+        gap: 6,
+    },
+    roleTabActive: {
+        backgroundColor: Colors.primary,
+        shadowColor: Colors.primary,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    roleTabText: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: Colors.green4,
+    },
+    roleTabTextActive: {
+        color: '#FFFFFF',
+    },
+
     formContainer: {
         width: '100%',
         marginBottom: 20,
     },
     registerButton: {
         marginTop: 10,
-        marginBottom: 20,
+        marginBottom: 16,
         width: '100%',
     },
+
+    // Divider
+    dividerContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    dividerLine: {
+        flex: 1,
+        height: 1,
+        backgroundColor: Colors.green2,
+    },
+    dividerText: {
+        marginHorizontal: 12,
+        fontSize: 13,
+        color: Colors.textSecondary,
+    },
+
     googleButton: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -358,7 +504,7 @@ const styles = StyleSheet.create({
     },
     passwordMatchText: {
         fontSize: 12,
-        marginTop: -15, // Pull up closer to input
+        marginTop: -15,
         marginBottom: 15,
         paddingLeft: 4,
         fontWeight: '500',

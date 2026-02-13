@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, StatusBar, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Colors } from '../constants/Colors';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface CustomHeaderProps {
     title: string;
@@ -16,19 +16,20 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({
     rightIcon,
 }) => {
     const router = useRouter();
+    const { colors } = useTheme();
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.green1 }]}>
             <View style={styles.container}>
                 <View style={styles.leftContainer}>
                     {showBack && (
                         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                            <Ionicons name="arrow-back" size={24} color={Colors.green5} />
+                            <Ionicons name="arrow-back" size={24} color={colors.green5} />
                         </TouchableOpacity>
                     )}
                 </View>
 
-                <Text style={styles.title}>{title}</Text>
+                <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>
 
                 <View style={styles.rightContainer}>
                     {rightIcon}
@@ -40,7 +41,6 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({
 
 const styles = StyleSheet.create({
     safeArea: {
-        backgroundColor: Colors.green1,
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
     container: {
@@ -64,11 +64,6 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: Colors.textPrimary,
-    },
-    subtitle: {
-        fontSize: 12,
-        color: Colors.textSecondary,
-        marginTop: 2,
     },
 });
+
