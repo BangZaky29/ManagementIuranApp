@@ -13,7 +13,7 @@ const { width } = Dimensions.get('window');
 
 export default function LoginScreen() {
     const router = useRouter();
-    const { signIn, signInWithGoogle } = useAuth();
+    const { signIn, signOut, signInWithGoogle } = useAuth();
 
     const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
@@ -54,17 +54,13 @@ export default function LoginScreen() {
         Keyboard.dismiss();
 
         try {
-            await signIn({ email: identifier.trim(), password });
-        } catch (error: any) {
-            // ... error handling
-        }
-
-        // RE-WRITING LOGIC TO USE SERVICE + CONTEXT
-        try {
             let loginEmail = identifier.trim();
 
             // Username lookup logic (Client-side helper)
             if (!loginEmail.includes('@')) {
+                // Dynamic require to avoid cycle if any, though standard import is better if possible. 
+                // Using require here to match existing pattern if that was the intent, or just import at top.
+                // Assuming lib/supabaseConfig is safe.
                 const { supabase } = require('../../../lib/supabaseConfig');
                 const { data, error } = await supabase
                     .rpc('get_email_by_username', { username_input: loginEmail });
@@ -73,15 +69,45 @@ export default function LoginScreen() {
                 loginEmail = data;
             }
 
-            await signIn({ email: loginEmail, password });
-            // AuthGate in _layout.tsx will handle redirect to (tabs)
+            // Perform Sign In
+            const { user } = await signIn({ email: loginEmail, password });
+
+            // STRICT ADMIN CHECKS
+            // Ensure we use the freshly returned user object or fallback to checking session
+            const role = user?.user_metadata?.role;
+
+            if (role !== 'admin') {
+                // If not admin, immediately sign out
+                await signOut();
+
+                setAlertConfig({
+                    title: 'Akses Ditolak',
+                    message: `Akun ini terdaftar sebagai ${role || 'User'}, bukan Admin.\nSilakan masuk melalui halaman login yang sesuai.`,
+                    type: 'warning',
+                    buttons: [
+                        { text: 'Tutup', onPress: hideAlert, style: 'cancel' },
+                        {
+                            text: 'Ke Login Warga',
+                            onPress: () => {
+                                hideAlert();
+                                router.push('/register'); // Redirecting to register/login portal for warga
+                            }
+                        }
+                    ]
+                });
+                setAlertVisible(true);
+                return;
+            }
+
+            // If Admin, AuthGate in _layout.tsx will handle redirect to (tabs) automatically.
+
         } catch (error: any) {
             let message = 'Terjadi kesalahan. Silakan coba lagi.';
 
             if (error?.message?.includes('Invalid login credentials')) {
                 message = 'Kombinasi login salah.';
             } else if (error?.message?.includes('Email not confirmed')) {
-                message = 'Maaf, email Anda belum terverifikasi. Silakan cek email verifikasi yang telah kami kirim (cek juga folder spam) atau hubungi admin jika ada kendala.';
+                message = 'Maaf, email Anda belum terverifikasi. Silakan cek email verifikasi yang telah kami kirim.';
             } else if (error?.message) {
                 message = error.message;
             }
@@ -161,6 +187,13 @@ export default function LoginScreen() {
                             style={styles.loginButton}
                         />
 
+                        <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 16, marginBottom: 16 }}>
+                            <Text style={{ color: Colors.green4 }}>Belum punya akun admin? </Text>
+                            <TouchableOpacity onPress={navigateToRegisterAdmin}>
+                                <Text style={{ color: Colors.primary, fontWeight: 'bold' }}>Daftar Admin</Text>
+                            </TouchableOpacity>
+                        </View>
+
                         <View style={styles.dividerContainer}>
                             <View style={styles.dividerLine} />
                             <Text style={styles.dividerText}>atau</Text>
@@ -174,13 +207,6 @@ export default function LoginScreen() {
                             style={{ marginBottom: 16, borderColor: Colors.primary }}
                             textStyle={{ color: Colors.primary }}
                         />
-
-                        <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 16 }}>
-                            <Text style={{ color: Colors.green4 }}>Belum punya akun admin? </Text>
-                            <TouchableOpacity onPress={navigateToRegisterAdmin}>
-                                <Text style={{ color: Colors.primary, fontWeight: 'bold' }}>Daftar Admin</Text>
-                            </TouchableOpacity>
-                        </View>
 
                     </View>
                 </ScrollView>

@@ -46,13 +46,18 @@ function AuthGate({ children }: { children: React.ReactNode }) {
         const inAdmin = segments[0] === 'admin';
         const inSecurity = segments[0] === 'security';
         const inWarga = segments[0] === '(tabs)';
-        const inProfile = segments[0] === 'profile'; // Add this
+        const inProfile = segments[0] === 'profile';
+        const isAtLogin = (segments[0] as string) === 'login'; // Check if at admin login
 
-        if (inProfile) return; // Allow profile access for all authenticated roles
+        if (inProfile) return;
 
         if (role === 'admin' && !inAdmin) router.replace('/admin');
         else if (role === 'security' && !inSecurity) router.replace('/security');
-        else if (role === 'warga' && !inWarga) router.replace('/(tabs)');
+        else if (role === 'warga' && !inWarga) {
+          // IF on Admin Login screen, DO NOT redirect. Allow LoginScreen to show alert.
+          if (isAtLogin) return;
+          router.replace('/(tabs)');
+        }
       }
     }
   }, [isAuthenticated, isLoading, segments, role]);
@@ -79,7 +84,11 @@ function AuthGate({ children }: { children: React.ReactNode }) {
       (role === 'warga' && (isAtWarga || isAtProfile));
 
     // Jika sedang di halaman login/auth atau rute salah, tampilkan loading screen
-    if (!isCorrectRoute || inAuthGroup) {
+    // PENGECUALIAN: Jika Warga sedang di halaman Login (Admin Login), jangan blokir UI.
+    // Biarkan LoginScreen menangani logika alert/signout sendiri.
+    const isWargaOnAdminLogin = role === 'warga' && (segments[0] as string) === 'login';
+
+    if ((!isCorrectRoute || inAuthGroup) && !isWargaOnAdminLogin) {
       return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#EEF2E3' }}>
           <ActivityIndicator size="large" color="#78C51C" />
