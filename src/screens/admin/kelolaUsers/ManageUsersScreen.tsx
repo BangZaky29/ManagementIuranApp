@@ -154,19 +154,31 @@ export default function ManageUsersScreen() {
         setSelectedComplexId(null);
     };
 
+    const [activeRoleFilter, setActiveRoleFilter] = useState<'Semua' | 'warga' | 'security'>('Semua');
+
     const filteredResidents = useMemo(() => {
-        if (!searchQuery) return residents;
-        const lowerQuery = searchQuery.toLowerCase();
-        return residents.filter(item =>
-            // item.rt_rw?.toLowerCase().includes(lowerQuery) || -> REMOVED
-            item.full_name.toLowerCase().includes(lowerQuery) ||
-            item.nik.includes(lowerQuery)
-        );
-    }, [residents, searchQuery]);
+        let result = residents;
+
+        // 1. Filter by Role
+        if (activeRoleFilter !== 'Semua') {
+            result = result.filter(item => item.role === activeRoleFilter);
+        }
+
+        // 2. Filter by Search
+        if (searchQuery) {
+            const lowerQuery = searchQuery.toLowerCase();
+            result = result.filter(item =>
+                item.full_name.toLowerCase().includes(lowerQuery) ||
+                item.nik.includes(lowerQuery)
+            );
+        }
+
+        return result;
+    }, [residents, searchQuery, activeRoleFilter]);
 
     const renderItem = ({ item }: { item: VerifiedResident }) => {
         const isExpanded = expandedId === item.id;
-
+        // ... (rest of renderItem code remains same, just ensuring context)
         return (
             <TouchableOpacity
                 activeOpacity={0.9}
@@ -174,8 +186,7 @@ export default function ManageUsersScreen() {
                 style={styles.card}
             >
                 <View style={styles.cardHeader}>
-                    {/* Avatar */}
-                    {/* Avatar */}
+                    {/* Avatar Code Block */}
                     {(() => {
                         const user = item.user as any;
                         const avatarUrl = Array.isArray(user) ? user[0]?.avatar_url : user?.avatar_url;
@@ -243,17 +254,17 @@ export default function ManageUsersScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <StatusBar style="dark" />
             <CustomHeader title="Kelola User" showBack={false} />
 
-            {/* Filter */}
+            {/* Search */}
             <View style={styles.filterContainer}>
                 <View style={styles.searchInputContainer}>
                     <Ionicons name="search" size={20} color={Colors.textSecondary} style={styles.searchIcon} />
                     <TextInput
                         style={styles.searchInput}
-                        placeholder="Cari Nama, NIK, atau RT/RW..."
+                        placeholder="Cari Nama, NIK..."
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                     />
@@ -263,6 +274,21 @@ export default function ManageUsersScreen() {
                         </TouchableOpacity>
                     )}
                 </View>
+            </View>
+
+            {/* Filter Chips */}
+            <View style={styles.filterChipsContainer}>
+                {(['Semua', 'warga', 'security'] as const).map((filter) => (
+                    <TouchableOpacity
+                        key={filter}
+                        style={[styles.filterChip, activeRoleFilter === filter && styles.filterChipActive]}
+                        onPress={() => setActiveRoleFilter(filter)}
+                    >
+                        <Text style={[styles.filterChipText, activeRoleFilter === filter && styles.filterChipTextActive]}>
+                            {filter === 'Semua' ? 'Semua' : filter === 'warga' ? 'Warga' : 'Security'}
+                        </Text>
+                    </TouchableOpacity>
+                ))}
             </View>
 
             {isLoading ? (
@@ -415,6 +441,6 @@ export default function ManageUsersScreen() {
                     </View>
                 </TouchableWithoutFeedback>
             </Modal>
-        </SafeAreaView>
+        </View>
     );
 }

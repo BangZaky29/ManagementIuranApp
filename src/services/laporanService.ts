@@ -128,3 +128,60 @@ export const createReport = async (
     if (error) throw error;
     return data;
 };
+
+export const updateReport = async (
+    id: string,
+    updates: {
+        title?: string;
+        description?: string;
+        category?: string;
+        imageUri?: string; // New image URI to upload
+        location?: string;
+    }
+) => {
+    let imageUrl = undefined;
+
+    if (updates.imageUri) {
+        // 1. Upload New Image
+        const fileName = `${Date.now()}_edit.jpg`;
+        const base64 = await FileSystem.readAsStringAsync(updates.imageUri, {
+            encoding: 'base64',
+        });
+
+        const { error: uploadError } = await supabase.storage
+            .from('wargaPintar')
+            .upload(`reports/${fileName}`, decode(base64), {
+                contentType: 'image/jpeg',
+            });
+
+        if (uploadError) throw uploadError;
+
+        // 2. Get Public URL
+        const { data: { publicUrl } } = supabase.storage
+            .from('wargaPintar')
+            .getPublicUrl(`reports/${fileName}`);
+
+        imageUrl = publicUrl;
+    }
+
+    // 3. Prepare Update Object
+    const updateData: any = {
+        updated_at: new Date().toISOString()
+    };
+    if (updates.title) updateData.title = updates.title;
+    if (updates.description) updateData.description = updates.description;
+    if (updates.category) updateData.category = updates.category;
+    if (updates.location !== undefined) updateData.location = updates.location;
+    if (imageUrl) updateData.image_url = imageUrl;
+
+    // 4. Update Report
+    const { data, error } = await supabase
+        .from('reports')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+    if (error) throw error;
+    return data;
+};

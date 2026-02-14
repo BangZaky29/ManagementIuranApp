@@ -45,7 +45,14 @@ export default function LaporanListScreen() {
     const fetchReports = async () => {
         setIsLoading(true);
         try {
-            // Join with profiles table to get user name
+            await fetchReportsData();
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const fetchReportsData = async () => {
+        try {
             const { data, error } = await supabase
                 .from('reports')
                 .select(`
@@ -58,11 +65,30 @@ export default function LaporanListScreen() {
             setReports(data || []);
         } catch (error) {
             console.error('Error fetching reports:', error);
-            Alert.alert('Error', 'Gagal memuat laporan warga');
-        } finally {
-            setIsLoading(false);
+            // Silent error or toast if needed, but alert might be annoying on auto-refresh
         }
     };
+
+    useEffect(() => {
+        fetchReports();
+
+        // Subscribe to real-time changes
+        const subscription = supabase
+            .channel('public:reports')
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'reports' },
+                (payload) => {
+                    console.log('Real-time update received:', payload);
+                    fetchReportsData(); // Reload data on any change
+                }
+            )
+            .subscribe();
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, []);
 
 
     const getStatusColor = (status: string) => {

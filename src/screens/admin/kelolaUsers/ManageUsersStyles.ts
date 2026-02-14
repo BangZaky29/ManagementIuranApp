@@ -21,9 +21,12 @@ export const styles = StyleSheet.create({
         flexDirection: 'row',
         paddingHorizontal: 16,
         paddingTop: 16,
-        paddingBottom: 8,
+        paddingBottom: 12, // Increased spacing between search and chips
         backgroundColor: '#F5F7FA', // Match background
     },
+    // ... searchInputContainer etc ...
+
+
     searchInputContainer: {
         flex: 1,
         flexDirection: 'row',
@@ -45,6 +48,35 @@ export const styles = StyleSheet.create({
         flex: 1,
         fontSize: 14,
         color: Colors.textPrimary,
+    },
+
+    // Filter Chips
+    filterChipsContainer: {
+        flexDirection: 'row',
+        paddingHorizontal: 16,
+        paddingBottom: 16,
+        backgroundColor: '#F5F7FA',
+        gap: 8,
+    },
+    filterChip: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 20,
+        backgroundColor: '#FFF',
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
+    },
+    filterChipActive: {
+        backgroundColor: Colors.primary,
+        borderColor: Colors.primary,
+    },
+    filterChipText: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: Colors.textSecondary,
+    },
+    filterChipTextActive: {
+        color: '#FFF',
     },
 
     // Card Styles

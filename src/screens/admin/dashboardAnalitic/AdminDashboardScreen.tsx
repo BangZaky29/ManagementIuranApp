@@ -1,21 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import { useFocusEffect } from 'expo-router';
+import React, { useState, useCallback } from 'react';
+
+
 import { View, Text, ScrollView, RefreshControl } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Colors } from '../../../constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { getDashboardStats } from '../../../services/adminService';
+import { supabase } from '../../../lib/supabaseConfig';
 import { CustomHeader } from '../../../components/CustomHeader';
 import { styles } from './AdminDashboardStyles';
 
 export default function AdminDashboardScreen() {
-    const [stats, setStats] = useState({ warga: 0, security: 0, activeUsers: 0 });
+    const [stats, setStats] = useState({ warga: 0, security: 0, activeUsers: 0, laporanMasuk: 0 });
     const [isLoading, setIsLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
     const loadStats = async () => {
         try {
+            // Fetch verify user stats (existing mock/service)
             const data = await getDashboardStats();
-            setStats(data);
+
+            // Fetch real report count
+            const { count, error } = await supabase
+                .from('reports')
+                .select('*', { count: 'exact', head: true }); // Head request for count only
+
+            setStats({
+                ...data,
+                laporanMasuk: count || 0
+            });
         } catch (error) {
             console.error('Failed to load stats:', error);
         } finally {
@@ -24,27 +38,35 @@ export default function AdminDashboardScreen() {
         }
     };
 
-    useEffect(() => {
-        loadStats();
-    }, []);
+    useFocusEffect(
+        useCallback(() => {
+            loadStats();
+        }, [])
+    );
 
     const onRefresh = () => {
         setRefreshing(true);
         loadStats();
     };
 
-    const StatCard = ({ title, count, icon, color, subtitle }: any) => (
-        <View style={styles.card}>
-            <View style={[styles.iconContainer, { backgroundColor: color }]}>
-                <Ionicons name={icon} size={24} color="#FFF" />
+    const StatCard = ({ title, count, icon, color, subtitle }: any) => {
+        const isEmpty = !count || count === 0 || count === '0';
+        const activeColor = isEmpty ? Colors.textSecondary + '40' : color; // 40 is hex for 25% opacity
+        const iconColor = isEmpty ? Colors.textSecondary : '#FFF';
+
+        return (
+            <View style={styles.card}>
+                <View style={[styles.iconContainer, { backgroundColor: activeColor }]}>
+                    <Ionicons name={icon} size={24} color={iconColor} />
+                </View>
+                <View style={styles.cardContent}>
+                    <Text style={styles.cardTitle}>{title}</Text>
+                    <Text style={styles.cardCount}>{isLoading ? '...' : count}</Text>
+                    {subtitle && <Text style={styles.cardSubtitle}>{subtitle}</Text>}
+                </View>
             </View>
-            <View style={styles.cardContent}>
-                <Text style={styles.cardTitle}>{title}</Text>
-                <Text style={styles.cardCount}>{isLoading ? '...' : count}</Text>
-                {subtitle && <Text style={styles.cardSubtitle}>{subtitle}</Text>}
-            </View>
-        </View>
-    );
+        );
+    };
 
     return (
         <View style={styles.container}>
@@ -72,7 +94,7 @@ export default function AdminDashboardScreen() {
                         title="Total Security"
                         count={stats.security}
                         icon="shield-checkmark"
-                        color={Colors.secondary}
+                        color={Colors.primary}
                         subtitle="Personil"
                     />
                     <StatCard
@@ -84,7 +106,7 @@ export default function AdminDashboardScreen() {
                     />
                     <StatCard
                         title="Laporan Masuk"
-                        count="0"
+                        count={stats.laporanMasuk}
                         icon="document-text"
                         color={Colors.warning}
                         subtitle="Buld"

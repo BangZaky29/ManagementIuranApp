@@ -1,151 +1,46 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, Alert, Image, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, Image, ActivityIndicator } from 'react-native';
 import { CreateReportStyles as styles } from './CreateReportStyles';
-import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Colors } from '../../../constants/Colors';
 import { CustomHeader } from '../../../components/CustomHeader';
 import { CustomButton } from '../../../components/CustomButton';
 import { Ionicons } from '@expo/vector-icons';
 
-import { createReport } from '../../../services/laporanService';
-import * as ImagePicker from 'expo-image-picker';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
-import * as Location from 'expo-location';
 import { LocationPickerModal } from '../../../components/LocationPickerModal';
+import { useCreateReportViewModel } from './CreateReportViewModel';
 
 export default function CreateReportScreen() {
-    const router = useRouter();
-    const { imageUri } = useLocalSearchParams();
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [category, setCategory] = useState('');
-    const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
-    const [image, setImage] = useState<string | null>(imageUri as string || null);
-    const [imageAspectRatio, setImageAspectRatio] = useState<number>(4 / 3);
-    const [isLoading, setIsLoading] = useState(false);
+    const {
+        title, setTitle,
+        description, setDescription,
+        category, setCategory,
+        image, setImage,
+        imageAspectRatio,
+        locationLink,
 
-    // Location State
-    const [locationLink, setLocationLink] = useState<string | null>(null);
-    const [locationStatus, setLocationStatus] = useState<'fetching' | 'success' | 'error' | 'idle'>('idle');
-    const [showMapPicker, setShowMapPicker] = useState(false);
+        isLoading,
+        isEditMode, // Now we know if we are editing
+        showCategoryDropdown, setShowCategoryDropdown,
+        locationStatus,
+        showMapPicker, setShowMapPicker,
 
-    // Alert State
-    const [alertVisible, setAlertVisible] = useState(false);
-    const [alertConfig, setAlertConfig] = useState({
-        title: '',
-        message: '',
-        type: 'info' as 'success' | 'info' | 'warning' | 'error',
-        buttons: [] as any[]
-    });
+        alertVisible,
+        alertConfig,
+        hideAlert,
 
-    const hideAlert = () => setAlertVisible(false);
-
-    // Effect to update image if passed via params
-    React.useEffect(() => {
-        if (imageUri) {
-            setImage(imageUri as string);
-        }
-    }, [imageUri]);
-
-    const handleGetCurrentLocation = async () => {
-        setLocationStatus('fetching');
-        try {
-            let { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-                Alert.alert('Izin Ditolak', 'Izin lokasi diperlukan.');
-                setLocationStatus('error');
-                return;
-            }
-
-            let location = await Location.getCurrentPositionAsync({});
-            const link = `https://www.google.com/maps/search/?api=1&query=${location.coords.latitude},${location.coords.longitude}`;
-            setLocationLink(link);
-            setLocationStatus('success');
-        } catch (error) {
-            console.warn('Location Error:', error);
-            Alert.alert('Gagal', 'Tidak dapat mengambil lokasi saat ini.');
-            setLocationStatus('error');
-        }
-    };
-
-    const handleSelectLocation = (coords: { latitude: number; longitude: number }) => {
-        const link = `https://www.google.com/maps/search/?api=1&query=${coords.latitude},${coords.longitude}`;
-        setLocationLink(link);
-        setLocationStatus('success');
-    };
+        handlePickImage,
+        handleGetCurrentLocation,
+        handleSelectLocation,
+        handleSubmit
+    } = useCreateReportViewModel();
 
     const categories = ['Fasilitas', 'Kebersihan', 'Keamanan', 'Lainnya'];
-
-    const handlePickImage = async () => {
-        try {
-            const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                allowsEditing: false,
-                quality: 0.5,
-            });
-
-            if (!result.canceled && result.assets[0].uri) {
-                const asset = result.assets[0];
-                setImage(asset.uri);
-                if (asset.width && asset.height) {
-                    setImageAspectRatio(asset.width / asset.height);
-                }
-            }
-        } catch (error) {
-            console.error('Image picker error:', error);
-            Alert.alert('Error', 'Gagal memuat galeri foto');
-        }
-    };
-
-    const handleSubmit = async () => {
-        if (!title || !category || !description) {
-            setAlertConfig({
-                title: 'Mohon Lengkapi',
-                message: 'Judul, kategori, dan deskripsi wajib diisi.',
-                type: 'warning',
-                buttons: [{ text: 'OK', onPress: hideAlert }]
-            });
-            setAlertVisible(true);
-            return;
-        }
-
-        setIsLoading(true);
-        try {
-            await createReport(title, description, category, image || undefined, locationLink || undefined);
-
-            setAlertConfig({
-                title: 'Laporan Terkirim',
-                message: 'Terima kasih atas laporan anda. Kami akan segera memprosesnya.',
-                type: 'success',
-                buttons: [
-                    {
-                        text: 'OK',
-                        onPress: () => {
-                            hideAlert();
-                            router.navigate('/(tabs)/laporan');
-                        }
-                    }
-                ]
-            });
-            setAlertVisible(true);
-        } catch (error: any) {
-            console.error('Submit report error:', error);
-            setAlertConfig({
-                title: 'Gagal Mengirim',
-                message: error.message || 'Terjadi kesalahan saat mengirim laporan.',
-                type: 'error',
-                buttons: [{ text: 'OK', onPress: hideAlert }]
-            });
-            setAlertVisible(true);
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor={Colors.green1} />
-            <CustomHeader title="Buat Laporan Baru" showBack={true} />
+            <CustomHeader title={isEditMode ? "Edit Laporan" : "Buat Laporan Baru"} showBack={true} />
 
             <ScrollView contentContainerStyle={styles.content}>
 
@@ -307,7 +202,7 @@ export default function CreateReportScreen() {
                 </View>
 
                 <CustomButton
-                    title={isLoading ? "Mengirim..." : "Kirim Laporan"}
+                    title={isLoading ? "Menyimpan..." : (isEditMode ? "Simpan Perubahan" : "Kirim Laporan")}
                     onPress={handleSubmit}
                     disabled={isLoading}
                     icon={!isLoading ? <Ionicons name="send" size={18} color={Colors.white} style={{ marginRight: 8 }} /> : undefined}
