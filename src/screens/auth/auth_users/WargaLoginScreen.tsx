@@ -40,7 +40,7 @@ export default function WargaLoginScreen() {
 
     const handleLogin = async () => {
         if (!email.trim()) {
-            showAlert('Perhatian', 'Email wajib diisi', 'warning');
+            showAlert('Perhatian', 'Email atau Username wajib diisi', 'warning');
             return;
         }
         if (!password) {
@@ -56,7 +56,7 @@ export default function WargaLoginScreen() {
         } catch (error: any) {
             let message = 'Terjadi kesalahan. Silakan coba lagi.';
             if (error?.message?.includes('Invalid login credentials')) {
-                message = 'Email atau kata sandi salah.';
+                message = 'Email/Username atau kata sandi salah.';
             } else if (error?.message?.includes('Email not confirmed')) {
                 message = 'Maaf, email Anda belum terverifikasi. Silakan cek email verifikasi yang telah kami kirim (cek juga folder spam) atau hubungi admin jika ada kendala.';
             }
@@ -89,12 +89,12 @@ export default function WargaLoginScreen() {
 
                     <View style={styles.formContainer}>
                         <CustomInput
-                            label="Email"
-                            placeholder="email@anda.com"
+                            label="Email / Username"
+                            placeholder="Email atau Username"
                             value={email}
                             onChangeText={setEmail}
-                            keyboardType="email-address"
-                            iconName="mail-outline"
+                            keyboardType="default"
+                            iconName="person-outline"
                             autoCapitalize="none"
                         />
                         <CustomInput
