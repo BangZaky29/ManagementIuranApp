@@ -4,9 +4,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { fetchVerifiedResidents, createVerifiedResident, deleteVerifiedResident, updateVerifiedResident, fetchHousingComplexes, VerifiedResident } from '../../../services/adminService';
+import { fetchVerifiedResidents, createVerifiedResident, deleteVerifiedResident, updateVerifiedResident, fetchHousingComplexes, VerifiedResident, exportResidents, importResidents } from '../../../services/adminService';
 import { useAuth } from '../../../contexts/AuthContext';
 import { CustomHeader } from '../../../components/CustomHeader';
+import { CustomAlertModal } from '../../../components/CustomAlertModal';
 import { Colors } from '../../../constants/Colors';
 import { styles } from './ManageUsersStyles';
 
@@ -155,6 +156,93 @@ export default function ManageUsersScreen() {
     };
 
     const [activeRoleFilter, setActiveRoleFilter] = useState<'Semua' | 'warga' | 'security'>('Semua');
+    const [showImportModal, setShowImportModal] = useState(false);
+    const [showExportModal, setShowExportModal] = useState(false);
+    const [importRole, setImportRole] = useState<'warga' | 'security'>('warga');
+    const [isImporting, setIsImporting] = useState(false);
+
+    // Custom Alert State
+    const [alertConfig, setAlertConfig] = useState<{
+        visible: boolean;
+        title: string;
+        message: string;
+        type: 'success' | 'info' | 'warning' | 'error';
+    }>({
+        visible: false,
+        title: '',
+        message: '',
+        type: 'info'
+    });
+
+    const hideAlert = () => setAlertConfig(prev => ({ ...prev, visible: false }));
+
+    // Import/Export Imports
+    // const { exportResidents, importResidents } = require('../../../services/adminService'); // Switched to top-level import for types
+
+    const handleExport = () => {
+        setShowExportModal(true);
+    };
+
+    const performExport = async (format: 'xlsx' | 'csv', action: 'share' | 'download') => {
+        try {
+            // Close modal first
+            setShowExportModal(false);
+
+            setIsLoading(true);
+            await exportResidents(profile?.housing_complex_id, format, action); // Filter by admin's complex if exists
+
+            setAlertConfig({
+                visible: true,
+                title: 'Sukses',
+                message: 'Data berhasil diekspor dan dibagikan',
+                type: 'success'
+            });
+        } catch (error: any) {
+            setAlertConfig({
+                visible: true,
+                title: 'Gagal',
+                message: error.message,
+                type: 'error'
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleImport = async () => {
+        try {
+            setIsImporting(true);
+            const result = await importResidents(importRole, profile?.housing_complex_id || selectedComplexId);
+
+            if (result) {
+                const message = `Sukses: ${result.success}, Gagal: ${result.failed}\n${result.errors.join('\n')}`;
+                // Determine alert type based on results
+                let type: 'success' | 'warning' = 'success';
+                if (result.failed > 0) type = 'warning';
+
+                setAlertConfig({
+                    visible: true,
+                    title: 'Hasil Import',
+                    message: message,
+                    type: type
+                });
+
+                loadData();
+                setShowImportModal(false);
+            }
+        } catch (error: any) {
+            if (error.message !== 'Import dibatalkan') {
+                setAlertConfig({
+                    visible: true,
+                    title: 'Gagal',
+                    message: error.message,
+                    type: 'error'
+                });
+            }
+        } finally {
+            setIsImporting(false);
+        }
+    };
 
     const filteredResidents = useMemo(() => {
         let result = residents;
@@ -276,19 +364,31 @@ export default function ManageUsersScreen() {
                 </View>
             </View>
 
-            {/* Filter Chips */}
+            {/* Filter Chips & Actions */}
             <View style={styles.filterChipsContainer}>
-                {(['Semua', 'warga', 'security'] as const).map((filter) => (
-                    <TouchableOpacity
-                        key={filter}
-                        style={[styles.filterChip, activeRoleFilter === filter && styles.filterChipActive]}
-                        onPress={() => setActiveRoleFilter(filter)}
-                    >
-                        <Text style={[styles.filterChipText, activeRoleFilter === filter && styles.filterChipTextActive]}>
-                            {filter === 'Semua' ? 'Semua' : filter === 'warga' ? 'Warga' : 'Security'}
-                        </Text>
+                <View style={{ flexDirection: 'row', gap: 8, flex: 1 }}>
+                    {(['Semua', 'warga', 'security'] as const).map((filter) => (
+                        <TouchableOpacity
+                            key={filter}
+                            style={[styles.filterChip, activeRoleFilter === filter && styles.filterChipActive]}
+                            onPress={() => setActiveRoleFilter(filter)}
+                        >
+                            <Text style={[styles.filterChipText, activeRoleFilter === filter && styles.filterChipTextActive]}>
+                                {filter === 'Semua' ? 'All' : filter === 'warga' ? 'Warga' : 'Security'}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+
+                {/* Import/Export Buttons */}
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                    <TouchableOpacity style={styles.actionIconButton} onPress={handleExport}>
+                        <Ionicons name="download-outline" size={20} color={Colors.primary} />
                     </TouchableOpacity>
-                ))}
+                    <TouchableOpacity style={styles.actionIconButton} onPress={() => setShowImportModal(true)}>
+                        <Ionicons name="cloud-upload-outline" size={20} color={Colors.primary} />
+                    </TouchableOpacity>
+                </View>
             </View>
 
             {isLoading ? (
@@ -441,6 +541,169 @@ export default function ManageUsersScreen() {
                     </View>
                 </TouchableWithoutFeedback>
             </Modal>
+
+            {/* Import Modal */}
+            <Modal
+                visible={showImportModal}
+                animationType="fade"
+                transparent={true}
+                onRequestClose={() => setShowImportModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={[styles.formContainer, { maxHeight: 'auto' }]}>
+                        <Text style={styles.formTitle}>Import Data Warga</Text>
+
+                        <Text style={{ textAlign: 'center', marginBottom: 20, color: Colors.textSecondary }}>
+                            Pastikan file Excel/CSV anda memiliki kolom "nik" dan "Nama Lengkap".
+                        </Text>
+
+                        <View style={styles.roleContainer}>
+                            <Text style={styles.roleLabel}>Import Sebagai:</Text>
+                            <View style={styles.roleSelector}>
+                                <TouchableOpacity
+                                    style={[styles.roleOption, importRole === 'warga' && styles.roleOptionActive]}
+                                    onPress={() => setImportRole('warga')}
+                                >
+                                    <Ionicons name="people" size={16} color={importRole === 'warga' ? '#FFF' : Colors.textSecondary} />
+                                    <Text style={[styles.roleText, importRole === 'warga' && styles.roleTextActive]}>Warga</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.roleOption, importRole === 'security' && styles.roleOptionActive]}
+                                    onPress={() => setImportRole('security')}
+                                >
+                                    <Ionicons name="shield-checkmark" size={16} color={importRole === 'security' ? '#FFF' : Colors.textSecondary} />
+                                    <Text style={[styles.roleText, importRole === 'security' && styles.roleTextActive]}>Security</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+
+                        <View style={styles.formActions}>
+                            <TouchableOpacity
+                                style={[styles.button, styles.cancelButton]}
+                                onPress={() => setShowImportModal(false)}
+                                disabled={isImporting}
+                            >
+                                <Text style={styles.buttonTextCancel}>Batal</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.button, styles.saveButton]}
+                                onPress={handleImport}
+                                disabled={isImporting}
+                            >
+                                {isImporting ? (
+                                    <ActivityIndicator color="#FFF" />
+                                ) : (
+                                    <Text style={styles.buttonText}>Pilih File</Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Export Modal */}
+            <Modal
+                visible={showExportModal}
+                animationType="fade"
+                transparent={true}
+                onRequestClose={() => setShowExportModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={[styles.formContainer, { maxHeight: 'auto' }]}>
+                        <Text style={styles.formTitle}>Ekspor Data Warga</Text>
+
+                        <Text style={{ textAlign: 'center', marginBottom: 20, color: Colors.textSecondary }}>
+                            Pilih format dan metode ekspor.
+                        </Text>
+
+                        <View style={{ gap: 16, marginBottom: 24 }}>
+                            {/* Excel Section */}
+                            <View style={{
+                                backgroundColor: '#E8F5E9',
+                                padding: 16,
+                                borderRadius: 12,
+                                borderWidth: 1,
+                                borderColor: Colors.green3
+                            }}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                                    <Ionicons name="document-text" size={24} color={Colors.green5} />
+                                    <View style={{ marginLeft: 12 }}>
+                                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: Colors.green5 }}>Excel (.xlsx)</Text>
+                                        <Text style={{ fontSize: 12, color: Colors.green4 }}>Format standar spreadsheet</Text>
+                                    </View>
+                                </View>
+                                <View style={{ flexDirection: 'row', gap: 8 }}>
+                                    <TouchableOpacity
+                                        style={[styles.button, { flex: 1, backgroundColor: Colors.green5, paddingVertical: 8 }]}
+                                        onPress={() => performExport('xlsx', 'download')}
+                                    >
+                                        <Ionicons name="download-outline" size={16} color="#FFF" style={{ marginRight: 4 }} />
+                                        <Text style={[styles.buttonText, { fontSize: 12 }]}>Simpan</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[styles.button, { flex: 1, backgroundColor: Colors.green4, paddingVertical: 8 }]}
+                                        onPress={() => performExport('xlsx', 'share')}
+                                    >
+                                        <Ionicons name="share-social-outline" size={16} color="#FFF" style={{ marginRight: 4 }} />
+                                        <Text style={[styles.buttonText, { fontSize: 12 }]}>Bagikan</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+
+                            {/* CSV Section */}
+                            <View style={{
+                                backgroundColor: '#E3F2FD',
+                                padding: 16,
+                                borderRadius: 12,
+                                borderWidth: 1,
+                                borderColor: '#90CAF9'
+                            }}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                                    <Ionicons name="code-download" size={24} color="#1565C0" />
+                                    <View style={{ marginLeft: 12 }}>
+                                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#1565C0' }}>CSV (.csv)</Text>
+                                        <Text style={{ fontSize: 12, color: '#1976D2' }}>Format teks terpisah koma</Text>
+                                    </View>
+                                </View>
+                                <View style={{ flexDirection: 'row', gap: 8 }}>
+                                    <TouchableOpacity
+                                        style={[styles.button, { flex: 1, backgroundColor: '#1565C0', paddingVertical: 8 }]}
+                                        onPress={() => performExport('csv', 'download')}
+                                    >
+                                        <Ionicons name="download-outline" size={16} color="#FFF" style={{ marginRight: 4 }} />
+                                        <Text style={[styles.buttonText, { fontSize: 12 }]}>Simpan</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[styles.button, { flex: 1, backgroundColor: '#1976D2', paddingVertical: 8 }]}
+                                        onPress={() => performExport('csv', 'share')}
+                                    >
+                                        <Ionicons name="share-social-outline" size={16} color="#FFF" style={{ marginRight: 4 }} />
+                                        <Text style={[styles.buttonText, { fontSize: 12 }]}>Bagikan</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={styles.formActions}>
+                            <TouchableOpacity
+                                style={[styles.button, styles.cancelButton, { flex: 1 }]}
+                                onPress={() => setShowExportModal(false)}
+                            >
+                                <Text style={styles.buttonTextCancel}>Batal</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Custom Alert Modal */}
+            <CustomAlertModal
+                visible={alertConfig.visible}
+                title={alertConfig.title}
+                message={alertConfig.message}
+                type={alertConfig.type}
+                onClose={hideAlert}
+            />
         </View>
     );
 }

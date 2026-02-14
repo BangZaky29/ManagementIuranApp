@@ -200,6 +200,16 @@ export const styles = StyleSheet.create({
         fontWeight: '600',
         marginLeft: 4,
     },
+    actionIconButton: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: '#FFF',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
+    },
 
     // FAB
     fab: {
