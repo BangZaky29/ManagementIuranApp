@@ -1,3 +1,6 @@
 
 import LaporanScreen from '../../src/screens/warga/laporan/LaporanScreen';
-export default LaporanScreen;
+
+export default function LaporanScreenPage() {
+    return <LaporanScreen />;
+}
