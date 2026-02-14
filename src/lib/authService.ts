@@ -10,7 +10,6 @@ export interface UserProfile {
     id: string;
     full_name: string;
     email: string;
-    phone: string | null;
     wa_phone: string | null;  // Added
     username: string | null;  // Added
     nik: string | null;       // Added

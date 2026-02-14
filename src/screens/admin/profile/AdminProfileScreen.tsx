@@ -22,8 +22,6 @@ export default function AdminProfileScreen() {
         setEditModalVisible,
         editName,
         setEditName,
-        editPhone,
-        setEditPhone,
         handleSaveProfile,
         isSubmitting
     } = useAdminProfileViewModel();
@@ -94,7 +92,6 @@ export default function AdminProfileScreen() {
                     {renderInfoItem('at-outline', 'Username', user.username)}
                     {renderInfoItem('id-card-outline', 'NIK', user.nik)}
                     {renderInfoItem('mail-outline', 'Email', user.email)}
-                    {renderInfoItem('call-outline', 'Nomor HP', user.phone)}
                     {renderInfoItem('logo-whatsapp', 'WhatsApp', user.wa_phone)}
                     {renderInfoItem('home-outline', 'Alamat Domisili', user.address)}
                     {renderInfoItem('map-outline', 'RT / RW', user.rt_rw)}
@@ -140,16 +137,6 @@ export default function AdminProfileScreen() {
                             />
                         </View>
 
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Nomor Telepon</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={editPhone}
-                                onChangeText={setEditPhone}
-                                placeholder="08xxxxxxxxxx"
-                                keyboardType="phone-pad"
-                            />
-                        </View>
 
                         <View style={styles.formActions}>
                             <TouchableOpacity

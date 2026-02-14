@@ -18,7 +18,6 @@ export const unstable_settings = {
 
 // Auth gate — redirect based on auth state & role
 function AuthGate({ children }: { children: React.ReactNode }) {
-  // ✅ BENAR: Panggil semua data yang dibutuhkan dari useAuth di sini
   const { isAuthenticated, isLoading, profile, user } = useAuth();
   const segments = useSegments();
   const router = useRouter();
@@ -26,36 +25,42 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isLoading) return;
 
+    // Gunakan metadata role (jalur cepat) atau database role
+    const role = user?.user_metadata?.role || profile?.role || 'warga';
+
     const inAuthGroup =
       segments[0] === 'login' ||
       segments[0] === 'login-warga' ||
       segments[0] === 'register' ||
-      segments[0] === 'forgot-password' ||
-      segments[0] === 'register-admin';
+      segments[0] === 'register-admin' ||
+      segments[0] === 'forgot-password';
 
-    if (!isAuthenticated && !inAuthGroup) {
-      router.replace('/login');
-    } else if (isAuthenticated) {
-      // ✅ SEKARANG AMAN: Gunakan variabel 'user' yang sudah diambil di atas
-      const role = profile?.role || user?.user_metadata?.role || 'warga';
-
+    if (!isAuthenticated) {
+      // Jika tidak login dan tidak di halaman login, buang ke /login
+      if (!inAuthGroup) {
+        router.replace('/login');
+      }
+    } else {
+      // User sudah login
       if (inAuthGroup) {
+        // Jika nekat buka halaman login saat sudah login, arahkan ke dashboard yang benar
         if (role === 'admin') router.replace('/admin');
         else if (role === 'security') router.replace('/security');
         else router.replace('/(tabs)');
       } else {
-        const inAdmin = segments[0] === 'admin';
-        const inSecurity = segments[0] === 'security';
-        const inWarga = segments[0] === '(tabs)';
+        // Proteksi Cross-Role
+        const inAdminGroup = segments[0] === 'admin';
+        const inSecurityGroup = segments[0] === 'security';
+        const inWargaGroup = segments[0] === '(tabs)';
 
-        if (role === 'warga' && (inAdmin || inSecurity)) router.replace('/(tabs)');
-        if (role === 'admin' && (inWarga || inSecurity)) router.replace('/admin');
-        if (role === 'security' && (inWarga || inAdmin)) router.replace('/security');
+        if (role === 'admin' && !inAdminGroup) router.replace('/admin');
+        else if (role === 'security' && !inSecurityGroup) router.replace('/security');
+        else if (role === 'warga' && !inWargaGroup) router.replace('/(tabs)');
       }
     }
-    // Tambahkan 'user' dan 'router' ke dependency array agar linter senang
-  }, [isAuthenticated, isLoading, segments, profile, user, router]);
+  }, [isAuthenticated, isLoading, segments, profile, user]);
 
+  // 1. Tampilkan loading saat cek session
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#EEF2E3' }}>
@@ -64,44 +69,18 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Prevent flash of protected content while redirecting
+  // 2. CEGAH KEDIPAN (FLASHING):
+  // Jika tidak login dan sedang tidak di halaman login, 
+  // kembalikan layar kosong/loading selama proses router.replace berjalan.
   const inAuthGroup =
     segments[0] === 'login' ||
     segments[0] === 'login-warga' ||
     segments[0] === 'register' ||
-    segments[0] === 'forgot-password' ||
-    segments[0] === 'register-admin';
+    segments[0] === 'register-admin' ||
+    segments[0] === 'forgot-password';
 
   if (!isAuthenticated && !inAuthGroup) {
-    // While we are redirecting in useEffect, don't show the protected content (children)
-    // Show loading or null instead
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#EEF2E3' }}>
-        <ActivityIndicator size="large" color="#78C51C" />
-      </View>
-    );
-  }
-
-  if (isAuthenticated && !inAuthGroup) {
-    // Prevent role-mismatch flash
-    const role = profile?.role || user?.user_metadata?.role || 'warga';
-    const inAdmin = segments[0] === 'admin';
-    const inSecurity = segments[0] === 'security';
-    // 'undefined' often means root/index which defaults to tabs
-    const inWarga = segments[0] === '(tabs)' || segments[0] === undefined;
-
-    const shouldRedirect =
-      (role === 'admin' && (inWarga || inSecurity)) ||
-      (role === 'warga' && (inAdmin || inSecurity)) ||
-      (role === 'security' && (inWarga || inAdmin));
-
-    if (shouldRedirect) {
-      return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#EEF2E3' }}>
-          <ActivityIndicator size="large" color="#78C51C" />
-        </View>
-      );
-    }
+    return <View style={{ flex: 1, backgroundColor: '#EEF2E3' }} />;
   }
 
   return <>{children}</>;

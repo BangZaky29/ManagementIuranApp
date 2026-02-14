@@ -12,7 +12,6 @@ export default function EditAdminProfileScreen() {
     const { profile, updateUserProfile } = useAuth();
 
     const [fullName, setFullName] = useState(profile?.full_name || '');
-    const [phone, setPhone] = useState(profile?.phone || '');
     const [waPhone, setWaPhone] = useState(profile?.wa_phone || '');
     const [address, setAddress] = useState(profile?.address || '');
     const [rtRw, setRtRw] = useState(profile?.rt_rw || '');
@@ -30,7 +29,6 @@ export default function EditAdminProfileScreen() {
         try {
             await updateUserProfile({
                 full_name: fullName,
-                phone: phone,
                 wa_phone: waPhone,
                 address: address,
                 rt_rw: rtRw,
@@ -84,17 +82,6 @@ export default function EditAdminProfileScreen() {
                 </View>
 
                 <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Nomor Telepon (HP)</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={phone}
-                        onChangeText={setPhone}
-                        placeholder="08xxxxxxxxxx"
-                        keyboardType="phone-pad"
-                    />
-                </View>
-
-                <View style={styles.inputGroup}>
                     <Text style={styles.label}>Nomor WhatsApp</Text>
                     <TextInput
                         style={styles.input}
@@ -138,7 +125,7 @@ export default function EditAdminProfileScreen() {
                     )}
                 </TouchableOpacity>
 
-                <View style={{ height: 40 }} />
+                <View style={{ height: 120 }} />
             </ScrollView>
         </SafeAreaView>
     );

@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../../contexts/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
 import { supabase } from '../../../lib/supabaseConfig';
-import { decode } from 'base64-arraybuffer';
 
 export const useAdminProfileViewModel = () => {
     const router = useRouter();
@@ -18,7 +16,6 @@ export const useAdminProfileViewModel = () => {
     const user = {
         name: profile?.full_name || 'Administrator',
         email: profile?.email || '-',
-        phone: profile?.phone || '-',
         wa_phone: profile?.wa_phone || '-',
         role: profile?.role || 'admin',
         rt_rw: profile?.rt_rw || '-',
@@ -44,14 +41,12 @@ export const useAdminProfileViewModel = () => {
     // Edit Modal State (Legacy - kept for inline modal if needed, but we used separate screen mostly)
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [editName, setEditName] = useState('');
-    const [editPhone, setEditPhone] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Initializer for Edit Screen (if using shared logic, but EditScreen has its own state)
     // We update this just in case AdminProfileScreen uses the modal.
     const handleEditProfile = () => {
         setEditName(profile?.full_name || '');
-        setEditPhone(profile?.phone || '');
         // For full edit, we usually navigate to EditScreen
         router.push('/admin/profile/edit');
     };
@@ -80,13 +75,13 @@ export const useAdminProfileViewModel = () => {
             const imageUri = result.assets[0].uri;
 
             const fileName = `avatars/admin_${profile?.id}_${Date.now()}.jpg`;
-            const base64 = await FileSystem.readAsStringAsync(imageUri, {
-                encoding: 'base64',
-            });
+            // Optimization: Use fetch to get blob/arrayBuffer directly (No deprecated FileSystem)
+            const response = await fetch(imageUri);
+            const arrayBuffer = await response.arrayBuffer();
 
             const { error: uploadError } = await supabase.storage
                 .from('wargaPintar')
-                .upload(fileName, decode(base64), {
+                .upload(fileName, arrayBuffer, {
                     contentType: 'image/jpeg',
                     upsert: true
                 });
@@ -154,8 +149,6 @@ export const useAdminProfileViewModel = () => {
         setEditModalVisible,
         editName,
         setEditName,
-        editPhone,
-        setEditPhone,
         handleSaveProfile,
         isSubmitting
     };
