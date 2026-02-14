@@ -82,7 +82,7 @@ export default function LoginScreen() {
 
                 setAlertConfig({
                     title: 'Akses Ditolak',
-                    message: `Akun ini terdaftar sebagai ${role || 'User'}, bukan Admin.\nSilakan masuk melalui halaman login yang sesuai.`,
+                    message: 'Maaf, pintu ini khusus untuk Admin. Silakan gunakan pintu masuk warga.',
                     type: 'warning',
                     buttons: [
                         { text: 'Tutup', onPress: hideAlert, style: 'cancel' },
@@ -90,7 +90,7 @@ export default function LoginScreen() {
                             text: 'Ke Login Warga',
                             onPress: () => {
                                 hideAlert();
-                                router.push('/register'); // Redirecting to register/login portal for warga
+                                router.replace('/register'); // Redirecting to register/login portal for warga with replace to prevent back nav
                             }
                         }
                     ]
