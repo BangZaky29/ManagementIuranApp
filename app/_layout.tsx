@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import { useEffect } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, View, Text } from 'react-native';
 import 'react-native-reanimated';
 
 import { ThemeProvider, useTheme } from '../src/contexts/ThemeContext';
@@ -12,20 +12,17 @@ import { AuthProvider, useAuth } from '../src/contexts/AuthContext';
 
 SplashScreen.preventAutoHideAsync();
 
+// Penting: Kosongkan ini atau arahkan ke rute login agar tidak memaksa ke (tabs)
 export const unstable_settings = {
-  anchor: '(tabs)',
+  initialRouteName: 'login',
 };
 
-// Auth gate — redirect based on auth state & role
 function AuthGate({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, profile, user } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
-  // 1. Ambil Role secepat mungkin
   const role = user?.user_metadata?.role || profile?.role || 'warga';
-
-  // 2. Tentukan grup halaman
   const inAuthGroup = segments[0] === 'login' ||
     segments[0] === 'login-warga' ||
     segments[0] === 'register' ||
@@ -36,28 +33,27 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     if (isLoading) return;
 
     if (!isAuthenticated) {
-      if (!inAuthGroup) router.replace('/login');
+      if (!inAuthGroup) {
+        // Gunakan replace untuk membersihkan history stack
+        router.replace('/login');
+      }
     } else {
-      // Logika Redirect Role
       if (inAuthGroup) {
         if (role === 'admin') router.replace('/admin');
         else if (role === 'security') router.replace('/security');
         else router.replace('/(tabs)');
       } else {
-        // Proteksi Cross-Role
         const inAdmin = segments[0] === 'admin';
         const inSecurity = segments[0] === 'security';
         const inWarga = segments[0] === '(tabs)';
 
         if (role === 'admin' && !inAdmin) router.replace('/admin');
-        if (role === 'security' && !inSecurity) router.replace('/security');
-        if (role === 'warga' && !inWarga) router.replace('/(tabs)');
+        else if (role === 'security' && !inSecurity) router.replace('/security');
+        else if (role === 'warga' && !inWarga) router.replace('/(tabs)');
       }
     }
   }, [isAuthenticated, isLoading, segments, role]);
 
-  // KUNCI PERBAIKAN: 
-  // Jangan render apapun jika masih loading
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#EEF2E3' }}>
@@ -66,18 +62,24 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // CEGAH SPLIT/FLASH: 
-  // Jika sudah login tapi segmen saat ini belum sesuai dengan role, 
-  // tahan rendering (tampilkan loading saja) sampai router.replace selesai.
+  // LOGIKA PENGUNCI (ANTI-FLICKER):
+  // Jika sudah login, cek apakah layar yang sekarang dirender cocok dengan role.
+  // Jika tidak cocok, TAMPILKAN LOADING, jangan render children (Stack).
   if (isAuthenticated) {
-    const isReady = (role === 'admin' && segments[0] === 'admin') ||
-      (role === 'security' && segments[0] === 'security') ||
-      (role === 'warga' && segments[0] === '(tabs)');
+    const isAtAdmin = segments[0] === 'admin';
+    const isAtSecurity = segments[0] === 'security';
+    const isAtWarga = segments[0] === '(tabs)';
 
-    if (!isReady && !inAuthGroup) {
+    const isCorrectRoute = (role === 'admin' && isAtAdmin) ||
+      (role === 'security' && isAtSecurity) ||
+      (role === 'warga' && isAtWarga);
+
+    // Jika sedang di halaman login/auth atau rute salah, tampilkan loading screen
+    if (!isCorrectRoute || inAuthGroup) {
       return (
-        <View style={{ flex: 1, justifyContent: 'center', backgroundColor: '#EEF2E3' }}>
-          <ActivityIndicator size="small" color="#78C51C" />
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#EEF2E3' }}>
+          <ActivityIndicator size="large" color="#78C51C" />
+          <Text style={{ marginTop: 10, color: '#78C51C', fontWeight: '500' }}>Menyiapkan Dashboard...</Text>
         </View>
       );
     }
@@ -92,20 +94,18 @@ function RootLayoutInner() {
   return (
     <NavThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
       <AuthGate>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="login" options={{ headerShown: false }} />
-          <Stack.Screen name="login-warga" options={{ headerShown: false }} />
-          <Stack.Screen name="register" options={{ headerShown: false }} />
-          <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
-          <Stack.Screen name="register-admin" options={{ headerShown: false }} />
+        <Stack screenOptions={{ headerShown: false }}>
+          {/* Urutan Screen: Pindahkan Login ke paling atas untuk default rute */}
+          <Stack.Screen name="login" />
+          <Stack.Screen name="admin" />
+          <Stack.Screen name="(tabs)" />
 
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-          <Stack.Screen name="iuran" options={{ headerShown: false }} />
-          <Stack.Screen name="profile" options={{ headerShown: false }} />
-          <Stack.Screen name="laporan" options={{ headerShown: false }} />
-          <Stack.Screen name="admin" options={{ headerShown: false }} />
-          <Stack.Screen name="security/index" options={{ headerShown: false }} />
+          <Stack.Screen name="login-warga" />
+          <Stack.Screen name="register" />
+          <Stack.Screen name="forgot-password" />
+          <Stack.Screen name="register-admin" />
+          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="security/index" />
         </Stack>
       </AuthGate>
       <StatusBar style={isDark ? 'light' : 'dark'} />
@@ -127,9 +127,7 @@ export default function RootLayout() {
     }
   }, [fontsLoaded]);
 
-  if (!fontsLoaded) {
-    return null;
-  }
+  if (!fontsLoaded) return null;
 
   return (
     <AuthProvider>
