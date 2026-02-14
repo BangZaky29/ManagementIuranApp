@@ -63,9 +63,13 @@ export const calculateBillSummary = async (userId: string) => {
         return { total: 0, dueDate: 'Lunas', isPaid: true };
     }
 
+    // Safer Manual Date Formatting
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+    const monthName = months[currentDATE.getMonth()];
+
     return {
         total: activeFee.amount,
-        dueDate: `${activeFee.due_date_day} ${currentDATE.toLocaleString('id-ID', { month: 'short' })} ${currentDATE.getFullYear()}`,
+        dueDate: `${activeFee.due_date_day} ${monthName} ${currentDATE.getFullYear()}`,
         isPaid: false
     };
 };

@@ -7,7 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "wargapintar",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
       "supportsTablet": true
     },
@@ -20,7 +20,16 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.ruangimaji29.ManagementIuranApp"
+      "package": "com.ruangimaji29.ManagementIuranApp",
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO"
+      ]
     },
     "web": {
       "output": "static",
@@ -40,7 +49,9 @@
           }
         }
       ],
-      "expo-media-library"
+      "expo-media-library",
+      "expo-file-system",
+      "expo-document-picker"
     ],
     "experiments": {
       "typedRoutes": true,
