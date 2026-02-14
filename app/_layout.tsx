@@ -103,10 +103,8 @@ function RootLayoutInner() {
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
           <Stack.Screen name="iuran" options={{ headerShown: false }} />
           <Stack.Screen name="profile" options={{ headerShown: false }} />
-          <Stack.Screen name="news" options={{ headerShown: false }} />
           <Stack.Screen name="laporan" options={{ headerShown: false }} />
           <Stack.Screen name="admin" options={{ headerShown: false }} />
-          <Stack.Screen name="admin/index" options={{ headerShown: false }} />
           <Stack.Screen name="security/index" options={{ headerShown: false }} />
         </Stack>
       </AuthGate>
