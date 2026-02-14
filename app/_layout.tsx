@@ -35,7 +35,9 @@ function AuthGate({ children }: { children: React.ReactNode }) {
       // Not logged in → redirect to login
       router.replace('/login');
     } else if (isAuthenticated) {
-      const role = profile?.role || 'warga';
+      const { user } = useAuth();
+      // Logic: Prefer profile role, fallback to metadata role (fast), default to 'warga'
+      const role = profile?.role || user?.user_metadata?.role || 'warga';
 
       if (inAuthGroup) {
         // Logged in but on auth screen → redirect based on role

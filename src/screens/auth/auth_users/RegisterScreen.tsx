@@ -3,10 +3,10 @@ import { View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platfor
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { CustomInput } from '../../components/CustomInput';
-import { CustomButton } from '../../components/CustomButton';
-import { CustomAlertModal } from '../../components/CustomAlertModal';
-import { Colors } from '../../constants/Colors';
+import { CustomInput } from '../../../components/CustomInput';
+import { CustomButton } from '../../../components/CustomButton';
+import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { Colors } from '../../../constants/Colors';
 import { useRegisterViewModel } from './RegisterViewModel';
 import { styles } from './RegisterStyles';
 

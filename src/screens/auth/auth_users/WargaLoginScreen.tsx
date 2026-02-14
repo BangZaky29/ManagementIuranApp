@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Keyboard, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Colors } from '../../constants/Colors';
-import { CustomButton } from '../../components/CustomButton';
-import { CustomInput } from '../../components/CustomInput';
+import { Colors } from '../../../constants/Colors';
+import { CustomButton } from '../../../components/CustomButton';
+import { CustomInput } from '../../../components/CustomInput';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { CustomAlertModal } from '../../components/CustomAlertModal';
-import { useAuth } from '../../contexts/AuthContext';
+import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { useAuth } from '../../../contexts/AuthContext';
 
 export default function WargaLoginScreen() {
     const router = useRouter();
@@ -58,7 +58,7 @@ export default function WargaLoginScreen() {
             if (error?.message?.includes('Invalid login credentials')) {
                 message = 'Email atau kata sandi salah.';
             } else if (error?.message?.includes('Email not confirmed')) {
-                message = 'Email belum dikonfirmasi. Silakan cek inbox Anda.';
+                message = 'Maaf, email Anda belum terverifikasi. Silakan cek email verifikasi yang telah kami kirim (cek juga folder spam) atau hubungi admin jika ada kendala.';
             }
             showAlert('Login Gagal', message, 'error');
         } finally {
@@ -152,6 +152,7 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         justifyContent: 'center',
         padding: 24,
+        paddingTop: 60, // Added padding for better spacing with back button
     },
     backButton: {
         position: 'absolute',

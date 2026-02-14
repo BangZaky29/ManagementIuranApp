@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Dimensions, Keyboard } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Colors } from '../../constants/Colors';
-import { CustomButton } from '../../components/CustomButton';
-import { CustomInput } from '../../components/CustomInput';
+import { Colors } from '../../../constants/Colors';
+import { CustomButton } from '../../../components/CustomButton';
+import { CustomInput } from '../../../components/CustomInput';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { CustomAlertModal } from '../../components/CustomAlertModal';
-import { useAuth } from '../../contexts/AuthContext';
+import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { useAuth } from '../../../contexts/AuthContext';
 
 const { width } = Dimensions.get('window');
 
@@ -55,20 +55,6 @@ export default function LoginScreen() {
 
         try {
             await signIn({ email: identifier.trim(), password });
-            // If username login is needed, switch to signInWithEmailOrUsername
-            // But existing signIn in AuthContext might only take email.
-            // We need to check useAuth(). But for now, let's assume direct usage or update context.
-            // Wait, I just updated authService, but useAuth uses AuthContext.
-            // I should probably use the service directly or update AuthContext.
-            // Let's use the service directly here for simplicity if context doesn't expose it, 
-            // OR better: check if identifier has @.
-
-            // Actually, the user asked for username login.
-            // I updated authService.ts but LoginScreen uses useAuth() from Context.
-            // Let's import the service function directly for the logic, then call signIn from context 
-            // OR just handle it here.
-            // The cleanest way: Update AuthContext to expose signInWithEmailOrUsername? 
-            // No, let's just use the service logic here locally.
         } catch (error: any) {
             // ... error handling
         }
@@ -79,7 +65,7 @@ export default function LoginScreen() {
 
             // Username lookup logic (Client-side helper)
             if (!loginEmail.includes('@')) {
-                const { supabase } = require('../../lib/supabaseConfig'); // Dynamic import to avoid cycles or just import top level
+                const { supabase } = require('../../../lib/supabaseConfig'); // Dynamic import to avoid cycles or just import top level
                 const { data, error } = await supabase
                     .from('profiles')
                     .select('email')
@@ -98,7 +84,7 @@ export default function LoginScreen() {
             if (error?.message?.includes('Invalid login credentials')) {
                 message = 'Kombinasi login salah.';
             } else if (error?.message?.includes('Email not confirmed')) {
-                message = 'Email belum dikonfirmasi. Silakan cek inbox email Anda.';
+                message = 'Maaf, email Anda belum terverifikasi. Silakan cek email verifikasi yang telah kami kirim (cek juga folder spam) atau hubungi admin jika ada kendala.';
             } else if (error?.message) {
                 message = error.message;
             }

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Colors } from '../../constants/Colors';
-import { CustomButton } from '../../components/CustomButton';
-import { CustomInput } from '../../components/CustomInput';
+import { Colors } from '../../../constants/Colors';
+import { CustomButton } from '../../../components/CustomButton';
+import { CustomInput } from '../../../components/CustomInput';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { CustomAlertModal } from '../../components/CustomAlertModal';
-import { useAuth } from '../../contexts/AuthContext';
+import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { useAuth } from '../../../contexts/AuthContext';
 
 export default function RegisterAdminScreen() {
     const router = useRouter();
@@ -19,7 +19,9 @@ export default function RegisterAdminScreen() {
 
     // New Fields
     const [fullName, setFullName] = useState('');
+    const [username, setUsername] = useState(''); // Added
     const [phone, setPhone] = useState('');
+    const [address, setAddress] = useState(''); // Added
     const [complexName, setComplexName] = useState('');
     const [complexAddress, setComplexAddress] = useState('');
 
@@ -47,8 +49,8 @@ export default function RegisterAdminScreen() {
     };
 
     const handleRegister = async () => {
-        if (!email.trim() || !password || !confirmPassword || !fullName || !complexName) {
-            showAlert('Perhatian', 'Mohon lengkapi semua data wajib (Nama, Cluster, Email, Password)', 'warning');
+        if (!email.trim() || !password || !confirmPassword || !fullName || !complexName || !username || !address) {
+            showAlert('Perhatian', 'Mohon lengkapi semua data wajib (Nama, Username, Alamat, Cluster, Email, Password)', 'warning');
             return;
         }
 
@@ -74,14 +76,18 @@ export default function RegisterAdminScreen() {
                 role: 'admin',
                 metadata: {
                     complex_name: complexName,
-                    complex_address: complexAddress
+                    complex_address: complexAddress,
+                    username: username,    // Added
+                    address: address,      // Added
+                    wa_phone: phone,       // Mapped from phone input
+                    phone: phone           // Ensure phone is also in metadata if needed by trigger, though auth.users handles it too
                 }
             });
 
             if (needsConfirmation) {
                 setAlertConfig({
                     title: 'Registrasi Berhasil',
-                    message: 'Silakan cek email Anda untuk konfirmasi akun sebelum login.',
+                    message: 'Silakan cek email konfirmasi yang telah kami kirim (cek juga folder spam) untuk mengaktifkan akun Anda sebelum login.',
                     type: 'success',
                     buttons: [{
                         text: 'Ke Halaman Login',
@@ -130,12 +136,27 @@ export default function RegisterAdminScreen() {
                             iconName="person-outline"
                         />
                         <CustomInput
+                            label="Username"
+                            placeholder="Username (untuk login)"
+                            value={username}
+                            onChangeText={setUsername}
+                            iconName="at-outline"
+                            autoCapitalize="none"
+                        />
+                        <CustomInput
                             label="No. WhatsApp"
                             placeholder="08xxxxxxxxxx"
                             value={phone}
                             onChangeText={setPhone}
                             keyboardType="phone-pad"
-                            iconName="call-outline"
+                            iconName="logo-whatsapp"
+                        />
+                        <CustomInput
+                            label="Alamat Domisili"
+                            placeholder="Alamat tempat tinggal Anda"
+                            value={address}
+                            onChangeText={setAddress}
+                            iconName="home-outline"
                         />
 
                         <View style={{ height: 1, backgroundColor: '#E0E0E0', marginVertical: 16 }} />
@@ -149,8 +170,8 @@ export default function RegisterAdminScreen() {
                             iconName="business-outline"
                         />
                         <CustomInput
-                            label="Alamat Lengkap"
-                            placeholder="Alamat Cluster"
+                            label="Alamat Cluster"
+                            placeholder="Alamat Lokasi Perumahan"
                             value={complexAddress}
                             onChangeText={setComplexAddress}
                             iconName="location-outline"

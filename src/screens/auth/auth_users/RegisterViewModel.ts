@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Keyboard } from 'react-native';
-import { useAuth } from '../../contexts/AuthContext';
-import { supabase } from '../../lib/supabaseConfig';
+import { useAuth } from '../../../contexts/AuthContext';
+import { supabase } from '../../../lib/supabaseConfig';
 
 export type VerifiedData = {
     valid: boolean;
@@ -143,8 +143,8 @@ export function useRegisterViewModel() {
 
             if (needsConfirmation) {
                 showAlert(
-                    'Verifikasi Email',
-                    'Registrasi berhasil! Silakan cek email Anda untuk verifikasi sebelum masuk.',
+                    'Registrasi Berhasil',
+                    'Silakan cek email konfirmasi yang telah kami kirim (cek juga folder spam) untuk mengaktifkan akun Anda sebelum login.',
                     'success',
                     [{ text: 'OK', onPress: () => { hideAlert(); router.replace('/login'); } }]
                 );
