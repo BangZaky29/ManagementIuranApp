@@ -108,7 +108,8 @@ export default function ManageNewsScreen() {
                     category,
                     is_published: isPublished,
                     author_id: session?.user?.id || null,
-                    image_url: imageUrl
+                    image_url: imageUrl,
+                    housing_complex_id: profile?.housing_complex_id || null // Auto-link to admin's housing
                 });
                 Alert.alert('Sukses', 'Berita berhasil dibuat');
             }

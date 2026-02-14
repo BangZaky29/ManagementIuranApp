@@ -7,7 +7,6 @@ import {
     resetPassword as _resetPassword,
     signInWithGoogle as _signInWithGoogle,
     getProfile,
-    createProfile,
     UserProfile,
     UserRole,
     SignUpData,
@@ -56,10 +55,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
             let p = await getProfile(u.id);
 
-            // Fallback: if trigger didn't create profile, create manually
-            if (!p && u.email) {
-                console.log('Profile not found, creating manually...');
-                p = await createProfile(u.id, u.email, u.user_metadata || {});
+            // Fallback: if trigger didn't create profile, we wait or retry. 
+            // Client-side creation is removed for security.
+            if (!p) {
+                console.log('Profile not found yet (trigger might be slow)...');
             }
 
             setProfile(p);

@@ -110,7 +110,7 @@ export default function LoginScreen() {
                             />
                         </View>
                         <Text style={styles.welcomeText}>Warga Pintar</Text>
-                        <Text style={styles.subtitleText}>Masuk untuk mengelola iuran warga</Text>
+                        <Text style={styles.subtitleText}>Masuk ke akun Warga Pintar Anda</Text>
                     </View>
 
                     <View style={styles.formContainer}>
@@ -159,14 +159,7 @@ export default function LoginScreen() {
                             <View style={styles.dividerLine} />
                         </View>
 
-                        {/* Warga / Security Login Button */}
-                        <TouchableOpacity
-                            style={styles.wargaButton}
-                            onPress={() => router.push('/login-warga')}
-                        >
-                            <Ionicons name="people" size={20} color={Colors.green5} />
-                            <Text style={styles.wargaButtonText}>Masuk sebagai Warga / Security</Text>
-                        </TouchableOpacity>
+                        {/* Warga / Security Login Button Removed - Unified Login */}
 
                     </View>
                 </ScrollView>

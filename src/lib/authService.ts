@@ -181,28 +181,7 @@ export async function getProfile(userId: string): Promise<UserProfile | null> {
     return data as UserProfile;
 }
 
-/**
- * Create profile manually (fallback if trigger didn't fire).
- */
-export async function createProfile(userId: string, email: string, metadata: Record<string, any>) {
-    const { data, error } = await supabase
-        .from('profiles')
-        .insert({
-            id: userId,
-            full_name: metadata.full_name || '',
-            email: email,
-            phone: metadata.phone || null,
-            role: metadata.role || 'warga',
-        })
-        .select()
-        .single();
-
-    if (error) {
-        console.warn('Profile create error:', error.message);
-        return null;
-    }
-    return data as UserProfile;
-}
+// createProfile removed - handled by database trigger
 
 /**
  * Update user profile fields.

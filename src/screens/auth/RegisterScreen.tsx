@@ -96,6 +96,12 @@ export default function RegisterScreen() {
                                             <Text style={styles.verifiedValue}>{vm.verifiedData.name}</Text>
                                         </View>
                                         <View style={styles.verifiedRow}>
+                                            <Text style={styles.verifiedLabel}>Perumahan:</Text>
+                                            <Text style={styles.verifiedValue}>
+                                                {vm.verifiedData.housing_name || 'Tidak diketahui'}
+                                            </Text>
+                                        </View>
+                                        <View style={styles.verifiedRow}>
                                             <Text style={styles.verifiedLabel}>Alamat:</Text>
                                             <Text style={styles.verifiedValue}>{vm.verifiedData.address}</Text>
                                         </View>

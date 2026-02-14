@@ -10,6 +10,7 @@ export type VerifiedData = {
     address: string;
     rt_rw: string;
     role: 'warga' | 'security';
+    housing_name?: string; // Added housing name
 };
 
 export function useRegisterViewModel() {
@@ -62,6 +63,7 @@ export function useRegisterViewModel() {
 
         setIsLoading(true);
         Keyboard.dismiss();
+
         try {
             const { data, error } = await supabase.rpc('verify_registration_token', {
                 input_nik: nik,
@@ -71,7 +73,14 @@ export function useRegisterViewModel() {
             if (error) throw error;
 
             if (data && data.valid) {
-                setVerifiedData(data);
+                setVerifiedData({
+                    valid: data.valid,
+                    name: data.name,
+                    address: data.address,
+                    rt_rw: data.rt_rw,
+                    role: data.role,
+                    housing_name: data.housing_name
+                });
                 setStep(2);
             } else {
                 showAlert('Gagal', 'NIK atau Kode Akses tidak valid, atau sudah terdaftar.', 'error');
@@ -122,7 +131,7 @@ export function useRegisterViewModel() {
                 phone: phone.trim(),
                 role: verifiedData.role, // Use verified role
                 metadata: {
-                    nik: nik,
+                    nik: nik, // Vital for linking to verified_residents
                     username: username,
                     wa_phone: phone,
                     address: verifiedData.address,

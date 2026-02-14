@@ -12,6 +12,7 @@ export interface NewsItem {
     created_at: string;
     is_published: boolean;
     image_url?: string | null; // Optional: user might want images later, good to have placeholders or structure
+    housing_complex_id?: number | null;
     author?: {
         full_name: string;
         avatar_url: string | null;
