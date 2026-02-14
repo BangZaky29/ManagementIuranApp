@@ -99,11 +99,22 @@ export default function EditProfilScreen() {
                 <View style={styles.inputGroup}>
                     <Text style={[styles.label, { color: colors.textSecondary }]}>Alamat</Text>
                     <TextInput
-                        style={[styles.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]}
+                        style={[
+                            styles.input,
+                            {
+                                backgroundColor: colors.background,
+                                color: colors.textPrimary,
+                                borderColor: colors.border,
+                                height: 100, // Make it taller
+                                textAlignVertical: 'top' // Align text to top
+                            }
+                        ]}
                         value={formData.address}
                         onChangeText={(text) => setFormData({ ...formData, address: text })}
                         placeholder="Jl. Mawar No. 1"
                         placeholderTextColor={colors.textSecondary}
+                        multiline={true}
+                        numberOfLines={4}
                     />
                 </View>
 

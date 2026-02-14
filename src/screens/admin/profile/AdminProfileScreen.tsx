@@ -26,13 +26,21 @@ export default function AdminProfileScreen() {
         isSubmitting
     } = useAdminProfileViewModel();
 
-    const renderInfoItem = (icon: string, label: string, value: string) => (
+    const renderInfoItem = (icon: string, label: string, value: string, isVerified = false) => (
         <View style={styles.infoRow}>
             <View style={[styles.infoIconBox, { backgroundColor: '#E3F2FD' }]}>
                 <Ionicons name={icon as any} size={20} color="#2196F3" />
             </View>
-            <View>
-                <Text style={styles.infoLabel}>{label}</Text>
+            <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={styles.infoLabel}>{label}</Text>
+                    {isVerified && (
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 8, backgroundColor: '#E3F2FD', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+                            <Ionicons name="checkmark-circle" size={12} color="#2196F3" />
+                            <Text style={{ fontSize: 10, color: '#2196F3', marginLeft: 2, fontWeight: '600' }}>Terverifikasi</Text>
+                        </View>
+                    )}
+                </View>
                 <Text style={styles.infoValue}>{value}</Text>
             </View>
         </View>
@@ -91,7 +99,7 @@ export default function AdminProfileScreen() {
                     {renderInfoItem('person-outline', 'Nama Lengkap', user.name)}
                     {renderInfoItem('at-outline', 'Username', user.username)}
                     {renderInfoItem('id-card-outline', 'NIK', user.nik)}
-                    {renderInfoItem('mail-outline', 'Email', user.email)}
+                    {renderInfoItem('mail-outline', 'Email', user.email, true)}
                     {renderInfoItem('logo-whatsapp', 'WhatsApp', user.wa_phone)}
                     {renderInfoItem('home-outline', 'Alamat Domisili', user.address)}
                     {renderInfoItem('map-outline', 'RT / RW', user.rt_rw)}

@@ -96,11 +96,12 @@ export default function EditAdminProfileScreen() {
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Alamat Domisili</Text>
                     <TextInput
-                        style={styles.input}
+                        style={[styles.input, { height: 100, textAlignVertical: 'top' }]}
                         value={address}
                         onChangeText={setAddress}
                         placeholder="Alamat Lengkap"
-                        multiline
+                        multiline={true}
+                        numberOfLines={4}
                     />
                 </View>
 

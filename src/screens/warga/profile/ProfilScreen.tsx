@@ -70,13 +70,21 @@ export default function ProfilScreen() {
 
     const { isDark, toggleTheme, colors } = useTheme();
 
-    const renderInfoItem = (icon: string, label: string, value: string) => (
+    const renderInfoItem = (icon: string, label: string, value: string, isVerified = false) => (
         <View style={[styles.infoRow, { borderBottomColor: colors.border }]}>
             <View style={[styles.infoIconBox, { backgroundColor: colors.green1 }]}>
                 <Ionicons name={icon as any} size={20} color={colors.green5} />
             </View>
-            <View>
-                <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>{label}</Text>
+            <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>{label}</Text>
+                    {isVerified && (
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 8, backgroundColor: '#DCFCE7', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+                            <Ionicons name="checkmark-circle" size={12} color={colors.primary} />
+                            <Text style={{ fontSize: 10, color: colors.primary, marginLeft: 2, fontWeight: '600' }}>Terverifikasi</Text>
+                        </View>
+                    )}
+                </View>
                 <Text style={[styles.infoValue, { color: colors.textPrimary }]}>{value}</Text>
             </View>
         </View>
@@ -135,7 +143,7 @@ export default function ProfilScreen() {
                     {renderInfoItem('card-outline', 'NIK', user.nik)}
                     {renderInfoItem('person-outline', 'Username', user.username)}
                     {renderInfoItem('home-outline', 'Alamat', user.address)}
-                    {renderInfoItem('mail-outline', 'Email', user.email)}
+                    {renderInfoItem('mail-outline', 'Email', user.email, true)}
                     {renderInfoItem('logo-whatsapp', 'WhatsApp', user.phone)}
                 </Animated.View>
 
