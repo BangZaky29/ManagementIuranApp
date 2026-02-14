@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { Keyboard } from 'react-native';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -44,6 +44,19 @@ export function useRegisterViewModel() {
     });
 
     const hideAlert = () => setAlertVisible(false);
+
+    // Real-time password validation
+    useEffect(() => {
+        if (password.length > 0 && password.length < 6) {
+            setErrors(prev => ({ ...prev, password: 'sandi terlalu lemah kurang dari 6 karakter' }));
+        } else {
+            // Clear error if valid length or empty (empty is handled on submit)
+            setErrors(prev => {
+                const { password: _, ...rest } = prev;
+                return rest;
+            });
+        }
+    }, [password]);
 
     const showAlert = (title: string, message: string, type: 'success' | 'info' | 'warning' | 'error', buttons?: any[]) => {
         setAlertConfig({
@@ -144,7 +157,9 @@ export function useRegisterViewModel() {
         }
 
         // Password Validation
-        const passwordStrengthRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+        // Requirement: Min 8 chars, at least 1 Letter, at least 1 Number.
+        // Symbols are allowed (and encouraged), so we use `.` instead of `[A-Za-z\d]` for the length check.
+        const passwordStrengthRegex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
 
         if (!password) {
             newErrors.password = 'Kata sandi wajib diisi';

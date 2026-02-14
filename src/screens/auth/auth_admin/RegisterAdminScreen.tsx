@@ -49,27 +49,76 @@ export default function RegisterAdminScreen() {
         setAlertVisible(true);
     };
 
-    const handleRegister = async () => {
-        // Validation
-        if (!email.includes('@')) {
-            showAlert('Validasi Email', 'Mohon masukkan format email yang benar (harus ada @).', 'warning');
-            return;
+    const validateForm = () => {
+        // 1. Username Validation
+        const usernameRegex = /^[a-zA-Z0-9_]+$/;
+        if (!username.trim()) {
+            showAlert('Validasi Username', 'Username wajib diisi.', 'warning');
+            return false;
+        } else if (username.length < 3) {
+            showAlert('Validasi Username', 'Username minimal 3 karakter.', 'warning');
+            return false;
+        } else if (!usernameRegex.test(username)) {
+            showAlert('Validasi Username', 'Username hanya boleh huruf, angka, dan underscore (tanpa spasi).', 'warning');
+            return false;
         }
 
-        if (!email.trim() || !password || !confirmPassword || !fullName || !complexName || !username || !address || !rtRw) {
-            showAlert('Perhatian', 'Mohon lengkapi semua data wajib (Nama, Username, Alamat, Cluster, RT/RW, Email, Password)', 'warning');
-            return;
+        // 2. Email Validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email.trim()) {
+            showAlert('Validasi Email', 'Email wajib diisi.', 'warning');
+            return false;
+        } else if (!emailRegex.test(email)) {
+            showAlert('Validasi Email', 'Format email tidak valid (harus ada @ dan domain).', 'warning');
+            return false;
+        }
+
+        // 3. Phone Validation (WA)
+        const phoneRegex = /^08[0-9]+$/;
+        if (!phone.trim()) {
+            showAlert('Validasi No. WA', 'Nomor WhatsApp wajib diisi.', 'warning');
+            return false;
+        } else if (!phoneRegex.test(phone)) {
+            showAlert('Validasi No. WA', 'Nomor WA harus berawalan "08" dan berupa angka.', 'warning');
+            return false;
+        } else if (phone.length < 10) {
+            showAlert('Validasi No. WA', 'Nomor WA terlalu pendek (minimal 10 digit).', 'warning');
+            return false;
+        }
+
+        // 4. Password Validation
+        // Regex: Min 8 chars, at least 1 Letter, at least 1 Number. Special chars allowed.
+        const passwordStrengthRegex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
+        if (!password) {
+            showAlert('Validasi Password', 'Kata sandi wajib diisi.', 'warning');
+            return false;
+        } else if (password.length < 6) {
+            showAlert('Validasi Password', 'sandi terlalu lemah kurang dari 6 karakter', 'warning');
+            return false;
+        } else if (password.length < 8) {
+            showAlert('Validasi Password', 'Kata sandi minimal 8 karakter.', 'warning');
+            return false;
+        } else if (!passwordStrengthRegex.test(password)) {
+            showAlert('Validasi Password', 'Kata sandi harus kombinasi huruf dan angka.', 'warning');
+            return false;
         }
 
         if (password !== confirmPassword) {
-            showAlert('Perhatian', 'Kata sandi tidak cocok', 'warning');
-            return;
+            showAlert('Validasi Password', 'Kata sandi tidak cocok.', 'warning');
+            return false;
         }
 
-        if (password.length < 6) {
-            showAlert('Perhatian', 'Kata sandi minimal 6 karakter', 'warning');
-            return;
+        // 5. Other Required Fields
+        if (!fullName.trim() || !complexName.trim() || !address.trim() || !rtRw.trim()) {
+            showAlert('Perhatian', 'Mohon lengkapi data: Nama, Alamat, Cluster, dan RT/RW.', 'warning');
+            return false;
         }
+
+        return true;
+    };
+
+    const handleRegister = async () => {
+        if (!validateForm()) return;
 
         setIsLoading(true);
         Keyboard.dismiss();
@@ -86,9 +135,8 @@ export default function RegisterAdminScreen() {
                     complex_address: complexAddress,
                     username: username,
                     address: address,
-                    rt_rw: rtRw,          // Added
-                    wa_phone: phone,      // Explicitly map inputs to wa_phone as requested
-                    // 'phone' field in metadata is also commonly used
+                    rt_rw: rtRw,
+                    wa_phone: phone,
                     phone: phone
                 }
             });
