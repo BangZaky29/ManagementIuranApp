@@ -46,6 +46,9 @@ function AuthGate({ children }: { children: React.ReactNode }) {
         const inAdmin = segments[0] === 'admin';
         const inSecurity = segments[0] === 'security';
         const inWarga = segments[0] === '(tabs)';
+        const inProfile = segments[0] === 'profile'; // Add this
+
+        if (inProfile) return; // Allow profile access for all authenticated roles
 
         if (role === 'admin' && !inAdmin) router.replace('/admin');
         else if (role === 'security' && !inSecurity) router.replace('/security');
@@ -69,10 +72,11 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     const isAtAdmin = segments[0] === 'admin';
     const isAtSecurity = segments[0] === 'security';
     const isAtWarga = segments[0] === '(tabs)';
+    const isAtProfile = segments[0] === 'profile'; // Add this
 
-    const isCorrectRoute = (role === 'admin' && isAtAdmin) ||
-      (role === 'security' && isAtSecurity) ||
-      (role === 'warga' && isAtWarga);
+    const isCorrectRoute = (role === 'admin' && (isAtAdmin || isAtProfile)) ||
+      (role === 'security' && (isAtSecurity || isAtProfile)) ||
+      (role === 'warga' && (isAtWarga || isAtProfile));
 
     // Jika sedang di halaman login/auth atau rute salah, tampilkan loading screen
     if (!isCorrectRoute || inAuthGroup) {

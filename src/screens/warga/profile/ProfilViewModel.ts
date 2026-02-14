@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../../contexts/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { supabase } from '../../../lib/supabaseConfig';
 import { decode } from 'base64-arraybuffer';
 
@@ -19,10 +19,13 @@ export const useProfilViewModel = () => {
     // Use real profile data from Supabase, with fallbacks
     const user = {
         name: profile?.full_name || 'Pengguna',
+        username: profile?.username || '-',
+        nik: profile?.nik || '-',
         address: profile?.address || 'Belum diatur',
         rt_rw: profile?.rt_rw || '005/003',
         email: profile?.email || '-',
-        phone: profile?.phone || '-',
+        phone: profile?.wa_phone || '-', // Prioritize WA Phone
+        wa_phone: profile?.wa_phone || '-',
         role: profile?.role || 'warga',
         avatarUrl: profile?.avatar_url || null,
         housingComplexName: profile?.housing_complexes?.name || null,
@@ -108,14 +111,7 @@ export const useProfilViewModel = () => {
     };
 
     const handleHelp = () => {
-        // router.push('/profile/help'); // Placeholder
-        setAlertConfig({
-            title: 'Bantuan',
-            message: 'Hubungi admin RT setempat untuk bantuan lebih lanjut.',
-            type: 'info',
-            buttons: [{ text: 'OK', onPress: hideAlert }]
-        });
-        setAlertVisible(true);
+        router.push('/profile/help');
     };
 
     const handleLogout = () => {

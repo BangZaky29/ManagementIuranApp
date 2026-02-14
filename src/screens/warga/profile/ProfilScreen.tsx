@@ -125,16 +125,18 @@ export default function ProfilScreen() {
                     </TouchableOpacity>
                     <Text style={[styles.userName, { color: colors.green5 }]}>{user.name}</Text>
                     <Text style={[styles.userRole, { color: colors.green4, backgroundColor: colors.green1 }]}>
-                        {user.housingComplexName ? user.housingComplexName : `Warga RT ${user.rt_rw}`}
+                        {user.housingComplexName ? `${user.housingComplexName} | ${user.rt_rw}` : `Warga RT ${user.rt_rw}`}
                     </Text>
                 </Animated.View>
 
                 {/* Personal Info */}
                 <Text style={[styles.sectionTitle, { color: colors.green5 }]}>Informasi Pribadi</Text>
                 <Animated.View entering={FadeInDown.delay(200).duration(500)} style={[styles.infoCard, { backgroundColor: colors.backgroundCard }]}>
+                    {renderInfoItem('card-outline', 'NIK', user.nik)}
+                    {renderInfoItem('person-outline', 'Username', user.username)}
                     {renderInfoItem('home-outline', 'Alamat', user.address)}
                     {renderInfoItem('mail-outline', 'Email', user.email)}
-                    {renderInfoItem('call-outline', 'Nomor Telepon', user.phone)}
+                    {renderInfoItem('logo-whatsapp', 'WhatsApp', user.phone)}
                 </Animated.View>
 
                 {/* Settings Menu */}

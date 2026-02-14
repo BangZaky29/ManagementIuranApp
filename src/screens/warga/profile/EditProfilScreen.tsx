@@ -13,7 +13,8 @@ export default function EditProfilScreen() {
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         full_name: profile?.full_name || '',
-        phone: profile?.phone || '',
+        username: profile?.username || '',
+        wa_phone: profile?.wa_phone || '',
         address: profile?.address || '',
         rt_rw: profile?.rt_rw || '',
     });
@@ -23,12 +24,17 @@ export default function EditProfilScreen() {
             Alert.alert('Error', 'Nama Lengkap tidak boleh kosong');
             return;
         }
+        if (!formData.username.trim()) {
+            Alert.alert('Error', 'Username tidak boleh kosong');
+            return;
+        }
 
         setIsLoading(true);
         try {
             await updateUserProfile({
                 full_name: formData.full_name,
-                phone: formData.phone,
+                username: formData.username,
+                wa_phone: formData.wa_phone,
                 address: formData.address,
                 rt_rw: formData.rt_rw,
             });
@@ -67,11 +73,23 @@ export default function EditProfilScreen() {
                 </View>
 
                 <View style={styles.inputGroup}>
-                    <Text style={[styles.label, { color: colors.textSecondary }]}>Nomor Telepon</Text>
+                    <Text style={[styles.label, { color: colors.textSecondary }]}>Username</Text>
                     <TextInput
                         style={[styles.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]}
-                        value={formData.phone}
-                        onChangeText={(text) => setFormData({ ...formData, phone: text })}
+                        value={formData.username}
+                        onChangeText={(text) => setFormData({ ...formData, username: text })}
+                        placeholder="Username"
+                        placeholderTextColor={colors.textSecondary}
+                        autoCapitalize="none"
+                    />
+                </View>
+
+                <View style={styles.inputGroup}>
+                    <Text style={[styles.label, { color: colors.textSecondary }]}>Nomor WhatsApp</Text>
+                    <TextInput
+                        style={[styles.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]}
+                        value={formData.wa_phone}
+                        onChangeText={(text) => setFormData({ ...formData, wa_phone: text })}
                         placeholder="08xx-xxxx-xxxx"
                         placeholderTextColor={colors.textSecondary}
                         keyboardType="phone-pad"

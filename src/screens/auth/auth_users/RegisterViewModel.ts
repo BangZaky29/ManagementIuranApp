@@ -27,9 +27,12 @@ export function useRegisterViewModel() {
     const [verifiedData, setVerifiedData] = useState<VerifiedData | null>(null);
 
     // Step 2: Registration
+    // Step 2: Registration
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
+    const [address, setAddress] = useState('');
+    const [rtRw, setRtRw] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -94,6 +97,9 @@ export function useRegisterViewModel() {
                     role: data.role,
                     housing_name: data.housing_name
                 });
+                // Pre-fill editable fields
+                setAddress(data.address || '');
+                setRtRw(data.rt_rw || '');
                 setStep(2);
             } else {
                 showAlert('Gagal', 'NIK atau Kode Akses tidak valid, atau sudah terdaftar.', 'error');
@@ -204,8 +210,8 @@ export function useRegisterViewModel() {
                     nik: nik,
                     username: username || '', // Force string
                     wa_phone: phone || '',    // Force string
-                    address: verifiedData.address,
-                    rt_rw: verifiedData.rt_rw,
+                    address: address,
+                    rt_rw: rtRw,
                     role: verifiedData.role,
                     verified: true
                 }
@@ -272,6 +278,8 @@ export function useRegisterViewModel() {
         username, setUsername,
         email, setEmail,
         phone, setPhone,
+        address, setAddress,
+        rtRw, setRtRw,
         password, setPassword,
         confirmPassword, setConfirmPassword,
         errors,

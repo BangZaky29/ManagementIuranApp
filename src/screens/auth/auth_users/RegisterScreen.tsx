@@ -146,6 +146,24 @@ export default function RegisterScreen() {
                                 />
 
                                 <CustomInput
+                                    label="Alamat Lengkap"
+                                    placeholder="Jl. Mawar No. 123"
+                                    value={vm.address}
+                                    onChangeText={vm.setAddress}
+                                    iconName="home-outline"
+                                // error={vm.errors.address} // Add validation if strict
+                                />
+
+                                <CustomInput
+                                    label="RT / RW"
+                                    placeholder="005/003"
+                                    value={vm.rtRw}
+                                    onChangeText={vm.setRtRw}
+                                    iconName="map-outline"
+                                // error={vm.errors.rtRw} // Add validation if strict
+                                />
+
+                                <CustomInput
                                     label="Kata Sandi"
                                     placeholder="Minimal 6 karakter"
                                     value={vm.password}
