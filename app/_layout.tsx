@@ -47,9 +47,11 @@ function AuthGate({ children }: { children: React.ReactNode }) {
         const inSecurity = segments[0] === 'security';
         const inWarga = segments[0] === '(tabs)';
         const inProfile = segments[0] === 'profile';
+        const inLaporan = segments[0] === 'laporan';
+        const inIuran = segments[0] === 'iuran';
         const isAtLogin = (segments[0] as string) === 'login'; // Check if at admin login
 
-        if (inProfile) return;
+        if (inProfile || inLaporan || inIuran) return;
 
         if (role === 'admin' && !inAdmin) router.replace('/admin');
         else if (role === 'security' && !inSecurity) router.replace('/security');
@@ -77,11 +79,13 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     const isAtAdmin = segments[0] === 'admin';
     const isAtSecurity = segments[0] === 'security';
     const isAtWarga = segments[0] === '(tabs)';
-    const isAtProfile = segments[0] === 'profile'; // Add this
+    const isAtProfile = segments[0] === 'profile';
+    const isAtLaporan = segments[0] === 'laporan';
+    const isAtIuran = segments[0] === 'iuran';
 
     const isCorrectRoute = (role === 'admin' && (isAtAdmin || isAtProfile)) ||
       (role === 'security' && (isAtSecurity || isAtProfile)) ||
-      (role === 'warga' && (isAtWarga || isAtProfile));
+      (role === 'warga' && (isAtWarga || isAtProfile || isAtLaporan || isAtIuran));
 
     // Jika sedang di halaman login/auth atau rute salah, tampilkan loading screen
     // PENGECUALIAN: Jika Warga sedang di halaman Login (Admin Login), jangan blokir UI.
