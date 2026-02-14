@@ -65,15 +65,12 @@ export default function LoginScreen() {
 
             // Username lookup logic (Client-side helper)
             if (!loginEmail.includes('@')) {
-                const { supabase } = require('../../../lib/supabaseConfig'); // Dynamic import to avoid cycles or just import top level
+                const { supabase } = require('../../../lib/supabaseConfig');
                 const { data, error } = await supabase
-                    .from('profiles')
-                    .select('email')
-                    .eq('username', loginEmail)
-                    .single();
+                    .rpc('get_email_by_username', { username_input: loginEmail });
 
                 if (error || !data) throw new Error('Username tidak ditemukan');
-                loginEmail = data.email;
+                loginEmail = data;
             }
 
             await signIn({ email: loginEmail, password });
@@ -158,7 +155,7 @@ export default function LoginScreen() {
                         </TouchableOpacity>
 
                         <CustomButton
-                            title="Masuk"
+                            title="Masuk Sebagai Admin"
                             onPress={handleLogin}
                             loading={isLoading}
                             style={styles.loginButton}

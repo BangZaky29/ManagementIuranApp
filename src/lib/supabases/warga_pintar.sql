@@ -62,7 +62,6 @@ CREATE TABLE public.profiles (
   id uuid NOT NULL,
   full_name text NOT NULL,
   email text NOT NULL,
-  phone text,
   role USER-DEFINED NOT NULL DEFAULT 'warga'::user_role,
   address text,
   rt_rw text,

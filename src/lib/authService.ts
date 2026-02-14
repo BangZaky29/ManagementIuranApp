@@ -90,15 +90,12 @@ export async function signInWithEmailOrUsername({ identifier, password }: { iden
     // Simple check: if no '@', assume username
     if (!identifier.includes('@')) {
         const { data, error } = await supabase
-            .from('profiles')
-            .select('email')
-            .eq('username', identifier)
-            .single();
+            .rpc('get_email_by_username', { username_input: identifier });
 
         if (error || !data) {
             throw new Error('Username tidak ditemukan.');
         }
-        email = data.email;
+        email = data;
     }
 
     return signInWithEmail({ email, password });

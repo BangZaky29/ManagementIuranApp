@@ -22,6 +22,16 @@
     {
         "schemaname": "public",
         "tablename": "housing_complexes",
+        "policyname": "Enable read access for authenticated users",
+        "permissive": "PERMISSIVE",
+        "roles": "{authenticated}",
+        "operation": "SELECT",
+        "using_expression": "true",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "housing_complexes",
         "policyname": "Enable insert for admins safe",
         "permissive": "PERMISSIVE",
         "roles": "{public}",
@@ -31,12 +41,22 @@
     },
     {
         "schemaname": "public",
-        "tablename": "housing_complexes",
-        "policyname": "Enable read access for authenticated users",
+        "tablename": "news",
+        "policyname": "Enable update for authenticated users only",
         "permissive": "PERMISSIVE",
-        "roles": "{authenticated}",
-        "operation": "SELECT",
-        "using_expression": "true",
+        "roles": "{public}",
+        "operation": "UPDATE",
+        "using_expression": "(auth.role() = 'authenticated'::text)",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "news",
+        "policyname": "Enable delete for authenticated users only",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "operation": "DELETE",
+        "using_expression": "(auth.role() = 'authenticated'::text)",
         "check_expression": null
     },
     {
@@ -52,42 +72,12 @@
     {
         "schemaname": "public",
         "tablename": "news",
-        "policyname": "Enable update for authenticated users only",
-        "permissive": "PERMISSIVE",
-        "roles": "{public}",
-        "operation": "UPDATE",
-        "using_expression": "(auth.role() = 'authenticated'::text)",
-        "check_expression": null
-    },
-    {
-        "schemaname": "public",
-        "tablename": "news",
         "policyname": "Enable insert for authenticated users only",
         "permissive": "PERMISSIVE",
         "roles": "{public}",
         "operation": "INSERT",
         "using_expression": null,
         "check_expression": "(auth.role() = 'authenticated'::text)"
-    },
-    {
-        "schemaname": "public",
-        "tablename": "news",
-        "policyname": "Enable delete for authenticated users only",
-        "permissive": "PERMISSIVE",
-        "roles": "{public}",
-        "operation": "DELETE",
-        "using_expression": "(auth.role() = 'authenticated'::text)",
-        "check_expression": null
-    },
-    {
-        "schemaname": "public",
-        "tablename": "panic_logs",
-        "policyname": "Users can trigger panic",
-        "permissive": "PERMISSIVE",
-        "roles": "{public}",
-        "operation": "INSERT",
-        "using_expression": null,
-        "check_expression": "(auth.uid() = user_id)"
     },
     {
         "schemaname": "public",
@@ -101,13 +91,13 @@
     },
     {
         "schemaname": "public",
-        "tablename": "payments",
-        "policyname": "Payment Isolation",
+        "tablename": "panic_logs",
+        "policyname": "Users can trigger panic",
         "permissive": "PERMISSIVE",
-        "roles": "{authenticated}",
-        "operation": "SELECT",
-        "using_expression": "((user_id = auth.uid()) OR ((( SELECT profiles.role\n   FROM profiles\n  WHERE (profiles.id = auth.uid())) = 'admin'::user_role) AND (( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = payments.user_id)) = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid())))))",
-        "check_expression": null
+        "roles": "{public}",
+        "operation": "INSERT",
+        "using_expression": null,
+        "check_expression": "(auth.uid() = user_id)"
     },
     {
         "schemaname": "public",
@@ -132,11 +122,31 @@
     {
         "schemaname": "public",
         "tablename": "payments",
+        "policyname": "Payment Isolation",
+        "permissive": "PERMISSIVE",
+        "roles": "{authenticated}",
+        "operation": "SELECT",
+        "using_expression": "((user_id = auth.uid()) OR ((( SELECT profiles.role\n   FROM profiles\n  WHERE (profiles.id = auth.uid())) = 'admin'::user_role) AND (( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = payments.user_id)) = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid())))))",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "payments",
         "policyname": "Admins can manage payments",
         "permissive": "PERMISSIVE",
         "roles": "{public}",
         "operation": "ALL",
         "using_expression": "is_admin()",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "profiles",
+        "policyname": "Users can update own profile",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "operation": "UPDATE",
+        "using_expression": "(auth.uid() = id)",
         "check_expression": null
     },
     {
@@ -152,37 +162,7 @@
     {
         "schemaname": "public",
         "tablename": "profiles",
-        "policyname": "Profiles are viewable by everyone",
-        "permissive": "PERMISSIVE",
-        "roles": "{public}",
-        "operation": "SELECT",
-        "using_expression": "true",
-        "check_expression": null
-    },
-    {
-        "schemaname": "public",
-        "tablename": "profiles",
-        "policyname": "View Profiles",
-        "permissive": "PERMISSIVE",
-        "roles": "{public}",
-        "operation": "SELECT",
-        "using_expression": "((auth.uid() = id) OR is_admin())",
-        "check_expression": null
-    },
-    {
-        "schemaname": "public",
-        "tablename": "profiles",
-        "policyname": "Update Profiles",
-        "permissive": "PERMISSIVE",
-        "roles": "{public}",
-        "operation": "UPDATE",
-        "using_expression": "((auth.uid() = id) OR is_admin())",
-        "check_expression": null
-    },
-    {
-        "schemaname": "public",
-        "tablename": "profiles",
-        "policyname": "Insert Profiles",
+        "policyname": "Insert Profiles Safe",
         "permissive": "PERMISSIVE",
         "roles": "{public}",
         "operation": "INSERT",
@@ -192,21 +172,21 @@
     {
         "schemaname": "public",
         "tablename": "profiles",
-        "policyname": "Users can update own profile",
+        "policyname": "View Profiles Safe",
         "permissive": "PERMISSIVE",
         "roles": "{public}",
-        "operation": "UPDATE",
-        "using_expression": "(auth.uid() = id)",
+        "operation": "SELECT",
+        "using_expression": "((auth.uid() = id) OR is_admin())",
         "check_expression": null
     },
     {
         "schemaname": "public",
-        "tablename": "reports",
-        "policyname": "Users can view own reports",
+        "tablename": "profiles",
+        "policyname": "Update Profiles Safe",
         "permissive": "PERMISSIVE",
         "roles": "{public}",
-        "operation": "SELECT",
-        "using_expression": "(auth.uid() = user_id)",
+        "operation": "UPDATE",
+        "using_expression": "((auth.uid() = id) OR is_admin())",
         "check_expression": null
     },
     {
@@ -222,17 +202,17 @@
     {
         "schemaname": "public",
         "tablename": "reports",
-        "policyname": "Staff can manage reports",
+        "policyname": "Users can view own reports",
         "permissive": "PERMISSIVE",
         "roles": "{public}",
-        "operation": "ALL",
-        "using_expression": "(is_admin() OR is_security())",
+        "operation": "SELECT",
+        "using_expression": "(auth.uid() = user_id)",
         "check_expression": null
     },
     {
         "schemaname": "public",
         "tablename": "reports",
-        "policyname": "Users can insert own reports",
+        "policyname": "Users can create reports",
         "permissive": "PERMISSIVE",
         "roles": "{public}",
         "operation": "INSERT",
@@ -252,6 +232,16 @@
     {
         "schemaname": "public",
         "tablename": "reports",
+        "policyname": "Users can insert own reports",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "operation": "INSERT",
+        "using_expression": null,
+        "check_expression": "(auth.uid() = user_id)"
+    },
+    {
+        "schemaname": "public",
+        "tablename": "reports",
         "policyname": "Users can update own reports",
         "permissive": "PERMISSIVE",
         "roles": "{public}",
@@ -262,12 +252,12 @@
     {
         "schemaname": "public",
         "tablename": "reports",
-        "policyname": "Users can create reports",
+        "policyname": "Staff can manage reports",
         "permissive": "PERMISSIVE",
         "roles": "{public}",
-        "operation": "INSERT",
-        "using_expression": null,
-        "check_expression": "(auth.uid() = user_id)"
+        "operation": "ALL",
+        "using_expression": "(is_admin() OR is_security())",
+        "check_expression": null
     },
     {
         "schemaname": "public",
@@ -283,6 +273,16 @@
         "schemaname": "public",
         "tablename": "verified_residents",
         "policyname": "Admins can manage verified_residents_safe",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "operation": "ALL",
+        "using_expression": "is_admin()",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "verified_residents",
+        "policyname": "Admin Verify Safe",
         "permissive": "PERMISSIVE",
         "roles": "{public}",
         "operation": "ALL",

@@ -21,7 +21,8 @@ export default function RegisterAdminScreen() {
     const [fullName, setFullName] = useState('');
     const [username, setUsername] = useState(''); // Added
     const [phone, setPhone] = useState('');
-    const [address, setAddress] = useState(''); // Added
+    const [address, setAddress] = useState('');
+    const [rtRw, setRtRw] = useState(''); // Added RT/RW
     const [complexName, setComplexName] = useState('');
     const [complexAddress, setComplexAddress] = useState('');
 
@@ -49,8 +50,14 @@ export default function RegisterAdminScreen() {
     };
 
     const handleRegister = async () => {
-        if (!email.trim() || !password || !confirmPassword || !fullName || !complexName || !username || !address) {
-            showAlert('Perhatian', 'Mohon lengkapi semua data wajib (Nama, Username, Alamat, Cluster, Email, Password)', 'warning');
+        // Validation
+        if (!email.includes('@')) {
+            showAlert('Validasi Email', 'Mohon masukkan format email yang benar (harus ada @).', 'warning');
+            return;
+        }
+
+        if (!email.trim() || !password || !confirmPassword || !fullName || !complexName || !username || !address || !rtRw) {
+            showAlert('Perhatian', 'Mohon lengkapi semua data wajib (Nama, Username, Alamat, Cluster, RT/RW, Email, Password)', 'warning');
             return;
         }
 
@@ -72,15 +79,17 @@ export default function RegisterAdminScreen() {
                 email: email.trim(),
                 password,
                 fullName: fullName,
-                phone: phone,
+                phone: phone, // Auth service needs this for standard field
                 role: 'admin',
                 metadata: {
                     complex_name: complexName,
                     complex_address: complexAddress,
-                    username: username,    // Added
-                    address: address,      // Added
-                    wa_phone: phone,       // Mapped from phone input
-                    phone: phone           // Ensure phone is also in metadata if needed by trigger, though auth.users handles it too
+                    username: username,
+                    address: address,
+                    rt_rw: rtRw,          // Added
+                    wa_phone: phone,      // Explicitly map inputs to wa_phone as requested
+                    // 'phone' field in metadata is also commonly used
+                    phone: phone
                 }
             });
 
@@ -164,10 +173,11 @@ export default function RegisterAdminScreen() {
 
                         <CustomInput
                             label="Nama Cluster / Apartemen"
-                            placeholder="Contoh: Green Valley Residence"
+                            placeholder="GREEN VALLEY RESIDENCE"
                             value={complexName}
-                            onChangeText={setComplexName}
+                            onChangeText={(text) => setComplexName(text.toUpperCase())}
                             iconName="business-outline"
+                            autoCapitalize="characters"
                         />
                         <CustomInput
                             label="Alamat Cluster"
@@ -175,6 +185,13 @@ export default function RegisterAdminScreen() {
                             value={complexAddress}
                             onChangeText={setComplexAddress}
                             iconName="location-outline"
+                        />
+                        <CustomInput
+                            label="RT / RW / No. Unit"
+                            placeholder="Contoh: RT 005 / RW 010 / Apt Lt.10"
+                            value={rtRw}
+                            onChangeText={setRtRw}
+                            iconName="map-outline"
                         />
 
                         <View style={{ height: 1, backgroundColor: '#E0E0E0', marginVertical: 16 }} />
@@ -189,6 +206,7 @@ export default function RegisterAdminScreen() {
                             iconName="mail-outline"
                             autoCapitalize="none"
                         />
+
                         <CustomInput
                             label="Kata Sandi"
                             placeholder="Minimal 6 karakter"
@@ -198,6 +216,20 @@ export default function RegisterAdminScreen() {
                             iconName="lock-closed-outline"
                             autoCapitalize="none"
                         />
+                        {/* Password Strength Indicator */}
+                        {password.length > 0 && (
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, marginLeft: 4 }}>
+                                <Text style={{ fontSize: 12, color: Colors.textSecondary, marginRight: 8 }}>Kekuatan:</Text>
+                                <Text style={{
+                                    fontSize: 12,
+                                    fontWeight: 'bold',
+                                    color: password.length < 6 ? Colors.danger : (password.length < 8 ? Colors.warning : Colors.success)
+                                }}>
+                                    {password.length < 6 ? 'Sangat Lemah (Kurang dari 6 karakter!)' : (password.length < 8 ? 'Sedang (Medium)' : 'Kuat (High)')}
+                                </Text>
+                            </View>
+                        )}
+
                         <CustomInput
                             label="Konfirmasi Kata Sandi"
                             placeholder="Ulangi kata sandi"
@@ -207,6 +239,23 @@ export default function RegisterAdminScreen() {
                             iconName="lock-closed-outline"
                             autoCapitalize="none"
                         />
+                        {/* Password Match Indicator */}
+                        {confirmPassword.length > 0 && (
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, marginLeft: 4 }}>
+                                <Ionicons
+                                    name={password === confirmPassword ? "checkmark-circle" : "close-circle"}
+                                    size={16}
+                                    color={password === confirmPassword ? Colors.success : Colors.danger}
+                                />
+                                <Text style={{
+                                    fontSize: 12,
+                                    marginLeft: 6,
+                                    color: password === confirmPassword ? Colors.success : Colors.danger
+                                }}>
+                                    {password === confirmPassword ? 'Password Cocok' : 'Password Belum Cocok'}
+                                </Text>
+                            </View>
+                        )}
 
                         <CustomButton
                             title="Daftar & Buat Cluster"
