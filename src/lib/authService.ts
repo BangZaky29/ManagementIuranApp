@@ -79,6 +79,31 @@ export async function signInWithEmail({ email, password }: SignInData) {
     return data;
 }
 
+
+/**
+ * Sign in with Email OR Username.
+ * If input is not an email, lookup email from profiles first.
+ */
+export async function signInWithEmailOrUsername({ identifier, password }: { identifier: string; password: string }) {
+    let email = identifier;
+
+    // Simple check: if no '@', assume username
+    if (!identifier.includes('@')) {
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('email')
+            .eq('username', identifier)
+            .single();
+
+        if (error || !data) {
+            throw new Error('Username tidak ditemukan.');
+        }
+        email = data.email;
+    }
+
+    return signInWithEmail({ email, password });
+}
+
 /**
  * Sign in with Google OAuth using expo-web-browser.
  * Opens a browser for Google login, then handles the callback.

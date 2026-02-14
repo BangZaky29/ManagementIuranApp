@@ -183,7 +183,7 @@ export default function RegisterScreen() {
 
                         <View style={styles.loginContainer}>
                             <Text style={styles.loginText}>Sudah punya akun? </Text>
-                            <TouchableOpacity onPress={() => router.push('/login')}>
+                            <TouchableOpacity onPress={() => router.push('/login-warga')}>
                                 <Text style={styles.loginLink}>Masuk</Text>
                             </TouchableOpacity>
                         </View>

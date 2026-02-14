@@ -16,6 +16,13 @@ export default function RegisterAdminScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+
+    // New Fields
+    const [fullName, setFullName] = useState('');
+    const [phone, setPhone] = useState('');
+    const [complexName, setComplexName] = useState('');
+    const [complexAddress, setComplexAddress] = useState('');
+
     const [isLoading, setIsLoading] = useState(false);
 
     // Alert State
@@ -40,8 +47,8 @@ export default function RegisterAdminScreen() {
     };
 
     const handleRegister = async () => {
-        if (!email.trim() || !password || !confirmPassword) {
-            showAlert('Perhatian', 'Mohon lengkapi semua data', 'warning');
+        if (!email.trim() || !password || !confirmPassword || !fullName || !complexName) {
+            showAlert('Perhatian', 'Mohon lengkapi semua data wajib (Nama, Cluster, Email, Password)', 'warning');
             return;
         }
 
@@ -62,9 +69,13 @@ export default function RegisterAdminScreen() {
             const { needsConfirmation } = await signUp({
                 email: email.trim(),
                 password,
-                fullName: 'Administrator', // Default name
-                phone: '', // Optional for admin
-                role: 'admin'
+                fullName: fullName,
+                phone: phone,
+                role: 'admin',
+                metadata: {
+                    complex_name: complexName,
+                    complex_address: complexAddress
+                }
             });
 
             if (needsConfirmation) {
@@ -112,6 +123,43 @@ export default function RegisterAdminScreen() {
 
                     <View style={styles.formContainer}>
                         <CustomInput
+                            label="Nama Lengkap"
+                            placeholder="Nama Anda"
+                            value={fullName}
+                            onChangeText={setFullName}
+                            iconName="person-outline"
+                        />
+                        <CustomInput
+                            label="No. WhatsApp"
+                            placeholder="08xxxxxxxxxx"
+                            value={phone}
+                            onChangeText={setPhone}
+                            keyboardType="phone-pad"
+                            iconName="call-outline"
+                        />
+
+                        <View style={{ height: 1, backgroundColor: '#E0E0E0', marginVertical: 16 }} />
+                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: Colors.green5, marginBottom: 12 }}>Data Perumahan / Cluster</Text>
+
+                        <CustomInput
+                            label="Nama Cluster / Apartemen"
+                            placeholder="Contoh: Green Valley Residence"
+                            value={complexName}
+                            onChangeText={setComplexName}
+                            iconName="business-outline"
+                        />
+                        <CustomInput
+                            label="Alamat Lengkap"
+                            placeholder="Alamat Cluster"
+                            value={complexAddress}
+                            onChangeText={setComplexAddress}
+                            iconName="location-outline"
+                        />
+
+                        <View style={{ height: 1, backgroundColor: '#E0E0E0', marginVertical: 16 }} />
+                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: Colors.green5, marginBottom: 12 }}>Akun Login</Text>
+
+                        <CustomInput
                             label="Email"
                             placeholder="contoh@email.com"
                             value={email}
@@ -140,7 +188,7 @@ export default function RegisterAdminScreen() {
                         />
 
                         <CustomButton
-                            title="Daftar Sekarang"
+                            title="Daftar & Buat Cluster"
                             onPress={handleRegister}
                             loading={isLoading}
                             style={styles.loginButton}

@@ -76,10 +76,11 @@ function RootLayoutInner() {
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="login" options={{ headerShown: false }} />
+          <Stack.Screen name="login-warga" options={{ headerShown: false }} />
           <Stack.Screen name="register" options={{ headerShown: false }} />
           <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
           <Stack.Screen name="register-admin" options={{ headerShown: false }} />
-          {/* login-warga removed */}
+
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
           <Stack.Screen name="iuran" options={{ headerShown: false }} />
           <Stack.Screen name="profile" options={{ headerShown: false }} />

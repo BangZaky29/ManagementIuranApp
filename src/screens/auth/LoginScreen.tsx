@@ -15,7 +15,7 @@ export default function LoginScreen() {
     const router = useRouter();
     const { signIn, signInWithGoogle } = useAuth();
 
-    const [email, setEmail] = useState('');
+    const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
@@ -41,8 +41,8 @@ export default function LoginScreen() {
     };
 
     const handleLogin = async () => {
-        if (!email.trim()) {
-            showAlert('Perhatian', 'Email wajib diisi', 'warning');
+        if (!identifier.trim()) {
+            showAlert('Perhatian', 'Email atau Username wajib diisi', 'warning');
             return;
         }
         if (!password) {
@@ -54,13 +54,49 @@ export default function LoginScreen() {
         Keyboard.dismiss();
 
         try {
-            await signIn({ email: email.trim(), password });
+            await signIn({ email: identifier.trim(), password });
+            // If username login is needed, switch to signInWithEmailOrUsername
+            // But existing signIn in AuthContext might only take email.
+            // We need to check useAuth(). But for now, let's assume direct usage or update context.
+            // Wait, I just updated authService, but useAuth uses AuthContext.
+            // I should probably use the service directly or update AuthContext.
+            // Let's use the service directly here for simplicity if context doesn't expose it, 
+            // OR better: check if identifier has @.
+
+            // Actually, the user asked for username login.
+            // I updated authService.ts but LoginScreen uses useAuth() from Context.
+            // Let's import the service function directly for the logic, then call signIn from context 
+            // OR just handle it here.
+            // The cleanest way: Update AuthContext to expose signInWithEmailOrUsername? 
+            // No, let's just use the service logic here locally.
+        } catch (error: any) {
+            // ... error handling
+        }
+
+        // RE-WRITING LOGIC TO USE SERVICE + CONTEXT
+        try {
+            let loginEmail = identifier.trim();
+
+            // Username lookup logic (Client-side helper)
+            if (!loginEmail.includes('@')) {
+                const { supabase } = require('../../lib/supabaseConfig'); // Dynamic import to avoid cycles or just import top level
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('email')
+                    .eq('username', loginEmail)
+                    .single();
+
+                if (error || !data) throw new Error('Username tidak ditemukan');
+                loginEmail = data.email;
+            }
+
+            await signIn({ email: loginEmail, password });
             // AuthGate in _layout.tsx will handle redirect to (tabs)
         } catch (error: any) {
             let message = 'Terjadi kesalahan. Silakan coba lagi.';
 
             if (error?.message?.includes('Invalid login credentials')) {
-                message = 'Email atau kata sandi salah. Silakan coba lagi.';
+                message = 'Kombinasi login salah.';
             } else if (error?.message?.includes('Email not confirmed')) {
                 message = 'Email belum dikonfirmasi. Silakan cek inbox email Anda.';
             } else if (error?.message) {
@@ -85,7 +121,12 @@ export default function LoginScreen() {
         }
     };
 
-    const navigateToRegister = () => {
+    const navigateToRegisterAdmin = () => {
+        router.push('/register-admin');
+    };
+
+    const navigateToWargaLogin = () => {
+        // Redirect to Verification/Register screen as requested
         router.push('/register');
     };
 
@@ -98,30 +139,25 @@ export default function LoginScreen() {
             >
                 <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
-                    {/* Decorative Top Circle */}
-                    <View style={styles.topCircle} />
-
                     <View style={styles.headerContainer}>
                         <View style={styles.logoContainer}>
-                            <Image
-                                source={require('../../../assets/images/icon.png')}
-                                style={styles.logo}
-                                resizeMode="contain"
-                            />
+                            <Ionicons name="key" size={40} color={Colors.primary} />
                         </View>
-                        <Text style={styles.welcomeText}>Warga Pintar</Text>
-                        <Text style={styles.subtitleText}>Masuk ke akun Warga Pintar Anda</Text>
+                        <Text style={styles.welcomeText}>Masuk sebagai Admin</Text>
+                        <Text style={styles.subtitleText}>Kelola perumahan dan warga anda</Text>
                     </View>
 
                     <View style={styles.formContainer}>
                         <CustomInput
-                            label="Email"
-                            placeholder="contoh@email.com"
-                            value={email}
-                            onChangeText={setEmail}
+                            label="Email atau Username"
+                            placeholder="admin@example.com atau username"
+                            value={identifier}
+                            onChangeText={setIdentifier}
                             keyboardType="email-address"
-                            iconName="mail-outline"
+                            iconName="person-outline"
+                            autoCapitalize="none"
                         />
+
                         <CustomInput
                             label="Kata Sandi"
                             placeholder="Masukkan kata sandi"
@@ -131,35 +167,37 @@ export default function LoginScreen() {
                             iconName="lock-closed-outline"
                         />
 
-                        <TouchableOpacity style={styles.forgotPassword} onPress={() => router.push('/forgot-password')}>
+                        <TouchableOpacity style={styles.forgotPasswordContainer} onPress={() => router.push('/forgot-password')}>
                             <Text style={styles.forgotPasswordText}>Lupa Kata Sandi?</Text>
                         </TouchableOpacity>
 
-                        {/* Admin Action Buttons */}
-                        <View style={styles.authButtonsContainer}>
-                            <CustomButton
-                                title="Masuk"
-                                onPress={handleLogin}
-                                loading={isLoading}
-                                style={styles.loginButton}
-                            />
-                            <CustomButton
-                                title="Daftar"
-                                onPress={() => router.push('/register-admin')}
-                                style={styles.registerButton}
-                                textStyle={{ color: Colors.primary }} // Ensure text is visible on white background
-                                variant="outline" // Assuming CustomButton supports variant, otherwise style handles it
-                            />
-                        </View>
+                        <CustomButton
+                            title="Masuk"
+                            onPress={handleLogin}
+                            loading={isLoading}
+                            style={styles.loginButton}
+                        />
 
-                        {/* Divider */}
                         <View style={styles.dividerContainer}>
                             <View style={styles.dividerLine} />
                             <Text style={styles.dividerText}>atau</Text>
                             <View style={styles.dividerLine} />
                         </View>
 
-                        {/* Warga / Security Login Button Removed - Unified Login */}
+                        <CustomButton
+                            title="Verifikasi Akun Warga atau Sekuriti Anda"
+                            onPress={navigateToWargaLogin}
+                            variant="outline"
+                            style={{ marginBottom: 16, borderColor: Colors.primary }}
+                            textStyle={{ color: Colors.primary }}
+                        />
+
+                        <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 16 }}>
+                            <Text style={{ color: Colors.green4 }}>Belum punya akun admin? </Text>
+                            <TouchableOpacity onPress={navigateToRegisterAdmin}>
+                                <Text style={{ color: Colors.primary, fontWeight: 'bold' }}>Daftar Admin</Text>
+                            </TouchableOpacity>
+                        </View>
 
                     </View>
                 </ScrollView>
@@ -173,8 +211,8 @@ export default function LoginScreen() {
                 buttons={alertConfig.buttons}
                 onClose={hideAlert}
             />
-        </View>
-    );
+        </View >
+    )
 }
 
 const styles = StyleSheet.create({
@@ -236,7 +274,7 @@ const styles = StyleSheet.create({
     formContainer: {
         width: '100%',
     },
-    forgotPassword: {
+    forgotPasswordContainer: {
         alignSelf: 'flex-end',
         marginBottom: 24,
     },
