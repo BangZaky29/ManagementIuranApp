@@ -106,7 +106,6 @@ export default function ManageUsersScreen() {
                 await createVerifiedResident({
                     nik,
                     full_name: fullName,
-                    address: null,
                     rt_rw: rtRw || '005/003',
                     role,
                     housing_complex_id: selectedComplexId,

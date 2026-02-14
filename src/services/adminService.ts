@@ -4,7 +4,6 @@ export interface VerifiedResident {
     id: string;
     nik: string;
     full_name: string;
-    address: string | null;
     rt_rw: string;
     role: 'warga' | 'security';
     description?: string;
