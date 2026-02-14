@@ -22,6 +22,16 @@
     {
         "schemaname": "public",
         "tablename": "housing_complexes",
+        "policyname": "Enable insert for admins safe",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "operation": "INSERT",
+        "using_expression": null,
+        "check_expression": "is_admin()"
+    },
+    {
+        "schemaname": "public",
+        "tablename": "housing_complexes",
         "policyname": "Enable read access for authenticated users",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
@@ -31,13 +41,13 @@
     },
     {
         "schemaname": "public",
-        "tablename": "housing_complexes",
-        "policyname": "Enable insert for admins",
+        "tablename": "news",
+        "policyname": "Enable read access for all users",
         "permissive": "PERMISSIVE",
-        "roles": "{authenticated}",
-        "operation": "INSERT",
-        "using_expression": null,
-        "check_expression": "(EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.id = auth.uid()) AND (profiles.role = 'admin'::user_role))))"
+        "roles": "{public}",
+        "operation": "SELECT",
+        "using_expression": "true",
+        "check_expression": null
     },
     {
         "schemaname": "public",
@@ -46,16 +56,6 @@
         "permissive": "PERMISSIVE",
         "roles": "{public}",
         "operation": "UPDATE",
-        "using_expression": "(auth.role() = 'authenticated'::text)",
-        "check_expression": null
-    },
-    {
-        "schemaname": "public",
-        "tablename": "news",
-        "policyname": "Enable delete for authenticated users only",
-        "permissive": "PERMISSIVE",
-        "roles": "{public}",
-        "operation": "DELETE",
         "using_expression": "(auth.role() = 'authenticated'::text)",
         "check_expression": null
     },
@@ -72,11 +72,11 @@
     {
         "schemaname": "public",
         "tablename": "news",
-        "policyname": "Enable read access for all users",
+        "policyname": "Enable delete for authenticated users only",
         "permissive": "PERMISSIVE",
         "roles": "{public}",
-        "operation": "SELECT",
-        "using_expression": "true",
+        "operation": "DELETE",
+        "using_expression": "(auth.role() = 'authenticated'::text)",
         "check_expression": null
     },
     {
@@ -142,12 +142,12 @@
     {
         "schemaname": "public",
         "tablename": "profiles",
-        "policyname": "Admin can see residents in their complex",
+        "policyname": "Users can insert own profile",
         "permissive": "PERMISSIVE",
-        "roles": "{authenticated}",
-        "operation": "SELECT",
-        "using_expression": "(((( SELECT profiles_1.role\n   FROM profiles profiles_1\n  WHERE (profiles_1.id = auth.uid())) = 'admin'::user_role) AND (housing_complex_id = ( SELECT profiles_1.housing_complex_id\n   FROM profiles profiles_1\n  WHERE (profiles_1.id = auth.uid())))) OR (id = auth.uid()))",
-        "check_expression": null
+        "roles": "{public}",
+        "operation": "INSERT",
+        "using_expression": null,
+        "check_expression": "(auth.uid() = id)"
     },
     {
         "schemaname": "public",
@@ -162,17 +162,27 @@
     {
         "schemaname": "public",
         "tablename": "profiles",
-        "policyname": "Users can update own profile",
+        "policyname": "View Profiles",
         "permissive": "PERMISSIVE",
         "roles": "{public}",
-        "operation": "UPDATE",
-        "using_expression": "(auth.uid() = id)",
+        "operation": "SELECT",
+        "using_expression": "((auth.uid() = id) OR is_admin())",
         "check_expression": null
     },
     {
         "schemaname": "public",
         "tablename": "profiles",
-        "policyname": "Users can insert own profile",
+        "policyname": "Update Profiles",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "operation": "UPDATE",
+        "using_expression": "((auth.uid() = id) OR is_admin())",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "profiles",
+        "policyname": "Insert Profiles",
         "permissive": "PERMISSIVE",
         "roles": "{public}",
         "operation": "INSERT",
@@ -181,12 +191,12 @@
     },
     {
         "schemaname": "public",
-        "tablename": "reports",
-        "policyname": "Public read access",
+        "tablename": "profiles",
+        "policyname": "Users can update own profile",
         "permissive": "PERMISSIVE",
         "roles": "{public}",
-        "operation": "SELECT",
-        "using_expression": "true",
+        "operation": "UPDATE",
+        "using_expression": "(auth.uid() = id)",
         "check_expression": null
     },
     {
@@ -232,11 +242,11 @@
     {
         "schemaname": "public",
         "tablename": "reports",
-        "policyname": "Report Isolation",
+        "policyname": "Public read access",
         "permissive": "PERMISSIVE",
-        "roles": "{authenticated}",
-        "operation": "ALL",
-        "using_expression": "((user_id = auth.uid()) OR ((( SELECT profiles.role\n   FROM profiles\n  WHERE (profiles.id = auth.uid())) = 'admin'::user_role) AND (( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = reports.user_id)) = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid())))))",
+        "roles": "{public}",
+        "operation": "SELECT",
+        "using_expression": "true",
         "check_expression": null
     },
     {
@@ -261,22 +271,22 @@
     },
     {
         "schemaname": "public",
-        "tablename": "verified_residents",
-        "policyname": "Enable update for admins",
+        "tablename": "reports",
+        "policyname": "Report Isolation",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
-        "operation": "UPDATE",
-        "using_expression": "(EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.id = auth.uid()) AND (profiles.role = 'admin'::user_role))))",
+        "operation": "ALL",
+        "using_expression": "((user_id = auth.uid()) OR ((( SELECT profiles.role\n   FROM profiles\n  WHERE (profiles.id = auth.uid())) = 'admin'::user_role) AND (( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = reports.user_id)) = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid())))))",
         "check_expression": null
     },
     {
         "schemaname": "public",
         "tablename": "verified_residents",
-        "policyname": "Admins can manage verified_residents",
+        "policyname": "Admins can manage verified_residents_safe",
         "permissive": "PERMISSIVE",
         "roles": "{public}",
         "operation": "ALL",
-        "using_expression": "(EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.id = auth.uid()) AND (profiles.role = 'admin'::user_role))))",
+        "using_expression": "is_admin()",
         "check_expression": null
     }
 ]
