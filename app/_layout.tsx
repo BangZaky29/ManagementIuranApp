@@ -22,45 +22,42 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const segments = useSegments();
   const router = useRouter();
 
+  // 1. Ambil Role secepat mungkin
+  const role = user?.user_metadata?.role || profile?.role || 'warga';
+
+  // 2. Tentukan grup halaman
+  const inAuthGroup = segments[0] === 'login' ||
+    segments[0] === 'login-warga' ||
+    segments[0] === 'register' ||
+    segments[0] === 'register-admin' ||
+    segments[0] === 'forgot-password';
+
   useEffect(() => {
     if (isLoading) return;
 
-    // Gunakan metadata role (jalur cepat) atau database role
-    const role = user?.user_metadata?.role || profile?.role || 'warga';
-
-    const inAuthGroup =
-      segments[0] === 'login' ||
-      segments[0] === 'login-warga' ||
-      segments[0] === 'register' ||
-      segments[0] === 'register-admin' ||
-      segments[0] === 'forgot-password';
-
     if (!isAuthenticated) {
-      // Jika tidak login dan tidak di halaman login, buang ke /login
-      if (!inAuthGroup) {
-        router.replace('/login');
-      }
+      if (!inAuthGroup) router.replace('/login');
     } else {
-      // User sudah login
+      // Logika Redirect Role
       if (inAuthGroup) {
-        // Jika nekat buka halaman login saat sudah login, arahkan ke dashboard yang benar
         if (role === 'admin') router.replace('/admin');
         else if (role === 'security') router.replace('/security');
         else router.replace('/(tabs)');
       } else {
         // Proteksi Cross-Role
-        const inAdminGroup = segments[0] === 'admin';
-        const inSecurityGroup = segments[0] === 'security';
-        const inWargaGroup = segments[0] === '(tabs)';
+        const inAdmin = segments[0] === 'admin';
+        const inSecurity = segments[0] === 'security';
+        const inWarga = segments[0] === '(tabs)';
 
-        if (role === 'admin' && !inAdminGroup) router.replace('/admin');
-        else if (role === 'security' && !inSecurityGroup) router.replace('/security');
-        else if (role === 'warga' && !inWargaGroup) router.replace('/(tabs)');
+        if (role === 'admin' && !inAdmin) router.replace('/admin');
+        if (role === 'security' && !inSecurity) router.replace('/security');
+        if (role === 'warga' && !inWarga) router.replace('/(tabs)');
       }
     }
-  }, [isAuthenticated, isLoading, segments, profile, user]);
+  }, [isAuthenticated, isLoading, segments, role]);
 
-  // 1. Tampilkan loading saat cek session
+  // KUNCI PERBAIKAN: 
+  // Jangan render apapun jika masih loading
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#EEF2E3' }}>
@@ -69,18 +66,21 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // 2. CEGAH KEDIPAN (FLASHING):
-  // Jika tidak login dan sedang tidak di halaman login, 
-  // kembalikan layar kosong/loading selama proses router.replace berjalan.
-  const inAuthGroup =
-    segments[0] === 'login' ||
-    segments[0] === 'login-warga' ||
-    segments[0] === 'register' ||
-    segments[0] === 'register-admin' ||
-    segments[0] === 'forgot-password';
+  // CEGAH SPLIT/FLASH: 
+  // Jika sudah login tapi segmen saat ini belum sesuai dengan role, 
+  // tahan rendering (tampilkan loading saja) sampai router.replace selesai.
+  if (isAuthenticated) {
+    const isReady = (role === 'admin' && segments[0] === 'admin') ||
+      (role === 'security' && segments[0] === 'security') ||
+      (role === 'warga' && segments[0] === '(tabs)');
 
-  if (!isAuthenticated && !inAuthGroup) {
-    return <View style={{ flex: 1, backgroundColor: '#EEF2E3' }} />;
+    if (!isReady && !inAuthGroup) {
+      return (
+        <View style={{ flex: 1, justifyContent: 'center', backgroundColor: '#EEF2E3' }}>
+          <ActivityIndicator size="small" color="#78C51C" />
+        </View>
+      );
+    }
   }
 
   return <>{children}</>;

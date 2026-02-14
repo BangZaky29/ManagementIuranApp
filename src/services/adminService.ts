@@ -4,7 +4,6 @@ export interface VerifiedResident {
     id: string;
     nik: string;
     full_name: string;
-    rt_rw: string;
     role: 'warga' | 'security';
     description?: string;
     access_token: string;
@@ -30,10 +29,10 @@ export const fetchVerifiedResidents = async (page = 0, limit = 20) => {
     const { data: residentsData, error: residentsError } = await supabase
         .from('verified_residents')
         .select(`
-            *,
-            housing_complexes (
-                name
-            )
+    *,
+    housing_complexes(
+        name
+    )
         `)
         .order('created_at', { ascending: false })
         .range(from, to)

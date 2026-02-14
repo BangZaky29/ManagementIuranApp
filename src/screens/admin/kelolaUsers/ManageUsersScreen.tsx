@@ -25,8 +25,8 @@ export default function ManageUsersScreen() {
     // Form State
     const [nik, setNik] = useState('');
     const [fullName, setFullName] = useState('');
-    // Address Removed as per user request
-    const [rtRw, setRtRw] = useState('');
+    // Address & RT/RW Removed as per user request (Plan B)
+    // const [rtRw, setRtRw] = useState(''); -> REMOVED
     const [role, setRole] = useState<'warga' | 'security'>('warga');
     const [selectedComplexId, setSelectedComplexId] = useState<number | null>(null);
 
@@ -69,7 +69,7 @@ export default function ManageUsersScreen() {
     const handleEdit = (item: VerifiedResident) => {
         setNik(item.nik);
         setFullName(item.full_name);
-        setRtRw(item.rt_rw);
+        // setRtRw(item.rt_rw); -> REMOVED
         setRole(item.role);
         setSelectedComplexId(item.housing_complex_id || null);
         setEditId(item.id);
@@ -93,8 +93,6 @@ export default function ManageUsersScreen() {
                 // Currently user only asked to display it.
                 await updateVerifiedResident(editId, {
                     nik,
-                    full_name: fullName,
-                    rt_rw: rtRw,
                     role,
                     housing_complex_id: selectedComplexId,
                 });
@@ -107,7 +105,7 @@ export default function ManageUsersScreen() {
                 await createVerifiedResident({
                     nik,
                     full_name: fullName,
-                    rt_rw: rtRw || '005/003',
+                    // rt_rw: rtRw || '005/003', -> REMOVED
                     role,
                     housing_complex_id: selectedComplexId,
                 });
@@ -149,7 +147,7 @@ export default function ManageUsersScreen() {
     const resetForm = () => {
         setNik('');
         setFullName('');
-        setRtRw('');
+        // setRtRw(''); -> REMOVED
         setRole('warga');
         setIsEditing(false);
         setEditId(null);
@@ -160,7 +158,7 @@ export default function ManageUsersScreen() {
         if (!searchQuery) return residents;
         const lowerQuery = searchQuery.toLowerCase();
         return residents.filter(item =>
-            item.rt_rw?.toLowerCase().includes(lowerQuery) ||
+            // item.rt_rw?.toLowerCase().includes(lowerQuery) || -> REMOVED
             item.full_name.toLowerCase().includes(lowerQuery) ||
             item.nik.includes(lowerQuery)
         );
@@ -213,7 +211,7 @@ export default function ManageUsersScreen() {
 
                 {isExpanded && (
                     <View style={styles.cardBody}>
-                        <Text style={styles.cardText}>RT/RW: {item.rt_rw}</Text>
+                        {/* RT/RW Removed from View */}
                         {/* Note: Address is usually null now for new users until they register/update */}
 
                         <View style={styles.tokenContainer}>
@@ -327,12 +325,8 @@ export default function ManageUsersScreen() {
                                     onChangeText={setFullName}
                                 />
                                 {role === 'warga' && (
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="RT/RW atau BLOK"
-                                        value={rtRw}
-                                        onChangeText={setRtRw}
-                                    />
+                                    // RT/RW Input Removed
+                                    null
                                 )}
 
                                 <View style={{ marginBottom: 16 }}>
