@@ -13,11 +13,16 @@ export interface Report {
     created_at: string;
 }
 
-export const fetchMyReports = async (): Promise<Report[]> => {
+export const fetchMyReports = async (page = 0, limit = 20): Promise<Report[]> => {
+    const from = page * limit;
+    const to = from + limit - 1;
+
     const { data, error } = await supabase
         .from('reports')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(from, to)
+        .limit(limit);
 
     if (error) throw error;
     return data as Report[];

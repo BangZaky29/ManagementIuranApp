@@ -23,7 +23,10 @@ export interface VerifiedResident {
     }[] | null;
 }
 
-export const fetchVerifiedResidents = async () => {
+export const fetchVerifiedResidents = async (page = 0, limit = 20) => {
+    const from = page * limit;
+    const to = from + limit - 1;
+
     // 1. Fetch Verified Residents
     const { data: residentsData, error: residentsError } = await supabase
         .from('verified_residents')
@@ -33,7 +36,9 @@ export const fetchVerifiedResidents = async () => {
                 name
             )
         `)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(from, to)
+        .limit(limit);
 
     if (residentsError) throw residentsError;
 

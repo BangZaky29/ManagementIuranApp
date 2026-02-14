@@ -11,6 +11,9 @@ export interface UserProfile {
     full_name: string;
     email: string;
     phone: string | null;
+    wa_phone: string | null;  // Added
+    username: string | null;  // Added
+    nik: string | null;       // Added
     role: UserRole;
     address: string | null;
     rt_rw: string | null;

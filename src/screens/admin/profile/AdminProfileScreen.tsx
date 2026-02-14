@@ -90,15 +90,21 @@ export default function AdminProfileScreen() {
                 {/* Info Section */}
                 <Text style={styles.sectionTitle}>Informasi Admin</Text>
                 <View style={[styles.infoCard, { backgroundColor: '#FFF' }]}>
+                    {renderInfoItem('person-outline', 'Nama Lengkap', user.name)}
+                    {renderInfoItem('at-outline', 'Username', user.username)}
+                    {renderInfoItem('id-card-outline', 'NIK', user.nik)}
                     {renderInfoItem('mail-outline', 'Email', user.email)}
-                    {renderInfoItem('call-outline', 'Nomor Telepon', user.phone)}
+                    {renderInfoItem('call-outline', 'Nomor HP', user.phone)}
+                    {renderInfoItem('logo-whatsapp', 'WhatsApp', user.wa_phone)}
+                    {renderInfoItem('home-outline', 'Alamat Domisili', user.address)}
+                    {renderInfoItem('map-outline', 'RT / RW', user.rt_rw)}
                     {renderInfoItem('shield-checkmark-outline', 'Status', user.isActive ? 'Aktif' : 'Non-Aktif')}
                 </View>
 
                 {/* Settings Section */}
                 <Text style={styles.sectionTitle}>Pengaturan</Text>
                 <View style={[styles.menuContainer, { backgroundColor: '#FFF', borderColor: '#EEE' }]}>
-                    {renderMenuItem('create-outline', 'Edit Profil', handleEditProfile)}
+                    {renderMenuItem('create-outline', 'Edit Profil & Data', handleEditProfile)}
                 </View>
 
                 {/* Logout */}

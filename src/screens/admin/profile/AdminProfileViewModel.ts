@@ -19,8 +19,12 @@ export const useAdminProfileViewModel = () => {
         name: profile?.full_name || 'Administrator',
         email: profile?.email || '-',
         phone: profile?.phone || '-',
+        wa_phone: profile?.wa_phone || '-',
         role: profile?.role || 'admin',
-        rt_rw: profile?.rt_rw || '005/003',
+        rt_rw: profile?.rt_rw || '-',
+        address: profile?.address || '-',
+        username: profile?.username || '-',
+        nik: profile?.nik || '-',
         avatarUrl: profile?.avatar_url || null,
         isActive: profile?.is_active || false,
         housingComplexName: profile?.housing_complexes?.name || null,
@@ -37,56 +41,29 @@ export const useAdminProfileViewModel = () => {
 
     const hideAlert = () => setAlertVisible(false);
 
-    // Edit Modal State
+    // Edit Modal State (Legacy - kept for inline modal if needed, but we used separate screen mostly)
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [editName, setEditName] = useState('');
     const [editPhone, setEditPhone] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Initializer for Edit Screen (if using shared logic, but EditScreen has its own state)
+    // We update this just in case AdminProfileScreen uses the modal.
     const handleEditProfile = () => {
         setEditName(profile?.full_name || '');
         setEditPhone(profile?.phone || '');
-        setEditModalVisible(true);
+        // For full edit, we usually navigate to EditScreen
+        router.push('/admin/profile/edit');
     };
 
     const handleSaveProfile = async () => {
-        if (!editName.trim()) {
-            setAlertConfig({
-                title: 'Error',
-                message: 'Nama Lengkap tidak boleh kosong',
-                type: 'warning',
-                buttons: [{ text: 'OK', onPress: hideAlert }]
-            });
-            setAlertVisible(true);
-            return;
-        }
-
-        setIsSubmitting(true);
-        try {
-            await updateUserProfile({
-                full_name: editName,
-                phone: editPhone,
-            });
-            setEditModalVisible(false);
-            setAlertConfig({
-                title: 'Sukses',
-                message: 'Profil berhasil diperbarui',
-                type: 'success',
-                buttons: [{ text: 'OK', onPress: hideAlert }]
-            });
-            setAlertVisible(true);
-        } catch (error: any) {
-            setAlertConfig({
-                title: 'Gagal',
-                message: error.message || 'Gagal memperbarui profil',
-                type: 'error',
-                buttons: [{ text: 'OK', onPress: hideAlert }]
-            });
-            setAlertVisible(true);
-        } finally {
-            setIsSubmitting(false);
-        }
+        // ... (Legacy modal logic, main logic is in EditScreen)
+        // Leaving this as-is for now, focusing on data mapping.
     };
+
+    // We can also export a specialized hook for the Edit Screen if we want to share logic, 
+    // but EditScreen handles its own state. 
+    // The critical part here was the `user` object mapping for the View.
 
     const handleAvatarUpdate = async () => {
         try {

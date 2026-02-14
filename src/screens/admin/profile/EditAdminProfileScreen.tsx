@@ -13,6 +13,11 @@ export default function EditAdminProfileScreen() {
 
     const [fullName, setFullName] = useState(profile?.full_name || '');
     const [phone, setPhone] = useState(profile?.phone || '');
+    const [waPhone, setWaPhone] = useState(profile?.wa_phone || '');
+    const [address, setAddress] = useState(profile?.address || '');
+    const [rtRw, setRtRw] = useState(profile?.rt_rw || '');
+    const [username, setUsername] = useState(profile?.username || '');
+
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSave = async () => {
@@ -26,6 +31,10 @@ export default function EditAdminProfileScreen() {
             await updateUserProfile({
                 full_name: fullName,
                 phone: phone,
+                wa_phone: waPhone,
+                address: address,
+                rt_rw: rtRw,
+                username: username
             });
             Alert.alert('Sukses', 'Profil berhasil diperbarui', [
                 { text: 'OK', onPress: () => router.back() }
@@ -42,7 +51,7 @@ export default function EditAdminProfileScreen() {
             <StatusBar style="dark" />
             <CustomHeader title="Edit Profil Admin" showBack={true} />
 
-            <ScrollView contentContainerStyle={styles.formContainer}>
+            <ScrollView contentContainerStyle={styles.formContainer} showsVerticalScrollIndicator={false}>
 
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Nama Lengkap</Text>
@@ -51,6 +60,17 @@ export default function EditAdminProfileScreen() {
                         value={fullName}
                         onChangeText={setFullName}
                         placeholder="Nama Lengkap Admin"
+                    />
+                </View>
+
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Username</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={username}
+                        onChangeText={setUsername}
+                        placeholder="Username Login"
+                        autoCapitalize="none"
                     />
                 </View>
 
@@ -64,13 +84,45 @@ export default function EditAdminProfileScreen() {
                 </View>
 
                 <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Nomor Telepon</Text>
+                    <Text style={styles.label}>Nomor Telepon (HP)</Text>
                     <TextInput
                         style={styles.input}
                         value={phone}
                         onChangeText={setPhone}
                         placeholder="08xxxxxxxxxx"
                         keyboardType="phone-pad"
+                    />
+                </View>
+
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Nomor WhatsApp</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={waPhone}
+                        onChangeText={setWaPhone}
+                        placeholder="08xxxxxxxxxx"
+                        keyboardType="phone-pad"
+                    />
+                </View>
+
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Alamat Domisili</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={address}
+                        onChangeText={setAddress}
+                        placeholder="Alamat Lengkap"
+                        multiline
+                    />
+                </View>
+
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>RT / RW</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={rtRw}
+                        onChangeText={setRtRw}
+                        placeholder="Contoh: 005/010"
                     />
                 </View>
 
@@ -86,6 +138,7 @@ export default function EditAdminProfileScreen() {
                     )}
                 </TouchableOpacity>
 
+                <View style={{ height: 40 }} />
             </ScrollView>
         </SafeAreaView>
     );
