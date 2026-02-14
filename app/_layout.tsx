@@ -1,3 +1,4 @@
+import 'react-native-reanimated';
 import { DarkTheme, DefaultTheme, ThemeProvider as NavThemeProvider } from '@react-navigation/native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -5,7 +6,6 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import { useEffect } from 'react';
 import { ActivityIndicator, View, Text } from 'react-native';
-import 'react-native-reanimated';
 
 import { ThemeProvider, useTheme } from '../src/contexts/ThemeContext';
 import { AuthProvider, useAuth } from '../src/contexts/AuthContext';

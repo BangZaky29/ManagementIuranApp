@@ -24,6 +24,12 @@ export default function HomeScreen() {
     } = useHomeViewModel();
     const { colors } = useTheme();
 
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+        return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+    };
+
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             <StatusBar barStyle={colors.statusBar} backgroundColor={colors.green1} />
@@ -133,7 +139,7 @@ export default function HomeScreen() {
                                 </View>
                                 <Text style={[styles.newsTitle, { color: colors.green5 }]} numberOfLines={2}>{item.title}</Text>
                                 <Text style={{ fontSize: 11, color: colors.green4, marginBottom: 8 }}>
-                                    <Ionicons name="calendar-outline" size={10} color={colors.green4} /> {item.date}
+                                    <Ionicons name="calendar-outline" size={10} color={colors.green4} /> {formatDate(item.created_at)}
                                 </Text>
                                 <Text style={[styles.newsContent, { color: colors.textSecondary }]} numberOfLines={3}>{item.content}</Text>
                             </TouchableOpacity>
