@@ -8,6 +8,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
 import { useAuth } from '../../../contexts/AuthContext';
+import { supabase } from '../../../lib/supabaseConfig';
+import { getProfile } from '../../../lib/authService';
 
 export default function WargaLoginScreen() {
     const router = useRouter();
@@ -52,13 +54,44 @@ export default function WargaLoginScreen() {
         Keyboard.dismiss();
 
         try {
-            await signIn({ email: email.trim(), password });
+            const { session } = await signIn({ email: email.trim(), password });
+
+            // STRICT CHECK: Ensure Email is Verified
+            // If Supabase settings allow login without verification, we block it here.
+
+            // DEBUG: Check what Supabase returns
+            console.log('Session Check:', {
+                email: session?.user?.email,
+                confirmed_at: session?.user?.confirmed_at,
+                email_confirmed_at: session?.user?.email_confirmed_at
+            });
+
+            if (session?.user && !session.user.confirmed_at && !session.user.email_confirmed_at) {
+                // Logout immediately
+                await supabase.auth.signOut();
+                throw new Error('Email not confirmed');
+            }
+
+            // CRITICAL CHECK: Ensure Profile Exists in Public Table
+            // If trigger failed, user exists in Auth but not in Headers. We must block them.
+            const profile = await getProfile(session.user.id);
+            if (!profile) {
+                await supabase.auth.signOut();
+                throw new Error('Data Profil tidak ditemukan. Akun Anda mungkin belum tersinkronisasi. Hubungi Admin.');
+            }
+
+            // Login successful & Confirmed & Profile Exists -> AuthContext handles state
         } catch (error: any) {
             let message = 'Terjadi kesalahan. Silakan coba lagi.';
             if (error?.message?.includes('Invalid login credentials')) {
                 message = 'Email/Username atau kata sandi salah.';
             } else if (error?.message?.includes('Email not confirmed')) {
                 message = 'Maaf, email Anda belum terverifikasi. Silakan cek email verifikasi yang telah kami kirim (cek juga folder spam) atau hubungi admin jika ada kendala.';
+            } else if (error?.message?.includes('Username tidak ditemukan')) {
+                message = 'Username tidak terdaftar. Silakan gunakan email atau periksa kembali username Anda.';
+            } else {
+                // DEBUG: Show actual error message for other cases
+                message = error.message || message;
             }
             showAlert('Login Gagal', message, 'error');
         } finally {

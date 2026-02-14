@@ -194,22 +194,28 @@ export function useRegisterViewModel() {
 
         try {
             // signUp throws on error, returns { needsConfirmation } on success
-            const { needsConfirmation } = await signUp({
+            const payload = {
                 email: email.trim(),
                 password,
                 fullName: verifiedData.name, // Use verified name
                 phone: phone.trim(),
                 role: verifiedData.role, // Use verified role
                 metadata: {
-                    nik: nik, // Vital for linking to verified_residents
-                    username: username,
-                    wa_phone: phone,
+                    nik: nik,
+                    username: username || '', // Force string
+                    wa_phone: phone || '',    // Force string
                     address: verifiedData.address,
                     rt_rw: verifiedData.rt_rw,
                     role: verifiedData.role,
                     verified: true
                 }
-            });
+            };
+            console.log('Sending Registration Payload:', JSON.stringify(payload, null, 2));
+
+            // DEBUG: Konfirmasi Visual untuk User
+            // alert(`Debug Payload:\nUsername: ${payload.metadata.username}\nPhone: ${payload.metadata.wa_phone}`);
+
+            const { needsConfirmation } = await signUp(payload);
 
             if (needsConfirmation) {
                 showAlert(

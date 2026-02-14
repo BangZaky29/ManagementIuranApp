@@ -57,9 +57,13 @@ export async function signUpWithEmail({ email, password, fullName, phone, role, 
             }),
             data: {
                 full_name: fullName,
-                phone,
+                phone: phone,
                 role,
-                ...metadata,
+                ...metadata, // Ensure this spreads { username, wa_phone, nik } to top level used by trigger
+                // Redundant explicit keys just in case spread fails or is shadowed
+                username: metadata?.username,
+                wa_phone: metadata?.wa_phone,
+                nik: metadata?.nik,
             },
         },
     });
@@ -78,6 +82,7 @@ export async function signInWithEmail({ email, password }: SignInData) {
     });
 
     if (error) throw error;
+    // Return full data to allow checking session properties (like confirmed_at)
     return data;
 }
 

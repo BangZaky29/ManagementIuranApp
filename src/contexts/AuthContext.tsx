@@ -20,7 +20,7 @@ interface AuthContextType {
     session: Session | null;
     isLoading: boolean;
     isAuthenticated: boolean;
-    signIn: (data: SignInData) => Promise<void>;
+    signIn: (data: SignInData) => Promise<any>;
     signUp: (data: SignUpData) => Promise<{ needsConfirmation: boolean }>;
     signOut: () => Promise<void>;
     resetPassword: (email: string) => Promise<void>;
@@ -95,7 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const signIn = useCallback(async (data: SignInData) => {
         // Support Email OR Username
-        await _signInWithEmailOrUsername({ identifier: data.email, password: data.password });
+        return await _signInWithEmailOrUsername({ identifier: data.email, password: data.password });
     }, []);
 
     const signUp = useCallback(async (data: SignUpData) => {
