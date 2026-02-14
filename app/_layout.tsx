@@ -18,7 +18,8 @@ export const unstable_settings = {
 
 // Auth gate — redirect based on auth state & role
 function AuthGate({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, profile } = useAuth();
+  // ✅ BENAR: Panggil semua data yang dibutuhkan dari useAuth di sini
+  const { isAuthenticated, isLoading, profile, user } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
@@ -27,26 +28,22 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 
     const inAuthGroup =
       segments[0] === 'login' ||
+      segments[0] === 'login-warga' ||
       segments[0] === 'register' ||
       segments[0] === 'forgot-password' ||
       segments[0] === 'register-admin';
 
     if (!isAuthenticated && !inAuthGroup) {
-      // Not logged in → redirect to login
       router.replace('/login');
     } else if (isAuthenticated) {
-      const { user } = useAuth();
-      // Logic: Prefer profile role, fallback to metadata role (fast), default to 'warga'
+      // ✅ SEKARANG AMAN: Gunakan variabel 'user' yang sudah diambil di atas
       const role = profile?.role || user?.user_metadata?.role || 'warga';
 
       if (inAuthGroup) {
-        // Logged in but on auth screen → redirect based on role
         if (role === 'admin') router.replace('/admin');
         else if (role === 'security') router.replace('/security');
         else router.replace('/(tabs)');
       } else {
-        // Prevent Warga accessing Admin/Security & vice versa (Basic protection)
-        // Note: Middleware is better for this, but this works for client-side
         const inAdmin = segments[0] === 'admin';
         const inSecurity = segments[0] === 'security';
         const inWarga = segments[0] === '(tabs)';
@@ -56,7 +53,8 @@ function AuthGate({ children }: { children: React.ReactNode }) {
         if (role === 'security' && (inWarga || inAdmin)) router.replace('/security');
       }
     }
-  }, [isAuthenticated, isLoading, segments, profile]);
+    // Tambahkan 'user' dan 'router' ke dependency array agar linter senang
+  }, [isAuthenticated, isLoading, segments, profile, user, router]);
 
   if (isLoading) {
     return (
@@ -64,6 +62,46 @@ function AuthGate({ children }: { children: React.ReactNode }) {
         <ActivityIndicator size="large" color="#78C51C" />
       </View>
     );
+  }
+
+  // Prevent flash of protected content while redirecting
+  const inAuthGroup =
+    segments[0] === 'login' ||
+    segments[0] === 'login-warga' ||
+    segments[0] === 'register' ||
+    segments[0] === 'forgot-password' ||
+    segments[0] === 'register-admin';
+
+  if (!isAuthenticated && !inAuthGroup) {
+    // While we are redirecting in useEffect, don't show the protected content (children)
+    // Show loading or null instead
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#EEF2E3' }}>
+        <ActivityIndicator size="large" color="#78C51C" />
+      </View>
+    );
+  }
+
+  if (isAuthenticated && !inAuthGroup) {
+    // Prevent role-mismatch flash
+    const role = profile?.role || user?.user_metadata?.role || 'warga';
+    const inAdmin = segments[0] === 'admin';
+    const inSecurity = segments[0] === 'security';
+    // 'undefined' often means root/index which defaults to tabs
+    const inWarga = segments[0] === '(tabs)' || segments[0] === undefined;
+
+    const shouldRedirect =
+      (role === 'admin' && (inWarga || inSecurity)) ||
+      (role === 'warga' && (inAdmin || inSecurity)) ||
+      (role === 'security' && (inWarga || inAdmin));
+
+    if (shouldRedirect) {
+      return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#EEF2E3' }}>
+          <ActivityIndicator size="large" color="#78C51C" />
+        </View>
+      );
+    }
   }
 
   return <>{children}</>;

@@ -181,7 +181,7 @@ export default function RegisterAdminScreen() {
                         <Text style={{ fontSize: 16, fontWeight: 'bold', color: Colors.green5, marginBottom: 12 }}>Akun Login</Text>
 
                         <CustomInput
-                            label="Email"
+                            label="Email (Verifikasi Email)"
                             placeholder="contoh@email.com"
                             value={email}
                             onChangeText={setEmail}

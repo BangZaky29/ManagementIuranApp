@@ -71,11 +71,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Listen for auth state changes
     useEffect(() => {
         // Get initial session
-        supabase.auth.getSession().then(({ data: { session: s } }) => {
+        supabase.auth.getSession().then(async ({ data: { session: s } }) => {
             setSession(s);
             setUser(s?.user ?? null);
             if (s?.user) {
-                fetchProfile(s.user);
+                await fetchProfile(s.user);
             }
             setIsLoading(false);
         });
