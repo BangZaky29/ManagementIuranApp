@@ -116,11 +116,6 @@ export default function PanicLogScreen() {
                             <Text style={[styles.userName, { color: colors.textPrimary }]}>
                                 {item.profiles?.full_name || 'Warga Tidak Dikenal'}
                             </Text>
-                            {item.profiles?.phone && (
-                                <Text style={[styles.userPhone, { color: colors.textSecondary }]}>
-                                    📞 {item.profiles.phone}
-                                </Text>
-                            )}
                         </View>
                     </View>
                     <View style={styles.timeContainer}>

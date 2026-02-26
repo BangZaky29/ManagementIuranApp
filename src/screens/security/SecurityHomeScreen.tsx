@@ -108,9 +108,6 @@ export default function SecurityHomeScreen() {
                         )}
                         <View style={{ marginLeft: 12, flex: 1 }}>
                             <Text style={styles.userName}>{item.profiles?.full_name || 'Warga'}</Text>
-                            {item.profiles?.phone && (
-                                <Text style={styles.userPhone}>📞 {item.profiles.phone}</Text>
-                            )}
                         </View>
                     </View>
                     <View style={{ alignItems: 'flex-end' }}>
