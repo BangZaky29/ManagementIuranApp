@@ -42,8 +42,8 @@ export const fetchActiveVisitors = async (): Promise<Visitor[]> => {
                     )
                 )
             `)
-            .eq('status', 'active')
-            .order('check_in_time', { ascending: false });
+            .in('status', ['active', 'pending'])
+            .order('created_at', { ascending: false });
 
         if (error) throw new AppError(error.message, 'FETCH_VISITORS_ERROR');
         return data as Visitor[];

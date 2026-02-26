@@ -40,6 +40,9 @@ export function useGuestBookViewModel() {
     const [residents, setResidents] = useState<Resident[]>([]);
     const [residentModalVisible, setResidentModalVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [pinModalVisible, setPinModalVisible] = useState(false);
+    const [pinInput, setPinInput] = useState('');
+    const [selectedGuest, setSelectedGuest] = useState<Visitor | null>(null);
 
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -246,6 +249,61 @@ export function useGuestBookViewModel() {
         }
     };
 
+    const handleCheckInWithPin = (item: Visitor) => {
+        setSelectedGuest(item);
+        setPinInput('');
+        setPinModalVisible(true);
+    };
+
+    const handleVerifyPin = async () => {
+        if (!selectedGuest || !selectedGuest.pin_code) return;
+
+        if (pinInput !== selectedGuest.pin_code) {
+            setAlertConfig({
+                title: 'PIN Salah',
+                message: 'Kode PIN yang dimasukkan tidak cocok. Silakan coba lagi.',
+                type: 'error',
+                buttons: [{ text: 'OK', onPress: hideAlert }]
+            });
+            setAlertVisible(true);
+            return;
+        }
+
+        setIsLoading(true);
+        setPinModalVisible(false);
+        try {
+            const { error } = await supabase
+                .from('visitors')
+                .update({
+                    status: 'active',
+                    check_in_time: new Date().toISOString()
+                })
+                .eq('id', selectedGuest.id);
+
+            if (error) throw error;
+            
+            await loadData();
+            setAlertConfig({
+                title: 'Verifikasi Berhasil',
+                message: `Tamu ${selectedGuest.visitor_name} telah diverifikasi dan diizinkan masuk.`,
+                type: 'success',
+                buttons: [{ text: 'Selesai', onPress: hideAlert }]
+            });
+            setAlertVisible(true);
+        } catch (error: any) {
+            console.error('Verify PIN error:', error);
+            setAlertConfig({
+                title: 'Gagal',
+                message: 'Terjadi kesalahan saat memproses data.',
+                type: 'error',
+                buttons: [{ text: 'Tutup', onPress: hideAlert }]
+            });
+            setAlertVisible(true);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const filteredResidents = residents.filter(r => {
         const query = searchQuery.toLowerCase().trim();
         if (!query) return true;
@@ -283,6 +341,13 @@ export function useGuestBookViewModel() {
         loadData,
         handleCheckOut,
         handleAddWalkin,
+        handleCheckInWithPin,
+        handleVerifyPin,
+        pinModalVisible,
+        setPinModalVisible,
+        pinInput,
+        setPinInput,
+        selectedGuest,
         filteredResidents
     };
 }

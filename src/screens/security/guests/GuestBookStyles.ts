@@ -130,5 +130,45 @@ export const styles = StyleSheet.create({
         width: 40, height: 40, borderRadius: 20
     },
     residentName: { fontSize: 15, fontWeight: '600', color: '#111' },
-    residentBlock: { fontSize: 12, color: '#666', marginTop: 2 }
+    residentBlock: { fontSize: 12, color: '#666', marginTop: 2 },
+
+    // PIN Modal specific
+    pinInputContainer: { 
+        flexDirection: 'row', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        marginVertical: 20,
+        gap: 10
+    },
+    pinDigitBox: {
+        width: 45,
+        height: 55,
+        borderRadius: 12,
+        backgroundColor: '#F5F5F5',
+        borderWidth: 2,
+        borderColor: '#EEE',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    pinDigitBoxActive: {
+        borderColor: '#0D47A1',
+        backgroundColor: '#E3F2FD'
+    },
+    pinDigitText: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#333'
+    },
+    hiddenPinInput: {
+        position: 'absolute',
+        opacity: 0,
+        width: '100%',
+        height: '100%'
+    },
+    pinInfoText: {
+        textAlign: 'center',
+        color: '#666',
+        fontSize: 14,
+        marginBottom: 10
+    }
 });

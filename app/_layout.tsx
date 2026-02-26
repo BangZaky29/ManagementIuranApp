@@ -45,7 +45,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
       } else {
         const inAdmin = segments[0] === 'admin';
         const inSecurity = segments[0] === 'security';
-        const inWarga = segments[0] === '(tabs)';
+        const inWarga = segments[0] === '(tabs)' || segments[0] === 'warga';
         const inProfile = segments[0] === 'profile';
         const inLaporan = segments[0] === 'laporan';
         const inIuran = segments[0] === 'iuran';
@@ -79,7 +79,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   if (isAuthenticated) {
     const isAtAdmin = segments[0] === 'admin';
     const isAtSecurity = segments[0] === 'security';
-    const isAtWarga = segments[0] === '(tabs)';
+    const isAtWarga = segments[0] === '(tabs)' || segments[0] === 'warga';
     const isAtProfile = segments[0] === 'profile';
     const isAtLaporan = segments[0] === 'laporan';
     const isAtIuran = segments[0] === 'iuran';

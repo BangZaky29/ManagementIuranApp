@@ -54,18 +54,22 @@ export default function GuestBookScreen() {
                     </View>
                 }
                 renderItem={({ item }) => (
-                    <View style={styles.card}>
+                    <View style={[styles.card, item.status === 'pending' && { borderLeftColor: '#FF9800' }]}>
                         <View style={styles.cardHeader}>
                             <View style={{ flex: 1 }}>
                                 <Text style={styles.guestName}>{item.visitor_name}</Text>
-                                <View style={[styles.guestTypeBadge, { backgroundColor: '#0D47A1' }]}>
-                                    <Text style={styles.guestTypeText}>{item.visitor_type}</Text>
+                                <View style={[styles.guestTypeBadge, { backgroundColor: item.status === 'pending' ? '#FF9800' : '#0D47A1' }]}>
+                                    <Text style={styles.guestTypeText}>
+                                        {item.status === 'pending' ? 'Undangan (Menunggu)' : item.visitor_type}
+                                    </Text>
                                 </View>
                             </View>
                             <View style={{ alignItems: 'flex-end' }}>
-                                <Text style={styles.timeText}>Masuk Pukul</Text>
+                                <Text style={styles.timeText}>{item.status === 'pending' ? 'Dibuat Pada' : 'Masuk Pukul'}</Text>
                                 <Text style={[styles.timeText, { fontWeight: 'bold', color: '#333' }]}>
-                                    {item.check_in_time ? new Date(item.check_in_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                                    {item.status === 'pending' 
+                                        ? new Date(item.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+                                        : (item.check_in_time ? new Date(item.check_in_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-')}
                                 </Text>
                             </View>
                         </View>
@@ -88,10 +92,20 @@ export default function GuestBookScreen() {
                             </View>
                         </View>
 
-                        <TouchableOpacity style={styles.checkoutBtn} onPress={() => vm.handleCheckOut(item)}>
-                            <Ionicons name="exit-outline" size={18} color="#C62828" />
-                            <Text style={styles.checkoutBtnText}>Checkout Keluar</Text>
-                        </TouchableOpacity>
+                        {item.status === 'pending' ? (
+                            <TouchableOpacity 
+                                style={[styles.checkoutBtn, { backgroundColor: '#E8F5E9' }]} 
+                                onPress={() => vm.handleCheckInWithPin(item)}
+                            >
+                                <Ionicons name="checkmark-circle-outline" size={18} color="#2E7D32" />
+                                <Text style={[styles.checkoutBtnText, { color: '#2E7D32' }]}>Verifikasi & Izinkan Masuk</Text>
+                            </TouchableOpacity>
+                        ) : (
+                            <TouchableOpacity style={styles.checkoutBtn} onPress={() => vm.handleCheckOut(item)}>
+                                <Ionicons name="exit-outline" size={18} color="#C62828" />
+                                <Text style={styles.checkoutBtnText}>Checkout Keluar</Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                 )}
             />
@@ -177,6 +191,73 @@ export default function GuestBookScreen() {
                         </View>
                     </View>
                 </KeyboardAvoidingView>
+            </Modal>
+
+            {/* PIN Verification Modal */}
+            <Modal
+                visible={vm.pinModalVisible}
+                animationType="fade"
+                transparent={true}
+                onRequestClose={() => vm.setPinModalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.headerRow}>
+                            <Text style={styles.modalTitle}>Verifikasi PIN Tamu</Text>
+                            <TouchableOpacity onPress={() => vm.setPinModalVisible(false)}>
+                                <Ionicons name="close" size={24} color="#333" />
+                            </TouchableOpacity>
+                        </View>
+
+                        <Text style={styles.pinInfoText}>
+                            Masukkan 6-digit kode PIN yang ditunjukkan oleh {vm.selectedGuest?.visitor_name}
+                        </Text>
+
+                        <View style={styles.pinInputContainer}>
+                            {[...Array(6)].map((_, i) => (
+                                <View 
+                                    key={i} 
+                                    style={[
+                                        styles.pinDigitBox, 
+                                        vm.pinInput.length === i && styles.pinDigitBoxActive
+                                    ]}
+                                >
+                                    <Text style={styles.pinDigitText}>{vm.pinInput[i] || ''}</Text>
+                                </View>
+                            ))}
+                            <TextInput
+                                style={styles.hiddenPinInput}
+                                value={vm.pinInput}
+                                onChangeText={vm.setPinInput}
+                                keyboardType="number-pad"
+                                maxLength={6}
+                                autoFocus={true}
+                            />
+                        </View>
+
+                        <TouchableOpacity
+                            style={[
+                                styles.submitBtn, 
+                                (vm.pinInput.length < 6 || vm.isLoading) && { opacity: 0.5 }
+                            ]}
+                            onPress={vm.handleVerifyPin}
+                            disabled={vm.pinInput.length < 6 || vm.isLoading}
+                        >
+                            {vm.isLoading ? (
+                                <ActivityIndicator color="#FFF" />
+                            ) : (
+                                <Text style={styles.submitBtnText}>Verifikasi & Izinkan Masuk</Text>
+                            )}
+                        </TouchableOpacity>
+
+                        <TouchableOpacity 
+                            style={styles.cancelBtn} 
+                            onPress={() => vm.setPinModalVisible(false)}
+                        >
+                            <Text style={styles.cancelBtnText}>Batal</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
             </Modal>
 
             {/* Resident Picker Modal */}
