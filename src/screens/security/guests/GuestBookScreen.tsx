@@ -1,0 +1,198 @@
+import React from 'react';
+import {
+    View, Text, SafeAreaView, TouchableOpacity, FlatList,
+    StatusBar, Modal, TextInput, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useGuestBookViewModel } from './GuestBookViewModel';
+import { styles } from './GuestBookStyles';
+import { CustomAlertModal } from '../../../components/CustomAlertModal';
+
+const VISITOR_TYPES = ['tamu', 'gojek', 'kurir', 'pekerja', 'lainnya'] as const;
+
+export default function GuestBookScreen() {
+    const vm = useGuestBookViewModel();
+    const router = useRouter();
+
+    if (vm.isLoading && vm.activeGuests.length === 0) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <ActivityIndicator size="large" color="#0D47A1" />
+                </View>
+            </SafeAreaView>
+        );
+    }
+
+    return (
+        <SafeAreaView style={styles.container}>
+            <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+
+            {/* Header */}
+            <View style={styles.header}>
+                <View style={styles.headerRow}>
+                    <View>
+                        <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 8 }}>
+                            <Ionicons name="arrow-back" size={24} color="#333" />
+                        </TouchableOpacity>
+                        <Text style={styles.title}>Buku Tamu</Text>
+                        <Text style={styles.subtitle}>{vm.activeGuests.length} tamu/kurir sedang di dalam area</Text>
+                    </View>
+                    <TouchableOpacity style={styles.addButton} onPress={() => vm.setAddModalVisible(true)}>
+                        <Ionicons name="add" size={20} color="#FFF" />
+                        <Text style={styles.addButtonText}>Masuk</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+
+            {/* List Active Guests */}
+            <FlatList
+                data={vm.activeGuests}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={styles.listContainer}
+                refreshing={vm.isLoading}
+                onRefresh={vm.loadData}
+                ListEmptyComponent={
+                    <View style={styles.emptyContainer}>
+                        <Ionicons name="document-text-outline" size={64} color="#B0BEC5" />
+                        <Text style={styles.emptyTitle}>Tidak Ada Tamu Aktif</Text>
+                        <Text style={styles.emptySubtitle}>
+                            Gunakan tombol "Masuk" di kanan atas jika ada tamu atau kurir yang datang.
+                        </Text>
+                    </View>
+                }
+                renderItem={({ item }) => (
+                    <View style={styles.card}>
+                        <View style={styles.cardHeader}>
+                            <View style={{ flex: 1 }}>
+                                <Text style={styles.guestName}>{item.visitor_name}</Text>
+                                <View style={[styles.guestTypeBadge, { backgroundColor: '#0D47A1' }]}>
+                                    <Text style={styles.guestTypeText}>{item.visitor_type}</Text>
+                                </View>
+                            </View>
+                            <View style={{ alignItems: 'flex-end' }}>
+                                <Text style={styles.timeText}>Masuk Pukul</Text>
+                                <Text style={[styles.timeText, { fontWeight: 'bold', color: '#333' }]}>
+                                    {item.check_in_time ? new Date(item.check_in_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                                </Text>
+                            </View>
+                        </View>
+
+                        <View style={styles.detailsRow}>
+                            <View style={styles.detailCol}>
+                                <Text style={styles.detailLabel}>Tujuan (Warga)</Text>
+                                <Text style={styles.detailValue} numberOfLines={1}>
+                                    {item.profiles?.full_name || 'Tidak diketahui'}
+                                    {item.profiles?.housing_complex_id ? ` (Blok ${item.profiles.housing_complex_id})` : ''}
+                                </Text>
+                            </View>
+                            <View style={styles.detailCol}>
+                                <Text style={styles.detailLabel}>Keperluan</Text>
+                                <Text style={styles.detailValue} numberOfLines={1}>
+                                    {item.purpose || '-'}
+                                </Text>
+                            </View>
+                        </View>
+
+                        <TouchableOpacity style={styles.checkoutBtn} onPress={() => vm.handleCheckOut(item)}>
+                            <Ionicons name="exit-outline" size={18} color="#C62828" />
+                            <Text style={styles.checkoutBtnText}>Checkout Keluar</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+            />
+
+            {/* Add Walk-in Guest Modal */}
+            <Modal
+                visible={vm.addModalVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => vm.setAddModalVisible(false)}
+            >
+                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContent}>
+                            <Text style={styles.modalTitle}>Catat Tamu Baru</Text>
+
+                            <ScrollView showsVerticalScrollIndicator={false}>
+                                <View style={styles.inputGroup}>
+                                    <Text style={styles.inputLabel}>Nama Tamu / Kurir <Text style={{ color: 'red' }}>*</Text></Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Contoh: Anton (JNE)"
+                                        value={vm.formName}
+                                        onChangeText={vm.setFormName}
+                                    />
+                                </View>
+
+                                <View style={styles.inputGroup}>
+                                    <Text style={styles.inputLabel}>Jenis Kunjungan <Text style={{ color: 'red' }}>*</Text></Text>
+                                    <View style={styles.typeSelector}>
+                                        {VISITOR_TYPES.map(type => (
+                                            <TouchableOpacity
+                                                key={type}
+                                                style={[styles.typeBtn, vm.formType === type && styles.typeBtnActive]}
+                                                onPress={() => vm.setFormType(type)}
+                                            >
+                                                <Text style={[styles.typeText, vm.formType === type && styles.typeTextActive]}>{type}</Text>
+                                            </TouchableOpacity>
+                                        ))}
+                                    </View>
+                                </View>
+
+                                <View style={styles.inputGroup}>
+                                    <Text style={styles.inputLabel}>Tujuan (Pilih Warga) <Text style={{ color: 'red' }}>*</Text></Text>
+                                    {/* For a real production app, this should be a Searchable Dropdown. Using simple map for now if list is small, or just a flatlist picker modal. To keep it simple, we render a horizontal list of residents. */}
+                                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexDirection: 'row' }}>
+                                        {vm.residents.map(res => (
+                                            <TouchableOpacity
+                                                key={res.id}
+                                                style={[styles.typeBtn, vm.formDestination === res.id && styles.typeBtnActive, { marginRight: 8 }]}
+                                                onPress={() => vm.setFormDestination(res.id)}
+                                            >
+                                                <Text style={[styles.typeText, vm.formDestination === res.id && styles.typeTextActive]}>
+                                                    {res.full_name} {res.block ? `(${res.block})` : ''}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        ))}
+                                    </ScrollView>
+                                </View>
+
+                                <View style={styles.inputGroup}>
+                                    <Text style={styles.inputLabel}>Keperluan <Text style={{ color: 'red' }}>*</Text></Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Contoh: Antar Paket Shopee"
+                                        value={vm.formPurpose}
+                                        onChangeText={vm.setFormPurpose}
+                                    />
+                                </View>
+                            </ScrollView>
+
+                            <TouchableOpacity
+                                style={[styles.submitBtn, vm.isSubmitting && { opacity: 0.7 }]}
+                                onPress={vm.handleAddWalkin}
+                                disabled={vm.isSubmitting}
+                            >
+                                {vm.isSubmitting ? (
+                                    <ActivityIndicator color="#FFF" />
+                                ) : (
+                                    <Text style={styles.submitBtnText}>Izinkan Masuk</Text>
+                                )}
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.cancelBtn} onPress={() => vm.setAddModalVisible(false)}>
+                                <Text style={styles.cancelBtnText}>Batal</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </KeyboardAvoidingView>
+            </Modal>
+
+            <CustomAlertModal
+                visible={vm.alertVisible} title={vm.alertConfig.title} message={vm.alertConfig.message}
+                type={vm.alertConfig.type} buttons={vm.alertConfig.buttons} onClose={vm.hideAlert}
+            />
+        </SafeAreaView>
+    );
+}
