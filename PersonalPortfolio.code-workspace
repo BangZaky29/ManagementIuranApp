@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "../../../../landingPages/PersonalPortfolio"
+		},
+		{
+			"path": "../../../.mainweb"
+		},
+		{
+			"path": "../../../.subpath"
+		},
+		{
+			"path": "../.."
+		}
+	]
+}
