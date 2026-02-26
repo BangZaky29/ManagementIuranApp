@@ -126,6 +126,9 @@ export const styles = StyleSheet.create({
         width: 40, height: 40, borderRadius: 20, backgroundColor: '#90CAF9',
         justifyContent: 'center', alignItems: 'center'
     },
+    residentAvatarImg: {
+        width: 40, height: 40, borderRadius: 20
+    },
     residentName: { fontSize: 15, fontWeight: '600', color: '#111' },
     residentBlock: { fontSize: 12, color: '#666', marginTop: 2 }
 });

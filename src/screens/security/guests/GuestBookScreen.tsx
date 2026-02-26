@@ -1,7 +1,7 @@
 import React from 'react';
 import {
     View, Text, SafeAreaView, TouchableOpacity, FlatList,
-    StatusBar, Modal, TextInput, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform
+    StatusBar, Modal, TextInput, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, Image
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useGuestBookViewModel } from './GuestBookViewModel';
@@ -218,9 +218,13 @@ export default function GuestBookScreen() {
                                             vm.setSearchQuery('');
                                         }}
                                     >
-                                        <View style={styles.residentAvatar}>
-                                            <Ionicons name="person" size={20} color="#FFF" />
-                                        </View>
+                                        {item.avatar_url ? (
+                                            <Image source={{ uri: item.avatar_url }} style={styles.residentAvatarImg} />
+                                        ) : (
+                                            <View style={styles.residentAvatar}>
+                                                <Ionicons name="person" size={20} color="#FFF" />
+                                            </View>
+                                        )}
                                         <View style={{ flex: 1 }}>
                                             <Text style={styles.residentName}>{item.full_name}</Text>
                                             <Text style={styles.residentBlock}>{item.block || 'Blok tidak diketahui'}</Text>

@@ -45,6 +45,16 @@ export default function SecurityHomeScreen() {
                     <View style={[styles.statCard, { borderLeftColor: '#4CAF50' }]}>
                         <Text style={styles.statNumber}>{vm.stats.warga}</Text>
                         <Text style={styles.statLabel}>Total Warga</Text>
+                        <View style={{ flexDirection: 'row', marginTop: 4, gap: 8 }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#4CAF50', marginRight: 4 }} />
+                                <Text style={{ fontSize: 10, color: '#666' }}>{vm.stats.wargaActive} Aktif</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#F44336', marginRight: 4 }} />
+                                <Text style={{ fontSize: 10, color: '#666' }}>{vm.stats.wargaInactive} Non-Aktif</Text>
+                            </View>
+                        </View>
                     </View>
                     <View style={[styles.statCard, { borderLeftColor: '#F44336' }]}>
                         <Text style={styles.statNumber}>{vm.activePanics}</Text>
