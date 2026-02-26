@@ -89,6 +89,22 @@ export const styles = StyleSheet.create({
     cancelBtn: { paddingVertical: 14, alignItems: 'center', marginTop: 4 },
     cancelBtnText: { color: '#888', fontSize: 15, fontWeight: '600' },
 
+    floatingAddBtn: {
+        position: 'absolute',
+        bottom: 90, // Above the tab bar
+        right: 20,
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: '#0D47A1',
+        justifyContent: 'center',
+        alignItems: 'center',
+        ...Platform.select({
+            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 6 },
+            android: { elevation: 6 },
+        }),
+    },
+
     // Resident Search Modal
     pickerButton: {
         backgroundColor: '#F5F5F5', borderRadius: 12, padding: 14,

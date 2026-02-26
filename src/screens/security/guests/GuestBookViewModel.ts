@@ -69,27 +69,44 @@ export function useGuestBookViewModel() {
 
     const loadResidents = useCallback(async () => {
         try {
-            // Assume verified_residents is used for finding valid destinations
+            console.log("Fetching residents...");
             const { data, error } = await supabase
                 .from('verified_residents')
-                .select('id, full_name, housing_complex_id, role, is_claimed, nik')
-                .eq('role', 'warga')
-                .eq('is_claimed', true);
+                .select(`
+                    id, 
+                    full_name, 
+                    housing_complex_id, 
+                    role, 
+                    is_claimed, 
+                    nik,
+                    housing_complexes (
+                        name
+                    )
+                `)
+                .eq('role', 'warga');
 
-            if (!error && data) {
+            console.log("Residents query returned:", { error, count: data?.length });
+            if (error) {
+                console.error("Supabase error fetching verified_residents:", error.message, error.details, error.hint);
+                return;
+            }
+
+            if (data) {
+                // Limit logging output slightly to avoid spam
+                if (data.length > 0) {
+                    console.log("First resident sample:", data[0]);
+                }
                 const formatted: Resident[] = data.map((d: any) => ({
-                    id: d.id, // Or destination_user_id should map to profiles id or verified_residents id
+                    id: d.id,
                     full_name: d.full_name,
                     housing_complex_id: d.housing_complex_id,
-                    block: d.housing_complex_id ? `Blok ${d.housing_complex_id}` : null,
+                    block: d.housing_complexes?.name ? d.housing_complexes.name : (d.housing_complex_id ? `Blok ${d.housing_complex_id}` : null),
                 }));
-                // Wait, destination_user_id in visitor table links to profiles id?
-                // Depending on schema, verified_residents might have different id than auth.users / profiles
-                // Let's use it as is
                 setResidents(formatted);
+                console.log("Formatted residents count:", formatted.length);
             }
         } catch (err) {
-            console.error('Load residents error:', err);
+            console.error('Load residents unexpected error:', err);
         }
     }, []);
 
@@ -184,10 +201,15 @@ export function useGuestBookViewModel() {
         }
     };
 
-    const filteredResidents = residents.filter(r => 
-        r.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        r.block?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredResidents = residents.filter(r => {
+        const query = searchQuery.toLowerCase().trim();
+        if (!query) return true;
+        
+        const nameMatch = r.full_name?.toLowerCase().includes(query);
+        const blockMatch = r.block?.toLowerCase().includes(query);
+        
+        return nameMatch || blockMatch;
+    });
 
     return {
         isLoading,

@@ -4,7 +4,6 @@ import {
     StatusBar, Modal, TextInput, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { useGuestBookViewModel } from './GuestBookViewModel';
 import { styles } from './GuestBookStyles';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
@@ -13,7 +12,6 @@ const VISITOR_TYPES = ['tamu', 'gojek', 'kurir', 'pekerja', 'lainnya'] as const;
 
 export default function GuestBookScreen() {
     const vm = useGuestBookViewModel();
-    const router = useRouter();
 
     if (vm.isLoading && vm.activeGuests.length === 0) {
         return (
@@ -33,16 +31,9 @@ export default function GuestBookScreen() {
             <View style={styles.header}>
                 <View style={styles.headerRow}>
                     <View>
-                        <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 8 }}>
-                            <Ionicons name="arrow-back" size={24} color="#333" />
-                        </TouchableOpacity>
                         <Text style={styles.title}>Buku Tamu</Text>
                         <Text style={styles.subtitle}>{vm.activeGuests.length} tamu/kurir sedang di dalam area</Text>
                     </View>
-                    <TouchableOpacity style={styles.addButton} onPress={() => vm.setAddModalVisible(true)}>
-                        <Ionicons name="add" size={20} color="#FFF" />
-                        <Text style={styles.addButtonText}>Masuk</Text>
-                    </TouchableOpacity>
                 </View>
             </View>
 
@@ -58,7 +49,7 @@ export default function GuestBookScreen() {
                         <Ionicons name="document-text-outline" size={64} color="#B0BEC5" />
                         <Text style={styles.emptyTitle}>Tidak Ada Tamu Aktif</Text>
                         <Text style={styles.emptySubtitle}>
-                            Gunakan tombol "Masuk" di kanan atas jika ada tamu atau kurir yang datang.
+                            Gunakan tombol "+" di pojok kanan bawah jika ada tamu atau kurir yang datang.
                         </Text>
                     </View>
                 }
@@ -250,6 +241,14 @@ export default function GuestBookScreen() {
                 visible={vm.alertVisible} title={vm.alertConfig.title} message={vm.alertConfig.message}
                 type={vm.alertConfig.type} buttons={vm.alertConfig.buttons} onClose={vm.hideAlert}
             />
+
+            {/* Floating Add Button */}
+            <TouchableOpacity 
+                style={styles.floatingAddBtn} 
+                onPress={() => vm.setAddModalVisible(true)}
+            >
+                <Ionicons name="add" size={32} color="#FFF" />
+            </TouchableOpacity>
         </SafeAreaView>
     );
 }
