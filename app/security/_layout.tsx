@@ -4,6 +4,7 @@ import { SecurityTabBar } from '../../src/components/navigation/SecurityTabBar';
 export default function SecurityLayout() {
     return (
         <MaterialTopTabs
+            tabBarPosition="bottom"
             tabBar={(props) => <SecurityTabBar {...props} />}
             screenOptions={{
                 swipeEnabled: true, // Enabled swipe for bottom tabs feeling

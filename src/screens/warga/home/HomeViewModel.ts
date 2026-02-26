@@ -59,9 +59,10 @@ export const useHomeViewModel = () => {
     };
 
     const quickActions: QuickAction[] = [
-        { id: 'pay', title: 'Bayar Iuran', icon: 'card-outline', route: '/(tabs)/iuran', color: '#1B5E20', bgColor: '#C8E6C9' },
-        { id: 'report', title: 'Lapor', icon: 'chatbox-ellipses-outline', route: '/(tabs)/laporan', color: '#E65100', bgColor: '#FFE0B2' },
-        { id: 'panic', title: 'Darurat', icon: 'warning-outline', color: '#B71C1C', bgColor: '#FFCDD2' },
+        { id: 'iuran', title: 'Iuran', icon: 'cash-outline', route: '/(tabs)/iuran', color: '#0D47A1', bgColor: '#E3F2FD' },
+        { id: 'laporan', title: 'Laporan', icon: 'document-text-outline', route: '/(tabs)/laporan', color: '#E65100', bgColor: '#FFF3E0' },
+        { id: 'tamu', title: 'Buku Tamu', icon: 'id-card-outline', route: '/warga/guests', color: '#00695C', bgColor: '#E0F2F1' },
+        { id: 'panic', title: 'Darurat', icon: 'warning', color: '#C62828', bgColor: '#FFEBEE' },
         { id: 'shop', title: 'UMKM', icon: 'storefront-outline', color: '#0D47A1', bgColor: '#BBDEFB' },
         { id: 'voting', title: 'Voting', icon: 'stats-chart-outline', color: '#4A148C', bgColor: '#E1BEE7' },
         { id: 'more', title: 'Lainnya', icon: 'grid-outline', color: '#333333', bgColor: '#F5F5F5' },
