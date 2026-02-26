@@ -30,6 +30,12 @@ export default function SecurityLayout() {
                     title: 'Buku Tamu',
                 }}
             />
+            <MaterialTopTabs.Screen
+                name="profile"
+                options={{
+                    title: 'Profil',
+                }}
+            />
         </MaterialTopTabs>
     );
 }

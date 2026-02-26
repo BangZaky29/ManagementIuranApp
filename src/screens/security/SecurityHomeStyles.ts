@@ -12,7 +12,13 @@ export const styles = StyleSheet.create({
     },
     greeting: { fontSize: 14, color: '#666' },
     userName: { fontSize: 22, fontWeight: 'bold', color: '#0D47A1' }, // Security Blue
-    logoutBtn: { padding: 10, backgroundColor: '#FFEBEE', borderRadius: 12 },
+    profileBtn: { 
+        width: 44, height: 44, borderRadius: 22, 
+        overflow: 'hidden', backgroundColor: '#E3F2FD',
+        justifyContent: 'center', alignItems: 'center',
+        padding: 0,
+    },
+    profileAvatar: { width: '100%', height: '100%', borderRadius: 22 },
 
     // Stats
     statsRow: {

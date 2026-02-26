@@ -75,7 +75,9 @@ export default function GuestBookScreen() {
                                 <Text style={styles.detailLabel}>Tujuan (Warga)</Text>
                                 <Text style={styles.detailValue} numberOfLines={1}>
                                     {item.profiles?.full_name || 'Tidak diketahui'}
-                                    {item.profiles?.housing_complex_id ? ` (Blok ${item.profiles.housing_complex_id})` : ''}
+                                </Text>
+                                <Text style={{ fontSize: 13, color: '#666', marginTop: 2 }} numberOfLines={1}>
+                                    {item.profiles ? `Blok ${item.profiles.rt_rw || item.profiles.housing_complex_id || '?'}` : ''}
                                 </Text>
                             </View>
                             <View style={styles.detailCol}>
@@ -211,8 +213,19 @@ export default function GuestBookScreen() {
                                 keyboardShouldPersistTaps="handled"
                                 renderItem={({ item }) => (
                                     <TouchableOpacity
-                                        style={styles.residentListItem}
+                                        style={[styles.residentListItem, !item.is_claimed && { opacity: 0.5 }]}
+                                        disabled={!item.is_claimed}
                                         onPress={() => {
+                                            if (!item.is_claimed) {
+                                                vm.setAlertConfig({
+                                                    title: 'Warga Belum Aktif',
+                                                    message: 'Warga ini belum melakukan registrasi / login ke aplikasi.',
+                                                    type: 'warning',
+                                                    buttons: [{ text: 'OK', onPress: vm.hideAlert }]
+                                                });
+                                                vm.setAlertVisible(true);
+                                                return;
+                                            }
                                             vm.setFormDestination(item.id);
                                             vm.setResidentModalVisible(false);
                                             vm.setSearchQuery('');
@@ -247,8 +260,8 @@ export default function GuestBookScreen() {
             />
 
             {/* Floating Add Button */}
-            <TouchableOpacity 
-                style={styles.floatingAddBtn} 
+            <TouchableOpacity
+                style={styles.floatingAddBtn}
                 onPress={() => vm.setAddModalVisible(true)}
             >
                 <Ionicons name="add" size={32} color="#FFF" />

@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { fetchPanicLogs, resolvePanicLog, countActivePanics, PanicLog } from '../../services/panicService';
 import { countActiveVisitors } from '../../services/guestService';
 import { getDashboardStats } from '../../services/adminService';
+import { supabase } from '../../lib/supabaseConfig';
 
 export function useSecurityHomeViewModel() {
     const { signOut, user } = useAuth();
@@ -15,6 +16,7 @@ export function useSecurityHomeViewModel() {
     const [activePanics, setActivePanics] = useState(0);
     const [activeGuests, setActiveGuests] = useState(0);
     const [recentPanics, setRecentPanics] = useState<PanicLog[]>([]);
+    const [securityProfile, setSecurityProfile] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     // Alert
@@ -32,10 +34,17 @@ export function useSecurityHomeViewModel() {
                 countActiveVisitors(),
                 fetchPanicLogs(0, 5, false), // Latest 5 active panics
             ]);
+            let profileData = null;
+            if (user?.id) {
+                const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+                profileData = data;
+            }
+
             setStats(statsData);
             setActivePanics(panicCount);
             setActiveGuests(guestCount);
             setRecentPanics(panicLogs);
+            setSecurityProfile(profileData);
         } catch (error) {
             console.error('Failed to load security dashboard:', error);
         } finally {
@@ -57,6 +66,7 @@ export function useSecurityHomeViewModel() {
 
     const navigateToPanicLogs = () => router.push('/security/panic-logs' as any);
     const navigateToGuestBook = () => router.push('/security/guests' as any);
+    const navigateToProfile = () => router.navigate('/security/profile' as any);
 
     const openPanicLocation = (log: PanicLog) => {
         if (log.location && log.location.startsWith('http')) {
@@ -95,8 +105,8 @@ export function useSecurityHomeViewModel() {
     };
 
     return {
-        user, stats, activePanics, activeGuests, recentPanics, isLoading,
-        handleLogout, navigateToPanicLogs, navigateToGuestBook,
+        user, stats, activePanics, activeGuests, recentPanics, isLoading, securityProfile,
+        handleLogout, navigateToPanicLogs, navigateToGuestBook, navigateToProfile,
         openPanicLocation, handleResolvePanic, formatTime,
         alertVisible, alertConfig, hideAlert, refresh: loadData,
     };

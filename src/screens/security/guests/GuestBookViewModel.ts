@@ -21,6 +21,7 @@ export interface Resident {
     housing_complex_id?: number | null;
     block?: string | null;
     avatar_url?: string | null;
+    is_claimed?: boolean;
 }
 
 export function useGuestBookViewModel() {
@@ -79,6 +80,7 @@ export function useGuestBookViewModel() {
                     housing_complex_id, 
                     role, 
                     is_claimed, 
+                    claimed_by,
                     nik,
                     housing_complexes (
                         name
@@ -100,7 +102,7 @@ export function useGuestBookViewModel() {
                 if (niks.length > 0) {
                     const { data: profilesData, error: profilesError } = await supabase
                         .from('profiles')
-                        .select('nik, avatar_url, address, rt_rw')
+                        .select('id, nik, avatar_url, rt_rw')
                         .in('nik', niks);
 
                     if (!profilesError && profilesData) {
@@ -118,13 +120,14 @@ export function useGuestBookViewModel() {
                     const profile = d.nik ? profilesMap[d.nik] : null;
 
                     // If not claimed yet
-                    if (!d.is_claimed) {
+                    if (!d.is_claimed || !profile?.id) {
                         return {
-                            id: d.id,
+                            id: d.id, // Keep unique UUID for React key
                             full_name: d.full_name,
                             housing_complex_id: d.housing_complex_id,
                             block: 'Warga Belum Login',
                             avatar_url: null,
+                            is_claimed: false, // Use this for UI disabling
                         };
                     }
 
@@ -136,11 +139,12 @@ export function useGuestBookViewModel() {
                     const blockStr = profile?.rt_rw || d.housing_complex_id || '?';
 
                     return {
-                        id: d.id,
+                        id: profile.id, // Must use profile.id for visitors table destination_user_id
                         full_name: d.full_name,
                         housing_complex_id: d.housing_complex_id,
                         block: `${complexName} | Blok ${blockStr}`,
                         avatar_url: profile?.avatar_url || null,
+                        is_claimed: true,
                     };
                 });
                 setResidents(formatted);
@@ -272,7 +276,9 @@ export function useGuestBookViewModel() {
         setSearchQuery,
         isSubmitting,
         alertVisible,
+        setAlertVisible,
         alertConfig,
+        setAlertConfig,
         hideAlert,
         loadData,
         handleCheckOut,

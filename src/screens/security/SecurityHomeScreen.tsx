@@ -35,8 +35,14 @@ export default function SecurityHomeScreen() {
                         <Text style={styles.greeting}>Tugas Berjaga,</Text>
                         <Text style={styles.userName}>{vm.user?.user_metadata?.full_name || 'Petugas'}</Text>
                     </View>
-                    <TouchableOpacity style={styles.logoutBtn} onPress={vm.handleLogout}>
-                        <Ionicons name="log-out-outline" size={20} color="#C62828" />
+                    <TouchableOpacity style={styles.profileBtn} onPress={vm.navigateToProfile}>
+                        {vm.securityProfile?.avatar_url ? (
+                            <Image source={{ uri: vm.securityProfile.avatar_url }} style={styles.profileAvatar} />
+                        ) : (
+                            <View style={[styles.profileAvatar, styles.avatarPlaceholder]}>
+                                <Ionicons name="person" size={20} color="#0D47A1" />
+                            </View>
+                        )}
                     </TouchableOpacity>
                 </View>
 

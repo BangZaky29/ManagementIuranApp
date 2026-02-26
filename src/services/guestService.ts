@@ -20,6 +20,10 @@ export interface Visitor {
     profiles?: {
         full_name: string;
         housing_complex_id: number | null;
+        rt_rw: string | null;
+        housing_complexes?: {
+            name: string;
+        } | null;
     } | null;
 }
 
@@ -31,7 +35,11 @@ export const fetchActiveVisitors = async (): Promise<Visitor[]> => {
                 *,
                 profiles:destination_user_id (
                     full_name,
-                    housing_complex_id
+                    housing_complex_id,
+                    rt_rw,
+                    housing_complexes (
+                        name
+                    )
                 )
             `)
             .eq('status', 'active')
@@ -52,7 +60,11 @@ export const fetchVisitorHistory = async (limit = 50): Promise<Visitor[]> => {
                 *,
                 profiles:destination_user_id (
                     full_name,
-                    housing_complex_id
+                    housing_complex_id,
+                    rt_rw,
+                    housing_complexes (
+                        name
+                    )
                 )
             `)
             .in('status', ['completed', 'rejected'])

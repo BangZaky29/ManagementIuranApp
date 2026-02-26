@@ -37,12 +37,15 @@ export const SecurityTabBar = ({ state, descriptors, navigation }: MaterialTopTa
                     case 'guests':
                         iconName = isFocused ? 'book' : 'book-outline';
                         break;
+                    case 'profile':
+                        iconName = isFocused ? 'person' : 'person-outline';
+                        break;
                     default:
                         iconName = 'alert-circle-outline';
                 }
 
                 // Filter out any route that is not explicitly handled
-                if (!['index', 'panic-logs', 'guests'].includes(route.name)) return null;
+                if (!['index', 'panic-logs', 'guests', 'profile'].includes(route.name)) return null;
 
                 return (
                     <TouchableOpacity
