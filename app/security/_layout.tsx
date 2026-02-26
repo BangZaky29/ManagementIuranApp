@@ -6,7 +6,7 @@ export default function SecurityLayout() {
         <MaterialTopTabs
             tabBar={(props) => <SecurityTabBar {...props} />}
             screenOptions={{
-                swipeEnabled: false, // Recommended for bottom tabs feeling
+                swipeEnabled: true, // Enabled swipe for bottom tabs feeling
                 animationEnabled: true,
             }}
             initialRouteName="index"
@@ -21,6 +21,12 @@ export default function SecurityLayout() {
                 name="panic-logs"
                 options={{
                     title: 'Darurat',
+                }}
+            />
+            <MaterialTopTabs.Screen
+                name="guests"
+                options={{
+                    title: 'Buku Tamu',
                 }}
             />
         </MaterialTopTabs>

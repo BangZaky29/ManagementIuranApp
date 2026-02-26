@@ -51,8 +51,8 @@ export default function AdminHomeScreen() {
                         <Text style={styles.statLabel}>Security</Text>
                     </View>
                     <View style={[styles.statCard, { borderLeftColor: '#FF9800' }]}>
-                        <Text style={styles.statNumber}>{vm.stats.activeUsers}</Text>
-                        <Text style={styles.statLabel}>Aktif</Text>
+                        <Text style={styles.statNumber}>{vm.activeGuests}</Text>
+                        <Text style={styles.statLabel}>Tamu Aktif</Text>
                     </View>
                 </View>
 

@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { Linking } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchPanicLogs, resolvePanicLog, countActivePanics, PanicLog } from '../../services/panicService';
+import { countActiveVisitors } from '../../services/guestService';
 import { getDashboardStats } from '../../services/adminService';
 
 export function useSecurityHomeViewModel() {
@@ -12,6 +13,7 @@ export function useSecurityHomeViewModel() {
     // Dashboard stats
     const [stats, setStats] = useState({ warga: 0, security: 0, activeUsers: 0 });
     const [activePanics, setActivePanics] = useState(0);
+    const [activeGuests, setActiveGuests] = useState(0);
     const [recentPanics, setRecentPanics] = useState<PanicLog[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -24,13 +26,15 @@ export function useSecurityHomeViewModel() {
 
     const loadData = useCallback(async () => {
         try {
-            const [statsData, panicCount, panicLogs] = await Promise.all([
+            const [statsData, panicCount, guestCount, panicLogs] = await Promise.all([
                 getDashboardStats(),
                 countActivePanics(),
+                countActiveVisitors(),
                 fetchPanicLogs(0, 5, false), // Latest 5 active panics
             ]);
             setStats(statsData);
             setActivePanics(panicCount);
+            setActiveGuests(guestCount);
             setRecentPanics(panicLogs);
         } catch (error) {
             console.error('Failed to load security dashboard:', error);
@@ -91,7 +95,7 @@ export function useSecurityHomeViewModel() {
     };
 
     return {
-        user, stats, activePanics, recentPanics, isLoading,
+        user, stats, activePanics, activeGuests, recentPanics, isLoading,
         handleLogout, navigateToPanicLogs, navigateToGuestBook,
         openPanicLocation, handleResolvePanic, formatTime,
         alertVisible, alertConfig, hideAlert, refresh: loadData,

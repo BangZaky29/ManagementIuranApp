@@ -51,7 +51,7 @@ export default function SecurityHomeScreen() {
                         <Text style={styles.statLabel}>Darurat Aktif</Text>
                     </View>
                     <View style={[styles.statCard, { borderLeftColor: '#FF9800' }]}>
-                        <Text style={styles.statNumber}>0</Text>
+                        <Text style={styles.statNumber}>{vm.activeGuests}</Text>
                         <Text style={styles.statLabel}>Tamu Aktif</Text>
                     </View>
                 </View>
