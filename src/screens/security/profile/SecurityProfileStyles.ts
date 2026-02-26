@@ -10,6 +10,14 @@ export const styles = StyleSheet.create({
         paddingBottom: 100,
     },
 
+    // Header Area (Aligned with Guest Book)
+    header: {
+        backgroundColor: '#FFF', paddingHorizontal: 20, paddingBottom: 16,
+        paddingTop: Platform.OS === 'android' ? 48 : 16,
+        borderBottomWidth: 1, borderBottomColor: '#E0E0E0',
+    },
+    title: { fontSize: 24, fontWeight: 'bold', color: '#0D47A1' },
+
     // Header Section
     headerCard: {
         alignItems: 'center',

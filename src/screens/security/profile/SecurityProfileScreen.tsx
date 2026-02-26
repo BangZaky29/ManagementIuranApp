@@ -43,8 +43,9 @@ export default function SecurityProfileScreen() {
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#F0F4F8" />
             
-            <View style={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 10 }}>
-                <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#0D47A1' }}>Profil Petugas</Text>
+            {/* Header Aligned with Guest Book */}
+            <View style={styles.header}>
+                <Text style={styles.title}>Profil Petugas</Text>
             </View>
 
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>

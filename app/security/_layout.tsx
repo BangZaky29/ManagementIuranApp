@@ -1,41 +1,19 @@
-import { MaterialTopTabs } from '../../src/components/navigation/SwipeableTabLayout';
-import { SecurityTabBar } from '../../src/components/navigation/SecurityTabBar';
+import { Stack } from 'expo-router';
 
-export default function SecurityLayout() {
+export default function SecurityRootLayout() {
     return (
-        <MaterialTopTabs
-            tabBarPosition="bottom"
-            tabBar={(props) => <SecurityTabBar {...props} />}
+        <Stack
             screenOptions={{
-                swipeEnabled: true, // Enabled swipe for bottom tabs feeling
-                animationEnabled: true,
+                headerShown: false,
+                animation: 'slide_from_right',
             }}
-            initialRouteName="index"
         >
-            <MaterialTopTabs.Screen
-                name="index"
-                options={{
-                    title: 'Dashboard',
-                }}
-            />
-            <MaterialTopTabs.Screen
-                name="panic-logs"
-                options={{
-                    title: 'Darurat',
-                }}
-            />
-            <MaterialTopTabs.Screen
-                name="guests"
-                options={{
-                    title: 'Buku Tamu',
-                }}
-            />
-            <MaterialTopTabs.Screen
-                name="profile"
-                options={{
-                    title: 'Profil',
-                }}
-            />
-        </MaterialTopTabs>
+            {/* Main Tabs Group */}
+            <Stack.Screen name="(tabs)" />
+
+            {/* Standalone Screens (Stand-out from swipeable tabs) */}
+            <Stack.Screen name="edit-profile" />
+            <Stack.Screen name="change-password" />
+        </Stack>
     );
 }
