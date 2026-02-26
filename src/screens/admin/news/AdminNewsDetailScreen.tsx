@@ -1,41 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, StatusBar, ActivityIndicator, Image, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
-import { fetchNewsDetail, deleteNews, NewsItem } from '../../../services/newsService';
+import { deleteNews } from '../../../services/newsService';
 import { NewsDetailStyles as styles } from '../../warga/news/NewsDetailStyles'; // Reuse styles
 import { useTheme } from '../../../contexts/ThemeContext';
+import { useNewsDetailViewModel } from '../../warga/news/NewsDetailViewModel';
 
 export default function AdminNewsDetailScreen() {
     const { id } = useLocalSearchParams();
     const router = useRouter();
     const { colors } = useTheme();
 
-    const [newsItem, setNewsItem] = useState<NewsItem | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        loadNews();
-    }, [id]);
-
-    const loadNews = async () => {
-        const newsId = typeof id === 'string' ? parseInt(id, 10) : 0;
-        if (!newsId) {
-            setIsLoading(false);
-            return;
-        }
-
-        try {
-            const data = await fetchNewsDetail(newsId);
-            setNewsItem(data);
-        } catch (error) {
-            console.error('Failed to load news detail:', error);
-            Alert.alert('Error', 'Gagal memuat detail berita');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    const { newsItem, isLoading, setIsLoading } = useNewsDetailViewModel(id as string);
 
     const handleDelete = () => {
         if (!newsItem) return;

@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabaseConfig';
+import { AppError } from '../utils/AppError';
 import { documentDirectory, writeAsStringAsync, readAsStringAsync } from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import * as DocumentPicker from 'expo-document-picker';
@@ -118,29 +119,30 @@ export const deleteVerifiedResident = async (id: string) => {
 };
 
 export const getDashboardStats = async () => {
-    const { count: wargaCount, error: wargaError } = await supabase
-        .from('verified_residents')
-        .select('*', { count: 'exact', head: true })
-        .eq('role', 'warga');
+    // Run all 3 count queries in parallel for better performance
+    const [wargaResult, securityResult, claimedResult] = await Promise.all([
+        supabase
+            .from('verified_residents')
+            .select('*', { count: 'exact', head: true })
+            .eq('role', 'warga'),
+        supabase
+            .from('verified_residents')
+            .select('*', { count: 'exact', head: true })
+            .eq('role', 'security'),
+        supabase
+            .from('verified_residents')
+            .select('*', { count: 'exact', head: true })
+            .eq('is_claimed', true),
+    ]);
 
-    const { count: securityCount, error: securityError } = await supabase
-        .from('verified_residents')
-        .select('*', { count: 'exact', head: true })
-        .eq('role', 'security');
-
-    const { count: claimedCount, error: claimedError } = await supabase
-        .from('verified_residents')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_claimed', true);
-
-    if (wargaError) throw wargaError;
-    if (securityError) throw securityError;
-    if (claimedError) throw claimedError;
+    if (wargaResult.error) throw new AppError(wargaResult.error.message, 'DASHBOARD_STATS', 'Gagal memuat statistik warga.');
+    if (securityResult.error) throw new AppError(securityResult.error.message, 'DASHBOARD_STATS', 'Gagal memuat statistik keamanan.');
+    if (claimedResult.error) throw new AppError(claimedResult.error.message, 'DASHBOARD_STATS', 'Gagal memuat statistik pengguna aktif.');
 
     return {
-        warga: wargaCount || 0,
-        security: securityCount || 0,
-        activeUsers: claimedCount || 0,
+        warga: wargaResult.count || 0,
+        security: securityResult.count || 0,
+        activeUsers: claimedResult.count || 0,
     };
 };
 
@@ -241,82 +243,103 @@ export const importResidents = async (
     role: 'warga' | 'security',
     complexId: number | null
 ): Promise<{ success: number; failed: number; errors: string[] }> => {
-    try {
-        const result = await DocumentPicker.getDocumentAsync({
-            type: [
-                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
-                'application/vnd.ms-excel', // .xls
-                'text/csv', // .csv
-                'text/comma-separated-values',
-                'application/csv'
-            ],
-            copyToCacheDirectory: true
-        });
+    const result = await DocumentPicker.getDocumentAsync({
+        type: [
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+            'application/vnd.ms-excel', // .xls
+            'text/csv', // .csv
+            'text/comma-separated-values',
+            'application/csv'
+        ],
+        copyToCacheDirectory: true
+    });
 
-        if (result.canceled) throw new Error('Import dibatalkan');
+    if (result.canceled) throw new AppError('Import dibatalkan', 'IMPORT_CANCELLED', 'Import dibatalkan.');
 
-        const fileUri = result.assets[0].uri;
-        const fileContent = await readAsStringAsync(fileUri, {
-            encoding: 'base64'
-        });
+    const fileUri = result.assets[0].uri;
+    const fileContent = await readAsStringAsync(fileUri, {
+        encoding: 'base64'
+    });
 
-        const wb = XLSX.read(fileContent, { type: 'base64' });
-        const wsname = wb.SheetNames[0];
-        const ws = wb.Sheets[wsname];
-        const data = XLSX.utils.sheet_to_json(ws) as any[];
+    const wb = XLSX.read(fileContent, { type: 'base64' });
+    const wsname = wb.SheetNames[0];
+    const ws = wb.Sheets[wsname];
+    const data = XLSX.utils.sheet_to_json(ws) as any[];
 
-        if (!data || data.length === 0) throw new Error('File kosong');
+    if (!data || data.length === 0) {
+        throw new AppError('File kosong', 'IMPORT_EMPTY', 'File yang diupload tidak berisi data.');
+    }
 
-        let success = 0;
-        let failed = 0;
-        const errors: string[] = [];
+    // Phase 1: Validate all rows first
+    const validRows: { nik: string; full_name: string; role: string; housing_complex_id: number | null; is_claimed: boolean }[] = [];
+    const errors: string[] = [];
+    let failed = 0;
 
-        for (const row of data) {
-            // Validate headers (case insensitive check usually safer, but sticking to plan)
-            const nik = row['nik'] || row['NIK']; // handle some variation
-            const fullName = row['Nama Lengkap'] || row['full_name'];
+    for (const row of data) {
+        const nik = row['nik'] || row['NIK'];
+        const fullName = row['Nama Lengkap'] || row['full_name'];
 
-            if (!nik || !fullName) {
-                failed++;
-                errors.push(`Baris tanpa NIK atau Nama Lengkap dilewati.`);
-                continue;
-            }
-
-            try {
-                // Ensure unique access token logic is handled by DB default (or generated if needed)
-                // DB has default: upper(SUBSTRING(md5((random())::text) from 0 for 7))
-                // We just insert the minimal fields
-
-                const { error } = await supabase
-                    .from('verified_residents')
-                    .insert({
-                        nik: String(nik), // Ensure string
-                        full_name: fullName,
-                        role: role,
-                        housing_complex_id: complexId,
-                        is_claimed: false
-                    });
-
-                if (error) {
-                    // Check for unique constraint (NIK already exists)
-                    if (error.code === '23505') { // Postgres unique_violation
-                        failed++;
-                        errors.push(`NIK ${nik} sudah terdaftar.`);
-                    } else {
-                        throw error;
-                    }
-                } else {
-                    success++;
-                }
-            } catch (err: any) {
-                failed++;
-                errors.push(`Gagal import ${fullName}: ${err.message}`);
-            }
+        if (!nik || !fullName) {
+            failed++;
+            errors.push(`Baris tanpa NIK atau Nama Lengkap dilewati.`);
+            continue;
         }
 
-        return { success, failed, errors };
-
-    } catch (error: any) {
-        throw error;
+        validRows.push({
+            nik: String(nik),
+            full_name: fullName,
+            role: role,
+            housing_complex_id: complexId,
+            is_claimed: false
+        });
     }
+
+    if (validRows.length === 0) {
+        return { success: 0, failed, errors };
+    }
+
+    // Phase 2: Batch insert all valid rows in a single query
+    // Supabase returns partial success info — we use upsert-like behavior
+    // with onConflict to handle duplicates gracefully
+    const BATCH_SIZE = 100;
+    let success = 0;
+
+    for (let i = 0; i < validRows.length; i += BATCH_SIZE) {
+        const batch = validRows.slice(i, i + BATCH_SIZE);
+
+        const { data: inserted, error } = await supabase
+            .from('verified_residents')
+            .insert(batch)
+            .select('nik');
+
+        if (error) {
+            // If batch fails due to unique violation, fallback to individual inserts for this batch
+            if (error.code === '23505') {
+                for (const row of batch) {
+                    const { error: singleError } = await supabase
+                        .from('verified_residents')
+                        .insert(row);
+
+                    if (singleError) {
+                        failed++;
+                        if (singleError.code === '23505') {
+                            errors.push(`NIK ${row.nik} sudah terdaftar.`);
+                        } else {
+                            errors.push(`Gagal import ${row.full_name}: ${singleError.message}`);
+                        }
+                    } else {
+                        success++;
+                    }
+                }
+            } else {
+                // Non-unique error: mark entire batch as failed
+                failed += batch.length;
+                errors.push(`Batch gagal: ${error.message}`);
+            }
+        } else {
+            success += inserted?.length || batch.length;
+        }
+    }
+
+    return { success, failed, errors };
 };

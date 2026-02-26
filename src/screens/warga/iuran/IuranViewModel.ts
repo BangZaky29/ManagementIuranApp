@@ -40,8 +40,8 @@ export const useIuranViewModel = () => {
         try {
             // 1. Get Bill Summary for current month
             const bill = await calculateBillSummary(user.id);
-            setAmountDue(bill.isPaid ? 'Lunas' : `Rp ${bill.total.toLocaleString('id-ID')}`);
-            setIsPaid(!!bill.isPaid);
+            setAmountDue(bill.allPaid ? 'Lunas' : `Rp ${bill.totalUnpaid.toLocaleString('id-ID')}`);
+            setIsPaid(bill.allPaid);
 
             // 2. Get Payment History
             const rawPayments = await fetchMyPayments();

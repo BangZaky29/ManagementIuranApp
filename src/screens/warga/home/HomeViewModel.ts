@@ -46,7 +46,7 @@ export const useHomeViewModel = () => {
             if (user?.id) {
                 const bill = await calculateBillSummary(user.id);
                 setBillSummary({
-                    total: bill.isPaid ? 'Lunas' : `Rp ${bill.total.toLocaleString('id-ID')}`,
+                    total: bill.allPaid ? 'Lunas' : `Rp ${bill.totalUnpaid.toLocaleString('id-ID')}`,
                     label: 'Iuran Bulanan',
                     dueDate: bill.dueDate
                 });

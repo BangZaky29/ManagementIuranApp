@@ -1,13 +1,14 @@
-export interface NewsItem {
-    id: number;
-    title: string;
-    date: string;
-    content: string;
-    image?: any; // Placeholder for image require or URL
-    category: string;
-}
+import { NewsItem } from '../services/newsService';
 
-export const NEWS_ITEMS: NewsItem[] = [
+/**
+ * Mock news data for offline/demo use.
+ * Uses a subset of the canonical NewsItem type from newsService.
+ */
+export type MockNewsItem = Pick<NewsItem, 'id' | 'title' | 'content' | 'category'> & {
+    date: string; // Formatted display date (not ISO timestamp)
+};
+
+export const NEWS_ITEMS: MockNewsItem[] = [
     {
         id: 1,
         title: 'Kerja Bakti Rutin - Minggu ini',

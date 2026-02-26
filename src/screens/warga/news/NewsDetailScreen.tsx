@@ -1,40 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, StatusBar, ActivityIndicator, Image } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
-import { fetchNewsDetail, NewsItem } from '../../../services/newsService';
 import { NewsDetailStyles as styles } from './NewsDetailStyles';
 import { useTheme } from '../../../contexts/ThemeContext';
+import { useNewsDetailViewModel } from './NewsDetailViewModel';
 
 export default function NewsDetailScreen() {
     const { id } = useLocalSearchParams();
     const router = useRouter();
     const { colors } = useTheme();
 
-    const [newsItem, setNewsItem] = useState<NewsItem | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        loadNews();
-    }, [id]);
-
-    const loadNews = async () => {
-        const newsId = typeof id === 'string' ? parseInt(id, 10) : 0;
-        if (!newsId) {
-            setIsLoading(false);
-            return;
-        }
-
-        try {
-            const data = await fetchNewsDetail(newsId);
-            setNewsItem(data);
-        } catch (error) {
-            console.error('Failed to load news detail:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    const { newsItem, isLoading } = useNewsDetailViewModel(id as string);
 
     if (isLoading) {
         return (

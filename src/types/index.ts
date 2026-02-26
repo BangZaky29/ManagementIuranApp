@@ -42,14 +42,8 @@ export interface ReportItem {
 }
 
 // ─── News ────────────────────────────────────────
-export interface NewsItem {
-    id: number;
-    title: string;
-    date: string;
-    content: string;
-    image?: any;
-    category: string;
-}
+// Canonical NewsItem is in newsService.ts — re-export for convenience
+export type { NewsItem } from '../services/newsService';
 
 // ─── Quick Actions ───────────────────────────────
 export interface QuickAction {
