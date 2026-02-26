@@ -14,7 +14,7 @@ SplashScreen.preventAutoHideAsync();
 
 // Penting: Kosongkan ini atau arahkan ke rute login agar tidak memaksa ke (tabs)
 export const unstable_settings = {
-  initialRouteName: 'login',
+  initialRouteName: 'login-warga',
 };
 
 function AuthGate({ children }: { children: React.ReactNode }) {
@@ -35,7 +35,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     if (!isAuthenticated) {
       if (!inAuthGroup) {
         // Gunakan replace untuk membersihkan history stack
-        router.replace('/login');
+        router.replace('/login-warga');
       }
     } else {
       if (inAuthGroup) {
@@ -114,12 +114,12 @@ function RootLayoutInner() {
     <NavThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
       <AuthGate>
         <Stack screenOptions={{ headerShown: false }}>
-          {/* Urutan Screen: Pindahkan Login ke paling atas untuk default rute */}
+          {/* Urutan Screen: Pindahkan Login Warga ke paling atas untuk default rute */}
+          <Stack.Screen name="login-warga" />
           <Stack.Screen name="login" />
           <Stack.Screen name="admin" />
           <Stack.Screen name="(tabs)" />
 
-          <Stack.Screen name="login-warga" />
           <Stack.Screen name="register" />
           <Stack.Screen name="forgot-password" />
           <Stack.Screen name="register-admin" />

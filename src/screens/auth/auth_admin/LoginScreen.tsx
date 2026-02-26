@@ -130,14 +130,16 @@ export default function LoginScreen() {
         }
     };
 
+    const navigateToWargaLogin = () => {
+        // Redirect directly to Warga/Security Login as requested
+        router.push('/login-warga');
+    };
+
     const navigateToRegisterAdmin = () => {
         router.push('/register-admin');
     };
 
-    const navigateToWargaLogin = () => {
-        // Redirect to Verification/Register screen as requested
-        router.push('/register');
-    };
+
 
     return (
         <View style={styles.container}>
@@ -201,13 +203,12 @@ export default function LoginScreen() {
                         </View>
 
                         <CustomButton
-                            title="Verifikasi Akun Warga atau Sekuriti Anda"
+                            title="Masuk sebagai Warga atau Sekuriti"
                             onPress={navigateToWargaLogin}
                             variant="outline"
                             style={{ marginBottom: 16, borderColor: Colors.primary }}
                             textStyle={{ color: Colors.primary }}
                         />
-
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>

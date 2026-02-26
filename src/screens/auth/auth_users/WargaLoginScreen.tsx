@@ -108,9 +108,7 @@ export default function WargaLoginScreen() {
             >
                 <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
-                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={24} color={Colors.green5} />
-                    </TouchableOpacity>
+
 
                     <View style={styles.headerContainer}>
                         <View style={styles.logoContainer}>
@@ -157,6 +155,20 @@ export default function WargaLoginScreen() {
                                 <Text style={styles.registerLink}>Verifikasi Data & Daftar</Text>
                             </TouchableOpacity>
                         </View>
+
+                        <View style={styles.dividerContainer}>
+                            <View style={styles.dividerLine} />
+                            <Text style={styles.dividerText}>atau</Text>
+                            <View style={styles.dividerLine} />
+                        </View>
+
+                        <CustomButton
+                            title="Masuk sebagai Admin"
+                            onPress={() => router.push('/login')}
+                            variant="outline"
+                            style={{ borderColor: Colors.primary }}
+                            textStyle={{ color: Colors.primary }}
+                        />
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
@@ -185,28 +197,12 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         justifyContent: 'center',
         padding: 24,
-        paddingTop: 60, // Added padding for better spacing with back button
-    },
-    backButton: {
-        position: 'absolute',
-        top: 50,
-        left: 24,
-        zIndex: 10,
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: Colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        elevation: 2,
+        paddingBottom: 80, // Added bottom padding to "push" content slightly up
     },
     headerContainer: {
         alignItems: 'center',
         marginBottom: 40,
-        marginTop: 60,
+        marginTop: 20, // Reduced from 60
     },
     logoContainer: {
         width: 80,
@@ -258,5 +254,21 @@ const styles = StyleSheet.create({
         color: Colors.primary,
         fontWeight: 'bold',
         fontSize: 15,
+    },
+    dividerContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 24,
+        marginBottom: 24,
+    },
+    dividerLine: {
+        flex: 1,
+        height: 1,
+        backgroundColor: Colors.green2,
+    },
+    dividerText: {
+        marginHorizontal: 12,
+        fontSize: 13,
+        color: Colors.textSecondary,
     },
 });
