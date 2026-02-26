@@ -117,3 +117,20 @@ CREATE TABLE public.verified_residents (
   CONSTRAINT verified_residents_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id),
   CONSTRAINT verified_residents_housing_complex_id_fkey FOREIGN KEY (housing_complex_id) REFERENCES public.housing_complexes(id)
 );
+CREATE TABLE public.visitors (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  visitor_name text NOT NULL,
+  visitor_type USER-DEFINED NOT NULL DEFAULT 'tamu'::visitor_type,
+  destination_user_id uuid,
+  purpose text,
+  pin_code character varying,
+  status USER-DEFINED NOT NULL DEFAULT 'pending'::visitor_status,
+  check_in_time timestamp with time zone,
+  check_out_time timestamp with time zone,
+  created_by uuid,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT visitors_pkey PRIMARY KEY (id),
+  CONSTRAINT visitors_destination_user_id_fkey FOREIGN KEY (destination_user_id) REFERENCES public.profiles(id),
+  CONSTRAINT visitors_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id)
+);

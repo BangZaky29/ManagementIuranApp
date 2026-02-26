@@ -15,6 +15,15 @@ export function useGuestBookViewModel() {
     const [formDestination, setFormDestination] = useState(''); // Resident ID
     const [formPurpose, setFormPurpose] = useState('');
 
+    // Resident Search Modal
+    const [residentModalVisible, setResidentModalVisible] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const filteredResidents = residents.filter(r =>
+        r.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (r.block && r.block.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+
     // Alert Handling
     const [alertVisible, setAlertVisible] = useState(false);
     const [alertConfig, setAlertConfig] = useState({
@@ -115,8 +124,9 @@ export function useGuestBookViewModel() {
     };
 
     return {
-        activeGuests, isLoading, isSubmitting, residents,
+        activeGuests, isLoading, isSubmitting, residents, filteredResidents,
         addModalVisible, setAddModalVisible,
+        residentModalVisible, setResidentModalVisible, searchQuery, setSearchQuery,
         formName, setFormName, formType, setFormType,
         formDestination, setFormDestination, formPurpose, setFormPurpose,
         handleCheckOut, handleAddWalkin, loadData,

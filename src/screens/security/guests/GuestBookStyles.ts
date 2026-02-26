@@ -87,5 +87,29 @@ export const styles = StyleSheet.create({
     },
     submitBtnText: { color: '#FFF', fontSize: 16, fontWeight: 'bold' },
     cancelBtn: { paddingVertical: 14, alignItems: 'center', marginTop: 4 },
-    cancelBtnText: { color: '#888', fontSize: 15, fontWeight: '600' }
+    cancelBtnText: { color: '#888', fontSize: 15, fontWeight: '600' },
+
+    // Resident Search Modal
+    pickerButton: {
+        backgroundColor: '#F5F5F5', borderRadius: 12, padding: 14,
+        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+        borderWidth: 1, borderColor: '#EEE'
+    },
+    pickerButtonText: { fontSize: 15, color: '#333' },
+    searchContainer: {
+        flexDirection: 'row', alignItems: 'center',
+        backgroundColor: '#F5F5F5', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12,
+        marginBottom: 16, borderWidth: 1, borderColor: '#EEE'
+    },
+    searchInput: { flex: 1, fontSize: 15, color: '#333' },
+    residentListItem: {
+        flexDirection: 'row', alignItems: 'center', gap: 12,
+        paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#F0F0F0'
+    },
+    residentAvatar: {
+        width: 40, height: 40, borderRadius: 20, backgroundColor: '#90CAF9',
+        justifyContent: 'center', alignItems: 'center'
+    },
+    residentName: { fontSize: 15, fontWeight: '600', color: '#111' },
+    residentBlock: { fontSize: 12, color: '#666', marginTop: 2 }
 });

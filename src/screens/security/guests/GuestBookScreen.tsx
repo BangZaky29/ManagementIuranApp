@@ -143,20 +143,17 @@ export default function GuestBookScreen() {
 
                                 <View style={styles.inputGroup}>
                                     <Text style={styles.inputLabel}>Tujuan (Pilih Warga) <Text style={{ color: 'red' }}>*</Text></Text>
-                                    {/* For a real production app, this should be a Searchable Dropdown. Using simple map for now if list is small, or just a flatlist picker modal. To keep it simple, we render a horizontal list of residents. */}
-                                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexDirection: 'row' }}>
-                                        {vm.residents.map(res => (
-                                            <TouchableOpacity
-                                                key={res.id}
-                                                style={[styles.typeBtn, vm.formDestination === res.id && styles.typeBtnActive, { marginRight: 8 }]}
-                                                onPress={() => vm.setFormDestination(res.id)}
-                                            >
-                                                <Text style={[styles.typeText, vm.formDestination === res.id && styles.typeTextActive]}>
-                                                    {res.full_name} {res.block ? `(${res.block})` : ''}
-                                                </Text>
-                                            </TouchableOpacity>
-                                        ))}
-                                    </ScrollView>
+                                    <TouchableOpacity
+                                        style={styles.pickerButton}
+                                        onPress={() => vm.setResidentModalVisible(true)}
+                                    >
+                                        <Text style={[styles.pickerButtonText, !vm.formDestination && { color: '#999' }]}>
+                                            {vm.formDestination
+                                                ? vm.residents.find(r => r.id === vm.formDestination)?.full_name || 'Pilih Warga...'
+                                                : 'Pencet untuk pilih warga tujuan...'}
+                                        </Text>
+                                        <Ionicons name="chevron-down" size={20} color="#666" />
+                                    </TouchableOpacity>
                                 </View>
 
                                 <View style={styles.inputGroup}>
@@ -184,6 +181,66 @@ export default function GuestBookScreen() {
                             <TouchableOpacity style={styles.cancelBtn} onPress={() => vm.setAddModalVisible(false)}>
                                 <Text style={styles.cancelBtnText}>Batal</Text>
                             </TouchableOpacity>
+                        </View>
+                    </View>
+                </KeyboardAvoidingView>
+            </Modal>
+
+            {/* Resident Picker Modal */}
+            <Modal
+                visible={vm.residentModalVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => vm.setResidentModalVisible(false)}
+            >
+                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+                    <View style={styles.modalOverlay}>
+                        <View style={[styles.modalContent, { height: '80%' }]}>
+                            <View style={styles.headerRow}>
+                                <Text style={styles.modalTitle}>Cari Warga</Text>
+                                <TouchableOpacity onPress={() => vm.setResidentModalVisible(false)}>
+                                    <Ionicons name="close" size={24} color="#333" />
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={styles.searchContainer}>
+                                <Ionicons name="search" size={20} color="#888" style={{ marginRight: 8 }} />
+                                <TextInput
+                                    style={styles.searchInput}
+                                    placeholder="Ketik nama warga atau blok..."
+                                    value={vm.searchQuery}
+                                    onChangeText={vm.setSearchQuery}
+                                    autoFocus
+                                />
+                            </View>
+
+                            <FlatList
+                                data={vm.filteredResidents}
+                                keyExtractor={(item) => item.id}
+                                keyboardShouldPersistTaps="handled"
+                                renderItem={({ item }) => (
+                                    <TouchableOpacity
+                                        style={styles.residentListItem}
+                                        onPress={() => {
+                                            vm.setFormDestination(item.id);
+                                            vm.setResidentModalVisible(false);
+                                            vm.setSearchQuery('');
+                                        }}
+                                    >
+                                        <View style={styles.residentAvatar}>
+                                            <Ionicons name="person" size={20} color="#FFF" />
+                                        </View>
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={styles.residentName}>{item.full_name}</Text>
+                                            <Text style={styles.residentBlock}>{item.block || 'Blok tidak diketahui'}</Text>
+                                        </View>
+                                        <Ionicons name="chevron-forward" size={20} color="#CCC" />
+                                    </TouchableOpacity>
+                                )}
+                                ListEmptyComponent={
+                                    <Text style={{ textAlign: 'center', marginTop: 20, color: '#888' }}>Warga tidak ditemukan.</Text>
+                                }
+                            />
                         </View>
                     </View>
                 </KeyboardAvoidingView>
