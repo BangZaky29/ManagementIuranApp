@@ -32,6 +32,12 @@ export default function AdminLayout() {
                 }}
             />
             <MaterialTopTabs.Screen
+                name="panic-logs"
+                options={{
+                    title: 'Darurat',
+                }}
+            />
+            <MaterialTopTabs.Screen
                 name="news-management"
                 options={{
                     title: 'Berita',

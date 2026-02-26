@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../../contexts/AuthContext';
 import { fetchNews, NewsItem } from '../../../services/newsService';
@@ -96,24 +96,67 @@ export const useHomeViewModel = () => {
         router.push(`/news/${id}` as any);
     };
 
-    const handlePanicButton = async () => {
-        try {
-            await triggerPanicButton();
-            setAlertConfig({
-                title: 'SOS Terkirim!',
-                message: 'Sinyal darurat telah dikirim ke petugas keamanan dan warga sekitar.',
-                type: 'error', // Red for emergency
-                buttons: [{ text: 'OK', style: 'destructive', onPress: hideAlert }]
-            });
-        } catch (error) {
-            setAlertConfig({
-                title: 'Gagal Mengirim SOS',
-                message: 'Terjadi kesalahan saat mengirim sinyal darurat.',
-                type: 'error',
-                buttons: [{ text: 'Coba Lagi', onPress: hideAlert }]
-            });
+    // ─── 3-Click Panic Button Safety ───────────────
+    const panicClickCount = useRef(0);
+    const panicTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const handlePanicButton = () => {
+        panicClickCount.current += 1;
+
+        // Reset timeout on each click
+        if (panicTimeoutRef.current) {
+            clearTimeout(panicTimeoutRef.current);
         }
-        setAlertVisible(true);
+
+        if (panicClickCount.current < 3) {
+            const remaining = 3 - panicClickCount.current;
+            setAlertConfig({
+                title: '⚠️ Tombol Darurat',
+                message: `Tekan ${remaining} kali lagi dalam 3 detik untuk mengaktifkan sinyal darurat SOS.`,
+                type: 'warning',
+                buttons: [{ text: 'Mengerti', onPress: hideAlert }]
+            });
+            setAlertVisible(true);
+
+            // Reset after 3 seconds of inactivity
+            panicTimeoutRef.current = setTimeout(() => {
+                panicClickCount.current = 0;
+            }, 3000);
+            return;
+        }
+
+        // 3rd click — Send SOS!
+        panicClickCount.current = 0;
+        if (panicTimeoutRef.current) clearTimeout(panicTimeoutRef.current);
+
+        (async () => {
+            try {
+                setAlertConfig({
+                    title: '📡 Mengirim SOS...',
+                    message: 'Mendeteksi lokasi dan mengirim sinyal darurat...',
+                    type: 'warning',
+                    buttons: []
+                });
+                setAlertVisible(true);
+
+                await triggerPanicButton();
+
+                setAlertConfig({
+                    title: '🚨 SOS Terkirim!',
+                    message: 'Sinyal darurat beserta lokasi GPS Anda telah dikirim ke petugas keamanan.',
+                    type: 'error',
+                    buttons: [{ text: 'OK', style: 'destructive', onPress: hideAlert }]
+                });
+            } catch (error) {
+                setAlertConfig({
+                    title: 'Gagal Mengirim SOS',
+                    message: 'Terjadi kesalahan saat mengirim sinyal darurat. Coba lagi.',
+                    type: 'error',
+                    buttons: [{ text: 'Coba Lagi', onPress: hideAlert }]
+                });
+            }
+            setAlertVisible(true);
+        })();
     };
 
     return {
