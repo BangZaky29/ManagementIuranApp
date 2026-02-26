@@ -202,6 +202,24 @@ export const HomeStyles = StyleSheet.create({
             }
         }),
     },
+    newsCardTopRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+    },
+    newsThumb: {
+        width: 48,
+        height: 48,
+        borderRadius: 10,
+        backgroundColor: '#f0f0f0',
+    },
+    newsThumbPlaceholder: {
+        width: 48,
+        height: 48,
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     newsBadge: {
         alignSelf: 'flex-start',
         paddingHorizontal: 8,

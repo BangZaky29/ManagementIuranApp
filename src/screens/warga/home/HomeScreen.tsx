@@ -134,10 +134,23 @@ export default function HomeScreen() {
                                 style={[styles.newsCard, { backgroundColor: colors.backgroundCard }]}
                                 onPress={() => handleNewsClick(item.id)}
                             >
-                                <View style={[styles.newsBadge, { backgroundColor: colors.accent }]}>
-                                    <Text style={[styles.newsBadgeText, { color: colors.green5 }]}>{item.category || 'PENGUMUMAN'}</Text>
+                                {/* Top row: badge + thumbnail */}
+                                <View style={styles.newsCardTopRow}>
+                                    <View style={[styles.newsBadge, { backgroundColor: colors.accent, marginBottom: 0 }]}>
+                                        <Text style={[styles.newsBadgeText, { color: colors.green5 }]}>{item.category || 'PENGUMUMAN'}</Text>
+                                    </View>
+                                    {item.image_url ? (
+                                        <Image
+                                            source={{ uri: item.image_url }}
+                                            style={styles.newsThumb}
+                                        />
+                                    ) : (
+                                        <View style={[styles.newsThumbPlaceholder, { backgroundColor: colors.accent }]}>
+                                            <Ionicons name="newspaper-outline" size={20} color={colors.green4} />
+                                        </View>
+                                    )}
                                 </View>
-                                <Text style={[styles.newsTitle, { color: colors.green5 }]} numberOfLines={2}>{item.title}</Text>
+                                <Text style={[styles.newsTitle, { color: colors.green5, marginTop: 10 }]} numberOfLines={2}>{item.title}</Text>
                                 <Text style={{ fontSize: 11, color: colors.green4, marginBottom: 8 }}>
                                     <Ionicons name="calendar-outline" size={10} color={colors.green4} /> {formatDate(item.created_at)}
                                 </Text>
