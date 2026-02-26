@@ -1,6 +1,14 @@
 -- WARNING: This schema is for context only and is not meant to be run.
 -- Table order and constraints may not be valid for execution.
 
+CREATE TABLE public.auth_debug_logs (
+  id integer NOT NULL DEFAULT nextval('auth_debug_logs_id_seq'::regclass),
+  event_time timestamp with time zone DEFAULT now(),
+  step text,
+  payload jsonb,
+  details text,
+  CONSTRAINT auth_debug_logs_pkey PRIMARY KEY (id)
+);
 CREATE TABLE public.fees (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   name text NOT NULL,
