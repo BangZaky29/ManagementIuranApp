@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../../contexts/AuthContext';
 import { fetchMyPayments, fetchBillingPeriods, SmartBillSummary, BillingPeriod, PaymentRecord } from '../../../services/iuranService';
@@ -23,7 +23,8 @@ export const useIuranViewModel = () => {
     const [billSummary, setBillSummary] = useState<SmartBillSummary | null>(null);
     const [history, setHistory] = useState<PaymentHistoryItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [selectedPeriodIds, setSelectedPeriodIds] = useState<Set<string>>(new Set());
+    const [expandedPeriodIds, setExpandedPeriodIds] = useState<Set<string>>(new Set());
+    const [selectedItemKeys, setSelectedItemKeys] = useState<Set<string>>(new Set());
     const [isDownloadingReceiptId, setIsDownloadingReceiptId] = useState<string | null>(null);
 
     const [alertVisible, setAlertVisible] = useState(false);
@@ -52,10 +53,12 @@ export const useIuranViewModel = () => {
             const toSelect = new Set<string>();
             bill.periods.forEach(p => {
                 if (p.isOverdue || (p.isCurrentMonth && (p.status === 'unpaid' || p.status === 'partial'))) {
-                    toSelect.add(p.id);
+                    p.items.forEach(i => {
+                        if (i.status === 'unpaid') toSelect.add(`${p.id}|${i.fee.id}`);
+                    });
                 }
             });
-            setSelectedPeriodIds(toSelect);
+            setSelectedItemKeys(toSelect);
 
             // Format history
             const formatted: PaymentHistoryItem[] = rawPayments.slice(0, 5).map(p => {
@@ -81,11 +84,40 @@ export const useIuranViewModel = () => {
     }, [user?.id]);
 
     // Selection
-    const togglePeriod = (periodId: string) => {
-        setSelectedPeriodIds(prev => {
+    const toggleExpandPeriod = (periodId: string) => {
+        setExpandedPeriodIds(prev => {
             const next = new Set(prev);
             if (next.has(periodId)) next.delete(periodId);
             else next.add(periodId);
+            return next;
+        });
+    };
+
+    const togglePeriodSelection = (periodId: string) => {
+        if (!billSummary) return;
+        const period = billSummary.periods.find(p => p.id === periodId);
+        if (!period) return;
+        
+        const unpaidItems = period.items.filter(i => i.status === 'unpaid');
+        const allSelected = unpaidItems.every(i => selectedItemKeys.has(`${periodId}|${i.fee.id}`));
+        
+        setSelectedItemKeys(prev => {
+            const next = new Set(prev);
+            unpaidItems.forEach(i => {
+                const key = `${periodId}|${i.fee.id}`;
+                if (allSelected) next.delete(key);
+                else next.add(key);
+            });
+            return next;
+        });
+    };
+
+    const toggleItemSelection = (periodId: string, feeId: number) => {
+        const key = `${periodId}|${feeId}`;
+        setSelectedItemKeys(prev => {
+            const next = new Set(prev);
+            if (next.has(key)) next.delete(key);
+            else next.add(key);
             return next;
         });
     };
@@ -94,17 +126,30 @@ export const useIuranViewModel = () => {
         if (!billSummary) return;
         const ids = new Set<string>();
         billSummary.periods.forEach(p => {
-            if (p.status === 'unpaid' || p.status === 'partial' || p.status === 'overdue') {
-                ids.add(p.id);
-            }
+            p.items.forEach(i => {
+                if (i.status === 'unpaid') ids.add(`${p.id}|${i.fee.id}`);
+            });
         });
-        setSelectedPeriodIds(ids);
+        setSelectedItemKeys(ids);
     };
 
-    const deselectAll = () => setSelectedPeriodIds(new Set());
+    const deselectAll = () => setSelectedItemKeys(new Set());
 
-    const selectedPeriods = billSummary?.periods.filter(p => selectedPeriodIds.has(p.id) && p.status !== 'paid') || [];
+    const selectedPeriods = useMemo(() => {
+        if (!billSummary) return [];
+        return billSummary.periods.map(p => {
+            const selectedItems = p.items.filter(i => selectedItemKeys.has(`${p.id}|${i.fee.id}`));
+            if (selectedItems.length === 0) return null;
+            return {
+                ...p,
+                items: selectedItems,
+                totalAmount: selectedItems.reduce((sum, i) => sum + i.amount, 0)
+            };
+        }).filter(Boolean) as BillingPeriod[];
+    }, [billSummary, selectedItemKeys]);
+
     const selectedTotal = selectedPeriods.reduce((sum, p) => sum + p.totalAmount, 0);
+    const selectedCount = selectedItemKeys.size;
 
     // Pay
     const handlePay = () => {
@@ -171,10 +216,13 @@ export const useIuranViewModel = () => {
         billSummary,
         history,
         isLoading,
-        selectedPeriodIds,
+        expandedPeriodIds,
+        selectedItemKeys,
         selectedTotal,
-        selectedCount: selectedPeriods.length,
-        togglePeriod,
+        selectedCount,
+        toggleExpandPeriod,
+        togglePeriodSelection,
+        toggleItemSelection,
         selectAllUnpaid,
         deselectAll,
         handlePay,

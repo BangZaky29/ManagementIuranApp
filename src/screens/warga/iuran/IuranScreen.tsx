@@ -21,10 +21,13 @@ export default function IuranScreen() {
         billSummary,
         history,
         isLoading,
-        selectedPeriodIds,
+        expandedPeriodIds,
+        selectedItemKeys,
         selectedTotal,
         selectedCount,
-        togglePeriod,
+        toggleExpandPeriod,
+        togglePeriodSelection,
+        toggleItemSelection,
         selectAllUnpaid,
         deselectAll,
         handlePay,
@@ -38,11 +41,15 @@ export default function IuranScreen() {
     } = useIuranViewModel();
     const { colors } = useTheme();
 
-    const unpaidCount = billSummary?.periods.filter(p => p.status === 'unpaid' || p.status === 'partial' || p.status === 'overdue').length || 0;
+    const unpaidPeriodCount = billSummary?.periods.filter(p => p.status === 'unpaid' || p.status === 'partial' || p.status === 'overdue').length || 0;
     const paidCount = billSummary?.periods.filter(p => p.status === 'paid').length || 0;
     const pendingCount = billSummary?.periods.filter(p => p.status === 'pending').length || 0;
+    const unpaidItemCount = billSummary?.periods.flatMap(p => p.items.filter(i => i.status === 'unpaid')).length || 0;
 
-    const allPaid = billSummary?.periods.length && unpaidCount === 0 && pendingCount === 0;
+    const allPaid = billSummary?.periods.length && unpaidItemCount === 0 && pendingCount === 0;
+
+    const displayPeriods = billSummary?.periods.slice(0, 5) || [];
+    const hasMorePeriods = (billSummary?.periods.length || 0) > 5;
 
     return (
         <SafeAreaView style={[s.container, { backgroundColor: colors.background }]}>
@@ -68,7 +75,7 @@ export default function IuranScreen() {
                                 {allPaid ? '✅ Lunas' : formatCurrency(billSummary?.totalUnpaid || 0)}
                             </Text>
                             {!allPaid && (
-                                <Text style={s.summaryLabel}>Total tunggakan & tagihan aktif</Text>
+                                <Text style={s.summaryLabel}>Tagihan {unpaidItemCount} iuran belum dibayar</Text>
                             )}
 
                             {/* Stats Row */}
@@ -83,7 +90,7 @@ export default function IuranScreen() {
                                 </View>
                                 <View style={s.statItem}>
                                     <View style={[s.statDot, { backgroundColor: '#E0E0E0' }]} />
-                                    <Text style={s.statText}>Belum {unpaidCount}</Text>
+                                    <Text style={s.statText}>Belum {unpaidItemCount}</Text>
                                 </View>
                             </View>
 
@@ -102,20 +109,31 @@ export default function IuranScreen() {
                             <Animated.View entering={FadeInDown.delay(200).duration(400)}>
                                 <View style={s.sectionHeader}>
                                     <Text style={s.sectionTitle}>Timeline Tagihan</Text>
-                                    {unpaidCount > 0 && (
-                                        <TouchableOpacity
-                                            onPress={selectedCount === unpaidCount ? deselectAll : selectAllUnpaid}
-                                        >
-                                            <Text style={s.selectAllText}>
-                                                {selectedCount === unpaidCount ? 'Hapus Semua' : 'Pilih Semua'}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    )}
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                                        {hasMorePeriods && (
+                                            <TouchableOpacity onPress={() => router.push('/iuran/timeline')}>
+                                                <Text style={s.selectAllText}>Lihat Semua</Text>
+                                            </TouchableOpacity>
+                                        )}
+                                        {unpaidItemCount > 0 && (
+                                            <TouchableOpacity
+                                                onPress={selectedCount === unpaidItemCount ? deselectAll : selectAllUnpaid}
+                                            >
+                                                <Text style={[s.selectAllText, { color: '#FF9800' }]}>
+                                                    {selectedCount === unpaidItemCount ? 'Hapus Semua' : 'Pilih Semua'}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        )}
+                                    </View>
                                 </View>
 
-                                {billSummary.periods.map(period => {
+                                {displayPeriods.map(period => {
                                     const isPayable = period.status === 'unpaid' || period.status === 'partial' || period.status === 'overdue';
-                                    const isSelected = selectedPeriodIds.has(period.id);
+                                    const isExpanded = expandedPeriodIds.has(period.id);
+                                    
+                                    const unpaidItemsInPeriod = period.items.filter(i => i.status === 'unpaid');
+                                    const allSelectedInPeriod = unpaidItemsInPeriod.length > 0 && unpaidItemsInPeriod.every(i => selectedItemKeys.has(`${period.id}|${i.fee.id}`));
+                                    const someSelectedInPeriod = unpaidItemsInPeriod.length > 0 && unpaidItemsInPeriod.some(i => selectedItemKeys.has(`${period.id}|${i.fee.id}`));
                                     
                                     let statusColor = '#4CAF50';
                                     let statusLabel = 'Lunas';
@@ -134,51 +152,80 @@ export default function IuranScreen() {
                                     }
 
                                     return (
-                                        <TouchableOpacity
-                                            key={period.id}
-                                            style={[
-                                                s.feeCard,
-                                                isSelected && s.feeCardSelected,
-                                                period.status === 'paid' && s.feeCardPaid,
-                                                { backgroundColor: colors.backgroundCard },
-                                            ]}
-                                            onPress={() => isPayable && togglePeriod(period.id)}
-                                            activeOpacity={isPayable ? 0.7 : 1}
-                                            disabled={!isPayable}
-                                        >
-                                            {/* Checkbox or status icon */}
-                                            {isPayable ? (
-                                                <View style={[s.checkbox, isSelected && s.checkboxChecked]}>
-                                                    {isSelected && <Ionicons name="checkmark" size={14} color="#FFF" />}
-                                                </View>
-                                            ) : (
-                                                <Ionicons name={statusIcon as any} size={22} color={statusColor} />
-                                            )}
+                                        <View key={period.id} style={{ marginBottom: 8 }}>
+                                            <TouchableOpacity
+                                                style={[
+                                                    s.feeCard,
+                                                    { marginBottom: 0 },
+                                                    (allSelectedInPeriod || someSelectedInPeriod) && s.feeCardSelected,
+                                                    period.status === 'paid' && s.feeCardPaid,
+                                                    { backgroundColor: colors.backgroundCard },
+                                                ]}
+                                                onPress={() => toggleExpandPeriod(period.id)}
+                                                activeOpacity={0.7}
+                                            >
+                                                {/* Checkbox for whole month */}
+                                                {isPayable ? (
+                                                    <TouchableOpacity
+                                                        style={[s.checkbox, allSelectedInPeriod && s.checkboxChecked]}
+                                                        onPress={() => togglePeriodSelection(period.id)}
+                                                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                                                    >
+                                                        {allSelectedInPeriod && <Ionicons name="checkmark" size={14} color="#FFF" />}
+                                                        {!allSelectedInPeriod && someSelectedInPeriod && <Ionicons name="remove" size={14} color="#1B5E20" />}
+                                                    </TouchableOpacity>
+                                                ) : (
+                                                    <Ionicons name={statusIcon as any} size={22} color={statusColor} />
+                                                )}
 
-                                            {/* Fee info */}
-                                            <View style={s.feeInfo}>
-                                                <Text style={s.feeName}>{period.monthName}</Text>
-                                                <Text style={s.feeDetailList} numberOfLines={1}>
-                                                    {period.items.map(i => i.fee.name).join(', ')}
+                                                <View style={s.feeInfo}>
+                                                    <Text style={s.feeName}>{period.monthName}</Text>
+                                                    <View style={s.feeMetaRow}>
+                                                        <Ionicons name={statusIcon as any} size={12} color={statusColor} />
+                                                        <Text style={[s.feeStatus, { color: statusColor }]}>{statusLabel}</Text>
+                                                    </View>
+                                                </View>
+
+                                                <Text style={[s.feeAmount, period.status === 'paid' && { color: '#999' }]}>
+                                                    {formatCurrency(period.totalAmount)}
                                                 </Text>
-                                                <View style={s.feeMetaRow}>
-                                                    <Ionicons name={statusIcon as any} size={12} color={statusColor} />
-                                                    <Text style={[s.feeStatus, { color: statusColor }]}>{statusLabel}</Text>
-                                                </View>
-                                            </View>
+                                                <Ionicons name={isExpanded ? "chevron-up" : "chevron-down"} size={20} color="#888" style={{marginLeft: 8}} />
+                                            </TouchableOpacity>
 
-                                            {/* Amount */}
-                                            <Text style={[s.feeAmount, period.status === 'paid' && { color: '#999' }]}>
-                                                {formatCurrency(period.totalAmount)}
-                                            </Text>
-                                        </TouchableOpacity>
+                                            {/* EXPANDED ITEMS LIST */}
+                                            {isExpanded && (
+                                                <View style={s.expandedBox}>
+                                                    {period.items.map((item: any) => {
+                                                        const isItemPayable = item.status === 'unpaid';
+                                                        const isItemSelected = selectedItemKeys.has(`${period.id}|${item.fee.id}`);
+                                                        return (
+                                                            <View key={item.fee.id} style={s.itemRow}>
+                                                                {isItemPayable ? (
+                                                                    <TouchableOpacity
+                                                                        style={[s.checkbox, s.itemCheckbox, isItemSelected && s.checkboxChecked]}
+                                                                        onPress={() => toggleItemSelection(period.id, item.fee.id)}
+                                                                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                                                                    >
+                                                                        {isItemSelected && <Ionicons name="checkmark" size={12} color="#FFF" />}
+                                                                    </TouchableOpacity>
+                                                                ) : (
+                                                                    <Ionicons name="checkmark-circle" size={18} color={item.status === 'paid' ? '#4CAF50' : '#FF9800'} style={{marginRight: 10}} />
+                                                                )}
+                                                                <Text style={[s.itemName, !isItemPayable && { color: '#999' }]}>{item.fee.name}</Text>
+                                                                <Text style={[s.itemAmountText, !isItemPayable && { color: '#999' }]}>{formatCurrency(item.amount)}</Text>
+                                                            </View>
+                                                        )
+                                                    })}
+                                                </View>
+                                            )}
+                                        </View>
                                     );
                                 })}
                             </Animated.View>
                         )}
 
                         {/* Inline Pay Button — below fee cards */}
-                        {unpaidCount > 0 && (
+                        {unpaidPeriodCount > 0 && (
                             <View style={s.payContainer}>
                                 <View style={s.payInfo}>
                                     <Text style={s.payInfoLabel}>
@@ -334,6 +381,12 @@ const s = StyleSheet.create({
     feeMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 },
     feeStatus: { fontSize: 11, fontWeight: '500' },
     feeAmount: { fontSize: 15, fontWeight: 'bold', color: '#1B5E20' },
+
+    expandedBox: { marginTop: 12, borderTopWidth: 1, borderTopColor: '#EEE', paddingTop: 8 },
+    itemRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 8 },
+    itemCheckbox: { width: 18, height: 18, marginRight: 10, borderRadius: 4 },
+    itemName: { flex: 1, fontSize: 13, color: '#333' },
+    itemAmountText: { fontSize: 13, fontWeight: 'bold', color: '#1B5E20' },
 
     // Pay Container (inline)
     payContainer: {
