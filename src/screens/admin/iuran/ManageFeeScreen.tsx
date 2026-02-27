@@ -617,9 +617,15 @@ export default function ManageFeeScreen() {
 
     function renderDatePickerModal() {
         const handleSelectMonth = (monthIdx: number) => {
-            const val = `${pickerTempYear}-${String(monthIdx + 1).padStart(2, '0')}-01`;
-            if (datePickerVisible === 'from') setForm({ ...form, active_from: val });
-            else if (datePickerVisible === 'to') setForm({ ...form, active_to: val });
+            if (datePickerVisible === 'from') {
+                const val = `${pickerTempYear}-${String(monthIdx + 1).padStart(2, '0')}-01`;
+                setForm({ ...form, active_from: val });
+            } else if (datePickerVisible === 'to') {
+                // Set to last day of month
+                const lastDay = new Date(pickerTempYear, monthIdx + 1, 0).getDate();
+                const val = `${pickerTempYear}-${String(monthIdx + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+                setForm({ ...form, active_to: val });
+            }
             setDatePickerVisible(null);
         };
 

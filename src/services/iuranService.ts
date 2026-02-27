@@ -43,6 +43,7 @@ export interface BillingPeriod {
     monthName: string; // e.g. "Januari 2026"
     status: 'paid' | 'pending' | 'unpaid' | 'overdue' | 'partial';
     totalAmount: number;
+    unpaidAmount: number;
     items: BillItem[];
     isCurrentMonth: boolean;
     isOverdue: boolean;
@@ -55,11 +56,17 @@ export interface SmartBillSummary {
     totalUnpaid: number;
 }
 
-export const fetchActiveFees = async (): Promise<Fee[]> => {
-    const { data, error } = await supabase
+export const fetchActiveFees = async (complexId?: number): Promise<Fee[]> => {
+    let query = supabase
         .from('fees')
         .select('*')
         .eq('is_active', true);
+    
+    if (complexId) {
+        query = query.eq('housing_complex_id', complexId);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw new AppError(error.message, 'FETCH_FEES', 'Gagal memuat data iuran.');
     return data as Fee[];
@@ -79,8 +86,8 @@ export const fetchMyPayments = async (): Promise<PaymentRecord[]> => {
  * Generate billing periods from user's join date up to next month.
  */
 export const fetchBillingPeriods = async (userId: string): Promise<SmartBillSummary> => {
-    // 1. Fetch user to get created_at
-    const { data: profile } = await supabase.from('profiles').select('created_at').eq('id', userId).single();
+    // 1. Fetch user to get created_at and housing_complex_id
+    const { data: profile } = await supabase.from('profiles').select('created_at, housing_complex_id').eq('id', userId).single();
     
     // Default to Jan 1st of current year if no valid created_at, or max 12 months ago to prevent massive queries
     let startDate = new Date();
@@ -97,8 +104,26 @@ export const fetchBillingPeriods = async (userId: string): Promise<SmartBillSumm
 
     const currentDate = new Date();
     const currentMonthDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    const nextMonthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
     
+    const fees = await fetchActiveFees(profile?.housing_complex_id);
+    if (fees.length === 0) {
+        return { periods: [], totalOverdue: 0, totalCurrent: 0, totalUnpaid: 0 };
+    }
+    fees.forEach(f => f.amount = Number(f.amount));
+
+    // Determine end date: max(today + 1 month, max fee's active_to)
+    let nextMonthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+    
+    fees.forEach(fee => {
+        if (fee.active_to) {
+            const [ty, tm] = fee.active_to.split('-');
+            const feeEnd = new Date(parseInt(ty), parseInt(tm) - 1, 1);
+            if (feeEnd > nextMonthDate) {
+                nextMonthDate = feeEnd;
+            }
+        }
+    });
+
     // Generate all months from startDate to nextMonthDate
     const monthsToCheck: Date[] = [];
     let d = new Date(startDate);
@@ -107,12 +132,6 @@ export const fetchBillingPeriods = async (userId: string): Promise<SmartBillSumm
         d.setMonth(d.getMonth() + 1);
     }
 
-    // 2. Fetch all active fees
-    const fees = await fetchActiveFees();
-    if (fees.length === 0) {
-        return { periods: [], totalOverdue: 0, totalCurrent: 0, totalUnpaid: 0 };
-    }
-    const totalFeeAmount = fees.reduce((sum, f) => sum + f.amount, 0);
 
     // 3. Fetch all payments for this user
     const { data: payments } = await supabase
@@ -143,13 +162,24 @@ export const fetchBillingPeriods = async (userId: string): Promise<SmartBillSumm
                 const targetY = monthDate.getFullYear();
                 const targetM = monthDate.getMonth();
 
-                // Check active periods
+                // Determine effective 'from' period
+                let effectiveFromY = -1;
+                let effectiveFromM = -1;
+
                 if (fee.active_from) {
                     const [fy, fm] = fee.active_from.split('-');
-                    const fromY = parseInt(fy);
-                    const fromM = parseInt(fm) - 1;
-                    if (targetY < fromY || (targetY === fromY && targetM < fromM)) return false;
+                    effectiveFromY = parseInt(fy);
+                    effectiveFromM = parseInt(fm) - 1;
+                } else if (fee.created_at) {
+                    const cDate = new Date(fee.created_at);
+                    effectiveFromY = cDate.getFullYear();
+                    effectiveFromM = cDate.getMonth();
                 }
+
+                if (effectiveFromY !== -1) {
+                    if (targetY < effectiveFromY || (targetY === effectiveFromY && targetM < effectiveFromM)) return false;
+                }
+
                 if (fee.active_to) {
                     const [ty, tm] = fee.active_to.split('-');
                     const toY = parseInt(ty);
@@ -168,7 +198,7 @@ export const fetchBillingPeriods = async (userId: string): Promise<SmartBillSumm
                 fee,
                 isPaid: status === 'paid',
                 status,
-                amount: fee.amount,
+                amount: Number(fee.amount),
             };
         });
 
@@ -194,7 +224,8 @@ export const fetchBillingPeriods = async (userId: string): Promise<SmartBillSumm
             periodDate: periodStr,
             monthName: mName,
             status: periodStatus,
-            totalAmount: items.filter(i => i.status !== 'paid').reduce((s, i) => s + i.amount, 0),
+            totalAmount: items.reduce((s, i) => s + i.amount, 0),
+            unpaidAmount: items.filter(i => i.status !== 'paid').reduce((s, i) => s + i.amount, 0),
             items,
             isCurrentMonth,
             isOverdue: periodStatus === 'overdue'
@@ -203,17 +234,17 @@ export const fetchBillingPeriods = async (userId: string): Promise<SmartBillSumm
 
     // We can filter out NEXT month if the current month is unpaid to keep UI clean, 
     // or we just show it. Let's just return all of them.
-    // Ensure chronological order
-    periods.sort((a, b) => new Date(a.periodDate).getTime() - new Date(b.periodDate).getTime());
+    // Ensure chronological order (Descending: Newest first)
+    periods.sort((a, b) => new Date(b.periodDate).getTime() - new Date(a.periodDate).getTime());
 
     let totalOverdue = 0;
     let totalCurrent = 0;
     let totalUnpaid = 0;
 
     periods.forEach(p => {
-        if (p.isOverdue) totalOverdue += p.totalAmount;
-        if (p.isCurrentMonth && (p.status === 'unpaid' || p.status === 'partial')) totalCurrent += p.totalAmount;
-        if (p.status === 'unpaid' || p.status === 'overdue' || p.status === 'partial') totalUnpaid += p.totalAmount;
+        if (p.isOverdue) totalOverdue += p.unpaidAmount;
+        if (p.isCurrentMonth && (p.status === 'unpaid' || p.status === 'partial')) totalCurrent += p.unpaidAmount;
+        if (p.status === 'unpaid' || p.status === 'overdue' || p.status === 'partial') totalUnpaid += p.unpaidAmount;
     });
 
     return { periods, totalOverdue, totalCurrent, totalUnpaid };

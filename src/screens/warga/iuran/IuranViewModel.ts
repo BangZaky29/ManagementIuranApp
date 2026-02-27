@@ -4,15 +4,22 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { fetchMyPayments, fetchBillingPeriods, SmartBillSummary, BillingPeriod, PaymentRecord } from '../../../services/iuranService';
 import { generateAndShareReceipt } from '../../../services/receiptService';
 
-export interface PaymentHistoryItem {
+export interface HistoryItem {
     id: string;
-    period: string;
-    amount: string;
-    status: 'Lunas' | 'Terlambat' | 'Pending';
-    date: string;
     feeName: string;
+    amount: number;
+    amountFormatted: string;
+    status: string;
+    date: string;
     methodName: string;
-    isExpanded?: boolean;
+}
+
+export interface GroupedHistory {
+    id: string; // YYYY-MM
+    periodName: string;
+    totalAmount: number;
+    items: HistoryItem[];
+    isExpanded: boolean;
 }
 
 export const useIuranViewModel = () => {
@@ -21,7 +28,7 @@ export const useIuranViewModel = () => {
 
     const [currentMonth, setCurrentMonth] = useState('');
     const [billSummary, setBillSummary] = useState<SmartBillSummary | null>(null);
-    const [history, setHistory] = useState<PaymentHistoryItem[]>([]);
+    const [history, setHistory] = useState<GroupedHistory[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [expandedPeriodIds, setExpandedPeriodIds] = useState<Set<string>>(new Set());
     const [selectedItemKeys, setSelectedItemKeys] = useState<Set<string>>(new Set());
@@ -60,22 +67,43 @@ export const useIuranViewModel = () => {
             });
             setSelectedItemKeys(toSelect);
 
-            // Format history
-            const formatted: PaymentHistoryItem[] = rawPayments.slice(0, 5).map(p => {
+            // Group history by month
+            const historyMap = new Map<string, GroupedHistory>();
+            
+            rawPayments.forEach(p => {
                 const dateObj = new Date(p.period);
-                const periodStr = dateObj.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
-                return {
+                const periodId = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
+                const periodName = dateObj.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+                
+                const item: HistoryItem = {
                     id: p.id,
-                    period: periodStr,
-                    amount: `Rp ${p.amount.toLocaleString('id-ID')}`,
+                    feeName: p.fees?.name || 'Iuran',
+                    amount: p.amount,
+                    amountFormatted: `Rp ${p.amount.toLocaleString('id-ID')}`,
                     status: p.status === 'paid' ? 'Lunas' : (p.status === 'overdue' ? 'Terlambat' : 'Pending'),
                     date: p.paid_at ? new Date(p.paid_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-',
-                    feeName: p.fees?.name || 'Iuran',
                     methodName: p.payment_method || '-',
-                    isExpanded: false,
                 };
+
+                if (!historyMap.has(periodId)) {
+                    historyMap.set(periodId, {
+                        id: periodId,
+                        periodName,
+                        totalAmount: 0,
+                        items: [],
+                        isExpanded: false
+                    });
+                }
+                
+                const group = historyMap.get(periodId)!;
+                group.items.push(item);
+                group.totalAmount += item.amount;
             });
-            setHistory(formatted);
+
+            const formatted = Array.from(historyMap.values())
+                .sort((a, b) => b.id.localeCompare(a.id))
+                .slice(0, 5);
+            setHistory(formatted as any);
         } catch (error) {
             console.error('Failed to load iuran data:', error);
         } finally {
@@ -173,23 +201,23 @@ export const useIuranViewModel = () => {
         });
     };
 
-    const toggleExpand = (id: string) => {
-        setHistory(prev => prev.map(item =>
-            item.id === id ? { ...item, isExpanded: !item.isExpanded } : item
+    const toggleExpand = (periodId: string) => {
+        setHistory(prev => (prev as any).map((item: any) =>
+            item.id === periodId ? { ...item, isExpanded: !item.isExpanded } : item
         ));
     };
 
-    const handleDownloadReceipt = async (item: PaymentHistoryItem) => {
+    const handleDownloadReceipt = async (item: HistoryItem, periodName: string) => {
         setIsDownloadingReceiptId(item.id);
         try {
             await generateAndShareReceipt({
                 paymentId: item.id,
                 userName: user?.user_metadata?.full_name || 'Warga',
-                amount: parseInt(item.amount.replace(/[^0-9]/g, '')) || 0, // strip formatting
-                period: item.period,
+                amount: item.amount,
+                period: periodName,
                 paymentMethod: item.methodName,
                 paidAt: item.date,
-                complexName: 'Manajemen Iuran Perumahan' // Can be dynamic if complex name is needed
+                complexName: 'Manajemen Iuran Perumahan'
             });
             setAlertConfig({
                 title: 'Berhasil',

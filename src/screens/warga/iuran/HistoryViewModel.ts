@@ -3,16 +3,23 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { fetchMyPayments, PaymentRecord } from '../../../services/iuranService';
 import { generateAndShareReceipt } from '../../../services/receiptService';
 
-interface HistoryItem {
+export interface HistoryItem {
     id: string;
-    period: string;
-    periodRaw: string; // YYYY-MM-DD for filtering
-    amount: string;
-    amountNum: number;
-    status: 'Lunas' | 'Terlambat' | 'Pending';
-    date: string;
     feeName: string;
+    amount: number;
+    amountFormatted: string;
+    status: string;
+    date: string;
     methodName: string;
+    periodRaw: string; // Internal use
+}
+
+export interface GroupedHistory {
+    id: string; // YYYY-MM
+    periodName: string;
+    totalAmount: number;
+    items: HistoryItem[];
+    isExpanded: boolean;
 }
 
 export const useHistoryViewModel = () => {
@@ -38,29 +45,20 @@ export const useHistoryViewModel = () => {
         try {
             const payments = await fetchMyPayments();
             const items: HistoryItem[] = payments.map(p => {
-                const dateObj = new Date(p.period);
-                const periodStr = dateObj.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
-                const statusMap: Record<string, 'Lunas' | 'Terlambat' | 'Pending'> = {
-                    paid: 'Lunas',
-                    overdue: 'Terlambat',
-                    pending: 'Pending',
-                    rejected: 'Terlambat',
-                };
                 return {
                     id: p.id,
-                    period: periodStr,
-                    periodRaw: p.period,
-                    amount: `Rp ${p.amount.toLocaleString('id-ID')}`,
-                    amountNum: p.amount,
-                    status: statusMap[p.status] || 'Pending',
+                    feeName: p.fees?.name || 'Iuran',
+                    amount: p.amount,
+                    amountFormatted: `Rp ${p.amount.toLocaleString('id-ID')}`,
+                    status: p.status === 'paid' ? 'Lunas' : (p.status === 'overdue' ? 'Terlambat' : 'Pending'),
                     date: p.paid_at
                         ? new Date(p.paid_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
                         : '-',
-                    feeName: p.fees?.name || 'Iuran',
                     methodName: p.payment_method || '-',
-                };
+                    periodRaw: p.period, // keep original for grouping
+                } as any;
             });
-            setAllHistory(items);
+            setAllHistory(items as any);
         } catch (error) {
             console.error('Failed to load history:', error);
         } finally {
@@ -70,12 +68,15 @@ export const useHistoryViewModel = () => {
 
     // Filter
     const filteredHistory = useMemo(() => {
-        return allHistory.filter(item => {
-            const matchesSearch = item.period.toLowerCase().includes(searchQuery.toLowerCase());
+        const filtered = allHistory.filter((item: any) => {
+            const dateObj = new Date(item.periodRaw);
+            const periodStr = dateObj.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+            
+            const matchesSearch = periodStr.toLowerCase().includes(searchQuery.toLowerCase());
 
             const matchesDate = selectedDate ? (() => {
                 const months = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
-                const periodLower = item.period.toLowerCase();
+                const periodLower = periodStr.toLowerCase();
                 const selMonthName = months[selectedDate.getMonth()];
                 const selYear = selectedDate.getFullYear().toString();
                 return periodLower.includes(selMonthName) && periodLower.includes(selYear);
@@ -85,7 +86,30 @@ export const useHistoryViewModel = () => {
 
             return matchesSearch && matchesDate && matchesStatus;
         });
-    }, [searchQuery, selectedDate, selectedStatus, allHistory]);
+
+        // Grouping
+        const historyMap = new Map<string, GroupedHistory>();
+        filtered.forEach((item: any) => {
+            const dateObj = new Date(item.periodRaw);
+            const periodId = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
+            const periodName = dateObj.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+
+            if (!historyMap.has(periodId)) {
+                historyMap.set(periodId, {
+                    id: periodId,
+                    periodName,
+                    totalAmount: 0,
+                    items: [],
+                    isExpanded: expandedIds.has(periodId)
+                });
+            }
+            const group = historyMap.get(periodId)!;
+            group.items.push(item);
+            group.totalAmount += item.amount;
+        });
+
+        return Array.from(historyMap.values()).sort((a, b) => b.id.localeCompare(a.id));
+    }, [searchQuery, selectedDate, selectedStatus, allHistory, expandedIds]);
 
     const statuses = ['All', 'Lunas', 'Pending', 'Terlambat'];
 
@@ -108,14 +132,14 @@ export const useHistoryViewModel = () => {
         setSelectedStatus('All');
     };
 
-    const handleDownloadReceipt = async (item: HistoryItem) => {
+    const handleDownloadReceipt = async (item: HistoryItem, periodName: string) => {
         setIsDownloadingId(item.id);
         try {
             await generateAndShareReceipt({
                 paymentId: item.id,
                 userName: user?.user_metadata?.full_name || 'Warga',
-                amount: item.amountNum,
-                period: item.period,
+                amount: item.amount,
+                period: periodName,
                 paymentMethod: item.methodName,
                 paidAt: item.date,
                 complexName: 'Manajemen Iuran Perumahan'

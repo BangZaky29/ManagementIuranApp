@@ -38,6 +38,8 @@ CREATE TABLE public.fees (
   is_active boolean DEFAULT true,
   created_at timestamp with time zone DEFAULT now(),
   housing_complex_id bigint,
+  active_from date,
+  active_to date,
   CONSTRAINT fees_pkey PRIMARY KEY (id),
   CONSTRAINT fees_housing_complex_id_fkey FOREIGN KEY (housing_complex_id) REFERENCES public.housing_complexes(id)
 );
