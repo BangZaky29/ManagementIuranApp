@@ -103,4 +103,14 @@ export const styles = StyleSheet.create({
     },
     emptyText: { fontSize: 14, fontWeight: '600', color: '#333', marginTop: 12 },
     emptySubtext: { fontSize: 12, color: '#999', marginTop: 4 },
+    statusDot: {
+        width: 8, height: 8, borderRadius: 4,
+    },
+    activityIconBox: {
+        width: 36, height: 36, borderRadius: 18,
+        justifyContent: 'center', alignItems: 'center',
+    },
+    activityDesc: {
+        fontSize: 11, color: '#999', marginTop: 2,
+    },
 });

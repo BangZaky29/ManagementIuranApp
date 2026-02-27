@@ -6,6 +6,7 @@ import { fetchPanicLogs, resolvePanicLog, countActivePanics, PanicLog } from '..
 import { countActiveVisitors } from '../../services/guestService';
 import { getDashboardStats } from '../../services/adminService';
 import { fetchRecentActivityLogs, ActivityLog } from '../../services/activityLogService';
+import { fetchAllReports, Report } from '../../services/laporanService';
 import { formatDateSafe } from '../../utils/dateUtils';
 import { supabase } from '../../lib/supabaseConfig';
 
@@ -18,6 +19,8 @@ export function useSecurityHomeViewModel() {
     const [activePanics, setActivePanics] = useState(0);
     const [activeGuests, setActiveGuests] = useState(0);
     const [recentPanics, setRecentPanics] = useState<PanicLog[]>([]);
+    const [recentReports, setRecentReports] = useState<Report[]>([]);
+    const [pendingReportsCount, setPendingReportsCount] = useState(0);
     const [securityProfile, setSecurityProfile] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -30,11 +33,13 @@ export function useSecurityHomeViewModel() {
 
     const loadData = useCallback(async () => {
         try {
-            const [statsData, panicCount, guestCount, panicLogs] = await Promise.all([
+            const [statsData, panicCount, guestCount, panicLogs, logsData, reportCount] = await Promise.all([
                 getDashboardStats(),
                 countActivePanics(),
                 countActiveVisitors(),
                 fetchPanicLogs(0, 5, false), // Latest 5 active panics
+                fetchAllReports(0, 5), // Latest 5 reports
+                supabase.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'Menunggu')
             ]);
             let profileData = null;
             if (user?.id) {
@@ -46,6 +51,8 @@ export function useSecurityHomeViewModel() {
             setActivePanics(panicCount);
             setActiveGuests(guestCount);
             setRecentPanics(panicLogs);
+            setRecentReports(logsData as any);
+            setPendingReportsCount(reportCount.count || 0);
             setSecurityProfile(profileData);
         } catch (error) {
             console.error('Failed to load security dashboard:', error);
@@ -68,6 +75,7 @@ export function useSecurityHomeViewModel() {
 
     const navigateToPanicLogs = () => router.push('/security/panic-logs' as any);
     const navigateToGuestBook = () => router.push('/security/guests' as any);
+    const navigateToReports = () => router.push('/security/reports' as any);
     const navigateToProfile = () => router.navigate('/security/profile' as any);
 
     const openPanicLocation = (log: PanicLog) => {
@@ -108,7 +116,8 @@ export function useSecurityHomeViewModel() {
 
     return {
         user, stats, activePanics, activeGuests, recentPanics, isLoading, securityProfile,
-        handleLogout, navigateToPanicLogs, navigateToGuestBook, navigateToProfile,
+        recentReports, pendingReportsCount,
+        handleLogout, navigateToPanicLogs, navigateToGuestBook, navigateToProfile, navigateToReports,
         openPanicLocation, handleResolvePanic, formatTime,
         alertVisible, alertConfig, hideAlert, refresh: loadData,
     };

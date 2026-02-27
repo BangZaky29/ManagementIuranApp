@@ -110,11 +110,22 @@ export default function SecurityHomeScreen() {
                         </View>
                         <Text style={styles.quickLabel}>Buku Tamu</Text>
                     </TouchableOpacity>
+                    <TouchableOpacity style={styles.quickAction} onPress={vm.navigateToReports}>
+                        <View style={[styles.quickIcon, { backgroundColor: '#E8EAF6' }]}>
+                            <Ionicons name="document-text" size={24} color="#3F51B5" />
+                            {vm.pendingReportsCount > 0 && (
+                                <View style={styles.badge}>
+                                    <Text style={styles.badgeText}>{vm.pendingReportsCount}</Text>
+                                </View>
+                            )}
+                        </View>
+                        <Text style={styles.quickLabel}>Laporan Warga</Text>
+                    </TouchableOpacity>
                 </View>
 
                 {/* Ringkasan Aktivitas — Recent Panic Logs */}
                 <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Ringkasan Aktivitas</Text>
+                    <Text style={styles.sectionTitle}>Darurat Terbaru</Text>
                     {vm.recentPanics.length > 0 && (
                         <TouchableOpacity onPress={vm.navigateToPanicLogs}>
                             <Text style={styles.seeAll}>Lihat Semua →</Text>
@@ -169,6 +180,47 @@ export default function SecurityHomeScreen() {
                             </TouchableOpacity>
                         );
                     })
+                )}
+
+                {/* Ringkasan Laporan Warga */}
+                <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>Laporan Warga Terbaru</Text>
+                    <TouchableOpacity onPress={vm.navigateToReports}>
+                        <Text style={styles.seeAll}>Lihat Semua →</Text>
+                    </TouchableOpacity>
+                </View>
+
+                {vm.recentReports.length === 0 ? (
+                    <View style={styles.emptyActivity}>
+                        <Ionicons name="document-text-outline" size={40} color="#3F51B5" />
+                        <Text style={styles.emptyText}>Tidak ada laporan baru</Text>
+                        <Text style={styles.emptySubtext}>Semua laporan warga sudah tertangani.</Text>
+                    </View>
+                ) : (
+                    vm.recentReports.map((report) => (
+                        <TouchableOpacity
+                            key={report.id}
+                            style={[styles.activityCard, { borderLeftColor: '#3F51B5' }]}
+                            onPress={vm.navigateToReports}
+                        >
+                            <View style={styles.activityLeft}>
+                                <View style={[styles.activityIconBox, { backgroundColor: '#E8EAF6' }]}>
+                                    <Ionicons name="document-text" size={20} color="#3F51B5" />
+                                </View>
+                                <View style={{ marginLeft: 12, flex: 1 }}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                                        <Text style={styles.activityName} numberOfLines={1}>{report.title}</Text>
+                                        <View style={[
+                                            styles.statusDot, 
+                                            { backgroundColor: report.status === 'Selesai' ? '#4CAF50' : 
+                                                            report.status === 'Diproses' ? '#2196F3' : '#FF9800' }
+                                        ]} />
+                                    </View>
+                                    <Text style={styles.activityDesc} numberOfLines={1}>{report.description}</Text>
+                                </View>
+                            </View>
+                        </TouchableOpacity>
+                    ))
                 )}
             </ScrollView>
 

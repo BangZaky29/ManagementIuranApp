@@ -11,19 +11,52 @@ export interface Report {
     image_url: string | null;
     location: string | null;
     created_at: string;
+    profiles?: {
+        full_name: string;
+        avatar_url: string | null;
+        address: string | null;
+    };
 }
 
 export const fetchMyReports = async (page = 0, limit = 20): Promise<Report[]> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
     const from = page * limit;
     const to = from + limit - 1;
 
     const { data, error } = await supabase
         .from('reports')
-        .select('*')
+        .select(`
+            *,
+            profiles:user_id (full_name, avatar_url, address)
+        `)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-        .range(from, to)
-        .limit(limit);
+        .range(from, to);
 
+    if (error) throw error;
+    return data as Report[];
+};
+
+export const fetchAllReports = async (page = 0, limit = 20, status?: string): Promise<Report[]> => {
+    const from = page * limit;
+    const to = from + limit - 1;
+
+    let query = supabase
+        .from('reports')
+        .select(`
+            *,
+            profiles:user_id (full_name, avatar_url, address)
+        `)
+        .order('created_at', { ascending: false })
+        .range(from, to);
+
+    if (status && status !== 'Semua') {
+        query = query.eq('status', status);
+    }
+
+    const { data, error } = await query;
     if (error) throw error;
     return data as Report[];
 };
@@ -184,4 +217,13 @@ export const updateReport = async (
 
     if (error) throw error;
     return data;
+};
+
+export const updateReportStatus = async (id: string, status: string): Promise<void> => {
+    const { error } = await supabase
+        .from('reports')
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq('id', id);
+
+    if (error) throw error;
 };

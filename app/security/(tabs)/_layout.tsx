@@ -31,6 +31,12 @@ export default function SecurityTabsLayout() {
                 }}
             />
             <MaterialTopTabs.Screen
+                name="reports"
+                options={{
+                    title: 'Laporan',
+                }}
+            />
+            <MaterialTopTabs.Screen
                 name="profile"
                 options={{
                     title: 'Profil',

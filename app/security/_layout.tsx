@@ -14,6 +14,7 @@ export default function SecurityRootLayout() {
             {/* Standalone Screens (Stand-out from swipeable tabs) */}
             <Stack.Screen name="edit-profile" />
             <Stack.Screen name="change-password" />
+            <Stack.Screen name="reports" />
         </Stack>
     );
 }
