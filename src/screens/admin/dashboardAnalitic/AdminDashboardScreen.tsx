@@ -1,35 +1,38 @@
 import { useFocusEffect } from 'expo-router';
 import React, { useState, useCallback } from 'react';
 
-
-import { View, Text, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Colors } from '../../../constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { getDashboardStats } from '../../../services/adminService';
+import { countPendingPayments } from '../../../services/paymentConfirmationService';
 import { supabase } from '../../../lib/supabaseConfig';
 import { CustomHeader } from '../../../components/CustomHeader';
+import { AdminSidebar } from '../../../components/navigation/AdminSidebar';
 import { styles } from './AdminDashboardStyles';
 
 export default function AdminDashboardScreen() {
     const [stats, setStats] = useState({ warga: 0, security: 0, activeUsers: 0, laporanMasuk: 0 });
+    const [pendingPayments, setPendingPayments] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [sidebarVisible, setSidebarVisible] = useState(false);
 
     const loadStats = async () => {
         try {
-            // Fetch verify user stats (existing mock/service)
             const data = await getDashboardStats();
 
-            // Fetch real report count
-            const { count, error } = await supabase
-                .from('reports')
-                .select('*', { count: 'exact', head: true }); // Head request for count only
+            const [reportResult, paymentCount] = await Promise.all([
+                supabase.from('reports').select('*', { count: 'exact', head: true }),
+                countPendingPayments(),
+            ]);
 
             setStats({
                 ...data,
-                laporanMasuk: count || 0
+                laporanMasuk: reportResult.count || 0
             });
+            setPendingPayments(paymentCount);
         } catch (error) {
             console.error('Failed to load stats:', error);
         } finally {
@@ -51,7 +54,7 @@ export default function AdminDashboardScreen() {
 
     const StatCard = ({ title, count, icon, color, subtitle }: any) => {
         const isEmpty = !count || count === 0 || count === '0';
-        const activeColor = isEmpty ? Colors.textSecondary + '40' : color; // 40 is hex for 25% opacity
+        const activeColor = isEmpty ? Colors.textSecondary + '40' : color;
         const iconColor = isEmpty ? Colors.textSecondary : '#FFF';
 
         return (
@@ -68,10 +71,27 @@ export default function AdminDashboardScreen() {
         );
     };
 
+    const HamburgerButton = (
+        <TouchableOpacity
+            onPress={() => setSidebarVisible(true)}
+            style={{
+                padding: 6,
+                backgroundColor: '#E8F5E9',
+                borderRadius: 10,
+            }}
+        >
+            <Ionicons name="menu" size={22} color="#1B5E20" />
+        </TouchableOpacity>
+    );
+
     return (
         <View style={styles.container}>
             <StatusBar style="dark" />
-            <CustomHeader title="Dashboard Admin" showBack={false} />
+            <CustomHeader
+                title="Dashboard Admin"
+                showBack={false}
+                rightIcon={HamburgerButton}
+            />
 
             <ScrollView
                 contentContainerStyle={styles.scrollContent}
@@ -109,11 +129,39 @@ export default function AdminDashboardScreen() {
                         count={stats.laporanMasuk}
                         icon="document-text"
                         color={Colors.warning}
-                        subtitle="Buld"
+                        subtitle="Total"
                     />
                 </View>
 
-                {/* Quick Actions or Charts could go here */}
+                {/* Pending Payments Banner */}
+                {pendingPayments > 0 && (
+                    <View style={{
+                        backgroundColor: '#FFF8E1',
+                        padding: 16,
+                        borderRadius: 14,
+                        marginHorizontal: 16,
+                        marginTop: 16,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 12,
+                    }}>
+                        <View style={{
+                            width: 40, height: 40, borderRadius: 12,
+                            backgroundColor: '#F57F17', alignItems: 'center', justifyContent: 'center',
+                        }}>
+                            <Ionicons name="receipt" size={20} color="#FFF" />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={{ fontSize: 14, fontWeight: '700', color: '#F57F17' }}>
+                                {pendingPayments} Pembayaran Menunggu Konfirmasi
+                            </Text>
+                            <Text style={{ fontSize: 12, color: '#888', marginTop: 2 }}>
+                                Buka via Menu → Management Iuran
+                            </Text>
+                        </View>
+                    </View>
+                )}
+
                 <View style={styles.sectionHeader}>
                     <Text style={styles.sectionTitle}>Ringkasan Aktivitas</Text>
                 </View>
@@ -123,6 +171,13 @@ export default function AdminDashboardScreen() {
                 </View>
 
             </ScrollView>
+
+            {/* Sidebar */}
+            <AdminSidebar
+                visible={sidebarVisible}
+                onClose={() => setSidebarVisible(false)}
+                pendingPayments={pendingPayments}
+            />
         </View>
     );
 }
