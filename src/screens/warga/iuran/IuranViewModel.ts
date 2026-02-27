@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../../contexts/AuthContext';
 import { fetchMyPayments, calculateBillSummary, BillSummary, BillItem, PaymentRecord } from '../../../services/iuranService';
+import { generateAndShareReceipt } from '../../../services/receiptService';
 
 export interface PaymentHistoryItem {
     id: string;
@@ -23,6 +24,7 @@ export const useIuranViewModel = () => {
     const [history, setHistory] = useState<PaymentHistoryItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedFeeIds, setSelectedFeeIds] = useState<Set<number>>(new Set());
+    const [isDownloadingReceiptId, setIsDownloadingReceiptId] = useState<string | null>(null);
 
     const [alertVisible, setAlertVisible] = useState(false);
     const [alertConfig, setAlertConfig] = useState({
@@ -138,6 +140,39 @@ export const useIuranViewModel = () => {
         ));
     };
 
+    const handleDownloadReceipt = async (item: PaymentHistoryItem) => {
+        setIsDownloadingReceiptId(item.id);
+        try {
+            await generateAndShareReceipt({
+                paymentId: item.id,
+                userName: user?.user_metadata?.full_name || 'Warga',
+                amount: parseInt(item.amount.replace(/[^0-9]/g, '')) || 0, // strip formatting
+                period: item.period,
+                paymentMethod: item.methodName,
+                paidAt: item.date,
+                complexName: 'Manajemen Iuran Perumahan' // Can be dynamic if complex name is needed
+            });
+            // Show success toast (or alert, let's just alert since it's already there)
+            setAlertConfig({
+                title: 'Berhasil',
+                message: 'Kuitansi berhasil diunduh/dibagikan.',
+                type: 'success',
+                buttons: [{ text: 'OK', onPress: hideAlert }],
+            });
+            setAlertVisible(true);
+        } catch (error: any) {
+            setAlertConfig({
+                title: 'Gagal',
+                message: error.message || 'Gagal mengunduh kuitansi',
+                type: 'error',
+                buttons: [{ text: 'OK', onPress: hideAlert }],
+            });
+            setAlertVisible(true);
+        } finally {
+            setIsDownloadingReceiptId(null);
+        }
+    };
+
     return {
         currentMonth,
         billSummary,
@@ -151,6 +186,8 @@ export const useIuranViewModel = () => {
         deselectAll,
         handlePay,
         toggleExpand,
+        handleDownloadReceipt,
+        isDownloadingReceiptId,
         alertVisible,
         alertConfig,
         hideAlert,

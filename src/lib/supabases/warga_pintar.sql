@@ -1,6 +1,18 @@
 -- WARNING: This schema is for context only and is not meant to be run.
 -- Table order and constraints may not be valid for execution.
 
+CREATE TABLE public.activity_logs (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  housing_complex_id bigint NOT NULL,
+  user_id uuid NOT NULL,
+  action_type text NOT NULL,
+  action_title text NOT NULL,
+  description text,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT activity_logs_pkey PRIMARY KEY (id),
+  CONSTRAINT activity_logs_complex_fkey FOREIGN KEY (housing_complex_id) REFERENCES public.housing_complexes(id),
+  CONSTRAINT activity_logs_user_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
+);
 CREATE TABLE public.auth_debug_logs (
   id integer NOT NULL DEFAULT nextval('auth_debug_logs_id_seq'::regclass),
   event_time timestamp with time zone DEFAULT now(),
@@ -8,6 +20,15 @@ CREATE TABLE public.auth_debug_logs (
   payload jsonb,
   details text,
   CONSTRAINT auth_debug_logs_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.ewallet_va_codes (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  ewallet_name text NOT NULL,
+  bank_name text NOT NULL,
+  va_code text NOT NULL,
+  format_example text NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT ewallet_va_codes_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.fees (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,

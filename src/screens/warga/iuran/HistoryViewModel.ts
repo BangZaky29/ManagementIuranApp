@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { fetchMyPayments, PaymentRecord } from '../../../services/iuranService';
+import { generateAndShareReceipt } from '../../../services/receiptService';
 
 interface HistoryItem {
     id: string;
@@ -24,6 +25,7 @@ export const useHistoryViewModel = () => {
     const [selectedStatus, setSelectedStatus] = useState<'All' | 'Lunas' | 'Terlambat' | 'Pending'>('All');
     const [isCalendarVisible, setCalendarVisible] = useState(false);
     const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+    const [isDownloadingId, setIsDownloadingId] = useState<string | null>(null);
 
     // Load real payment data
     useEffect(() => {
@@ -106,8 +108,25 @@ export const useHistoryViewModel = () => {
         setSelectedStatus('All');
     };
 
-    const handleDownloadReceipt = (period: string) => {
-        // TODO: Implement real receipt download
+    const handleDownloadReceipt = async (item: HistoryItem) => {
+        setIsDownloadingId(item.id);
+        try {
+            await generateAndShareReceipt({
+                paymentId: item.id,
+                userName: user?.user_metadata?.full_name || 'Warga',
+                amount: item.amountNum,
+                period: item.period,
+                paymentMethod: item.methodName,
+                paidAt: item.date,
+                complexName: 'Manajemen Iuran Perumahan'
+            });
+            // Show success via alert (assuming parent or internal handles it, but since we don't have robust alert here, we can just let it finish successfully as sharing handles the UI)
+        } catch (error: any) {
+            console.error('Download Receipt Error:', error);
+            alert('Gagal mengunduh kuitansi: ' + error.message);
+        } finally {
+            setIsDownloadingId(null);
+        }
     };
 
     return {
@@ -122,6 +141,7 @@ export const useHistoryViewModel = () => {
         toggleExpand,
         isExpanded,
         handleDownloadReceipt,
+        isDownloadingId,
         isLoading,
         refresh: loadHistory,
     };

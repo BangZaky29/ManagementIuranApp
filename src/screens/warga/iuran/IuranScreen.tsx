@@ -32,6 +32,8 @@ export default function IuranScreen() {
         alertVisible,
         alertConfig,
         hideAlert,
+        handleDownloadReceipt,
+        isDownloadingReceiptId,
         refresh,
     } = useIuranViewModel();
     const { colors } = useTheme();
@@ -230,6 +232,23 @@ export default function IuranScreen() {
                                                     <Text style={s.detailLabel}>Metode</Text>
                                                     <Text style={s.detailValue}>{item.methodName}</Text>
                                                 </View>
+                                                {/* Download Kuitansi Button */}
+                                                {(item.status === 'Lunas' || item.status === 'Terlambat') && (
+                                                    <TouchableOpacity
+                                                        style={s.downloadBtn}
+                                                        onPress={() => handleDownloadReceipt(item)}
+                                                        disabled={isDownloadingReceiptId === item.id}
+                                                    >
+                                                        {isDownloadingReceiptId === item.id ? (
+                                                            <ActivityIndicator size="small" color="#FFF" />
+                                                        ) : (
+                                                            <>
+                                                                <Ionicons name="download-outline" size={16} color="#FFF" />
+                                                                <Text style={s.downloadBtnText}>Unduh Kuitansi</Text>
+                                                            </>
+                                                        )}
+                                                    </TouchableOpacity>
+                                                )}
                                             </View>
                                         )}
                                     </TouchableOpacity>
@@ -327,12 +346,20 @@ const s = StyleSheet.create({
     historyPeriod: { fontSize: 14, fontWeight: '600', color: '#333' },
     historyDate: { fontSize: 11, color: '#888', marginTop: 2 },
     historyAmount: { fontSize: 14, fontWeight: 'bold', color: '#1B5E20', textAlign: 'right' },
-    historyStatus: { fontSize: 11, fontWeight: '600', marginTop: 2 },
-    expandedRow: { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#F0F0F0' },
-    detailLine: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 },
-    detailLabel: { fontSize: 12, color: '#888' },
-    detailValue: { fontSize: 12, fontWeight: '500', color: '#333' },
+    historyStatus: { fontSize: 13, fontWeight: '700' },
+    expandedRow: {
+        marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#EEE',
+    },
+    detailLine: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
+    detailLabel: { fontSize: 13, color: '#888' },
+    detailValue: { fontSize: 13, fontWeight: '500', color: '#333' },
 
+    // Receipt Download Button
+    downloadBtn: {
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+        backgroundColor: '#1B5E20', paddingVertical: 10, borderRadius: 10, marginTop: 12,
+    },
+    downloadBtnText: { color: '#FFF', fontSize: 13, fontWeight: '600' },
     // Pay Button
     payBtn: {
         flexDirection: 'row', alignItems: 'center', gap: 6,

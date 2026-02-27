@@ -1,100 +1,99 @@
 import { StyleSheet, Platform } from 'react-native';
 
 export const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F5F7F5' },
+    container: { flex: 1, backgroundColor: '#F8FAF8' }, // Softer modern background
 
     // Header
     header: {
-        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-        paddingHorizontal: 20, paddingVertical: 16,
-        paddingTop: Platform.OS === 'android' ? 48 : 16,
+        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start',
+        paddingHorizontal: 20, paddingTop: Platform.OS === 'android' ? 56 : 24, paddingBottom: 20,
         backgroundColor: '#FFF',
+        borderBottomWidth: 1, borderBottomColor: '#F0F0F0',
     },
-    greeting: { fontSize: 14, color: '#666' },
-    userName: { fontSize: 22, fontWeight: 'bold', color: '#1B5E20' },
-    logoutBtn: { padding: 10, backgroundColor: '#FFEBEE', borderRadius: 12 },
+    greeting: { fontSize: 13, color: '#888', textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: '600' },
+    userName: { fontSize: 24, fontWeight: '800', color: '#1B5E20', marginTop: 2 },
+    menuBtn: {
+        padding: 10,
+        backgroundColor: '#F1F8E9',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#E8F5E9',
+    },
 
-    // Stats
-    statsRow: {
-        flexDirection: 'row', gap: 10, paddingHorizontal: 16, paddingTop: 16,
+    // Stats Grid
+    statsContainer: {
+        flexDirection: 'row', flexWrap: 'wrap', gap: 12, paddingHorizontal: 20, paddingTop: 20,
     },
     statCard: {
-        flex: 1, backgroundColor: '#FFF', borderRadius: 14, padding: 14,
-        borderLeftWidth: 3, alignItems: 'center',
+        flex: 1, minWidth: '30%', backgroundColor: '#FFF', borderRadius: 16, padding: 16,
+        alignItems: 'flex-start',
+        borderWidth: 1, borderColor: '#F0F0F0',
         ...Platform.select({
-            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4 },
+            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8 },
             android: { elevation: 2 },
         }),
     },
-    statNumber: { fontSize: 24, fontWeight: 'bold', color: '#333' },
-    statLabel: { fontSize: 11, color: '#888', marginTop: 2, fontWeight: '500' },
-
-    // Panic Banner
-    panicBanner: {
-        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-        backgroundColor: '#F44336', marginHorizontal: 16, marginTop: 16,
-        padding: 16, borderRadius: 14,
+    statIconContainer: {
+        width: 32, height: 32, borderRadius: 8,
+        justifyContent: 'center', alignItems: 'center', marginBottom: 12,
     },
-    panicBannerLeft: { flexDirection: 'row', alignItems: 'center' },
-    panicBannerTitle: { fontSize: 15, fontWeight: 'bold', color: '#FFF' },
-    panicBannerSubtitle: { fontSize: 11, color: '#FFCDD2', marginTop: 2 },
+    statNumber: { fontSize: 22, fontWeight: '800', color: '#333' },
+    statLabel: { fontSize: 12, color: '#666', marginTop: 4, fontWeight: '500' },
+
+    // Alert Banners (Action Needed)
+    bannerContainer: {
+        paddingHorizontal: 20, marginTop: 20, gap: 10,
+    },
+    actionBanner: {
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+        padding: 16, borderRadius: 16,
+        ...Platform.select({
+            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.1, shadowRadius: 6 },
+            android: { elevation: 3 },
+        }),
+    },
+    actionBannerLeft: { flexDirection: 'row', alignItems: 'flex-start', flex: 1 },
+    actionIconBox: {
+        width: 40, height: 40, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.2)',
+        justifyContent: 'center', alignItems: 'center', marginRight: 12, marginTop: 2,
+    },
+    actionBannerTitle: { fontSize: 15, fontWeight: '700', color: '#FFF' },
+    actionBannerSubtitle: { fontSize: 12, color: 'rgba(255,255,255,0.85)', marginTop: 4, lineHeight: 16, paddingRight: 10 },
 
     // Sections
     sectionHeader: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-        paddingHorizontal: 20, paddingTop: 24, paddingBottom: 12,
+        paddingHorizontal: 20, paddingTop: 32, paddingBottom: 16,
     },
-    sectionTitle: { fontSize: 17, fontWeight: 'bold', color: '#333' },
-    seeAll: { fontSize: 13, fontWeight: '600', color: '#1B5E20' },
+    sectionTitle: { fontSize: 18, fontWeight: '800', color: '#1B5E20' },
+    seeAll: { fontSize: 13, fontWeight: '600', color: '#4CAF50' },
 
-    // Quick Actions
-    quickActionsRow: {
-        flexDirection: 'row', gap: 12, paddingHorizontal: 16,
-    },
-    quickAction: {
-        flex: 1, backgroundColor: '#FFF', borderRadius: 14, padding: 16,
-        alignItems: 'center',
-        ...Platform.select({
-            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4 },
-            android: { elevation: 2 },
-        }),
-    },
-    quickIcon: {
-        width: 50, height: 50, borderRadius: 16,
-        justifyContent: 'center', alignItems: 'center', marginBottom: 8,
-    },
-    quickLabel: { fontSize: 13, fontWeight: '600', color: '#333' },
-    badge: {
-        position: 'absolute', top: -4, right: -4,
-        backgroundColor: '#F44336', borderRadius: 10,
-        minWidth: 18, height: 18,
-        justifyContent: 'center', alignItems: 'center',
-    },
-    badgeText: { color: '#FFF', fontSize: 10, fontWeight: 'bold' },
-
-    // Activity Cards
+    // Premium Activity Cards (Log Aktifitas)
     activityCard: {
-        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-        backgroundColor: '#FFF', marginHorizontal: 16, marginBottom: 8,
-        padding: 14, borderRadius: 14, borderLeftWidth: 3, borderLeftColor: '#F44336',
-        ...Platform.select({
-            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 3 },
-            android: { elevation: 1 },
-        }),
+        flexDirection: 'row', alignItems: 'center',
+        backgroundColor: '#FFF', marginHorizontal: 20, marginBottom: 12,
+        padding: 16, borderRadius: 16,
+        borderWidth: 1, borderColor: '#F0F0F0',
     },
-    activityLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
-    activityAvatar: { width: 36, height: 36, borderRadius: 18 },
-    avatarPlaceholder: { backgroundColor: '#FFCDD2', justifyContent: 'center', alignItems: 'center' },
-    activityName: { fontSize: 14, fontWeight: '600', color: '#333' },
-    activityLocation: { fontSize: 11, marginLeft: 3 },
-    activityRight: { alignItems: 'flex-end', marginLeft: 8 },
-    activityTime: { fontSize: 11, color: '#999' },
+    activityIconBox: {
+        width: 46, height: 46, borderRadius: 23,
+        justifyContent: 'center', alignItems: 'center', marginRight: 14,
+    },
+    activityContent: { flex: 1 },
+    activityHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 },
+    activityTitle: { fontSize: 14, fontWeight: '700', color: '#333', flex: 1, marginRight: 8 },
+    activityTime: { fontSize: 11, color: '#999', fontWeight: '500' },
+    activityDesc: { fontSize: 13, color: '#666', lineHeight: 18 },
+    activityUserRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8 },
+    activityAvatar: { width: 16, height: 16, borderRadius: 8, marginRight: 6, backgroundColor: '#EEE' },
+    activityUserName: { fontSize: 11, color: '#888', fontWeight: '600' },
 
     // Empty State
     emptyActivity: {
-        alignItems: 'center', paddingVertical: 30, marginHorizontal: 16,
-        backgroundColor: '#FFF', borderRadius: 14,
+        alignItems: 'center', paddingVertical: 40, marginHorizontal: 20,
+        backgroundColor: '#FFF', borderRadius: 16, borderWidth: 1, borderColor: '#F0F0F0',
+        borderStyle: 'dashed',
     },
-    emptyText: { fontSize: 14, fontWeight: '600', color: '#333', marginTop: 12 },
-    emptySubtext: { fontSize: 12, color: '#999', marginTop: 4 },
+    emptyText: { fontSize: 15, fontWeight: '700', color: '#333', marginTop: 16 },
+    emptySubtext: { fontSize: 13, color: '#888', marginTop: 6, textAlign: 'center', paddingHorizontal: 20 },
 });

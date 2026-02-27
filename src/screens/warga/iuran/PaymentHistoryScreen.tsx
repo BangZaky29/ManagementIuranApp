@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, SafeAreaView, StatusBar, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, StatusBar, ScrollView, ActivityIndicator, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
 import { useHistoryViewModel } from './HistoryViewModel';
 import { HistoryStyles as styles } from './HistoryStyles';
+import { FilterCalendar } from '../../../components/FilterCalendar';
 
 export default function PaymentHistoryScreen() {
     const router = useRouter();
@@ -23,7 +24,10 @@ export default function PaymentHistoryScreen() {
         resetFilters,
         toggleExpand,
         isExpanded,
-        handleDownloadReceipt
+        handleDownloadReceipt,
+        isDownloadingId,
+        isLoading,
+        refresh
     } = useHistoryViewModel();
 
     const renderItem = ({ item }: { item: any }) => (
@@ -59,10 +63,17 @@ export default function PaymentHistoryScreen() {
                     {item.status === 'Lunas' && (
                         <TouchableOpacity
                             style={styles.downloadButton}
-                            onPress={() => handleDownloadReceipt(item.period)}
+                            onPress={() => handleDownloadReceipt(item)}
+                            disabled={isDownloadingId === item.id}
                         >
-                            <Ionicons name="download-outline" size={18} color={Colors.green5} />
-                            <Text style={styles.downloadText}>Unduh Kuitansi</Text>
+                            {isDownloadingId === item.id ? (
+                                <ActivityIndicator size="small" color={Colors.green5} />
+                            ) : (
+                                <>
+                                    <Ionicons name="download-outline" size={18} color={Colors.green5} />
+                                    <Text style={styles.downloadText}>Unduh Kuitansi</Text>
+                                </>
+                            )}
                         </TouchableOpacity>
                     )}
                 </View>
@@ -182,7 +193,3 @@ export default function PaymentHistoryScreen() {
         </SafeAreaView>
     );
 }
-
-// Helper to use ScrollView in filterRow needs import 
-import { ScrollView } from 'react-native';
-import { FilterCalendar } from '../../../components/FilterCalendar';
