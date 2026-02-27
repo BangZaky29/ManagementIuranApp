@@ -383,7 +383,8 @@ export default function IuranScreen() {
                                                                                                 fee: { id: item.feeId, name: item.feeName, amount: item.amount },
                                                                                                 isPaid: false,
                                                                                                 status: 'rejected',
-                                                                                                amount: item.amount
+                                                                                                amount: item.amount,
+                                                                                                rawPaymentId: item.rawPaymentId
                                                                                             }]
                                                                                         };
                                                                                         router.push({

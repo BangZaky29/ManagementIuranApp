@@ -212,11 +212,11 @@
     {
         "schemaname": "public",
         "tablename": "payments",
-        "policyname": "Users can update own pending payments",
+        "policyname": "Users can update own pending or rejected payments",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
         "operation": "UPDATE",
-        "using_expression": "((auth.uid() = user_id) AND (status = 'pending'::text))",
+        "using_expression": "(auth.uid() = user_id AND (status = 'pending'::text OR status = 'rejected'::text))",
         "check_expression": null
     },
     {

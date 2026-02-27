@@ -295,8 +295,10 @@ export const submitBulkPayments = async (userId: string, selectedPeriods: Billin
                         proof_url: proofUrl,
                         payment_method: paymentMethod,
                         updated_at: new Date().toISOString()
-                    }).eq('id', item.rawPaymentId)
+                    }).eq('id', item.rawPaymentId).select()
                 );
+            } else {
+                throw new AppError('rawPaymentId missing for ' + item.fee.name, 'MISSING_ID', 'Missing ID');
             }
         }
     }
@@ -310,9 +312,15 @@ export const submitBulkPayments = async (userId: string, selectedPeriods: Billin
 
     if (updatePromises.length > 0) {
         const results = await Promise.all(updatePromises);
+        let updatedCount = 0;
         for (const res of results) {
             if (res.error) {
                 throw new AppError(res.error.message, 'SUBMIT_BULK_REJECTED', 'Gagal mengulang tagihan yang ditolak.');
+            }
+            if (res.data && res.data.length > 0) {
+                updatedCount++;
+            } else {
+                throw new AppError(`DB returned 0 rows updated`, 'SUBMIT_BULK_NO_UPDATE', 'Gagal memproses: baris tidak ditemukan.');
             }
         }
     }
