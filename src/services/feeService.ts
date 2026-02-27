@@ -93,3 +93,170 @@ export const toggleFeeActive = async (id: number, isActive: boolean): Promise<vo
 
     if (error) throw new AppError(error.message, 'TOGGLE_FEE', 'Gagal mengubah status iuran.');
 };
+
+// ============ ANALYTICS ============
+
+export interface FeePaymentStat {
+    fee: AdminFee;
+    totalWarga: number;
+    paidCount: number;
+    pendingCount: number;
+    unpaidCount: number;
+    collectedAmount: number;
+    expectedAmount: number;
+    collectionRate: number; // 0-100
+}
+
+export interface PayerInfo {
+    userId: string;
+    fullName: string;
+    address: string | null;
+    avatarUrl: string | null;
+    status: 'paid' | 'pending' | 'unpaid' | 'rejected';
+    amount: number;
+    paidAt: string | null;
+    paymentMethod: string | null;
+}
+
+export interface MonthlyRevenue {
+    totalExpected: number;
+    totalCollected: number;
+    totalPending: number;
+    totalWarga: number;
+    paidWargaCount: number;
+    collectionRate: number;
+}
+
+/**
+ * Fetch payment stats per fee for a given month period.
+ */
+export const fetchFeePaymentStats = async (period: string): Promise<FeePaymentStat[]> => {
+    // Get active fees
+    const fees = await fetchAdminFees();
+    const activeFees = fees.filter(f => f.is_active);
+
+    if (activeFees.length === 0) return [];
+
+    // Get total warga count in this complex (RLS handles filtering)
+    const { count: wargaCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'warga');
+
+    const totalWarga = wargaCount || 0;
+
+    // Get all payments for this period
+    const { data: payments } = await supabase
+        .from('payments')
+        .select('fee_id, status, amount')
+        .eq('period', period);
+
+    const paymentList = payments || [];
+
+    return activeFees.map(fee => {
+        const feePayments = paymentList.filter(p => p.fee_id === fee.id);
+        const paidCount = feePayments.filter(p => p.status === 'paid').length;
+        const pendingCount = feePayments.filter(p => p.status === 'pending').length;
+        const unpaidCount = totalWarga - paidCount - pendingCount;
+        const collectedAmount = feePayments
+            .filter(p => p.status === 'paid')
+            .reduce((sum, p) => sum + Number(p.amount), 0);
+        const expectedAmount = totalWarga * fee.amount;
+
+        return {
+            fee,
+            totalWarga,
+            paidCount,
+            pendingCount,
+            unpaidCount: Math.max(0, unpaidCount),
+            collectedAmount,
+            expectedAmount,
+            collectionRate: expectedAmount > 0 ? Math.round((collectedAmount / expectedAmount) * 100) : 0,
+        };
+    });
+};
+
+/**
+ * Fetch individual payers for a specific fee + period with optional status filter.
+ */
+export const fetchFeePayerList = async (
+    feeId: number,
+    period: string,
+    statusFilter: 'all' | 'paid' | 'pending' | 'unpaid'
+): Promise<PayerInfo[]> => {
+    // Get all warga in this complex
+    const { data: wargaList } = await supabase
+        .from('profiles')
+        .select('id, full_name, address, avatar_url')
+        .eq('role', 'warga')
+        .order('full_name');
+
+    if (!wargaList || wargaList.length === 0) return [];
+
+    // Get payments for this fee + period
+    const { data: payments } = await supabase
+        .from('payments')
+        .select('user_id, status, amount, paid_at, payment_method')
+        .eq('fee_id', feeId)
+        .eq('period', period);
+
+    const paymentMap = new Map<string, any>();
+    (payments || []).forEach(p => paymentMap.set(p.user_id, p));
+
+    const result: PayerInfo[] = wargaList.map(w => {
+        const payment = paymentMap.get(w.id);
+        return {
+            userId: w.id,
+            fullName: w.full_name || 'Tanpa Nama',
+            address: w.address,
+            avatarUrl: w.avatar_url,
+            status: payment ? payment.status : 'unpaid',
+            amount: payment ? Number(payment.amount) : 0,
+            paidAt: payment?.paid_at || null,
+            paymentMethod: payment?.payment_method || null,
+        };
+    });
+
+    if (statusFilter === 'all') return result;
+    return result.filter(p => p.status === statusFilter);
+};
+
+/**
+ * Monthly revenue summary across all active fees.
+ */
+export const fetchMonthlyRevenueSummary = async (period: string): Promise<MonthlyRevenue> => {
+    const fees = await fetchAdminFees();
+    const activeFees = fees.filter(f => f.is_active);
+
+    const { count: wargaCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'warga');
+
+    const totalWarga = wargaCount || 0;
+    const totalExpected = activeFees.reduce((sum, f) => sum + f.amount, 0) * totalWarga;
+
+    const { data: payments } = await supabase
+        .from('payments')
+        .select('user_id, status, amount')
+        .eq('period', period);
+
+    const paymentList = payments || [];
+    const totalCollected = paymentList
+        .filter(p => p.status === 'paid')
+        .reduce((sum, p) => sum + Number(p.amount), 0);
+    const totalPending = paymentList
+        .filter(p => p.status === 'pending')
+        .reduce((sum, p) => sum + Number(p.amount), 0);
+
+    const paidUserIds = new Set(paymentList.filter(p => p.status === 'paid').map(p => p.user_id));
+
+    return {
+        totalExpected,
+        totalCollected,
+        totalPending,
+        totalWarga,
+        paidWargaCount: paidUserIds.size,
+        collectionRate: totalExpected > 0 ? Math.round((totalCollected / totalExpected) * 100) : 0,
+    };
+};
