@@ -36,6 +36,7 @@ export interface BillItem {
     status: 'paid' | 'pending' | 'unpaid' | 'rejected';
     amount: number;
     rejectionReason?: string;
+    rawPaymentId?: string;
 }
 
 export interface BillingPeriod {
@@ -193,6 +194,7 @@ export const fetchBillingPeriods = async (userId: string): Promise<SmartBillSumm
                 const p = paymentMap.get(fee.id);
                 let status: 'paid' | 'pending' | 'unpaid' | 'rejected' = 'unpaid';
                 let rejectionReason = undefined;
+                let rawPaymentId = undefined;
 
                 if (p?.status === 'paid') status = 'paid';
                 else if (p?.status === 'pending') status = 'pending';
@@ -201,12 +203,15 @@ export const fetchBillingPeriods = async (userId: string): Promise<SmartBillSumm
                     rejectionReason = p.rejection_reason || 'Ditolak (hubungi admin)';
                 }
 
+                if (p?.id) rawPaymentId = p.id;
+
                 return {
                     fee,
                     isPaid: status === 'paid',
                     status,
                     amount: Number(fee.amount),
-                    rejectionReason
+                    rejectionReason,
+                    rawPaymentId
                 };
             });
 
@@ -263,13 +268,15 @@ export const fetchBillingPeriods = async (userId: string): Promise<SmartBillSumm
  * Submit bulk payments for multiple periods and fees using a single proof.
  */
 export const submitBulkPayments = async (userId: string, selectedPeriods: BillingPeriod[], totalAmount: number, proofUrl: string, paymentMethod: string) => {
-    const payload = [];
+    const inserts = [];
+    const updatePromises = [];
 
     for (const period of selectedPeriods) {
-        // Includes rejected items that the user is trying to re-pay
-        const unpaidItems = period.items.filter(i => i.status === 'unpaid' || i.status === 'rejected');
+        const unpaidItems = period.items.filter(i => i.status === 'unpaid');
+        const rejectedItems = period.items.filter(i => i.status === 'rejected');
+
         for (const item of unpaidItems) {
-            payload.push({
+            inserts.push({
                 user_id: userId,
                 fee_id: item.fee.id,
                 amount: item.amount,
@@ -277,16 +284,37 @@ export const submitBulkPayments = async (userId: string, selectedPeriods: Billin
                 status: 'pending',
                 payment_method: paymentMethod,
                 proof_url: proofUrl,
-                updated_at: new Date().toISOString()
             });
+        }
+
+        for (const item of rejectedItems) {
+            if (item.rawPaymentId) {
+                updatePromises.push(
+                    supabase.from('payments').update({
+                        status: 'pending',
+                        proof_url: proofUrl,
+                        payment_method: paymentMethod,
+                        updated_at: new Date().toISOString()
+                    }).eq('id', item.rawPaymentId)
+                );
+            }
         }
     }
 
-    if (payload.length === 0) return;
+    if (inserts.length > 0) {
+        const { error } = await supabase.from('payments').insert(inserts);
+        if (error) {
+            throw new AppError(error.message, 'SUBMIT_BULK', 'Gagal memproses tagihan baru.');
+        }
+    }
 
-    const { error } = await supabase.from('payments').upsert(payload, { onConflict: 'user_id,fee_id,period' });
-    if (error) {
-        throw new AppError(error.message, 'SUBMIT_BULK', 'Gagal memproses pembayaran batch.');
+    if (updatePromises.length > 0) {
+        const results = await Promise.all(updatePromises);
+        for (const res of results) {
+            if (res.error) {
+                throw new AppError(res.error.message, 'SUBMIT_BULK_REJECTED', 'Gagal mengulang tagihan yang ditolak.');
+            }
+        }
     }
 };
 
