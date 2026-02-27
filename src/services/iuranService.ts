@@ -144,15 +144,15 @@ export const fetchBillingPeriods = async (userId: string): Promise<SmartBillSumm
 
                 // Check active periods
                 if (fee.active_from) {
-                    const fromDate = new Date(fee.active_from);
-                    const fromY = fromDate.getFullYear();
-                    const fromM = fromDate.getMonth();
+                    const [fy, fm] = fee.active_from.split('-');
+                    const fromY = parseInt(fy);
+                    const fromM = parseInt(fm) - 1;
                     if (targetY < fromY || (targetY === fromY && targetM < fromM)) return false;
                 }
                 if (fee.active_to) {
-                    const toDate = new Date(fee.active_to);
-                    const toY = toDate.getFullYear();
-                    const toM = toDate.getMonth();
+                    const [ty, tm] = fee.active_to.split('-');
+                    const toY = parseInt(ty);
+                    const toM = parseInt(tm) - 1;
                     if (targetY > toY || (targetY === toY && targetM > toM)) return false;
                 }
                 return true;

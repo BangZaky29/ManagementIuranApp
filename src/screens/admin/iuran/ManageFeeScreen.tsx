@@ -203,17 +203,6 @@ export default function ManageFeeScreen() {
 
     const handleToggle = async (fee: AdminFee) => { await toggleFeeActive(fee.id, fee.is_active); loadAllData(); };
 
-    const handleDelete = (fee: AdminFee) => {
-        setAlertConfig({
-            title: 'Hapus Iuran?', message: `Yakin hapus "${fee.name}"?\n\n⚠️ Data pembayaran terkait akan terpengaruh.`, type: 'warning',
-            buttons: [
-                { text: 'Batal', style: 'cancel', onPress: () => setAlertVisible(false) },
-                { text: 'Hapus', style: 'destructive', onPress: async () => { setAlertVisible(false); await deleteFee(fee.id); loadAllData(); } },
-            ],
-        });
-        setAlertVisible(true);
-    };
-
     // ====== RENDER HELPERS ======
 
     const getStatusColor = (status: string) => {
@@ -238,6 +227,27 @@ export default function ManageFeeScreen() {
 
     const activeFees = fees.filter(f => f.is_active);
     const inactiveFees = fees.filter(f => !f.is_active);
+
+    // Calculate Boundaries for Month Selector
+    let minPeriodStr: string | null = null;
+    let maxPeriodStr: string | null = null;
+    
+    if (fees.length > 0) {
+        // If there's ANY fee without active_from, we can go back infinitely
+        if (!fees.some(f => !f.active_from)) {
+            // Otherwise, find the earliest active_from
+            minPeriodStr = fees.reduce((min, f) => (f.active_from! < min ? f.active_from! : min), fees[0].active_from!);
+        }
+        
+        // If there's ANY fee without active_to, we can go forward infinitely
+        if (!fees.some(f => !f.active_to)) {
+            // Otherwise, find the latest active_to
+            maxPeriodStr = fees.reduce((max, f) => (f.active_to! > max ? f.active_to! : max), fees[0].active_to!);
+        }
+    }
+
+    const canGoBack = !minPeriodStr || currentPeriod > minPeriodStr;
+    const canGoForward = !maxPeriodStr || currentPeriod < maxPeriodStr;
 
     // ====== MAIN RENDER ======
 
@@ -299,14 +309,22 @@ export default function ManageFeeScreen() {
             <>
                 {/* Month Selector */}
                 <View style={s.monthSelector}>
-                    <TouchableOpacity onPress={() => shiftMonth(-1)} style={s.monthArrow}>
+                    <TouchableOpacity 
+                        onPress={() => shiftMonth(-1)} 
+                        style={[s.monthArrow, !canGoBack && { opacity: 0.3 }]}
+                        disabled={!canGoBack}
+                    >
                         <Ionicons name="chevron-back" size={20} color="#1B5E20" />
                     </TouchableOpacity>
                     <View style={s.monthLabel}>
                         <Ionicons name="calendar-outline" size={16} color="#1B5E20" />
                         <Text style={s.monthText}>{formatPeriodLabel(currentPeriod)}</Text>
                     </View>
-                    <TouchableOpacity onPress={() => shiftMonth(1)} style={s.monthArrow}>
+                    <TouchableOpacity 
+                        onPress={() => shiftMonth(1)} 
+                        style={[s.monthArrow, !canGoForward && { opacity: 0.3 }]}
+                        disabled={!canGoForward}
+                    >
                         <Ionicons name="chevron-forward" size={20} color="#1B5E20" />
                     </TouchableOpacity>
                 </View>
@@ -455,10 +473,6 @@ export default function ManageFeeScreen() {
                     <TouchableOpacity style={s.actionBtn} onPress={() => openEditForm(fee)}>
                         <Ionicons name="create-outline" size={18} color="#1B5E20" />
                         <Text style={s.actionText}>Edit</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={s.actionBtn} onPress={() => handleDelete(fee)}>
-                        <Ionicons name="trash-outline" size={18} color="#C62828" />
-                        <Text style={[s.actionText, { color: '#C62828' }]}>Hapus</Text>
                     </TouchableOpacity>
                 </View>
             </View>

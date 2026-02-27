@@ -139,7 +139,27 @@ export interface MonthlyRevenue {
 export const fetchFeePaymentStats = async (period: string): Promise<FeePaymentStat[]> => {
     // Get active fees
     const fees = await fetchAdminFees();
-    const activeFees = fees.filter(f => f.is_active);
+    const [py, pm] = period.split('-');
+    const targetY = parseInt(py);
+    const targetM = parseInt(pm) - 1;
+
+    const activeFees = fees.filter(f => {
+        if (!f.is_active) return false;
+        
+        if (f.active_from) {
+            const [fy, fm] = f.active_from.split('-');
+            const fromY = parseInt(fy);
+            const fromM = parseInt(fm) - 1;
+            if (targetY < fromY || (targetY === fromY && targetM < fromM)) return false;
+        }
+        if (f.active_to) {
+            const [ty, tm] = f.active_to.split('-');
+            const toY = parseInt(ty);
+            const toM = parseInt(tm) - 1;
+            if (targetY > toY || (targetY === toY && targetM > toM)) return false;
+        }
+        return true;
+    });
 
     if (activeFees.length === 0) return [];
 
@@ -232,7 +252,27 @@ export const fetchFeePayerList = async (
  */
 export const fetchMonthlyRevenueSummary = async (period: string): Promise<MonthlyRevenue> => {
     const fees = await fetchAdminFees();
-    const activeFees = fees.filter(f => f.is_active);
+    const [py, pm] = period.split('-');
+    const targetY = parseInt(py);
+    const targetM = parseInt(pm) - 1;
+
+    const activeFees = fees.filter(f => {
+        if (!f.is_active) return false;
+        
+        if (f.active_from) {
+            const [fy, fm] = f.active_from.split('-');
+            const fromY = parseInt(fy);
+            const fromM = parseInt(fm) - 1;
+            if (targetY < fromY || (targetY === fromY && targetM < fromM)) return false;
+        }
+        if (f.active_to) {
+            const [ty, tm] = f.active_to.split('-');
+            const toY = parseInt(ty);
+            const toM = parseInt(tm) - 1;
+            if (targetY > toY || (targetY === toY && targetM > toM)) return false;
+        }
+        return true;
+    });
 
     const { count: wargaCount } = await supabase
         .from('profiles')
