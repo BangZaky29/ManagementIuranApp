@@ -45,18 +45,22 @@ export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = (
     const handleDownloadQR = async () => {
         if (!method.qris_image_url) return;
         try {
-            const { status } = await MediaLibrary.requestPermissionsAsync();
+            // true = write-only permission. This bypasses the need for READ_MEDIA_AUDIO in AndroidManifest
+            const { status } = await MediaLibrary.requestPermissionsAsync(true);
             if (status !== 'granted') {
-                Alert.alert('Izin Diperlukan', 'Izinkan akses penyimpanan untuk download QR.');
+                Alert.alert('Izin Diperlukan', 'Izinkan akses penyimpanan untuk menyimpan QR.');
                 return;
             }
-            const fileUri = FileSystem.documentDirectory + `qr_${Date.now()}.jpg`;
+
+            const fileUri = FileSystem.cacheDirectory + `qr_${Date.now()}.jpg`;
             const download = await FileSystem.downloadAsync(method.qris_image_url, fileUri);
+
             await MediaLibrary.saveToLibraryAsync(download.uri);
             showToast('QR Code berhasil disimpan ke galeri');
-        } catch (e) {
+
+        } catch (e: any) {
             console.error('Download QR error:', e);
-            showToast('Gagal menyimpan QR Code');
+            Alert.alert('Gagal Menyimpan', e.message || 'Terjadi kesalahan saat menyimpan QR Code');
         }
     };
 
