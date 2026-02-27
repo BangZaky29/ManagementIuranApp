@@ -13,7 +13,7 @@ import * as ImagePicker from 'expo-image-picker';
 import {
     uploadPaymentProof,
 } from '../../../services/paymentConfirmationService';
-import { submitBulkPayments, BillingPeriod } from '../../../services/iuranService';
+import { submitBulkPayments, updateRejectedPayment, BillingPeriod } from '../../../services/iuranService';
 
 
 
@@ -25,6 +25,8 @@ export default function PaymentProofScreen() {
         methodName: string;
         methodType: string;
         selectedPeriods: string;
+        isRepayment?: string;
+        paymentIdToUpdate?: string;
     }>();
 
     const [proofImage, setProofImage] = useState<string | null>(null);
@@ -37,8 +39,8 @@ export default function PaymentProofScreen() {
         buttons: [] as any[],
     });
 
-    const selectedPeriods: BillingPeriod[] = params.selectedPeriods 
-        ? JSON.parse(params.selectedPeriods) 
+    const selectedPeriods: BillingPeriod[] = params.selectedPeriods
+        ? JSON.parse(params.selectedPeriods)
         : [];
     const totalAmount = Number(params.totalAmount) || 0;
 
@@ -102,13 +104,19 @@ export default function PaymentProofScreen() {
             const paymentId = `${Date.now()}`;
             const proofUrl = await uploadPaymentProof(user.id, paymentId, proofImage);
 
-            await submitBulkPayments(
-                user.id, 
-                selectedPeriods, 
-                totalAmount, 
-                proofUrl, 
-                params.methodName || ''
-            );
+            if (params.isRepayment === 'true' && params.paymentIdToUpdate) {
+                // Update existing record
+                await updateRejectedPayment(params.paymentIdToUpdate, proofUrl, params.methodName || '');
+            } else {
+                // Insert new records
+                await submitBulkPayments(
+                    user.id,
+                    selectedPeriods,
+                    totalAmount,
+                    proofUrl,
+                    params.methodName || ''
+                );
+            }
 
             // 3. Show success
             setAlertConfig({
@@ -152,6 +160,15 @@ export default function PaymentProofScreen() {
             </View>
 
             <ScrollView contentContainerStyle={styles.content}>
+
+                {params.isRepayment === 'true' && (
+                    <View style={{ backgroundColor: '#FFEBEE', padding: 12, borderRadius: 12, marginBottom: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                        <Ionicons name="refresh-circle" size={20} color="#D32F2F" />
+                        <Text style={{ flex: 1, color: '#D32F2F', fontSize: 13, fontWeight: '500' }}>
+                            Bukti pembayaran baru untuk iuran yang ditolak.
+                        </Text>
+                    </View>
+                )}
 
                 {/* Payment Summary */}
                 <View style={styles.summaryCard}>

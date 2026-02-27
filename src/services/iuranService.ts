@@ -266,8 +266,8 @@ export const submitBulkPayments = async (userId: string, selectedPeriods: Billin
     const payload = [];
 
     for (const period of selectedPeriods) {
-        // Only pay for items that are unpaid
-        const unpaidItems = period.items.filter(i => i.status === 'unpaid');
+        // Includes rejected items that the user is trying to re-pay
+        const unpaidItems = period.items.filter(i => i.status === 'unpaid' || i.status === 'rejected');
         for (const item of unpaidItems) {
             payload.push({
                 user_id: userId,
@@ -277,14 +277,34 @@ export const submitBulkPayments = async (userId: string, selectedPeriods: Billin
                 status: 'pending',
                 payment_method: paymentMethod,
                 proof_url: proofUrl,
+                updated_at: new Date().toISOString()
             });
         }
     }
 
     if (payload.length === 0) return;
 
-    const { error } = await supabase.from('payments').insert(payload);
+    const { error } = await supabase.from('payments').upsert(payload, { onConflict: 'user_id,fee_id,period' });
     if (error) {
         throw new AppError(error.message, 'SUBMIT_BULK', 'Gagal memproses pembayaran batch.');
+    }
+};
+
+/**
+ * Update an existing rejected payment with a new proof URL and set status to pending.
+ */
+export const updateRejectedPayment = async (paymentId: string, proofUrl: string, paymentMethod: string) => {
+    const { error } = await supabase
+        .from('payments')
+        .update({
+            status: 'pending',
+            proof_url: proofUrl,
+            payment_method: paymentMethod,
+            updated_at: new Date().toISOString()
+        })
+        .eq('id', paymentId);
+
+    if (error) {
+        throw new AppError(error.message, 'UPDATE_REJECTED', 'Gagal mengunggah ulang bukti pembayaran.');
     }
 };

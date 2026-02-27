@@ -44,7 +44,8 @@ export default function IuranScreen() {
     const unpaidPeriodCount = billSummary?.periods.filter(p => p.status === 'unpaid' || p.status === 'partial' || p.status === 'overdue').length || 0;
     const paidCount = billSummary?.periods.flatMap(p => p.items.filter(i => i.status === 'paid')).length || 0;
     const pendingCount = billSummary?.periods.flatMap(p => p.items.filter(i => i.status === 'pending')).length || 0;
-    const unpaidItemCount = billSummary?.periods.flatMap(p => p.items.filter(i => i.status === 'unpaid')).length || 0;
+    const rejectedCount = billSummary?.periods.flatMap(p => p.items.filter(i => i.status === 'rejected')).length || 0;
+    const unpaidItemCount = billSummary?.periods.flatMap(p => p.items.filter(i => i.status === 'unpaid' || i.status === 'rejected')).length || 0;
 
     const allPaid = billSummary?.periods.length && unpaidItemCount === 0 && pendingCount === 0;
 
@@ -94,8 +95,14 @@ export default function IuranScreen() {
                                 </View>
                                 <View style={s.statItem}>
                                     <View style={[s.statDot, { backgroundColor: '#E0E0E0' }]} />
-                                    <Text style={s.statText}>Belum {unpaidItemCount}</Text>
+                                    <Text style={s.statText}>Belum {unpaidItemCount - rejectedCount}</Text>
                                 </View>
+                                {rejectedCount > 0 && (
+                                    <View style={s.statItem}>
+                                        <View style={[s.statDot, { backgroundColor: '#F44336' }]} />
+                                        <Text style={s.statText}>Ditolak {rejectedCount}</Text>
+                                    </View>
+                                )}
                             </View>
 
                             {billSummary && billSummary.totalOverdue > 0 && (

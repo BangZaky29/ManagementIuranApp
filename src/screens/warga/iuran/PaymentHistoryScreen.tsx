@@ -75,9 +75,44 @@ export default function PaymentHistoryScreen() {
                                         </Text>
 
                                         {item.status === 'Ditolak' && item.rejectionReason && (
-                                            <Text style={{ fontSize: 11, color: '#D32F2F', marginTop: 4, fontStyle: 'italic' }}>
-                                                "{item.rejectionReason}"
-                                            </Text>
+                                            <View>
+                                                <Text style={{ fontSize: 11, color: '#D32F2F', marginTop: 4, fontStyle: 'italic' }}>
+                                                    "{item.rejectionReason}"
+                                                </Text>
+                                                <TouchableOpacity
+                                                    style={{ alignSelf: 'flex-start', backgroundColor: '#F44336', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6, marginTop: 6 }}
+                                                    onPress={() => {
+                                                        const mockedPeriod = {
+                                                            id: group.id,
+                                                            periodDate: group.periodName, // usually YYYY-MM-01, but UI doesn't strictly need it to be exact for single repay
+                                                            monthName: group.periodName,
+                                                            status: 'rejected',
+                                                            totalAmount: item.amount,
+                                                            unpaidAmount: item.amount,
+                                                            isCurrentMonth: false,
+                                                            isOverdue: false,
+                                                            items: [{
+                                                                fee: { id: item.feeId, name: item.feeName, amount: item.amount },
+                                                                isPaid: false,
+                                                                status: 'rejected',
+                                                                amount: item.amount
+                                                            }]
+                                                        };
+
+                                                        router.push({
+                                                            pathname: '/iuran/payment-detail',
+                                                            params: {
+                                                                selectedPeriods: JSON.stringify([mockedPeriod]),
+                                                                totalAmount: item.amount.toString(),
+                                                                isRepayment: 'true',
+                                                                paymentIdToUpdate: item.rawPaymentId
+                                                            }
+                                                        });
+                                                    }}
+                                                >
+                                                    <Text style={{ fontSize: 10, color: '#FFF', fontWeight: 'bold' }}>Bayar Ulang</Text>
+                                                </TouchableOpacity>
+                                            </View>
                                         )}
                                     </View>
                                     <View style={{ alignItems: 'flex-end' }}>

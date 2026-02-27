@@ -15,10 +15,11 @@ export default function PaymentDetailScreen() {
     const router = useRouter();
     const { user } = useAuth();
 
-    const params = useLocalSearchParams<{ selectedPeriods: string; totalAmount: string }>();
+    const params = useLocalSearchParams<{ selectedPeriods: string; totalAmount: string, isRepayment?: string, paymentIdToUpdate?: string }>();
 
     const selectedPeriods: BillingPeriod[] = params.selectedPeriods ? JSON.parse(params.selectedPeriods) : [];
     const totalAmount = Number(params.totalAmount) || selectedPeriods.reduce((s, p) => s + p.totalAmount, 0);
+    const isRepayment = params.isRepayment === 'true';
 
     const [selectedMethodId, setSelectedMethodId] = useState<number | null>(null);
     const [isModalVisible, setModalVisible] = useState(false);
@@ -54,6 +55,8 @@ export default function PaymentDetailScreen() {
                 methodName: method.method_name,
                 methodType: method.method_type,
                 selectedPeriods: JSON.stringify(selectedPeriods),
+                isRepayment: isRepayment ? 'true' : 'false',
+                paymentIdToUpdate: params.paymentIdToUpdate || '',
             },
         });
     };
@@ -94,6 +97,14 @@ export default function PaymentDetailScreen() {
             </View>
 
             <ScrollView contentContainerStyle={st.content}>
+                {isRepayment && (
+                    <View style={{ backgroundColor: '#FFEBEE', padding: 12, borderRadius: 12, marginBottom: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                        <Ionicons name="alert-circle" size={20} color="#D32F2F" />
+                        <Text style={{ flex: 1, color: '#D32F2F', fontSize: 13, fontWeight: '500' }}>
+                            Anda sedang melakukan pembayaran ulang untuk iuran yang sebelumnya ditolak.
+                        </Text>
+                    </View>
+                )}
 
                 {/* Bill Summary */}
                 <View style={st.section}>
@@ -102,7 +113,7 @@ export default function PaymentDetailScreen() {
 
                     <View style={st.card}>
                         {selectedPeriods.map((period, idx) => {
-                            const unpaidItems = period.items.filter(i => i.status === 'unpaid');
+                            const unpaidItems = period.items.filter(i => i.status === 'unpaid' || i.status === 'rejected');
                             return (
                                 <View key={idx} style={{ marginBottom: 12 }}>
                                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
@@ -111,7 +122,14 @@ export default function PaymentDetailScreen() {
                                     </View>
                                     {unpaidItems.map((item, itemIdx) => (
                                         <View key={`${idx}-${itemIdx}`} style={[st.row, { paddingLeft: 22, marginTop: 4 }]}>
-                                            <Text style={[st.rowLabel, { color: '#555', fontSize: 13 }]}>- {item.fee.name}</Text>
+                                            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+                                                <Text style={[st.rowLabel, { color: '#555', fontSize: 13 }]}>- {item.fee.name}</Text>
+                                                {item.status === 'rejected' && (
+                                                    <View style={{ backgroundColor: '#FFEBEE', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginLeft: 6 }}>
+                                                        <Text style={{ color: '#D32F2F', fontSize: 9, fontWeight: 'bold' }}>Pembayaran ulang</Text>
+                                                    </View>
+                                                )}
+                                            </View>
                                             <Text style={[st.rowValue, { fontSize: 13 }]}>{formatCurrency(item.amount)}</Text>
                                         </View>
                                     ))}

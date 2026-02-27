@@ -14,6 +14,8 @@ export interface HistoryItem {
     methodName: string;
     periodRaw: string; // Internal use
     rejectionReason?: string;
+    rawPaymentId: string;
+    feeId: number;
 }
 
 export interface GroupedHistory {
@@ -59,6 +61,8 @@ export const useHistoryViewModel = () => {
                     methodName: p.payment_method || '-',
                     periodRaw: p.period, // keep original for grouping
                     rejectionReason: p.rejection_reason || 'Ditolak (hubungi admin)',
+                    rawPaymentId: p.id,
+                    feeId: p.fee_id,
                 } as any;
             });
             setAllHistory(items as any);
