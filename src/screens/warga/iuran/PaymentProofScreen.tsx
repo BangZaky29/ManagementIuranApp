@@ -3,7 +3,7 @@ import {
     View, Text, ScrollView, TouchableOpacity, SafeAreaView,
     StatusBar, Image, ActivityIndicator, StyleSheet
 } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
 import { CustomButton } from '../../../components/CustomButton';
@@ -14,6 +14,29 @@ import {
     uploadPaymentProof,
     submitBulkPaymentWithProof,
 } from '../../../services/paymentConfirmationService';
+
+// Helper to convert "Maret 2026" to "2026-03-01" for Supabase Date column
+const formatPeriodToDate = (periodStr: string): string => {
+    if (!periodStr) return new Date().toISOString().split('T')[0];
+
+    // Check if it's already YYYY-MM-DD
+    if (/^\d{4}-\d{2}-\d{2}$/.test(periodStr)) return periodStr;
+
+    const parts = periodStr.split(' ');
+    if (parts.length !== 2) return new Date().toISOString().split('T')[0];
+
+    const months: Record<string, string> = {
+        'januari': '01', 'februari': '02', 'maret': '03', 'april': '04',
+        'mei': '05', 'juni': '06', 'juli': '07', 'agustus': '08',
+        'september': '09', 'oktober': '10', 'november': '11', 'desember': '12'
+    };
+
+    const monthStr = parts[0].toLowerCase();
+    const monthNum = months[monthStr] || '01';
+    const yearStr = parts[1];
+
+    return `${yearStr}-${monthNum}-01`;
+};
 
 export default function PaymentProofScreen() {
     const router = useRouter();
@@ -101,10 +124,12 @@ export default function PaymentProofScreen() {
             const proofUrl = await uploadPaymentProof(user.id, paymentId, proofImage);
 
             // 2. Create payment records for all unpaid fees
+            const dbPeriodDate = formatPeriodToDate(params.period || '');
+
             await submitBulkPaymentWithProof({
                 userId: user.id,
                 fees: unpaidFees.map(f => ({ feeId: f.feeId, amount: f.amount })),
-                period: params.period || '',
+                period: dbPeriodDate,
                 paymentMethodName: params.methodName || '',
                 proofUrl,
             });
@@ -139,6 +164,7 @@ export default function PaymentProofScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
+            <Stack.Screen options={{ headerShown: false }} />
             <StatusBar barStyle="dark-content" backgroundColor={Colors.green1} />
 
             {/* Header */}

@@ -1,5 +1,7 @@
 import { supabase } from '../lib/supabaseConfig';
 import { AppError } from '../utils/AppError';
+import * as FileSystem from 'expo-file-system/legacy';
+import { decode } from 'base64-arraybuffer';
 
 export interface PendingPaymentItem {
     id: string;
@@ -180,21 +182,31 @@ export const uploadPaymentProof = async (
     paymentId: string,
     imageUri: string
 ): Promise<string> => {
-    const response = await fetch(imageUri);
-    const blob = await response.blob();
+    try {
+        const base64 = await FileSystem.readAsStringAsync(imageUri, {
+            encoding: FileSystem.EncodingType.Base64,
+        });
 
-    const filePath = `${userId}/${paymentId}.jpg`;
-    const { error } = await supabase.storage
-        .from('payment-proofs')
-        .upload(filePath, blob, { upsert: true, contentType: 'image/jpeg' });
+        const filePath = `${userId}/${paymentId}.jpg`;
+        const { error } = await supabase.storage
+            .from('payment-proofs')
+            .upload(filePath, decode(base64), {
+                upsert: true,
+                contentType: 'image/jpeg'
+            });
 
-    if (error) throw new AppError(error.message, 'UPLOAD_PROOF', 'Gagal mengupload bukti pembayaran.');
+        if (error) throw new AppError(error.message, 'UPLOAD_PROOF', 'Gagal mengupload bukti pembayaran.');
 
-    const { data: urlData } = supabase.storage
-        .from('payment-proofs')
-        .getPublicUrl(filePath);
+        const { data: urlData } = supabase.storage
+            .from('payment-proofs')
+            .getPublicUrl(filePath);
 
-    return urlData.publicUrl;
+        return urlData.publicUrl;
+    } catch (error: any) {
+        if (error instanceof AppError) throw error;
+        console.error('Payment proof upload error:', error);
+        throw new AppError(error.message || 'Unknown error', 'UPLOAD_PROOF', 'Gagal mengupload bukti pembayaran.');
+    }
 };
 
 /**
