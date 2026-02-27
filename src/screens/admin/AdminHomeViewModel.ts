@@ -46,7 +46,7 @@ export function useAdminHomeViewModel() {
                 fetchPanicLogs(0, 5, false), // Latest 5 active panics
                 countPendingPayments(),
                 fetchPendingReports(),
-                fetchRecentActivityLogs(10),
+                fetchRecentActivityLogs(5),
             ]);
 
             setStats(statsData);
@@ -81,6 +81,7 @@ export function useAdminHomeViewModel() {
     const navigateToPaymentConfirmation = () => router.push('/admin/payment-confirmation' as any);
 
     const navigateToReports = () => router.push('/admin/reports' as any);
+    const navigateToActivityLog = () => router.push('/admin/activity-log' as any);
 
     const openPanicLocation = (log: PanicLog) => {
         if (log.location && log.location.startsWith('http')) {
@@ -123,6 +124,7 @@ export function useAdminHomeViewModel() {
         pendingPayments, pendingReports, activityLogs,
         handleLogout, navigateToManageResidents, navigateToPanicLogs,
         navigateToPaymentMethods, navigateToPaymentConfirmation, navigateToReports,
+        navigateToActivityLog,
         openPanicLocation, handleResolvePanic, formatTime,
         alertVisible, alertConfig, hideAlert, refresh: loadData,
     };

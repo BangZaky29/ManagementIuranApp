@@ -4,8 +4,10 @@ import {
     StatusBar, StyleSheet, Platform
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Colors } from '../../../constants/Colors';
+import { countPendingPayments } from '../../../services/paymentConfirmationService';
+import { useState, useCallback } from 'react';
 
 interface MenuCard {
     key: string;
@@ -19,6 +21,18 @@ interface MenuCard {
 
 export default function IuranManagementScreen() {
     const router = useRouter();
+    const [pendingCount, setPendingCount] = useState(0);
+
+    const loadPendingCount = async () => {
+        const count = await countPendingPayments();
+        setPendingCount(count);
+    };
+
+    useFocusEffect(
+        useCallback(() => {
+            loadPendingCount();
+        }, [])
+    );
 
     const menuCards: MenuCard[] = [
         {
@@ -86,6 +100,13 @@ export default function IuranManagementScreen() {
                             <Text style={styles.cardTitle}>{card.title}</Text>
                             <Text style={styles.cardSubtitle}>{card.subtitle}</Text>
                         </View>
+                        
+                        {card.key === 'confirmation' && pendingCount > 0 && (
+                            <View style={styles.badgeContainer}>
+                                <Text style={styles.badgeText}>{pendingCount}</Text>
+                            </View>
+                        )}
+
                         <Ionicons name="chevron-forward" size={20} color="#CCC" />
                     </TouchableOpacity>
                 ))}
@@ -129,4 +150,23 @@ const styles = StyleSheet.create({
     cardContent: { flex: 1 },
     cardTitle: { fontSize: 16, fontWeight: 'bold', color: '#333' },
     cardSubtitle: { fontSize: 12, color: '#888', marginTop: 4, lineHeight: 17 },
+    badgeContainer: {
+        backgroundColor: '#F44336',
+        borderRadius: 12,
+        minWidth: 22,
+        height: 22,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 8,
+        paddingHorizontal: 6,
+        ...Platform.select({
+            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.2, shadowRadius: 2 },
+            android: { elevation: 2 },
+        }),
+    },
+    badgeText: {
+        color: '#FFF',
+        fontSize: 11,
+        fontWeight: 'bold',
+    },
 });

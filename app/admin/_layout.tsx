@@ -12,6 +12,7 @@ export default function AdminRootLayout() {
             <Stack.Screen name="manage-fees" />
             <Stack.Screen name="payment-methods" />
             <Stack.Screen name="payment-confirmation" />
+            <Stack.Screen name="activity-log" />
         </Stack>
     );
 }

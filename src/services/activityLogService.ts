@@ -20,7 +20,7 @@ export interface ActivityLog {
  * Fetch recent activity logs for the admin's housing complex.
  * RLS ensures they only see logs from their own complex.
  */
-export const fetchRecentActivityLogs = async (limit: number = 20): Promise<ActivityLog[]> => {
+export const fetchRecentActivityLogs = async (limit: number = 20, offset: number = 0): Promise<ActivityLog[]> => {
     const { data, error } = await supabase
         .from('activity_logs')
         .select(`
@@ -28,7 +28,7 @@ export const fetchRecentActivityLogs = async (limit: number = 20): Promise<Activ
             profiles:user_id (full_name, avatar_url, wa_phone)
         `)
         .order('created_at', { ascending: false })
-        .limit(limit);
+        .range(offset, offset + limit - 1);
 
     if (error) {
         console.error('Error fetching activity logs:', error);

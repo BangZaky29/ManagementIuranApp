@@ -142,6 +142,9 @@ export default function AdminHomeScreen() {
                 {/* Ringkasan Aktivitas */}
                 <View style={styles.sectionHeader}>
                     <Text style={styles.sectionTitle}>Ringkasan Aktivitas</Text>
+                    <TouchableOpacity onPress={vm.navigateToActivityLog}>
+                        <Text style={{ color: '#1B5E20', fontSize: 13, fontWeight: '700' }}>Lihat Semua</Text>
+                    </TouchableOpacity>
                 </View>
 
                 {vm.activityLogs.length === 0 ? (
@@ -151,7 +154,7 @@ export default function AdminHomeScreen() {
                         <Text style={styles.emptySubtext}>Aktivitas bayar iuran, tamu, atau darurat warga akan muncul di sini.</Text>
                     </View>
                 ) : (
-                    vm.activityLogs.map((log) => {
+                    vm.activityLogs.slice(0, 5).map((log) => {
                         let iconName = 'ellipse';
                         let iconColor = '#999';
                         let bgColor = '#F5F5F5';
