@@ -37,7 +37,8 @@ export default function PaymentHistoryScreen() {
                 onPress={() => toggleExpand(item.id)}
             >
                 <View>
-                    <Text style={styles.itemPeriod}>{item.period}</Text>
+                    <Text style={styles.itemPeriod}>{item.feeName}</Text>
+                    <Text style={[styles.itemDate, { fontSize: 12, color: '#555', marginTop: 1, marginBottom: 2 }]}>{item.period}</Text>
                     <Text style={styles.itemDate}>{item.date}</Text>
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>

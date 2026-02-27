@@ -56,7 +56,7 @@ export const useHistoryViewModel = () => {
                     date: p.paid_at
                         ? new Date(p.paid_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
                         : '-',
-                    feeName: '',
+                    feeName: p.fees?.name || 'Iuran',
                     methodName: p.payment_method || '-',
                 };
             });

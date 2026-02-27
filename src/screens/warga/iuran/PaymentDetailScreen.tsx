@@ -101,15 +101,23 @@ export default function PaymentDetailScreen() {
                     <Text style={st.period}>{currentMonth}</Text>
 
                     <View style={st.card}>
-                        {selectedPeriods.map((period, idx) => (
-                            <View key={idx} style={st.row}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                                    <Ionicons name="receipt-outline" size={14} color="#888" />
-                                    <Text style={st.rowLabel}>{period.monthName}</Text>
+                        {selectedPeriods.map((period, idx) => {
+                            const unpaidItems = period.items.filter(i => i.status === 'unpaid');
+                            return (
+                                <View key={idx} style={{ marginBottom: 12 }}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                                        <Ionicons name="calendar-outline" size={14} color="#1B5E20" />
+                                        <Text style={[st.rowLabel, { fontWeight: '700', color: '#1B5E20' }]}>{period.monthName}</Text>
+                                    </View>
+                                    {unpaidItems.map((item, itemIdx) => (
+                                        <View key={`${idx}-${itemIdx}`} style={[st.row, { paddingLeft: 22, marginTop: 4 }]}>
+                                            <Text style={[st.rowLabel, { color: '#555', fontSize: 13 }]}>- {item.fee.name}</Text>
+                                            <Text style={[st.rowValue, { fontSize: 13 }]}>{formatCurrency(item.amount)}</Text>
+                                        </View>
+                                    ))}
                                 </View>
-                                <Text style={st.rowValue}>{formatCurrency(period.totalAmount)}</Text>
-                            </View>
-                        ))}
+                            );
+                        })}
                         <View style={st.divider} />
                         <View style={st.row}>
                             <Text style={st.totalLabel}>Total Bayar</Text>

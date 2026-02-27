@@ -158,6 +158,9 @@ export default function IuranScreen() {
                                             {/* Fee info */}
                                             <View style={s.feeInfo}>
                                                 <Text style={s.feeName}>{period.monthName}</Text>
+                                                <Text style={s.feeDetailList} numberOfLines={1}>
+                                                    {period.items.map(i => i.fee.name).join(', ')}
+                                                </Text>
                                                 <View style={s.feeMetaRow}>
                                                     <Ionicons name={statusIcon as any} size={12} color={statusColor} />
                                                     <Text style={[s.feeStatus, { color: statusColor }]}>{statusLabel}</Text>
@@ -230,7 +233,8 @@ export default function IuranScreen() {
                                     >
                                         <View style={s.historyRow}>
                                             <View>
-                                                <Text style={s.historyPeriod}>{item.period}</Text>
+                                                <Text style={s.historyPeriod}>{item.feeName}</Text>
+                                                <Text style={[s.historyDate, { fontSize: 13, color: '#555', marginTop: 1 }]}>{item.period}</Text>
                                                 <Text style={s.historyDate}>{item.date}</Text>
                                             </View>
                                             <View style={{ alignItems: 'flex-end' }}>
@@ -326,6 +330,7 @@ const s = StyleSheet.create({
     checkboxChecked: { backgroundColor: '#1B5E20', borderColor: '#1B5E20' },
     feeInfo: { flex: 1, marginLeft: 12 },
     feeName: { fontSize: 14, fontWeight: '600', color: '#333' },
+    feeDetailList: { fontSize: 11, color: '#888', marginTop: 2, fontStyle: 'italic' },
     feeMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 },
     feeStatus: { fontSize: 11, fontWeight: '500' },
     feeAmount: { fontSize: 15, fontWeight: 'bold', color: '#1B5E20' },

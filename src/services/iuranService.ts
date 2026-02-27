@@ -27,6 +27,7 @@ export interface PaymentRecord {
     confirmed_at: string | null;
     admin_notes: string | null;
     rejection_reason: string | null;
+    fees?: { name: string };
 }
 
 export interface BillItem {
@@ -67,7 +68,7 @@ export const fetchActiveFees = async (): Promise<Fee[]> => {
 export const fetchMyPayments = async (): Promise<PaymentRecord[]> => {
     const { data, error } = await supabase
         .from('payments')
-        .select('*')
+        .select('*, fees(name)')
         .order('period', { ascending: false });
 
     if (error) throw new AppError(error.message, 'FETCH_PAYMENTS', 'Gagal memuat riwayat pembayaran.');
