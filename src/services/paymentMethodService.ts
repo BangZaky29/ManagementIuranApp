@@ -143,3 +143,33 @@ export const uploadQrisImage = async (
         throw new AppError(error.message || 'Unknown error', 'UPLOAD_QRIS', 'Gagal mengupload gambar QRIS.');
     }
 };
+
+// ============================================================
+// E-Wallet VA Codes
+// ============================================================
+
+export interface EwalletVaCode {
+    id: number;
+    ewallet_name: string;
+    bank_name: string;
+    va_code: string;
+    format_example: string;
+}
+
+/**
+ * Fetch VA codes for a specific e-wallet (e.g. 'GoPay', 'OVO', 'DANA', 'ShopeePay').
+ */
+export const fetchEwalletVaCodes = async (ewalletName: string): Promise<EwalletVaCode[]> => {
+    const { data, error } = await supabase
+        .from('ewallet_va_codes')
+        .select('*')
+        .eq('ewallet_name', ewalletName)
+        .order('bank_name');
+
+    if (error) {
+        console.error('Failed to fetch VA codes:', error);
+        return [];
+    }
+    return data as EwalletVaCode[];
+};
+

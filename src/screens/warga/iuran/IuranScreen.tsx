@@ -158,6 +158,29 @@ export default function IuranScreen() {
                             </Animated.View>
                         )}
 
+                        {/* Inline Pay Button — below fee cards */}
+                        {unpaidCount > 0 && (
+                            <View style={s.payContainer}>
+                                <View style={s.payInfo}>
+                                    <Text style={s.payInfoLabel}>
+                                        {selectedCount > 0 ? `${selectedCount} iuran dipilih` : 'Pilih iuran di atas'}
+                                    </Text>
+                                    <Text style={s.payInfoAmount}>
+                                        {selectedCount > 0 ? formatCurrency(selectedTotal) : '-'}
+                                    </Text>
+                                </View>
+                                <TouchableOpacity
+                                    style={[s.payBtn, selectedCount === 0 && s.payBtnDisabled]}
+                                    onPress={handlePay}
+                                    disabled={selectedCount === 0}
+                                    activeOpacity={0.8}
+                                >
+                                    <Ionicons name="wallet-outline" size={18} color="#FFF" />
+                                    <Text style={s.payBtnText}>Bayar Sekarang</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+
                         {/* Empty state */}
                         {billSummary && billSummary.items.length === 0 && (
                             <View style={s.emptyBox}>
@@ -214,31 +237,8 @@ export default function IuranScreen() {
                             </Animated.View>
                         )}
 
-                        <View style={{ height: 80 }} />
+                        <View style={{ height: 40 }} />
                     </ScrollView>
-
-                    {/* Bottom Pay Button */}
-                    {unpaidCount > 0 && (
-                        <View style={s.footer}>
-                            <View style={s.footerInfo}>
-                                <Text style={s.footerLabel}>
-                                    {selectedCount > 0 ? `${selectedCount} item dipilih` : 'Pilih iuran'}
-                                </Text>
-                                <Text style={s.footerAmount}>
-                                    {selectedCount > 0 ? formatCurrency(selectedTotal) : '-'}
-                                </Text>
-                            </View>
-                            <TouchableOpacity
-                                style={[s.payBtn, selectedCount === 0 && s.payBtnDisabled]}
-                                onPress={handlePay}
-                                disabled={selectedCount === 0}
-                                activeOpacity={0.8}
-                            >
-                                <Ionicons name="wallet-outline" size={18} color="#FFF" />
-                                <Text style={s.payBtnText}>Bayar</Text>
-                            </TouchableOpacity>
-                        </View>
-                    )}
                 </>
             )}
 
@@ -297,6 +297,19 @@ const s = StyleSheet.create({
     feeStatus: { fontSize: 11, fontWeight: '500' },
     feeAmount: { fontSize: 15, fontWeight: 'bold', color: '#1B5E20' },
 
+    // Pay Container (inline)
+    payContainer: {
+        flexDirection: 'row', alignItems: 'center', padding: 16, marginTop: 4, marginBottom: 16,
+        backgroundColor: '#FFF', borderRadius: 16,
+        ...Platform.select({
+            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6 },
+            android: { elevation: 3 },
+        }),
+    },
+    payInfo: { flex: 1 },
+    payInfoLabel: { fontSize: 12, color: '#888' },
+    payInfoAmount: { fontSize: 18, fontWeight: 'bold', color: '#1B5E20' },
+
     // Empty
     emptyBox: { alignItems: 'center', paddingVertical: 30, backgroundColor: '#FFF', borderRadius: 16, padding: 20, marginBottom: 16 },
     emptyTitle: { fontSize: 16, fontWeight: 'bold', color: '#333', marginTop: 12 },
@@ -320,19 +333,7 @@ const s = StyleSheet.create({
     detailLabel: { fontSize: 12, color: '#888' },
     detailValue: { fontSize: 12, fontWeight: '500', color: '#333' },
 
-    // Footer
-    footer: {
-        position: 'absolute', bottom: 0, left: 0, right: 0,
-        flexDirection: 'row', alignItems: 'center', padding: 16,
-        backgroundColor: '#FFF', borderTopLeftRadius: 20, borderTopRightRadius: 20,
-        ...Platform.select({
-            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: -3 }, shadowOpacity: 0.08, shadowRadius: 8 },
-            android: { elevation: 10 },
-        }),
-    },
-    footerInfo: { flex: 1 },
-    footerLabel: { fontSize: 12, color: '#888' },
-    footerAmount: { fontSize: 18, fontWeight: 'bold', color: '#1B5E20' },
+    // Pay Button
     payBtn: {
         flexDirection: 'row', alignItems: 'center', gap: 6,
         backgroundColor: '#1B5E20', paddingHorizontal: 24, paddingVertical: 14, borderRadius: 14,

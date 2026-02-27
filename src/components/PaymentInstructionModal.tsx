@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Modal, StyleSheet, TouchableOpacity, Image, ScrollView, Platform, Animated, PanResponder, ActivityIndicator } from 'react-native';
+import { View, Text, Modal, StyleSheet, TouchableOpacity, Image, ScrollView, Platform, Animated, PanResponder, ActivityIndicator, Alert } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomButton } from './CustomButton';
 import { ToastNotification } from './ToastNotification';
 import * as Clipboard from 'expo-clipboard';
-import { PaymentMethod } from '../services/paymentMethodService';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as MediaLibrary from 'expo-media-library';
+import { PaymentMethod, fetchEwalletVaCodes, EwalletVaCode } from '../services/paymentMethodService';
 
 interface PaymentInstructionModalProps {
     visible: boolean;
@@ -22,6 +24,8 @@ export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = (
     const [secondsLeft, setSecondsLeft] = useState(24 * 60 * 60);
     const panY = React.useRef(new Animated.Value(0)).current;
     const [toast, setToast] = useState({ visible: false, message: '' });
+    const [vaCodes, setVaCodes] = useState<EwalletVaCode[]>([]);
+    const [vaLoading, setVaLoading] = useState(false);
 
     const showToast = (message: string) => {
         setToast({ visible: true, message });
@@ -38,6 +42,24 @@ export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = (
         }
     };
 
+    const handleDownloadQR = async () => {
+        if (!method.qris_image_url) return;
+        try {
+            const { status } = await MediaLibrary.requestPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Izin Diperlukan', 'Izinkan akses penyimpanan untuk download QR.');
+                return;
+            }
+            const fileUri = FileSystem.documentDirectory + `qr_${Date.now()}.jpg`;
+            const download = await FileSystem.downloadAsync(method.qris_image_url, fileUri);
+            await MediaLibrary.saveToLibraryAsync(download.uri);
+            showToast('QR Code berhasil disimpan ke galeri');
+        } catch (e) {
+            console.error('Download QR error:', e);
+            showToast('Gagal menyimpan QR Code');
+        }
+    };
+
     useEffect(() => {
         if (!visible) return;
         setSecondsLeft(24 * 60 * 60);
@@ -46,6 +68,16 @@ export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = (
         }, 1000);
         return () => clearInterval(timer);
     }, [visible]);
+
+    // Fetch VA codes when modal opens for e-wallet
+    useEffect(() => {
+        if (visible && method.method_type === 'ewallet') {
+            setVaLoading(true);
+            fetchEwalletVaCodes(method.method_name)
+                .then(codes => setVaCodes(codes))
+                .finally(() => setVaLoading(false));
+        }
+    }, [visible, method.method_name, method.method_type]);
 
     useEffect(() => {
         if (visible) panY.setValue(0);
@@ -149,6 +181,14 @@ export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = (
                         )}
                     </View>
 
+                    {/* Download QR Button */}
+                    {method.qris_image_url && (
+                        <TouchableOpacity style={styles.downloadQrBtn} onPress={handleDownloadQR}>
+                            <Ionicons name="download-outline" size={18} color={Colors.green5} />
+                            <Text style={styles.downloadQrText}>Simpan QR ke Galeri</Text>
+                        </TouchableOpacity>
+                    )}
+
                     <View style={styles.amountContainer}>
                         <Text style={styles.amountLabel}>Total Pembayaran</Text>
                         <Text style={styles.amountValue}>{amount}</Text>
@@ -160,6 +200,8 @@ export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = (
         }
 
         // Bank Transfer or E-Wallet
+        const isEwallet = method.method_type === 'ewallet';
+
         return (
             <View>
                 <View style={styles.timerContainer}>
@@ -169,19 +211,21 @@ export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = (
 
                 <View style={styles.vaContainer}>
                     <Text style={styles.vaLabel}>
-                        {method.method_type === 'bank_transfer' ? 'Nomor Rekening' : 'Nomor Tujuan'}
+                        {isEwallet ? 'Nomor E-Wallet Tujuan' : 'Nomor Rekening'}
                     </Text>
+
                     <View style={styles.vaRow}>
                         <Text style={styles.vaNumber}>{method.account_number || '-'}</Text>
                         {method.account_number && (
-                            <TouchableOpacity onPress={handleCopy}>
-                                <Text style={styles.copyText}>SALIN</Text>
+                            <TouchableOpacity onPress={handleCopy} style={styles.copyBtn}>
+                                <Ionicons name="copy-outline" size={14} color="#FFF" />
+                                <Text style={styles.copyBtnText}>SALIN</Text>
                             </TouchableOpacity>
                         )}
                     </View>
                     <View style={styles.bankInfo}>
                         <Ionicons
-                            name={method.method_type === 'bank_transfer' ? 'business' : 'wallet'}
+                            name={isEwallet ? 'wallet' : 'business'}
                             size={20}
                             color={Colors.green5}
                         />
@@ -193,6 +237,58 @@ export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = (
                         </Text>
                     )}
                 </View>
+
+                {/* E-Wallet VA Code Info — from database */}
+                {isEwallet && (
+                    <View style={styles.vaInfoCard}>
+                        <View style={styles.vaInfoHeader}>
+                            <Ionicons name="information-circle" size={18} color={Colors.green4} />
+                            <Text style={styles.vaInfoTitle}>Kode VA per Bank</Text>
+                        </View>
+                        <Text style={styles.vaInfoDesc}>
+                            Kode depan (kode VA) {method.method_name} berbeda tergantung bank Anda. Format: [Kode Bank] + [Nomor HP]
+                        </Text>
+
+                        {vaLoading ? (
+                            <ActivityIndicator size="small" color={Colors.green3} style={{ marginVertical: 12 }} />
+                        ) : vaCodes.length > 0 ? (
+                            <View style={styles.vaCodeList}>
+                                {vaCodes.map(item => (
+                                    <View key={item.id} style={styles.vaCodeRow}>
+                                        <Text style={styles.vaCodeBank}>{item.bank_name}</Text>
+                                        <Text style={styles.vaCodeValue}>{item.va_code} + No. HP</Text>
+                                    </View>
+                                ))}
+                            </View>
+                        ) : (
+                            <Text style={{ fontSize: 12, color: Colors.textSecondary, textAlign: 'center', paddingVertical: 10 }}>
+                                Data kode VA belum tersedia
+                            </Text>
+                        )}
+
+                        {vaCodes.length > 0 && (() => {
+                            const exampleCode = `${vaCodes[0].va_code}${method.account_number || '08xxxxxxxxxx'}`;
+                            return (
+                                <View style={styles.vaExampleBox}>
+                                    <Text style={styles.vaExampleLabel}>Contoh ({vaCodes[0].bank_name}):</Text>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <Text style={styles.vaExampleValue}>{exampleCode}</Text>
+                                        <TouchableOpacity
+                                            onPress={async () => {
+                                                await Clipboard.setStringAsync(exampleCode);
+                                                showToast('Kode VA berhasil disalin');
+                                            }}
+                                            style={styles.copyBtn}
+                                        >
+                                            <Ionicons name="copy-outline" size={14} color="#FFF" />
+                                            <Text style={styles.copyBtnText}>SALIN</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            );
+                        })()}
+                    </View>
+                )}
 
                 <View style={styles.amountContainer}>
                     <Text style={styles.amountLabel}>Total Pembayaran</Text>
@@ -373,6 +469,103 @@ const styles = StyleSheet.create({
         color: Colors.green3,
         fontWeight: 'bold',
         fontSize: 13,
+    },
+    copyBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        backgroundColor: Colors.green3,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 8,
+    },
+    copyBtnText: {
+        color: '#FFF',
+        fontWeight: 'bold',
+        fontSize: 12,
+    },
+    // VA Info Card styles
+    vaInfoCard: {
+        backgroundColor: '#FFF',
+        borderRadius: 14,
+        padding: 14,
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: Colors.green2,
+    },
+    vaInfoHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        marginBottom: 8,
+    },
+    vaInfoTitle: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: Colors.green5,
+    },
+    vaInfoDesc: {
+        fontSize: 12,
+        color: Colors.textSecondary,
+        lineHeight: 17,
+        marginBottom: 10,
+    },
+    vaCodeList: {
+        backgroundColor: '#F9FBF7',
+        borderRadius: 10,
+        padding: 10,
+        marginBottom: 10,
+    },
+    vaCodeRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingVertical: 4,
+    },
+    vaCodeBank: {
+        fontSize: 12,
+        color: '#555',
+        fontWeight: '500',
+    },
+    vaCodeValue: {
+        fontSize: 12,
+        color: Colors.green5,
+        fontWeight: '600',
+        fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+    },
+    vaExampleBox: {
+        backgroundColor: '#F1F8E9',
+        borderRadius: 8,
+        padding: 10,
+    },
+    vaExampleLabel: {
+        fontSize: 11,
+        color: Colors.green4,
+        fontWeight: '500',
+        marginBottom: 3,
+    },
+    vaExampleValue: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: Colors.green5,
+        fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+        letterSpacing: 0.5,
+    },
+    downloadQrBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        backgroundColor: '#F1F8E9',
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRadius: 12,
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: Colors.green2,
+    },
+    downloadQrText: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: Colors.green5,
     },
     bankInfo: {
         flexDirection: 'row',

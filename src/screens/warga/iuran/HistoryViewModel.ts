@@ -1,92 +1,104 @@
-import { useState, useMemo } from 'react';
-import { PaymentHistoryItem } from './IuranViewModel'; // Reuse interface
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useAuth } from '../../../contexts/AuthContext';
+import { fetchMyPayments, PaymentRecord } from '../../../services/iuranService';
+
+interface HistoryItem {
+    id: string;
+    period: string;
+    periodRaw: string; // YYYY-MM-DD for filtering
+    amount: string;
+    amountNum: number;
+    status: 'Lunas' | 'Terlambat' | 'Pending';
+    date: string;
+    feeName: string;
+    methodName: string;
+}
 
 export const useHistoryViewModel = () => {
+    const { user } = useAuth();
+    const [allHistory, setAllHistory] = useState<HistoryItem[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-    const [selectedStatus, setSelectedStatus] = useState<'All' | 'Lunas' | 'Terlambat'>('All');
+    const [selectedStatus, setSelectedStatus] = useState<'All' | 'Lunas' | 'Terlambat' | 'Pending'>('All');
     const [isCalendarVisible, setCalendarVisible] = useState(false);
+    const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
-    // Mock Data - Expanded for testing filters
-    const allHistory: PaymentHistoryItem[] = [
-        {
-            id: '1', period: 'Januari 2026', amount: 'Rp 150.000', status: 'Lunas', date: '05 Jan 2026',
-            details: [{ label: 'Keamanan', value: 'Rp 100.000' }, { label: 'Sampah', value: 'Rp 50.000' }]
-        },
-        {
-            id: '2', period: 'Desember 2025', amount: 'Rp 150.000', status: 'Lunas', date: '02 Dec 2025',
-            details: [{ label: 'Keamanan', value: 'Rp 100.000' }, { label: 'Sampah', value: 'Rp 50.000' }]
-        },
-        {
-            id: '3', period: 'November 2025', amount: 'Rp 150.000', status: 'Terlambat', date: '10 Nov 2025',
-            details: [{ label: 'Keamanan', value: 'Rp 100.000' }, { label: 'Sampah', value: 'Rp 50.000' }, { label: 'Denda', value: 'Rp 15.000' }]
-        },
-        {
-            id: '4', period: 'Oktober 2025', amount: 'Rp 150.000', status: 'Lunas', date: '01 Oct 2025',
-            details: [{ label: 'Keamanan', value: 'Rp 100.000' }, { label: 'Sampah', value: 'Rp 50.000' }]
-        },
-        {
-            id: '5', period: 'September 2025', amount: 'Rp 150.000', status: 'Lunas', date: '05 Sep 2025',
-            details: [{ label: 'Keamanan', value: 'Rp 100.000' }, { label: 'Sampah', value: 'Rp 50.000' }]
-        },
-        {
-            id: '6', period: 'Agustus 2025', amount: 'Rp 150.000', status: 'Lunas', date: '02 Aug 2025',
-            details: [{ label: 'Keamanan', value: 'Rp 100.000' }, { label: 'Sampah', value: 'Rp 50.000' }]
-        },
-    ];
+    // Load real payment data
+    useEffect(() => {
+        loadHistory();
+    }, [user?.id]);
 
+    const loadHistory = useCallback(async () => {
+        if (!user?.id) return;
+        setIsLoading(true);
+        try {
+            const payments = await fetchMyPayments();
+            const items: HistoryItem[] = payments.map(p => {
+                const dateObj = new Date(p.period);
+                const periodStr = dateObj.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+                const statusMap: Record<string, 'Lunas' | 'Terlambat' | 'Pending'> = {
+                    paid: 'Lunas',
+                    overdue: 'Terlambat',
+                    pending: 'Pending',
+                    rejected: 'Terlambat',
+                };
+                return {
+                    id: p.id,
+                    period: periodStr,
+                    periodRaw: p.period,
+                    amount: `Rp ${p.amount.toLocaleString('id-ID')}`,
+                    amountNum: p.amount,
+                    status: statusMap[p.status] || 'Pending',
+                    date: p.paid_at
+                        ? new Date(p.paid_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
+                        : '-',
+                    feeName: '',
+                    methodName: p.payment_method || '-',
+                };
+            });
+            setAllHistory(items);
+        } catch (error) {
+            console.error('Failed to load history:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [user?.id]);
+
+    // Filter
     const filteredHistory = useMemo(() => {
         return allHistory.filter(item => {
-            // Filter by Search Query (Period)
             const matchesSearch = item.period.toLowerCase().includes(searchQuery.toLowerCase());
 
-            // Filter by Date (Match Month and Year)
-            const matchesDate = selectedDate ? (
-                // Assuming date string format like "05 Jan 2026" or similar
-                // We'll compare month index and full year
-                // Note: This relies on parsed dates or consistent string formatting.
-                // Let's assume the 'period' field (e.g. "Januari 2026") holds the source of truth for Month/Year
-
-                // Helper to map month names to index
-                (() => {
-                    const months = ["januari", "februari", "maret", "april", "mei", "juni", "juli", "agustus", "september", "oktober", "november", "desember"];
-                    const itemPeriodLower = item.period.toLowerCase();
-                    const selectedMonthName = months[selectedDate.getMonth()];
-                    const selectedYear = selectedDate.getFullYear().toString();
-
-                    return itemPeriodLower.includes(selectedMonthName) && itemPeriodLower.includes(selectedYear);
-                })()
-            ) : true;
+            const matchesDate = selectedDate ? (() => {
+                const months = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
+                const periodLower = item.period.toLowerCase();
+                const selMonthName = months[selectedDate.getMonth()];
+                const selYear = selectedDate.getFullYear().toString();
+                return periodLower.includes(selMonthName) && periodLower.includes(selYear);
+            })() : true;
 
             const matchesStatus = selectedStatus === 'All' || item.status === selectedStatus;
 
             return matchesSearch && matchesDate && matchesStatus;
         });
-    }, [searchQuery, selectedDate, selectedStatus, allHistory]); // Added allHistory dependency
+    }, [searchQuery, selectedDate, selectedStatus, allHistory]);
 
-    const statuses = ['All', 'Lunas', 'Terlambat'];
-
-    // State for expanded items (handled locally here since allHistory is static in this mock)
-    // In a real app, this might be part of the data fetching or a separate state map
-    const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+    const statuses = ['All', 'Lunas', 'Pending', 'Terlambat'];
 
     const toggleExpand = (id: string) => {
         setExpandedIds(prev => {
             const next = new Set(prev);
-            if (next.has(id)) {
-                next.delete(id);
-            } else {
-                next.add(id);
-            }
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
             return next;
         });
     };
 
     const isExpanded = (id: string) => expandedIds.has(id);
 
-    const handleDateSelect = () => {
-        setCalendarVisible(true);
-    };
+    const handleDateSelect = () => setCalendarVisible(true);
 
     const resetFilters = () => {
         setSearchQuery('');
@@ -95,25 +107,22 @@ export const useHistoryViewModel = () => {
     };
 
     const handleDownloadReceipt = (period: string) => {
-        // Mock download logic
-        alert(`Mengunduh kuitansi periode ${period}`);
+        // TODO: Implement real receipt download
     };
 
     return {
-        searchQuery,
-        setSearchQuery,
-        selectedDate,
-        setSelectedDate,
-        selectedStatus,
-        setSelectedStatus,
+        searchQuery, setSearchQuery,
+        selectedDate, setSelectedDate,
+        selectedStatus, setSelectedStatus,
         filteredHistory,
         statuses,
         handleDateSelect,
-        isCalendarVisible,
-        setCalendarVisible,
+        isCalendarVisible, setCalendarVisible,
         resetFilters,
         toggleExpand,
         isExpanded,
-        handleDownloadReceipt
+        handleDownloadReceipt,
+        isLoading,
+        refresh: loadHistory,
     };
 };

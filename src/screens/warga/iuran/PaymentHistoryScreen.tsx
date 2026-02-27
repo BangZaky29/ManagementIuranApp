@@ -38,7 +38,11 @@ export default function PaymentHistoryScreen() {
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
                     <Text style={styles.itemAmount}>{item.amount}</Text>
-                    <Text style={[styles.itemStatus, { color: item.status === 'Lunas' ? Colors.success : Colors.danger }]}>
+                    <Text style={[styles.itemStatus, {
+                        color: item.status === 'Lunas' ? Colors.success
+                            : item.status === 'Pending' ? Colors.warning
+                                : Colors.danger
+                    }]}>
                         {item.status}
                     </Text>
                 </View>
@@ -47,12 +51,10 @@ export default function PaymentHistoryScreen() {
             {/* Expanded Details */}
             {isExpanded(item.id) && (
                 <View style={styles.expandedContent}>
-                    {item.details.map((detail: any, index: number) => (
-                        <View key={index} style={styles.detailRow}>
-                            <Text style={styles.detailLabel}>{detail.label}</Text>
-                            <Text style={styles.detailValue}>{detail.value}</Text>
-                        </View>
-                    ))}
+                    <View style={styles.detailRow}>
+                        <Text style={styles.detailLabel}>Metode</Text>
+                        <Text style={styles.detailValue}>{item.methodName}</Text>
+                    </View>
 
                     {item.status === 'Lunas' && (
                         <TouchableOpacity
@@ -60,9 +62,7 @@ export default function PaymentHistoryScreen() {
                             onPress={() => handleDownloadReceipt(item.period)}
                         >
                             <Ionicons name="download-outline" size={18} color={Colors.green5} />
-                            <Text style={styles.downloadText}>
-                                Unduh Kuitansi
-                            </Text>
+                            <Text style={styles.downloadText}>Unduh Kuitansi</Text>
                         </TouchableOpacity>
                     )}
                 </View>
