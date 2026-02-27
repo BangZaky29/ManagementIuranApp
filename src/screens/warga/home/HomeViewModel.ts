@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../../contexts/AuthContext';
 import { fetchNews, NewsItem } from '../../../services/newsService';
-import { calculateBillSummary } from '../../../services/iuranService';
+import { fetchBillingPeriods } from '../../../services/iuranService';
 import { triggerPanicButton } from '../../../services/panicService';
 
 export interface QuickAction {
@@ -44,11 +44,11 @@ export const useHomeViewModel = () => {
 
             // 2. Fetch Bill Summary
             if (user?.id) {
-                const bill = await calculateBillSummary(user.id);
+                const bill = await fetchBillingPeriods(user.id);
                 setBillSummary({
-                    total: bill.allPaid ? 'Lunas' : `Rp ${bill.totalUnpaid.toLocaleString('id-ID')}`,
+                    total: bill.totalUnpaid === 0 ? 'Lunas' : `Rp ${bill.totalUnpaid.toLocaleString('id-ID')}`,
                     label: 'Iuran Bulanan',
-                    dueDate: bill.dueDate
+                    dueDate: '-'
                 });
             }
         } catch (error) {

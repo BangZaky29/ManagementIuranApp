@@ -8,6 +8,8 @@ export interface AdminFee {
     due_date_day: number;
     is_active: boolean;
     housing_complex_id: number;
+    active_from: string | null;
+    active_to: string | null;
     created_at: string;
 }
 
@@ -16,6 +18,8 @@ export interface CreateFeeData {
     amount: number;
     due_date_day: number;
     housing_complex_id: number;
+    active_from?: string | null;
+    active_to?: string | null;
 }
 
 /**
@@ -43,6 +47,8 @@ export const createFee = async (feeData: CreateFeeData): Promise<AdminFee> => {
             amount: feeData.amount,
             due_date_day: feeData.due_date_day,
             housing_complex_id: feeData.housing_complex_id,
+            active_from: feeData.active_from || null,
+            active_to: feeData.active_to || null,
             is_active: true,
         })
         .select()
@@ -57,7 +63,7 @@ export const createFee = async (feeData: CreateFeeData): Promise<AdminFee> => {
  */
 export const updateFee = async (
     id: number,
-    updates: Partial<Pick<AdminFee, 'name' | 'amount' | 'due_date_day' | 'is_active'>>
+    updates: Partial<Pick<AdminFee, 'name' | 'amount' | 'due_date_day' | 'is_active' | 'active_from' | 'active_to'>>
 ): Promise<AdminFee> => {
     const { data, error } = await supabase
         .from('fees')

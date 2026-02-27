@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../../contexts/AuthContext';
-import { fetchMyPayments, calculateBillSummary, BillSummary, BillItem, PaymentRecord } from '../../../services/iuranService';
+import { fetchMyPayments, fetchBillingPeriods, SmartBillSummary, BillingPeriod, PaymentRecord } from '../../../services/iuranService';
 import { generateAndShareReceipt } from '../../../services/receiptService';
 
 export interface PaymentHistoryItem {
@@ -20,10 +20,10 @@ export const useIuranViewModel = () => {
     const { user } = useAuth();
 
     const [currentMonth, setCurrentMonth] = useState('');
-    const [billSummary, setBillSummary] = useState<BillSummary | null>(null);
+    const [billSummary, setBillSummary] = useState<SmartBillSummary | null>(null);
     const [history, setHistory] = useState<PaymentHistoryItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [selectedFeeIds, setSelectedFeeIds] = useState<Set<number>>(new Set());
+    const [selectedPeriodIds, setSelectedPeriodIds] = useState<Set<string>>(new Set());
     const [isDownloadingReceiptId, setIsDownloadingReceiptId] = useState<string | null>(null);
 
     const [alertVisible, setAlertVisible] = useState(false);
@@ -43,16 +43,19 @@ export const useIuranViewModel = () => {
         setIsLoading(true);
         try {
             const [bill, rawPayments] = await Promise.all([
-                calculateBillSummary(user.id),
+                fetchBillingPeriods(user.id),
                 fetchMyPayments(),
             ]);
             setBillSummary(bill);
 
-            // Auto-select all unpaid (not pending, not paid) fees
-            const unpaidIds = new Set<number>(
-                bill.items.filter(i => i.status === 'unpaid').map(i => i.fee.id)
-            );
-            setSelectedFeeIds(unpaidIds);
+            // Auto-select all overdue and unpaid current month periods
+            const toSelect = new Set<string>();
+            bill.periods.forEach(p => {
+                if (p.isOverdue || (p.isCurrentMonth && (p.status === 'unpaid' || p.status === 'partial'))) {
+                    toSelect.add(p.id);
+                }
+            });
+            setSelectedPeriodIds(toSelect);
 
             // Format history
             const formatted: PaymentHistoryItem[] = rawPayments.slice(0, 5).map(p => {
@@ -78,45 +81,38 @@ export const useIuranViewModel = () => {
     }, [user?.id]);
 
     // Selection
-    const toggleFee = (feeId: number) => {
-        setSelectedFeeIds(prev => {
+    const togglePeriod = (periodId: string) => {
+        setSelectedPeriodIds(prev => {
             const next = new Set(prev);
-            if (next.has(feeId)) next.delete(feeId);
-            else next.add(feeId);
+            if (next.has(periodId)) next.delete(periodId);
+            else next.add(periodId);
             return next;
         });
     };
 
     const selectAllUnpaid = () => {
         if (!billSummary) return;
-        const ids = new Set<number>(
-            billSummary.items.filter(i => i.status === 'unpaid').map(i => i.fee.id)
-        );
-        setSelectedFeeIds(ids);
+        const ids = new Set<string>();
+        billSummary.periods.forEach(p => {
+            if (p.status === 'unpaid' || p.status === 'partial' || p.status === 'overdue') {
+                ids.add(p.id);
+            }
+        });
+        setSelectedPeriodIds(ids);
     };
 
-    const deselectAll = () => setSelectedFeeIds(new Set());
+    const deselectAll = () => setSelectedPeriodIds(new Set());
 
-    const selectedItems = billSummary?.items.filter(i => selectedFeeIds.has(i.fee.id) && i.status === 'unpaid') || [];
-    const selectedTotal = selectedItems.reduce((sum, i) => sum + i.amount, 0);
+    const selectedPeriods = billSummary?.periods.filter(p => selectedPeriodIds.has(p.id) && p.status !== 'paid') || [];
+    const selectedTotal = selectedPeriods.reduce((sum, p) => sum + p.totalAmount, 0);
 
     // Pay
     const handlePay = () => {
         if (!billSummary) return;
-        if (billSummary.allPaid) {
+        if (selectedPeriods.length === 0) {
             setAlertConfig({
-                title: 'Info',
-                message: 'Semua tagihan bulan ini sudah lunas.',
-                type: 'info',
-                buttons: [{ text: 'OK', onPress: hideAlert }],
-            });
-            setAlertVisible(true);
-            return;
-        }
-        if (selectedItems.length === 0) {
-            setAlertConfig({
-                title: 'Pilih Iuran',
-                message: 'Pilih minimal 1 iuran yang ingin dibayar.',
+                title: 'Pilih Bulan',
+                message: 'Pilih minimal 1 bulan tunggakan/tagihan yang ingin dibayar.',
                 type: 'warning',
                 buttons: [{ text: 'OK', onPress: hideAlert }],
             });
@@ -126,9 +122,7 @@ export const useIuranViewModel = () => {
         router.push({
             pathname: '/iuran/payment-detail',
             params: {
-                selectedFees: JSON.stringify(
-                    selectedItems.map(i => ({ feeId: i.fee.id, amount: i.amount, name: i.fee.name }))
-                ),
+                selectedPeriods: JSON.stringify(selectedPeriods),
                 totalAmount: selectedTotal.toString(),
             },
         });
@@ -152,10 +146,9 @@ export const useIuranViewModel = () => {
                 paidAt: item.date,
                 complexName: 'Manajemen Iuran Perumahan' // Can be dynamic if complex name is needed
             });
-            // Show success toast (or alert, let's just alert since it's already there)
             setAlertConfig({
                 title: 'Berhasil',
-                message: 'Kuitansi berhasil diunduh/dibagikan.',
+                message: 'Kuitansi berhasil diunduh.',
                 type: 'success',
                 buttons: [{ text: 'OK', onPress: hideAlert }],
             });
@@ -178,10 +171,10 @@ export const useIuranViewModel = () => {
         billSummary,
         history,
         isLoading,
-        selectedFeeIds,
+        selectedPeriodIds,
         selectedTotal,
-        selectedCount: selectedItems.length,
-        toggleFee,
+        selectedCount: selectedPeriods.length,
+        togglePeriod,
         selectAllUnpaid,
         deselectAll,
         handlePay,

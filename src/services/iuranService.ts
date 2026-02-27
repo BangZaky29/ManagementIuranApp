@@ -8,6 +8,8 @@ export interface Fee {
     due_date_day: number;
     is_active: boolean;
     housing_complex_id: number;
+    active_from?: string | null;
+    active_to?: string | null;
     created_at: string;
 }
 
@@ -34,15 +36,22 @@ export interface BillItem {
     amount: number;
 }
 
-export interface BillSummary {
+export interface BillingPeriod {
+    id: string; // format YYYY-MM
+    periodDate: string; // format YYYY-MM-01
+    monthName: string; // e.g. "Januari 2026"
+    status: 'paid' | 'pending' | 'unpaid' | 'overdue' | 'partial';
+    totalAmount: number;
     items: BillItem[];
-    total: number;
-    totalPaid: number;
-    totalPending: number;
+    isCurrentMonth: boolean;
+    isOverdue: boolean;
+}
+
+export interface SmartBillSummary {
+    periods: BillingPeriod[];
+    totalOverdue: number;
+    totalCurrent: number;
     totalUnpaid: number;
-    pendingCount: number;
-    dueDate: string;
-    allPaid: boolean;
 }
 
 export const fetchActiveFees = async (): Promise<Fee[]> => {
@@ -66,82 +75,175 @@ export const fetchMyPayments = async (): Promise<PaymentRecord[]> => {
 };
 
 /**
- * Calculate bill summary aggregating ALL active fees for the current month.
- * Now tracks paid, pending, AND unpaid statuses separately.
+ * Generate billing periods from user's join date up to next month.
  */
-export const calculateBillSummary = async (userId: string): Promise<BillSummary> => {
-    const currentDate = new Date();
-    const currentMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-01`;
+export const fetchBillingPeriods = async (userId: string): Promise<SmartBillSummary> => {
+    // 1. Fetch user to get created_at
+    const { data: profile } = await supabase.from('profiles').select('created_at').eq('id', userId).single();
+    
+    // Default to Jan 1st of current year if no valid created_at, or max 12 months ago to prevent massive queries
+    let startDate = new Date();
+    startDate.setMonth(startDate.getMonth() - 11); // max 1 year ago by default
+    startDate.setDate(1);
 
-    // Fetch all active fees
-    const fees = await fetchActiveFees();
-    if (fees.length === 0) {
-        return {
-            items: [],
-            total: 0,
-            totalPaid: 0,
-            totalPending: 0,
-            totalUnpaid: 0,
-            pendingCount: 0,
-            dueDate: '-',
-            allPaid: true,
-        };
+    if (profile?.created_at) {
+        const joinDate = new Date(profile.created_at);
+        joinDate.setDate(1);
+        if (joinDate > startDate) {
+            startDate = joinDate;
+        }
     }
 
-    // Fetch all payments for this user in the current month
+    const currentDate = new Date();
+    const currentMonthDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const nextMonthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+    
+    // Generate all months from startDate to nextMonthDate
+    const monthsToCheck: Date[] = [];
+    let d = new Date(startDate);
+    while (d <= nextMonthDate) {
+        monthsToCheck.push(new Date(d));
+        d.setMonth(d.getMonth() + 1);
+    }
+
+    // 2. Fetch all active fees
+    const fees = await fetchActiveFees();
+    if (fees.length === 0) {
+        return { periods: [], totalOverdue: 0, totalCurrent: 0, totalUnpaid: 0 };
+    }
+    const totalFeeAmount = fees.reduce((sum, f) => sum + f.amount, 0);
+
+    // 3. Fetch all payments for this user
     const { data: payments } = await supabase
         .from('payments')
         .select('*')
-        .eq('user_id', userId)
-        .eq('period', currentMonth);
+        .eq('user_id', userId);
 
-    const paymentMap = new Map<number, string>();
-    (payments || []).forEach(p => paymentMap.set(p.fee_id, p.status));
+    // 4. Build periods
+    const periods: BillingPeriod[] = [];
+    const localeMonths = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
-    // Build per-fee breakdown with proper status
-    const items: BillItem[] = fees.map(fee => {
-        const paymentStatus = paymentMap.get(fee.id);
-        let status: 'paid' | 'pending' | 'unpaid' = 'unpaid';
-        if (paymentStatus === 'paid') status = 'paid';
-        else if (paymentStatus === 'pending') status = 'pending';
+    monthsToCheck.forEach(monthDate => {
+        const periodStr = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}-01`;
+        const idStr = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}`;
+        const mName = `${localeMonths[monthDate.getMonth()]} ${monthDate.getFullYear()}`;
+        
+        const isCurrentMonth = monthDate.getTime() === currentMonthDate.getTime();
+        const isPastMonth = monthDate.getTime() < currentMonthDate.getTime();
 
-        return {
-            fee,
-            isPaid: status === 'paid',
-            status,
-            amount: fee.amount,
-        };
+        // Find payments for this exactly period
+        const periodPayments = (payments || []).filter(p => p.period === periodStr);
+        const paymentMap = new Map<number, typeof periodPayments[0]>();
+        periodPayments.forEach(p => paymentMap.set(p.fee_id, p));
+
+        // Build items
+        const items: BillItem[] = fees
+            .filter(fee => {
+                const targetY = monthDate.getFullYear();
+                const targetM = monthDate.getMonth();
+
+                // Check active periods
+                if (fee.active_from) {
+                    const fromDate = new Date(fee.active_from);
+                    const fromY = fromDate.getFullYear();
+                    const fromM = fromDate.getMonth();
+                    if (targetY < fromY || (targetY === fromY && targetM < fromM)) return false;
+                }
+                if (fee.active_to) {
+                    const toDate = new Date(fee.active_to);
+                    const toY = toDate.getFullYear();
+                    const toM = toDate.getMonth();
+                    if (targetY > toY || (targetY === toY && targetM > toM)) return false;
+                }
+                return true;
+            })
+            .map(fee => {
+                const p = paymentMap.get(fee.id);
+                let status: 'paid' | 'pending' | 'unpaid' = 'unpaid';
+                if (p?.status === 'paid') status = 'paid';
+            else if (p?.status === 'pending') status = 'pending';
+
+            return {
+                fee,
+                isPaid: status === 'paid',
+                status,
+                amount: fee.amount,
+            };
+        });
+
+        // If no fees are applicable for this month, skip creating a period
+        if (items.length === 0) return;
+
+        // Determine period status
+        const paidCount = items.filter(i => i.status === 'paid').length;
+        const pendingCount = items.filter(i => i.status === 'pending').length;
+        const unpaidCount = items.filter(i => i.status === 'unpaid').length;
+
+        let periodStatus: BillingPeriod['status'] = 'unpaid';
+        if (paidCount === items.length) periodStatus = 'paid';
+        else if (pendingCount > 0 && unpaidCount === 0) periodStatus = 'pending';
+        else if (paidCount > 0 || pendingCount > 0) periodStatus = 'partial';
+        
+        if (periodStatus === 'unpaid' || periodStatus === 'partial') {
+            if (isPastMonth) periodStatus = 'overdue';
+        }
+
+        periods.push({
+            id: idStr,
+            periodDate: periodStr,
+            monthName: mName,
+            status: periodStatus,
+            totalAmount: items.filter(i => i.status !== 'paid').reduce((s, i) => s + i.amount, 0),
+            items,
+            isCurrentMonth,
+            isOverdue: periodStatus === 'overdue'
+        });
     });
 
-    const totalPaid = items.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.amount, 0);
-    const totalPending = items.filter(i => i.status === 'pending').reduce((sum, i) => sum + i.amount, 0);
-    const totalUnpaid = items.filter(i => i.status === 'unpaid').reduce((sum, i) => sum + i.amount, 0);
-    const pendingCount = items.filter(i => i.status === 'pending').length;
-    const allPaid = items.every(i => i.status === 'paid');
+    // We can filter out NEXT month if the current month is unpaid to keep UI clean, 
+    // or we just show it. Let's just return all of them.
+    // Ensure chronological order
+    periods.sort((a, b) => new Date(a.periodDate).getTime() - new Date(b.periodDate).getTime());
 
-    // Use the earliest due date among unpaid fees
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
-    const monthName = months[currentDate.getMonth()];
+    let totalOverdue = 0;
+    let totalCurrent = 0;
+    let totalUnpaid = 0;
 
-    const unpaidItems = items.filter(i => i.status === 'unpaid');
-    const earliestDueDay = unpaidItems.length > 0
-        ? Math.min(...unpaidItems.map(i => i.fee.due_date_day))
-        : null;
+    periods.forEach(p => {
+        if (p.isOverdue) totalOverdue += p.totalAmount;
+        if (p.isCurrentMonth && (p.status === 'unpaid' || p.status === 'partial')) totalCurrent += p.totalAmount;
+        if (p.status === 'unpaid' || p.status === 'overdue' || p.status === 'partial') totalUnpaid += p.totalAmount;
+    });
 
-    const dueDate = allPaid
-        ? 'Lunas'
-        : earliestDueDay
-            ? `${earliestDueDay} ${monthName} ${currentDate.getFullYear()}`
-            : '-';
+    return { periods, totalOverdue, totalCurrent, totalUnpaid };
+};
 
-    return {
-        items,
-        total: items.reduce((sum, i) => sum + i.amount, 0),
-        totalPaid,
-        totalPending,
-        totalUnpaid,
-        pendingCount,
-        dueDate,
-        allPaid,
-    };
+/**
+ * Submit bulk payments for multiple periods and fees using a single proof.
+ */
+export const submitBulkPayments = async (userId: string, selectedPeriods: BillingPeriod[], totalAmount: number, proofUrl: string, paymentMethod: string) => {
+    const payload = [];
+    
+    for (const period of selectedPeriods) {
+        // Only pay for items that are unpaid
+        const unpaidItems = period.items.filter(i => i.status === 'unpaid');
+        for (const item of unpaidItems) {
+            payload.push({
+                user_id: userId,
+                fee_id: item.fee.id,
+                amount: item.amount,
+                period: period.periodDate,
+                status: 'pending',
+                payment_method: paymentMethod,
+                proof_url: proofUrl,
+            });
+        }
+    }
+
+    if (payload.length === 0) return;
+
+    const { error } = await supabase.from('payments').insert(payload);
+    if (error) {
+        throw new AppError(error.message, 'SUBMIT_BULK', 'Gagal memproses pembayaran batch.');
+    }
 };

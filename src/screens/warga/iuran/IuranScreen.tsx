@@ -21,10 +21,10 @@ export default function IuranScreen() {
         billSummary,
         history,
         isLoading,
-        selectedFeeIds,
+        selectedPeriodIds,
         selectedTotal,
         selectedCount,
-        toggleFee,
+        togglePeriod,
         selectAllUnpaid,
         deselectAll,
         handlePay,
@@ -38,9 +38,11 @@ export default function IuranScreen() {
     } = useIuranViewModel();
     const { colors } = useTheme();
 
-    const unpaidCount = billSummary?.items.filter(i => i.status === 'unpaid').length || 0;
-    const paidCount = billSummary?.items.filter(i => i.status === 'paid').length || 0;
-    const pendingCount = billSummary?.pendingCount || 0;
+    const unpaidCount = billSummary?.periods.filter(p => p.status === 'unpaid' || p.status === 'partial' || p.status === 'overdue').length || 0;
+    const paidCount = billSummary?.periods.filter(p => p.status === 'paid').length || 0;
+    const pendingCount = billSummary?.periods.filter(p => p.status === 'pending').length || 0;
+
+    const allPaid = billSummary?.periods.length && unpaidCount === 0 && pendingCount === 0;
 
     return (
         <SafeAreaView style={[s.container, { backgroundColor: colors.background }]}>
@@ -61,12 +63,12 @@ export default function IuranScreen() {
                     >
                         {/* Summary Card */}
                         <Animated.View entering={FadeInDown.delay(100).duration(400)} style={s.summaryCard}>
-                            <Text style={s.summaryMonth}>{currentMonth}</Text>
+                            <Text style={s.summaryMonth}>Status Keuangan Anda</Text>
                             <Text style={s.summaryTotal}>
-                                {billSummary?.allPaid ? '✅ Lunas' : formatCurrency(billSummary?.totalUnpaid || 0)}
+                                {allPaid ? '✅ Lunas' : formatCurrency(billSummary?.totalUnpaid || 0)}
                             </Text>
-                            {!billSummary?.allPaid && (
-                                <Text style={s.summaryLabel}>Total tagihan belum dibayar</Text>
+                            {!allPaid && (
+                                <Text style={s.summaryLabel}>Total tunggakan & tagihan aktif</Text>
                             )}
 
                             {/* Stats Row */}
@@ -85,19 +87,21 @@ export default function IuranScreen() {
                                 </View>
                             </View>
 
-                            {billSummary && !billSummary.allPaid && billSummary.dueDate !== '-' && (
+                            {billSummary && billSummary.totalOverdue > 0 && (
                                 <View style={s.dueDateRow}>
-                                    <Ionicons name="alarm-outline" size={14} color="#E65100" />
-                                    <Text style={s.dueDateText}>Jatuh tempo: {billSummary.dueDate}</Text>
+                                    <Ionicons name="warning" size={14} color="#FF5252" />
+                                    <Text style={[s.dueDateText, { color: '#FF5252' }]}>
+                                        Tunggakan: {formatCurrency(billSummary.totalOverdue)}
+                                    </Text>
                                 </View>
                             )}
                         </Animated.View>
 
-                        {/* Fee Items — Checklist */}
-                        {billSummary && billSummary.items.length > 0 && (
+                        {/* Fee Periods — Checklist */}
+                        {billSummary && billSummary.periods.length > 0 && (
                             <Animated.View entering={FadeInDown.delay(200).duration(400)}>
                                 <View style={s.sectionHeader}>
-                                    <Text style={s.sectionTitle}>Rincian Iuran</Text>
+                                    <Text style={s.sectionTitle}>Timeline Tagihan</Text>
                                     {unpaidCount > 0 && (
                                         <TouchableOpacity
                                             onPress={selectedCount === unpaidCount ? deselectAll : selectAllUnpaid}
@@ -109,31 +113,41 @@ export default function IuranScreen() {
                                     )}
                                 </View>
 
-                                {billSummary.items.map(item => {
-                                    const isUnpaid = item.status === 'unpaid';
-                                    const isSelected = selectedFeeIds.has(item.fee.id);
-                                    const statusColor = item.status === 'paid' ? '#4CAF50'
-                                        : item.status === 'pending' ? '#FF9800' : '#C62828';
-                                    const statusLabel = item.status === 'paid' ? 'Lunas'
-                                        : item.status === 'pending' ? 'Menunggu Konfirmasi' : 'Belum Dibayar';
-                                    const statusIcon = item.status === 'paid' ? 'checkmark-circle'
-                                        : item.status === 'pending' ? 'time' : 'close-circle';
+                                {billSummary.periods.map(period => {
+                                    const isPayable = period.status === 'unpaid' || period.status === 'partial' || period.status === 'overdue';
+                                    const isSelected = selectedPeriodIds.has(period.id);
+                                    
+                                    let statusColor = '#4CAF50';
+                                    let statusLabel = 'Lunas';
+                                    let statusIcon = 'checkmark-circle';
+                                    
+                                    if (period.status === 'overdue') {
+                                        statusColor = '#D32F2F'; statusLabel = 'Tunggakan'; statusIcon = 'alert-circle';
+                                    } else if (period.status === 'pending') {
+                                        statusColor = '#FF9800'; statusLabel = 'Menunggu Konfirmasi'; statusIcon = 'time';
+                                    } else if (period.status === 'unpaid') {
+                                        statusColor = period.isCurrentMonth ? '#F57C00' : '#888'; 
+                                        statusLabel = period.isCurrentMonth ? 'Bulan Ini' : 'Belum Dibayar'; 
+                                        statusIcon = 'ellipse-outline';
+                                    } else if (period.status === 'partial') {
+                                        statusColor = '#F57C00'; statusLabel = 'Dibayar Sebagian'; statusIcon = 'pie-chart';
+                                    }
 
                                     return (
                                         <TouchableOpacity
-                                            key={item.fee.id}
+                                            key={period.id}
                                             style={[
                                                 s.feeCard,
                                                 isSelected && s.feeCardSelected,
-                                                item.status === 'paid' && s.feeCardPaid,
+                                                period.status === 'paid' && s.feeCardPaid,
                                                 { backgroundColor: colors.backgroundCard },
                                             ]}
-                                            onPress={() => isUnpaid && toggleFee(item.fee.id)}
-                                            activeOpacity={isUnpaid ? 0.7 : 1}
-                                            disabled={!isUnpaid}
+                                            onPress={() => isPayable && togglePeriod(period.id)}
+                                            activeOpacity={isPayable ? 0.7 : 1}
+                                            disabled={!isPayable}
                                         >
                                             {/* Checkbox or status icon */}
-                                            {isUnpaid ? (
+                                            {isPayable ? (
                                                 <View style={[s.checkbox, isSelected && s.checkboxChecked]}>
                                                     {isSelected && <Ionicons name="checkmark" size={14} color="#FFF" />}
                                                 </View>
@@ -143,7 +157,7 @@ export default function IuranScreen() {
 
                                             {/* Fee info */}
                                             <View style={s.feeInfo}>
-                                                <Text style={s.feeName}>{item.fee.name}</Text>
+                                                <Text style={s.feeName}>{period.monthName}</Text>
                                                 <View style={s.feeMetaRow}>
                                                     <Ionicons name={statusIcon as any} size={12} color={statusColor} />
                                                     <Text style={[s.feeStatus, { color: statusColor }]}>{statusLabel}</Text>
@@ -151,8 +165,8 @@ export default function IuranScreen() {
                                             </View>
 
                                             {/* Amount */}
-                                            <Text style={[s.feeAmount, item.status === 'paid' && { color: '#999' }]}>
-                                                {formatCurrency(item.amount)}
+                                            <Text style={[s.feeAmount, period.status === 'paid' && { color: '#999' }]}>
+                                                {formatCurrency(period.totalAmount)}
                                             </Text>
                                         </TouchableOpacity>
                                     );
@@ -184,7 +198,7 @@ export default function IuranScreen() {
                         )}
 
                         {/* Empty state */}
-                        {billSummary && billSummary.items.length === 0 && (
+                        {billSummary && billSummary.periods.length === 0 && (
                             <View style={s.emptyBox}>
                                 <Ionicons name="receipt-outline" size={48} color="#CCC" />
                                 <Text style={s.emptyTitle}>Belum Ada Iuran</Text>

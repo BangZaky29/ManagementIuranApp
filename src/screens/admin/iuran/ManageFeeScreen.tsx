@@ -31,11 +31,13 @@ interface FormData {
     name: string;
     amount: string;
     due_date_day: string;
+    active_from: string;
+    active_to: string;
 }
 
 type TabKey = 'overview' | 'manage';
 
-const EMPTY_FORM: FormData = { name: '', amount: '', due_date_day: '10' };
+const EMPTY_FORM: FormData = { name: '', amount: '', due_date_day: '10', active_from: '', active_to: '' };
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
 
@@ -82,6 +84,10 @@ export default function ManageFeeScreen() {
     const [editingFee, setEditingFee] = useState<AdminFee | null>(null);
     const [form, setForm] = useState<FormData>(EMPTY_FORM);
     const [isSaving, setIsSaving] = useState(false);
+
+    // Date Picker
+    const [datePickerVisible, setDatePickerVisible] = useState<'from' | 'to' | null>(null);
+    const [pickerTempYear, setPickerTempYear] = useState(new Date().getFullYear());
 
     // Alert
     const [alertVisible, setAlertVisible] = useState(false);
@@ -156,7 +162,13 @@ export default function ManageFeeScreen() {
 
     const openEditForm = (fee: AdminFee) => {
         setEditingFee(fee);
-        setForm({ name: fee.name, amount: fee.amount.toString(), due_date_day: fee.due_date_day.toString() });
+        setForm({ 
+            name: fee.name, 
+            amount: fee.amount.toString(), 
+            due_date_day: fee.due_date_day.toString(),
+            active_from: fee.active_from || '',
+            active_to: fee.active_to || ''
+        });
         setFormVisible(true);
     };
 
@@ -168,10 +180,18 @@ export default function ManageFeeScreen() {
         }
         setIsSaving(true);
         try {
+            const dataToSave = {
+                name: form.name.trim(),
+                amount: Number(form.amount),
+                due_date_day: Number(form.due_date_day) || 10,
+                active_from: form.active_from ? form.active_from : null,
+                active_to: form.active_to ? form.active_to : null,
+            };
+
             if (editingFee) {
-                await updateFee(editingFee.id, { name: form.name.trim(), amount: Number(form.amount), due_date_day: Number(form.due_date_day) || 10 });
+                await updateFee(editingFee.id, dataToSave);
             } else {
-                await createFee({ name: form.name.trim(), amount: Number(form.amount), due_date_day: Number(form.due_date_day) || 10, housing_complex_id: profile?.housing_complex_id! });
+                await createFee({ ...dataToSave, housing_complex_id: profile?.housing_complex_id! });
             }
             setFormVisible(false);
             loadAllData();
@@ -264,6 +284,9 @@ export default function ManageFeeScreen() {
 
             {/* CRUD Modal */}
             {renderFormModal()}
+
+            {/* Date Picker Modal */}
+            {renderDatePickerModal()}
 
             <CustomAlertModal visible={alertVisible} title={alertConfig.title} message={alertConfig.message} type={alertConfig.type} buttons={alertConfig.buttons} onClose={() => setAlertVisible(false)} />
         </SafeAreaView>
@@ -414,6 +437,16 @@ export default function ManageFeeScreen() {
                     <Ionicons name="calendar-outline" size={13} color="#888" />
                     <Text style={s.feeDetailText}>Jatuh tempo tgl {fee.due_date_day}/bulan</Text>
                 </View>
+                {(fee.active_from || fee.active_to) && (
+                    <View style={[s.feeDetails, { marginTop: 4, paddingTop: 0, borderTopWidth: 0 }]}>
+                        <Ionicons name="time-outline" size={13} color="#1B5E20" />
+                        <Text style={[s.feeDetailText, { color: '#1B5E20' }]}>
+                            Aktif: {fee.active_from ? formatPeriodLabel(fee.active_from) : 'Awal'} 
+                            {' - '} 
+                            {fee.active_to ? formatPeriodLabel(fee.active_to) : 'Seterusnya'}
+                        </Text>
+                    </View>
+                )}
                 <View style={s.feeActions}>
                     <TouchableOpacity style={s.actionBtn} onPress={() => handleToggle(fee)}>
                         <Ionicons name={fee.is_active ? 'pause-circle-outline' : 'play-circle-outline'} size={18} color="#1B5E20" />
@@ -512,7 +545,7 @@ export default function ManageFeeScreen() {
                             <Text style={s.modalTitle}>{editingFee ? 'Edit Iuran' : 'Tambah Iuran Baru'}</Text>
                             <TouchableOpacity onPress={() => setFormVisible(false)}><Ionicons name="close" size={24} color="#1B5E20" /></TouchableOpacity>
                         </View>
-                        <ScrollView style={{ padding: 20 }}>
+                        <ScrollView style={{ padding: 20 }} contentContainerStyle={{ paddingBottom: 40 }}>
                             <Text style={s.formLabel}>Nama Iuran *</Text>
                             <TextInput style={s.input} value={form.name} onChangeText={t => setForm({ ...form, name: t })} placeholder="Iuran Bulanan, Sampah, Keamanan" placeholderTextColor="#999" />
                             <Text style={s.formLabel}>Jumlah (Rp) *</Text>
@@ -521,10 +554,94 @@ export default function ManageFeeScreen() {
                             <Text style={s.formLabel}>Jatuh Tempo (tanggal)</Text>
                             <TextInput style={s.input} value={form.due_date_day} onChangeText={t => { const n = t.replace(/[^0-9]/g, ''); if (Number(n) <= 31) setForm({ ...form, due_date_day: n }); }} placeholder="10" placeholderTextColor="#999" keyboardType="numeric" />
                             <Text style={s.helper}>Warga melihat jatuh tempo pada tanggal ini setiap bulan.</Text>
+                            
+                            <Text style={s.formLabel}>Mulai Berlaku (Bulan/Tahun) Opsional</Text>
+                            <TouchableOpacity 
+                                style={s.inputBtn} 
+                                onPress={() => { setPickerTempYear(form.active_from ? parseInt(form.active_from.split('-')[0]) : new Date().getFullYear()); setDatePickerVisible('from'); }}
+                            >
+                                <Text style={form.active_from ? s.inputText : s.inputPlaceholder}>
+                                    {form.active_from ? formatPeriodLabel(form.active_from) : 'Pilih... (Abaikan jika sejak awal)'}
+                                </Text>
+                                {form.active_from ? (
+                                    <TouchableOpacity onPress={() => setForm({ ...form, active_from: '' })} style={{ padding: 4 }}>
+                                        <Ionicons name="close-circle" size={18} color="#999" />
+                                    </TouchableOpacity>
+                                ) : (
+                                    <Ionicons name="calendar-outline" size={18} color="#999" />
+                                )}
+                            </TouchableOpacity>
+
+                            <Text style={s.formLabel}>Berakhir Pada (Bulan/Tahun) Opsional</Text>
+                            <TouchableOpacity 
+                                style={s.inputBtn} 
+                                onPress={() => { setPickerTempYear(form.active_to ? parseInt(form.active_to.split('-')[0]) : new Date().getFullYear()); setDatePickerVisible('to'); }}
+                            >
+                                <Text style={form.active_to ? s.inputText : s.inputPlaceholder}>
+                                    {form.active_to ? formatPeriodLabel(form.active_to) : 'Pilih... (Abaikan jika seterusnya)'}
+                                </Text>
+                                {form.active_to ? (
+                                    <TouchableOpacity onPress={() => setForm({ ...form, active_to: '' })} style={{ padding: 4 }}>
+                                        <Ionicons name="close-circle" size={18} color="#999" />
+                                    </TouchableOpacity>
+                                ) : (
+                                    <Ionicons name="calendar-outline" size={18} color="#999" />
+                                )}
+                            </TouchableOpacity>
                         </ScrollView>
                         <View style={s.modalFooter}>
                             <CustomButton title="Batal" onPress={() => setFormVisible(false)} variant="outline" style={{ flex: 1 }} />
                             <CustomButton title={editingFee ? 'Simpan' : 'Tambah'} onPress={handleSave} loading={isSaving} style={{ flex: 1, marginLeft: 10 }} />
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+        );
+    }
+
+    // ====== DATE PICKER MODAL ======
+
+    function renderDatePickerModal() {
+        const handleSelectMonth = (monthIdx: number) => {
+            const val = `${pickerTempYear}-${String(monthIdx + 1).padStart(2, '0')}-01`;
+            if (datePickerVisible === 'from') setForm({ ...form, active_from: val });
+            else if (datePickerVisible === 'to') setForm({ ...form, active_to: val });
+            setDatePickerVisible(null);
+        };
+
+        const currentSelected = datePickerVisible === 'from' ? form.active_from : datePickerVisible === 'to' ? form.active_to : '';
+        const currentM = currentSelected ? parseInt(currentSelected.split('-')[1]) - 1 : -1;
+        const currentY = currentSelected ? parseInt(currentSelected.split('-')[0]) : -1;
+
+        return (
+            <Modal visible={!!datePickerVisible} transparent animationType="fade">
+                <View style={[s.modalOverlay, { justifyContent: 'center', alignItems: 'center' }]}>
+                    <View style={s.datePickerContainer}>
+                        <View style={s.datePickerHeader}>
+                            <TouchableOpacity onPress={() => setPickerTempYear(y => y - 1)} style={{ padding: 10 }}>
+                                <Ionicons name="chevron-back" size={24} color="#1B5E20" />
+                            </TouchableOpacity>
+                            <Text style={s.datePickerYear}>{pickerTempYear}</Text>
+                            <TouchableOpacity onPress={() => setPickerTempYear(y => y + 1)} style={{ padding: 10 }}>
+                                <Ionicons name="chevron-forward" size={24} color="#1B5E20" />
+                            </TouchableOpacity>
+                        </View>
+                        <View style={s.datePickerGrid}>
+                            {MONTHS.map((m, idx) => {
+                                const isSelected = currentM === idx && currentY === pickerTempYear;
+                                return (
+                                    <TouchableOpacity 
+                                        key={m} 
+                                        style={[s.monthBox, isSelected && s.monthBoxSelected]} 
+                                        onPress={() => handleSelectMonth(idx)}
+                                    >
+                                        <Text style={[s.monthBoxText, isSelected && s.monthBoxTextSelected]}>{m}</Text>
+                                    </TouchableOpacity>
+                                );
+                            })}
+                        </View>
+                        <View style={{ padding: 16 }}>
+                            <CustomButton title="Batal" onPress={() => setDatePickerVisible(null)} variant="outline" />
                         </View>
                     </View>
                 </View>
@@ -638,6 +755,19 @@ const s = StyleSheet.create({
     modalFooter: { flexDirection: 'row', padding: 20, gap: 10 },
     formLabel: { fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8, marginTop: 16 },
     input: { backgroundColor: '#FFF', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 14, color: '#333', borderWidth: 1, borderColor: '#E0E0E0' },
+    inputBtn: { backgroundColor: '#FFF', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, borderWidth: 1, borderColor: '#E0E0E0', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    inputText: { fontSize: 14, color: '#333', flex: 1 },
+    inputPlaceholder: { fontSize: 14, color: '#999', flex: 1 },
     preview: { fontSize: 13, fontWeight: '600', color: '#1B5E20', marginTop: 6 },
     helper: { fontSize: 12, color: '#888', marginTop: 6, fontStyle: 'italic' },
+
+    // Date Picker specific
+    datePickerContainer: { width: '85%', backgroundColor: '#FFF', borderRadius: 20, overflow: 'hidden', ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8 }, android: { elevation: 6 } }) },
+    datePickerHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 10, backgroundColor: '#F1F8E9' },
+    datePickerYear: { fontSize: 20, fontWeight: 'bold', color: '#1B5E20' },
+    datePickerGrid: { flexDirection: 'row', flexWrap: 'wrap', padding: 16, justifyContent: 'space-between' },
+    monthBox: { width: '30%', paddingVertical: 14, alignItems: 'center', borderRadius: 12, marginBottom: 12, backgroundColor: '#F5F5F5' },
+    monthBoxSelected: { backgroundColor: '#1B5E20' },
+    monthBoxText: { fontSize: 15, fontWeight: '600', color: '#555' },
+    monthBoxTextSelected: { color: '#FFF' },
 });

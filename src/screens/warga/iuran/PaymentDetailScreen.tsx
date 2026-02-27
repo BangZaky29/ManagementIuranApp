@@ -9,21 +9,16 @@ import { CustomButton } from '../../../components/CustomButton';
 import { PaymentInstructionModal } from '../../../components/PaymentInstructionModal';
 import { useAuth } from '../../../contexts/AuthContext';
 import { fetchPaymentMethodsForUser, PaymentMethod } from '../../../services/paymentMethodService';
-
-interface SelectedFee {
-    feeId: number;
-    amount: number;
-    name: string;
-}
+import { BillingPeriod } from '../../../services/iuranService';
 
 export default function PaymentDetailScreen() {
     const router = useRouter();
     const { user } = useAuth();
 
-    const params = useLocalSearchParams<{ selectedFees: string; totalAmount: string }>();
+    const params = useLocalSearchParams<{ selectedPeriods: string; totalAmount: string }>();
 
-    const selectedFees: SelectedFee[] = params.selectedFees ? JSON.parse(params.selectedFees) : [];
-    const totalAmount = Number(params.totalAmount) || selectedFees.reduce((s, f) => s + f.amount, 0);
+    const selectedPeriods: BillingPeriod[] = params.selectedPeriods ? JSON.parse(params.selectedPeriods) : [];
+    const totalAmount = Number(params.totalAmount) || selectedPeriods.reduce((s, p) => s + p.totalAmount, 0);
 
     const [selectedMethodId, setSelectedMethodId] = useState<number | null>(null);
     const [isModalVisible, setModalVisible] = useState(false);
@@ -58,8 +53,7 @@ export default function PaymentDetailScreen() {
                 totalAmount: totalAmount.toString(),
                 methodName: method.method_name,
                 methodType: method.method_type,
-                period: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`,
-                unpaidFees: JSON.stringify(selectedFees),
+                selectedPeriods: JSON.stringify(selectedPeriods),
             },
         });
     };
@@ -107,13 +101,13 @@ export default function PaymentDetailScreen() {
                     <Text style={st.period}>{currentMonth}</Text>
 
                     <View style={st.card}>
-                        {selectedFees.map((fee, idx) => (
+                        {selectedPeriods.map((period, idx) => (
                             <View key={idx} style={st.row}>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                                     <Ionicons name="receipt-outline" size={14} color="#888" />
-                                    <Text style={st.rowLabel}>{fee.name}</Text>
+                                    <Text style={st.rowLabel}>{period.monthName}</Text>
                                 </View>
-                                <Text style={st.rowValue}>{formatCurrency(fee.amount)}</Text>
+                                <Text style={st.rowValue}>{formatCurrency(period.totalAmount)}</Text>
                             </View>
                         ))}
                         <View style={st.divider} />
@@ -177,10 +171,10 @@ export default function PaymentDetailScreen() {
             </ScrollView>
 
             {/* Footer */}
-            {selectedFees.length > 0 && paymentMethods.length > 0 && (
+            {selectedPeriods.length > 0 && paymentMethods.length > 0 && (
                 <View style={st.footer}>
                     <View style={{ flex: 1 }}>
-                        <Text style={st.footerLabel}>{selectedFees.length} iuran</Text>
+                        <Text style={st.footerLabel}>{selectedPeriods.length} bulan</Text>
                         <Text style={st.footerAmount}>{formatCurrency(totalAmount)}</Text>
                     </View>
                     <CustomButton

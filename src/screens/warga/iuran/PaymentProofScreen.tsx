@@ -12,31 +12,10 @@ import { useAuth } from '../../../contexts/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
 import {
     uploadPaymentProof,
-    submitBulkPaymentWithProof,
 } from '../../../services/paymentConfirmationService';
+import { submitBulkPayments, BillingPeriod } from '../../../services/iuranService';
 
-// Helper to convert "Maret 2026" to "2026-03-01" for Supabase Date column
-const formatPeriodToDate = (periodStr: string): string => {
-    if (!periodStr) return new Date().toISOString().split('T')[0];
 
-    // Check if it's already YYYY-MM-DD
-    if (/^\d{4}-\d{2}-\d{2}$/.test(periodStr)) return periodStr;
-
-    const parts = periodStr.split(' ');
-    if (parts.length !== 2) return new Date().toISOString().split('T')[0];
-
-    const months: Record<string, string> = {
-        'januari': '01', 'februari': '02', 'maret': '03', 'april': '04',
-        'mei': '05', 'juni': '06', 'juli': '07', 'agustus': '08',
-        'september': '09', 'oktober': '10', 'november': '11', 'desember': '12'
-    };
-
-    const monthStr = parts[0].toLowerCase();
-    const monthNum = months[monthStr] || '01';
-    const yearStr = parts[1];
-
-    return `${yearStr}-${monthNum}-01`;
-};
 
 export default function PaymentProofScreen() {
     const router = useRouter();
@@ -45,8 +24,7 @@ export default function PaymentProofScreen() {
         totalAmount: string;
         methodName: string;
         methodType: string;
-        period: string;
-        unpaidFees: string;
+        selectedPeriods: string;
     }>();
 
     const [proofImage, setProofImage] = useState<string | null>(null);
@@ -59,8 +37,9 @@ export default function PaymentProofScreen() {
         buttons: [] as any[],
     });
 
-    const unpaidFees: { feeId: number; amount: number; name: string }[] =
-        params.unpaidFees ? JSON.parse(params.unpaidFees) : [];
+    const selectedPeriods: BillingPeriod[] = params.selectedPeriods 
+        ? JSON.parse(params.selectedPeriods) 
+        : [];
     const totalAmount = Number(params.totalAmount) || 0;
 
     const formatCurrency = (value: number) => {
@@ -123,16 +102,13 @@ export default function PaymentProofScreen() {
             const paymentId = `${Date.now()}`;
             const proofUrl = await uploadPaymentProof(user.id, paymentId, proofImage);
 
-            // 2. Create payment records for all unpaid fees
-            const dbPeriodDate = formatPeriodToDate(params.period || '');
-
-            await submitBulkPaymentWithProof({
-                userId: user.id,
-                fees: unpaidFees.map(f => ({ feeId: f.feeId, amount: f.amount })),
-                period: dbPeriodDate,
-                paymentMethodName: params.methodName || '',
-                proofUrl,
-            });
+            await submitBulkPayments(
+                user.id, 
+                selectedPeriods, 
+                totalAmount, 
+                proofUrl, 
+                params.methodName || ''
+            );
 
             // 3. Show success
             setAlertConfig({
@@ -189,10 +165,10 @@ export default function PaymentProofScreen() {
                         <Text style={styles.summaryMethodValue}>{params.methodName || '-'}</Text>
                     </View>
                     <View style={styles.divider} />
-                    {unpaidFees.map((fee, idx) => (
+                    {selectedPeriods.map((period, idx) => (
                         <View key={idx} style={styles.summaryRow}>
-                            <Text style={styles.feeLabel}>{fee.name}</Text>
-                            <Text style={styles.feeValue}>{formatCurrency(fee.amount)}</Text>
+                            <Text style={styles.feeLabel}>{period.monthName}</Text>
+                            <Text style={styles.feeValue}>{formatCurrency(period.totalAmount)}</Text>
                         </View>
                     ))}
                 </View>
