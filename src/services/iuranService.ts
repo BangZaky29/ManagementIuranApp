@@ -15,10 +15,14 @@ export interface PaymentRecord {
     fee_id: number;
     amount: number;
     period: string; // YYYY-MM-DD
-    status: 'pending' | 'paid' | 'overdue';
+    status: 'pending' | 'paid' | 'overdue' | 'rejected';
     payment_method: string | null;
     paid_at: string | null;
     proof_url: string | null;
+    confirmed_by: string | null;
+    confirmed_at: string | null;
+    admin_notes: string | null;
+    rejection_reason: string | null;
 }
 
 export interface BillItem {

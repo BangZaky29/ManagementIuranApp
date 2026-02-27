@@ -1,5 +1,5 @@
 ---
-description: intruksi 
+description: intruksi
 ---
 
 Secara singkat: **Ya, ini bisa menjadi masalah serius**, terutama saat kamu mencoba melakukan *build* aplikasi (APK/IPA) atau saat menjalankan fitur-fitur Expo yang spesifik.
@@ -62,3 +62,24 @@ npx expo start -c
 **Saran saya:** Segera perbaiki sekarang sebelum kamu lanjut koding lebih jauh. Menunda perbaikan `expo doctor` biasanya akan berakhir dengan error misterius saat kamu ingin merilis aplikasi nanti.
 
 Apakah kamu mengalami kendala atau error lain saat menjalankan `npx expo install --check` tadi?
+
+
+
+A. Untuk URL:
+Jalankan: eas secret:create
+
+Nama: EXPO_PUBLIC_SUPABASE_URL
+
+Type: string
+
+Value (Hanya ini yang di-paste): https://ezffgnsyakuforkycqrx.supabase.co
+
+B. Untuk Anon Key:
+Jalankan: eas secret:create
+
+Nama: EXPO_PUBLIC_SUPABASE_ANON_KEY
+
+Type: string
+
+Value (Hanya ini yang di-paste): eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6ZmZnbnN5YWt1Zm9ya3ljcXJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1MzkyNjQsImV4cCI6MjA4NjExNTI2NH0.puncA8mrI-a1bXNw5K0ZfvRic_OLIGYEMUBRtAiVVeA
+

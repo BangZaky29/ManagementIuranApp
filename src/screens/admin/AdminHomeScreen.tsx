@@ -94,6 +94,23 @@ export default function AdminHomeScreen() {
                         </View>
                         <Text style={styles.quickLabel}>Log Darurat</Text>
                     </TouchableOpacity>
+                    <TouchableOpacity style={styles.quickAction} onPress={vm.navigateToPaymentMethods}>
+                        <View style={[styles.quickIcon, { backgroundColor: '#E3F2FD' }]}>
+                            <Ionicons name="card" size={24} color="#1565C0" />
+                        </View>
+                        <Text style={styles.quickLabel}>Metode Bayar</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.quickAction} onPress={vm.navigateToPaymentConfirmation}>
+                        <View style={[styles.quickIcon, { backgroundColor: '#FFF8E1' }]}>
+                            <Ionicons name="receipt" size={24} color="#F57F17" />
+                            {vm.pendingPayments > 0 && (
+                                <View style={styles.badge}>
+                                    <Text style={styles.badgeText}>{vm.pendingPayments}</Text>
+                                </View>
+                            )}
+                        </View>
+                        <Text style={styles.quickLabel}>Konfirmasi</Text>
+                    </TouchableOpacity>
                 </View>
 
                 {/* Ringkasan Aktivitas — Recent Panic Logs */}

@@ -1,29 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Modal, StyleSheet, TouchableOpacity, Image, ScrollView, Platform, Animated, PanResponder, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, Modal, StyleSheet, TouchableOpacity, Image, ScrollView, Platform, Animated, PanResponder, ActivityIndicator } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomButton } from './CustomButton';
-import { useRouter } from 'expo-router';
 import { ToastNotification } from './ToastNotification';
 import * as Clipboard from 'expo-clipboard';
-import { documentDirectory, downloadAsync } from 'expo-file-system/legacy';
-import * as MediaLibrary from 'expo-media-library';
+import { PaymentMethod } from '../services/paymentMethodService';
 
 interface PaymentInstructionModalProps {
     visible: boolean;
     onClose: () => void;
-    method: 'transfer' | 'ewallet' | 'qris';
+    method: PaymentMethod;
     amount: string;
     dueDate: string;
+    onUploadProof: () => void;
 }
 
-export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = ({ visible, onClose, method, amount, dueDate }) => {
-    const router = useRouter();
-    const [secondsLeft, setSecondsLeft] = useState(24 * 60 * 60); // 24 hours in seconds
+export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = ({
+    visible, onClose, method, amount, dueDate, onUploadProof
+}) => {
+    const [secondsLeft, setSecondsLeft] = useState(24 * 60 * 60);
     const panY = React.useRef(new Animated.Value(0)).current;
     const [toast, setToast] = useState({ visible: false, message: '' });
-    const [isChecking, setIsChecking] = useState(false);
-    const [isDownloading, setIsDownloading] = useState(false);
 
     const showToast = (message: string) => {
         setToast({ visible: true, message });
@@ -34,73 +32,21 @@ export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = (
     };
 
     const handleCopy = async () => {
-        await Clipboard.setStringAsync('8801 2345 6789 000');
-        showToast('Kode sudah disalin ke clipboard');
-    };
-
-    const handleDownloadQR = async () => {
-        if (Platform.OS === 'web') {
-            showToast('Download QR feature is limited on web');
-            return;
+        if (method.account_number) {
+            await Clipboard.setStringAsync(method.account_number);
+            showToast('Nomor berhasil disalin');
         }
-
-        setIsDownloading(true);
-
-        try {
-            // Simulate delay for better UX
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
-            const { status } = await MediaLibrary.requestPermissionsAsync(true);
-            if (status !== 'granted') {
-                showToast('Izinkan akses galeri untuk menyimpan QR');
-                return;
-            }
-
-            if (!documentDirectory) {
-                showToast('Gagal mengakses penyimpanan');
-                return;
-            }
-
-            const fileUri = documentDirectory + 'qr-payment.png';
-            const { uri } = await downloadAsync(
-                'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=WargaPintarPayment',
-                fileUri
-            );
-
-            await MediaLibrary.saveToLibraryAsync(uri);
-            showToast('QR Code berhasil disimpan ke Galeri');
-        } catch (error) {
-            console.error(error);
-            showToast('Gagal menyimpan QR Code');
-        } finally {
-            setIsDownloading(false);
-        }
-    };
-
-    const handleCheckStatus = () => {
-        setIsChecking(true);
-        // Simulate API call
-        setTimeout(() => {
-            setIsChecking(false);
-            const isSuccess = Math.random() > 0.3; // 70% chance success mock
-            if (isSuccess) {
-                showToast('Pembayaran Dikonfirmasi Lunas');
-                // Automatically close and go to success screen if needed, or just refresh
-            } else {
-                showToast('Pembayaran Belum Diterima. Coba lagi nanti.');
-            }
-        }, 2000);
     };
 
     useEffect(() => {
         if (!visible) return;
+        setSecondsLeft(24 * 60 * 60);
         const timer = setInterval(() => {
             setSecondsLeft(prev => (prev > 0 ? prev - 1 : 0));
         }, 1000);
         return () => clearInterval(timer);
     }, [visible]);
 
-    // Reset panY when modal opens
     useEffect(() => {
         if (visible) panY.setValue(0);
     }, [visible]);
@@ -110,11 +56,6 @@ export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = (
         const m = Math.floor((seconds % 3600) / 60);
         const s = seconds % 60;
         return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-    };
-
-    const handleDone = () => {
-        onClose();
-        router.replace('/(tabs)/iuran');
     };
 
     const resetPosition = () => {
@@ -153,35 +94,59 @@ export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = (
         })
     ).current;
 
+    const getInstructions = () => {
+        if (method.method_type === 'qris') {
+            return [
+                '1. Buka aplikasi pembayaran / e-wallet',
+                '2. Pilih menu Scan / Bayar',
+                '3. Scan QR code di atas',
+                '4. Periksa detail dan konfirmasi pembayaran',
+                '5. Screenshot bukti pembayaran',
+            ];
+        }
+        if (method.method_type === 'ewallet') {
+            return [
+                `1. Buka aplikasi ${method.method_name}`,
+                '2. Pilih menu Transfer / Bayar',
+                `3. Masukkan nomor: ${method.account_number || '-'}`,
+                `4. Masukkan jumlah: ${amount}`,
+                '5. Periksa detail dan konfirmasi pembayaran',
+                '6. Screenshot bukti pembayaran',
+            ];
+        }
+        return [
+            '1. Buka aplikasi Mobile Banking / Internet Banking',
+            '2. Pilih menu Transfer',
+            `3. Pilih bank tujuan: ${method.method_name}`,
+            `4. Masukkan nomor rekening: ${method.account_number || '-'}`,
+            `5. Masukkan jumlah: ${amount}`,
+            '6. Periksa detail dan konfirmasi pembayaran',
+            '7. Screenshot bukti pembayaran',
+        ];
+    };
+
     const renderContent = () => {
-        if (method === 'qris') {
+        if (method.method_type === 'qris') {
             return (
                 <View style={styles.centerContent}>
                     <Text style={styles.instructionTitle}>Scan QRIS</Text>
                     <Text style={styles.instructionSubtitle}>Scan kode di bawah ini untuk membayar</Text>
 
                     <View style={styles.qrContainer}>
-                        <Image
-                            source={{ uri: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=WargaPintarPayment' }}
-                            style={styles.qrImage}
-                        />
-                        <TouchableOpacity
-                            style={[
-                                styles.downloadQrButton,
-                                isDownloading && { backgroundColor: '#E0E0E0', borderColor: '#BDBDBD' }
-                            ]}
-                            onPress={handleDownloadQR}
-                            disabled={isDownloading}
-                        >
-                            {isDownloading ? (
-                                <ActivityIndicator size="small" color={Colors.green5} />
-                            ) : (
-                                <>
-                                    <Ionicons name="download-outline" size={18} color={Colors.green5} />
-                                    <Text style={styles.downloadQrText}>Download QR</Text>
-                                </>
-                            )}
-                        </TouchableOpacity>
+                        {method.qris_image_url ? (
+                            <Image
+                                source={{ uri: method.qris_image_url }}
+                                style={styles.qrImage}
+                                resizeMode="contain"
+                            />
+                        ) : (
+                            <View style={[styles.qrImage, { justifyContent: 'center', alignItems: 'center', backgroundColor: '#F5F5F5' }]}>
+                                <Ionicons name="qr-code-outline" size={80} color={Colors.textSecondary} />
+                                <Text style={{ color: Colors.textSecondary, marginTop: 8, fontSize: 12 }}>
+                                    QRIS belum tersedia
+                                </Text>
+                            </View>
+                        )}
                     </View>
 
                     <View style={styles.amountContainer}>
@@ -194,6 +159,7 @@ export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = (
             );
         }
 
+        // Bank Transfer or E-Wallet
         return (
             <View>
                 <View style={styles.timerContainer}>
@@ -202,17 +168,30 @@ export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = (
                 </View>
 
                 <View style={styles.vaContainer}>
-                    <Text style={styles.vaLabel}>Nomor Virtual Account</Text>
+                    <Text style={styles.vaLabel}>
+                        {method.method_type === 'bank_transfer' ? 'Nomor Rekening' : 'Nomor Tujuan'}
+                    </Text>
                     <View style={styles.vaRow}>
-                        <Text style={styles.vaNumber}>8801 2345 6789 000</Text>
-                        <TouchableOpacity onPress={handleCopy}>
-                            <Text style={styles.copyText}>SALIN</Text>
-                        </TouchableOpacity>
+                        <Text style={styles.vaNumber}>{method.account_number || '-'}</Text>
+                        {method.account_number && (
+                            <TouchableOpacity onPress={handleCopy}>
+                                <Text style={styles.copyText}>SALIN</Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                     <View style={styles.bankInfo}>
-                        <Ionicons name={method === 'transfer' ? 'business' : 'wallet'} size={20} color={Colors.green5} />
-                        <Text style={styles.bankName}>{method === 'transfer' ? 'Bank Mandiri' : 'GoPay'}</Text>
+                        <Ionicons
+                            name={method.method_type === 'bank_transfer' ? 'business' : 'wallet'}
+                            size={20}
+                            color={Colors.green5}
+                        />
+                        <Text style={styles.bankName}>{method.method_name}</Text>
                     </View>
+                    {method.account_holder && (
+                        <Text style={{ fontSize: 13, color: Colors.textSecondary, marginTop: 8 }}>
+                            a/n {method.account_holder}
+                        </Text>
+                    )}
                 </View>
 
                 <View style={styles.amountContainer}>
@@ -239,28 +218,36 @@ export const PaymentInstructionModal: React.FC<PaymentInstructionModalProps> = (
                     <ScrollView contentContainerStyle={styles.scrollContent}>
                         {renderContent()}
 
+                        {/* Description from admin */}
+                        {method.description && (
+                            <View style={styles.descriptionBox}>
+                                <Ionicons name="information-circle-outline" size={18} color={Colors.green4} />
+                                <Text style={styles.descriptionText}>{method.description}</Text>
+                            </View>
+                        )}
+
                         <View style={styles.instructionList}>
                             <Text style={styles.instructionHeader}>Cara Pembayaran</Text>
-                            <Text style={styles.stepText}>1. Buka aplikasi {method === 'qris' ? 'pembayaran / e-wallet' : (method === 'transfer' ? 'Mobile Banking' : 'E-Wallet')}</Text>
-                            <Text style={styles.stepText}>2. Pilih menu {method === 'qris' ? 'Scan / Bayar' : 'Transfer / Bayar'}</Text>
-                            <Text style={styles.stepText}>3. {method === 'qris' ? 'Scan QR code di atas' : 'Masukkan nomor Virtual Account'}</Text>
-                            <Text style={styles.stepText}>4. Periksa detail dan konfirmasi pembayaran</Text>
+                            {getInstructions().map((step, idx) => (
+                                <Text key={idx} style={styles.stepText}>{step}</Text>
+                            ))}
                         </View>
                     </ScrollView>
 
                     <View style={styles.footer}>
                         <View style={{ flexDirection: 'row', gap: 10 }}>
                             <CustomButton
-                                title="Cek Status"
-                                onPress={handleCheckStatus}
+                                title="Batal"
+                                onPress={onClose}
                                 style={{ flex: 1, backgroundColor: Colors.white, borderWidth: 1, borderColor: Colors.green5 }}
                                 textStyle={{ color: Colors.green5 }}
-                                loading={isChecking}
                             />
                             <CustomButton
-                                title="Sudah Bayar"
-                                onPress={handleDone}
+                                title="Upload Bukti"
+                                onPress={onUploadProof}
                                 style={{ flex: 1 }}
+                                icon={<Ionicons name="camera-outline" size={18} color={Colors.white} />}
+                                iconPosition="left"
                             />
                         </View>
                     </View>
@@ -331,28 +318,11 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 3,
+        alignItems: 'center',
     },
     qrImage: {
         width: 200,
         height: 200,
-    },
-    downloadQrButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: 16,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        backgroundColor: '#F1F8E9',
-        borderRadius: 20,
-        borderWidth: 1,
-        borderColor: Colors.green2,
-    },
-    downloadQrText: {
-        marginLeft: 8,
-        color: Colors.green5,
-        fontWeight: 'bold',
-        fontSize: 14,
     },
     expiryText: {
         color: Colors.danger,
@@ -360,8 +330,6 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         marginTop: 10,
     },
-
-    // Timer & VA Styles
     timerContainer: {
         alignItems: 'center',
         marginBottom: 24,
@@ -419,8 +387,6 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: Colors.green5,
     },
-
-    // Amount Styles
     amountContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -441,8 +407,21 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: Colors.green5,
     },
-
-    // Instruction List
+    descriptionBox: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        backgroundColor: '#F1F8E9',
+        padding: 14,
+        borderRadius: 12,
+        marginBottom: 16,
+        gap: 10,
+    },
+    descriptionText: {
+        flex: 1,
+        fontSize: 13,
+        color: Colors.green4,
+        lineHeight: 18,
+    },
     instructionList: {
         marginTop: 10,
     },
@@ -458,7 +437,6 @@ const styles = StyleSheet.create({
         marginBottom: 8,
         lineHeight: 20,
     },
-
     footer: {
         position: 'absolute',
         bottom: 0,

@@ -4,6 +4,7 @@ import { Linking } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchPanicLogs, resolvePanicLog, countActivePanics, PanicLog } from '../../services/panicService';
 import { countActiveVisitors } from '../../services/guestService';
+import { countPendingPayments } from '../../services/paymentConfirmationService';
 import { getDashboardStats } from '../../services/adminService';
 
 export function useAdminHomeViewModel() {
@@ -14,6 +15,7 @@ export function useAdminHomeViewModel() {
     const [stats, setStats] = useState({ warga: 0, security: 0, activeUsers: 0 });
     const [activePanics, setActivePanics] = useState(0);
     const [activeGuests, setActiveGuests] = useState(0);
+    const [pendingPayments, setPendingPayments] = useState(0);
     const [recentPanics, setRecentPanics] = useState<PanicLog[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -26,16 +28,18 @@ export function useAdminHomeViewModel() {
 
     const loadData = useCallback(async () => {
         try {
-            const [statsData, panicCount, guestCount, panicLogs] = await Promise.all([
+            const [statsData, panicCount, guestCount, panicLogs, paymentCount] = await Promise.all([
                 getDashboardStats(),
                 countActivePanics(),
                 countActiveVisitors(),
                 fetchPanicLogs(0, 5, false), // Latest 5 active panics
+                countPendingPayments(),
             ]);
             setStats(statsData);
             setActivePanics(panicCount);
             setActiveGuests(guestCount);
             setRecentPanics(panicLogs);
+            setPendingPayments(paymentCount);
         } catch (error) {
             console.error('Failed to load dashboard:', error);
         } finally {
@@ -57,6 +61,8 @@ export function useAdminHomeViewModel() {
 
     const navigateToManageResidents = () => router.push('/admin/users');
     const navigateToPanicLogs = () => router.push('/admin/panic-logs' as any);
+    const navigateToPaymentMethods = () => router.push('/admin/payment-methods' as any);
+    const navigateToPaymentConfirmation = () => router.push('/admin/payment-confirmation' as any);
 
     const openPanicLocation = (log: PanicLog) => {
         if (log.location && log.location.startsWith('http')) {
@@ -96,7 +102,9 @@ export function useAdminHomeViewModel() {
 
     return {
         user, stats, activePanics, activeGuests, recentPanics, isLoading,
+        pendingPayments,
         handleLogout, navigateToManageResidents, navigateToPanicLogs,
+        navigateToPaymentMethods, navigateToPaymentConfirmation,
         openPanicLocation, handleResolvePanic, formatTime,
         alertVisible, alertConfig, hideAlert, refresh: loadData,
     };

@@ -50,21 +50,54 @@ CREATE TABLE public.panic_logs (
   CONSTRAINT panic_logs_pkey PRIMARY KEY (id),
   CONSTRAINT panic_logs_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
 );
+CREATE TABLE public.payment_confirmations (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  payment_id uuid NOT NULL,
+  admin_id uuid NOT NULL,
+  action text NOT NULL CHECK (action = ANY (ARRAY['approved'::text, 'rejected'::text])),
+  notes text,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT payment_confirmations_pkey PRIMARY KEY (id),
+  CONSTRAINT payment_confirmations_payment_id_fkey FOREIGN KEY (payment_id) REFERENCES public.payments(id),
+  CONSTRAINT payment_confirmations_admin_id_fkey FOREIGN KEY (admin_id) REFERENCES public.profiles(id)
+);
+CREATE TABLE public.payment_methods (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  housing_complex_id bigint NOT NULL,
+  method_type text NOT NULL CHECK (method_type = ANY (ARRAY['bank_transfer'::text, 'ewallet'::text, 'qris'::text])),
+  method_name text NOT NULL,
+  account_number text,
+  account_holder text,
+  description text,
+  qris_image_url text,
+  is_active boolean DEFAULT true,
+  created_by uuid NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT payment_methods_pkey PRIMARY KEY (id),
+  CONSTRAINT payment_methods_housing_complex_id_fkey FOREIGN KEY (housing_complex_id) REFERENCES public.housing_complexes(id),
+  CONSTRAINT payment_methods_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.profiles(id)
+);
 CREATE TABLE public.payments (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
   fee_id bigint,
   amount numeric NOT NULL,
   period date NOT NULL,
-  status text DEFAULT 'pending'::text,
+  status text DEFAULT 'pending'::text CHECK (status = ANY (ARRAY['pending'::text, 'paid'::text, 'rejected'::text, 'overdue'::text])),
   payment_method text,
   paid_at timestamp with time zone,
   proof_url text,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
+  confirmed_by uuid,
+  confirmed_at timestamp with time zone,
+  admin_notes text,
+  rejection_reason text,
   CONSTRAINT payments_pkey PRIMARY KEY (id),
   CONSTRAINT payments_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id),
-  CONSTRAINT payments_fee_id_fkey FOREIGN KEY (fee_id) REFERENCES public.fees(id)
+  CONSTRAINT payments_fee_id_fkey FOREIGN KEY (fee_id) REFERENCES public.fees(id),
+  CONSTRAINT payments_confirmed_by_fkey FOREIGN KEY (confirmed_by) REFERENCES public.profiles(id)
 );
 CREATE TABLE public.profiles (
   id uuid NOT NULL,
