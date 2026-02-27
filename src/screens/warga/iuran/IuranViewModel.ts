@@ -1,15 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../../contexts/AuthContext';
-import { fetchMyPayments, fetchActiveFees, calculateBillSummary, PaymentRecord } from '../../../services/iuranService';
+import { fetchMyPayments, calculateBillSummary, BillSummary, BillItem, PaymentRecord } from '../../../services/iuranService';
 
 export interface PaymentHistoryItem {
     id: string;
-    period: string; // "Januari 2026"
+    period: string;
     amount: string;
     status: 'Lunas' | 'Terlambat' | 'Pending';
     date: string;
-    details: { label: string; value: string }[];
+    feeName: string;
+    methodName: string;
     isExpanded?: boolean;
 }
 
@@ -17,82 +18,118 @@ export const useIuranViewModel = () => {
     const router = useRouter();
     const { user } = useAuth();
 
-    // State
     const [currentMonth, setCurrentMonth] = useState('');
-    const [amountDue, setAmountDue] = useState('Rp 0');
-    const [isPaid, setIsPaid] = useState(false);
-
-    // Mapped history for UI
+    const [billSummary, setBillSummary] = useState<BillSummary | null>(null);
     const [history, setHistory] = useState<PaymentHistoryItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [selectedFeeIds, setSelectedFeeIds] = useState<Set<number>>(new Set());
 
-    // Initial Load
+    const [alertVisible, setAlertVisible] = useState(false);
+    const [alertConfig, setAlertConfig] = useState({
+        title: '', message: '', type: 'info' as any, buttons: [] as any[],
+    });
+    const hideAlert = () => setAlertVisible(false);
+
     useEffect(() => {
         const date = new Date();
         setCurrentMonth(date.toLocaleString('id-ID', { month: 'long', year: 'numeric' }));
         loadData();
     }, [user?.id]);
 
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         if (!user?.id) return;
         setIsLoading(true);
-
         try {
-            // 1. Get Bill Summary for current month
-            const bill = await calculateBillSummary(user.id);
-            setAmountDue(bill.allPaid ? 'Lunas' : `Rp ${bill.totalUnpaid.toLocaleString('id-ID')}`);
-            setIsPaid(bill.allPaid);
+            const [bill, rawPayments] = await Promise.all([
+                calculateBillSummary(user.id),
+                fetchMyPayments(),
+            ]);
+            setBillSummary(bill);
 
-            // 2. Get Payment History
-            const rawPayments = await fetchMyPayments();
-            const formattedHistory: PaymentHistoryItem[] = rawPayments.map(p => {
+            // Auto-select all unpaid (not pending, not paid) fees
+            const unpaidIds = new Set<number>(
+                bill.items.filter(i => i.status === 'unpaid').map(i => i.fee.id)
+            );
+            setSelectedFeeIds(unpaidIds);
+
+            // Format history
+            const formatted: PaymentHistoryItem[] = rawPayments.slice(0, 5).map(p => {
                 const dateObj = new Date(p.period);
                 const periodStr = dateObj.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
-
                 return {
                     id: p.id,
                     period: periodStr,
                     amount: `Rp ${p.amount.toLocaleString('id-ID')}`,
                     status: p.status === 'paid' ? 'Lunas' : (p.status === 'overdue' ? 'Terlambat' : 'Pending'),
                     date: p.paid_at ? new Date(p.paid_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-',
-                    details: [
-                        { label: 'Metode', value: p.payment_method || '-' },
-                        { label: 'Iuran', value: `Rp ${p.amount.toLocaleString('id-ID')}` }
-                    ],
-                    isExpanded: false
+                    feeName: '',
+                    methodName: p.payment_method || '-',
+                    isExpanded: false,
                 };
             });
-            setHistory(formattedHistory);
+            setHistory(formatted);
         } catch (error) {
             console.error('Failed to load iuran data:', error);
         } finally {
             setIsLoading(false);
         }
+    }, [user?.id]);
+
+    // Selection
+    const toggleFee = (feeId: number) => {
+        setSelectedFeeIds(prev => {
+            const next = new Set(prev);
+            if (next.has(feeId)) next.delete(feeId);
+            else next.add(feeId);
+            return next;
+        });
     };
 
-    const [alertVisible, setAlertVisible] = useState(false);
-    const [alertConfig, setAlertConfig] = useState({
-        title: '',
-        message: '',
-        type: 'info' as 'success' | 'info' | 'warning' | 'error',
-        buttons: [] as any[]
-    });
+    const selectAllUnpaid = () => {
+        if (!billSummary) return;
+        const ids = new Set<number>(
+            billSummary.items.filter(i => i.status === 'unpaid').map(i => i.fee.id)
+        );
+        setSelectedFeeIds(ids);
+    };
 
-    const hideAlert = () => setAlertVisible(false);
+    const deselectAll = () => setSelectedFeeIds(new Set());
 
+    const selectedItems = billSummary?.items.filter(i => selectedFeeIds.has(i.fee.id) && i.status === 'unpaid') || [];
+    const selectedTotal = selectedItems.reduce((sum, i) => sum + i.amount, 0);
+
+    // Pay
     const handlePay = () => {
-        // For now, mock payment flow or navigate to detail
-        if (isPaid) {
+        if (!billSummary) return;
+        if (billSummary.allPaid) {
             setAlertConfig({
                 title: 'Info',
-                message: 'Tagihan bulan ini sudah lunas.',
+                message: 'Semua tagihan bulan ini sudah lunas.',
                 type: 'info',
-                buttons: [{ text: 'OK', onPress: hideAlert }]
+                buttons: [{ text: 'OK', onPress: hideAlert }],
             });
             setAlertVisible(true);
             return;
         }
-        router.push('/iuran/payment-detail');
+        if (selectedItems.length === 0) {
+            setAlertConfig({
+                title: 'Pilih Iuran',
+                message: 'Pilih minimal 1 iuran yang ingin dibayar.',
+                type: 'warning',
+                buttons: [{ text: 'OK', onPress: hideAlert }],
+            });
+            setAlertVisible(true);
+            return;
+        }
+        router.push({
+            pathname: '/iuran/payment-detail',
+            params: {
+                selectedFees: JSON.stringify(
+                    selectedItems.map(i => ({ feeId: i.fee.id, amount: i.amount, name: i.fee.name }))
+                ),
+                totalAmount: selectedTotal.toString(),
+            },
+        });
     };
 
     const toggleExpand = (id: string) => {
@@ -101,28 +138,22 @@ export const useIuranViewModel = () => {
         ));
     };
 
-    const handleDownloadReceipt = (period: string) => {
-        setAlertConfig({
-            title: 'Simpan Bukti',
-            message: `Mengunduh kuitansi untuk periode ${period}...`,
-            type: 'info',
-            buttons: [{ text: 'OK', onPress: hideAlert }]
-        });
-        setAlertVisible(true);
-    };
-
     return {
         currentMonth,
-        amountDue,
-        isPaid,
+        billSummary,
         history,
+        isLoading,
+        selectedFeeIds,
+        selectedTotal,
+        selectedCount: selectedItems.length,
+        toggleFee,
+        selectAllUnpaid,
+        deselectAll,
         handlePay,
         toggleExpand,
-        handleDownloadReceipt,
         alertVisible,
         alertConfig,
         hideAlert,
-        isLoading,
-        refresh: loadData
+        refresh: loadData,
     };
 };

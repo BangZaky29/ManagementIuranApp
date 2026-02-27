@@ -105,27 +105,41 @@ export const deletePaymentMethod = async (id: number): Promise<void> => {
     if (error) throw new AppError(error.message, 'DELETE_METHOD', 'Gagal menghapus metode pembayaran.');
 };
 
+import { readAsStringAsync } from 'expo-file-system/legacy';
+import { decode } from 'base64-arraybuffer';
+
 /**
  * Upload QRIS image to payment-proofs bucket and return public URL.
+ * Uses base64 encoding (same pattern as newsService) — blob won't work in React Native.
  */
 export const uploadQrisImage = async (
     adminId: string,
     imageUri: string,
     fileName: string
 ): Promise<string> => {
-    const response = await fetch(imageUri);
-    const blob = await response.blob();
+    try {
+        const fileExt = imageUri.split('.').pop()?.toLowerCase() || 'jpg';
+        const filePath = `qris/${adminId}/${fileName}`;
 
-    const filePath = `qris/${adminId}/${fileName}`;
-    const { error } = await supabase.storage
-        .from('payment-proofs')
-        .upload(filePath, blob, { upsert: true, contentType: 'image/jpeg' });
+        const base64 = await readAsStringAsync(imageUri, { encoding: 'base64' });
 
-    if (error) throw new AppError(error.message, 'UPLOAD_QRIS', 'Gagal mengupload gambar QRIS.');
+        const { error } = await supabase.storage
+            .from('payment-proofs')
+            .upload(filePath, decode(base64), {
+                contentType: `image/${fileExt === 'png' ? 'png' : 'jpeg'}`,
+                upsert: true,
+            });
 
-    const { data: urlData } = supabase.storage
-        .from('payment-proofs')
-        .getPublicUrl(filePath);
+        if (error) throw new AppError(error.message, 'UPLOAD_QRIS', 'Gagal mengupload gambar QRIS.');
 
-    return urlData.publicUrl;
+        const { data: urlData } = supabase.storage
+            .from('payment-proofs')
+            .getPublicUrl(filePath);
+
+        return urlData.publicUrl;
+    } catch (error: any) {
+        if (error instanceof AppError) throw error;
+        console.error('QRIS upload error:', error);
+        throw new AppError(error.message || 'Unknown error', 'UPLOAD_QRIS', 'Gagal mengupload gambar QRIS.');
+    }
 };

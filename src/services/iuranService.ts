@@ -30,6 +30,7 @@ export interface PaymentRecord {
 export interface BillItem {
     fee: Fee;
     isPaid: boolean;
+    status: 'paid' | 'pending' | 'unpaid';
     amount: number;
 }
 
@@ -37,7 +38,9 @@ export interface BillSummary {
     items: BillItem[];
     total: number;
     totalPaid: number;
+    totalPending: number;
     totalUnpaid: number;
+    pendingCount: number;
     dueDate: string;
     allPaid: boolean;
 }
@@ -64,7 +67,7 @@ export const fetchMyPayments = async (): Promise<PaymentRecord[]> => {
 
 /**
  * Calculate bill summary aggregating ALL active fees for the current month.
- * Returns per-fee breakdown + totals.
+ * Now tracks paid, pending, AND unpaid statuses separately.
  */
 export const calculateBillSummary = async (userId: string): Promise<BillSummary> => {
     const currentDate = new Date();
@@ -77,7 +80,9 @@ export const calculateBillSummary = async (userId: string): Promise<BillSummary>
             items: [],
             total: 0,
             totalPaid: 0,
+            totalPending: 0,
             totalUnpaid: 0,
+            pendingCount: 0,
             dueDate: '-',
             allPaid: true,
         };
@@ -90,40 +95,52 @@ export const calculateBillSummary = async (userId: string): Promise<BillSummary>
         .eq('user_id', userId)
         .eq('period', currentMonth);
 
-    const paidFeeIds = new Set(
-        (payments || [])
-            .filter(p => p.status === 'paid')
-            .map(p => p.fee_id)
-    );
+    const paymentMap = new Map<number, string>();
+    (payments || []).forEach(p => paymentMap.set(p.fee_id, p.status));
 
-    // Build per-fee breakdown
-    const items: BillItem[] = fees.map(fee => ({
-        fee,
-        isPaid: paidFeeIds.has(fee.id),
-        amount: fee.amount,
-    }));
+    // Build per-fee breakdown with proper status
+    const items: BillItem[] = fees.map(fee => {
+        const paymentStatus = paymentMap.get(fee.id);
+        let status: 'paid' | 'pending' | 'unpaid' = 'unpaid';
+        if (paymentStatus === 'paid') status = 'paid';
+        else if (paymentStatus === 'pending') status = 'pending';
 
-    const totalPaid = items.filter(i => i.isPaid).reduce((sum, i) => sum + i.amount, 0);
-    const totalUnpaid = items.filter(i => !i.isPaid).reduce((sum, i) => sum + i.amount, 0);
-    const allPaid = items.every(i => i.isPaid);
+        return {
+            fee,
+            isPaid: status === 'paid',
+            status,
+            amount: fee.amount,
+        };
+    });
+
+    const totalPaid = items.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.amount, 0);
+    const totalPending = items.filter(i => i.status === 'pending').reduce((sum, i) => sum + i.amount, 0);
+    const totalUnpaid = items.filter(i => i.status === 'unpaid').reduce((sum, i) => sum + i.amount, 0);
+    const pendingCount = items.filter(i => i.status === 'pending').length;
+    const allPaid = items.every(i => i.status === 'paid');
 
     // Use the earliest due date among unpaid fees
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
     const monthName = months[currentDate.getMonth()];
 
-    const earliestDueDay = allPaid
-        ? null
-        : Math.min(...items.filter(i => !i.isPaid).map(i => i.fee.due_date_day));
+    const unpaidItems = items.filter(i => i.status === 'unpaid');
+    const earliestDueDay = unpaidItems.length > 0
+        ? Math.min(...unpaidItems.map(i => i.fee.due_date_day))
+        : null;
 
     const dueDate = allPaid
         ? 'Lunas'
-        : `${earliestDueDay} ${monthName} ${currentDate.getFullYear()}`;
+        : earliestDueDay
+            ? `${earliestDueDay} ${monthName} ${currentDate.getFullYear()}`
+            : '-';
 
     return {
         items,
         total: items.reduce((sum, i) => sum + i.amount, 0),
         totalPaid,
+        totalPending,
         totalUnpaid,
+        pendingCount,
         dueDate,
         allPaid,
     };
