@@ -35,139 +35,153 @@ export default function PaymentHistoryScreen() {
         refresh
     } = useHistoryViewModel();
 
-    const renderItem = ({ item: group }: { item: any }) => (
-        <View style={s.periodCard}>
-            <TouchableOpacity
-                style={s.periodHeader}
-                onPress={() => toggleExpand(group.id)}
-                activeOpacity={0.7}
-            >
-                <View style={{ flex: 1 }}>
-                    <Text style={s.periodMonth}>{group.periodName}</Text>
-                    <Text style={[s.periodStatus, { color: '#4CAF50' }]}>Terbayar {group.items.length} iuran</Text>
-                </View>
-                <View style={{ alignItems: 'flex-end', marginRight: 12 }}>
-                    <Text style={s.periodAmount}>{formatCurrency(group.totalAmount)}</Text>
-                </View>
-                <Ionicons
-                    name={group.isExpanded ? "chevron-up" : "chevron-down"}
-                    size={20}
-                    color="#666"
-                />
-            </TouchableOpacity>
+    const renderItem = ({ item: group }: { item: any }) => {
+        const rejectedHistoryCount = group.items.filter((i: any) => i.status === 'Ditolak').length;
+        const nonRejectedHistoryCount = group.items.length - rejectedHistoryCount;
 
-            {group.isExpanded && (
-                <View style={s.expandedBox}>
-                    <View style={s.itemsContainer}>
-                        {group.items.map((item: any, idx: number) => (
-                            <View key={item.id}>
-                                <View style={s.historyItemRow}>
-                                    <Ionicons
-                                        name={item.status === 'Lunas' ? "checkmark-circle" : item.status === 'Ditolak' ? "close-circle" : "time"}
-                                        size={20}
-                                        color={item.status === 'Lunas' ? "#4CAF50" : item.status === 'Ditolak' ? "#F44336" : "#FF9800"}
-                                        style={{ marginRight: 10 }}
-                                    />
-                                    <View style={{ flex: 1 }}>
-                                        <Text style={s.itemName}>{item.feeName}</Text>
-                                        <Text style={s.historyItemSub}>
-                                            {item.status === 'Lunas' ? `${item.date} • ${item.methodName}` : item.status === 'Ditolak' ? 'Pembayaran Ditolak Admin' : 'Menunggu konfirmasi'}
-                                        </Text>
-
-                                        {item.status === 'Ditolak' && item.rejectionReason && (
-                                            <View>
-                                                <Text style={{ fontSize: 11, color: '#D32F2F', marginTop: 4, fontStyle: 'italic' }}>
-                                                    "{item.rejectionReason}"
-                                                </Text>
-                                                <TouchableOpacity
-                                                    style={{ alignSelf: 'flex-start', backgroundColor: '#F44336', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6, marginTop: 6 }}
-                                                    onPress={() => {
-                                                        const mockedPeriod = {
-                                                            id: group.id,
-                                                            periodDate: group.periodName, // usually YYYY-MM-01, but UI doesn't strictly need it to be exact for single repay
-                                                            monthName: group.periodName,
-                                                            status: 'rejected',
-                                                            totalAmount: item.amount,
-                                                            unpaidAmount: item.amount,
-                                                            isCurrentMonth: false,
-                                                            isOverdue: false,
-                                                            items: [{
-                                                                fee: { id: item.feeId, name: item.feeName, amount: item.amount },
-                                                                isPaid: false,
-                                                                status: 'rejected',
-                                                                amount: item.amount
-                                                            }]
-                                                        };
-
-                                                        router.push({
-                                                            pathname: '/iuran/payment-detail',
-                                                            params: {
-                                                                selectedPeriods: JSON.stringify([mockedPeriod]),
-                                                                totalAmount: item.amount.toString(),
-                                                                isRepayment: 'true',
-                                                                paymentIdToUpdate: item.rawPaymentId
-                                                            }
-                                                        });
-                                                    }}
-                                                >
-                                                    <Text style={{ fontSize: 10, color: '#FFF', fontWeight: 'bold' }}>Bayar Ulang</Text>
-                                                </TouchableOpacity>
-                                            </View>
-                                        )}
-                                    </View>
-                                    <View style={{ alignItems: 'flex-end' }}>
-                                        <Text style={[s.itemAmountText, item.status !== 'Lunas' && { color: item.status === 'Ditolak' ? '#F44336' : '#FF9800' }]}>{item.amountFormatted}</Text>
-
-                                        {item.status === 'Lunas' && (
-                                            <TouchableOpacity
-                                                onPress={() => handleDownloadReceipt(item, group.periodName)}
-                                                disabled={isDownloadingId === item.id}
-                                                style={{ marginTop: 4 }}
-                                            >
-                                                {isDownloadingId === item.id ? (
-                                                    <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#E8F5E9', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, gap: 4 }}>
-                                                        <ActivityIndicator size="small" color="#1B5E20" />
-                                                    </View>
-                                                ) : (
-                                                    <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#E8F5E9', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, gap: 4 }}>
-                                                        <Ionicons name="download-outline" size={14} color="#1B5E20" />
-                                                        <Text style={{ color: '#1B5E20', fontSize: 11, fontWeight: 'bold' }}>Kuitansi</Text>
-                                                    </View>
-                                                )}
-                                            </TouchableOpacity>
-                                        )}
-                                    </View>
-                                </View>
-                                {idx < group.items.length - 1 && <View style={s.divider} />}
-                            </View>
-                        ))}
-
-                        {/* Download Period Button */}
-                        {group.items.some((i: any) => i.status === 'Lunas') && (
-                            <TouchableOpacity
-                                style={{
-                                    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-                                    backgroundColor: '#E8F5E9', paddingVertical: 10, borderRadius: 12, marginTop: 12, borderWidth: 1, borderColor: '#C8E6C9'
-                                }}
-                                onPress={() => handleDownloadPeriodReceipt(group)}
-                                disabled={isDownloadingId === group.id}
-                            >
-                                {isDownloadingId === group.id ? (
-                                    <ActivityIndicator size="small" color="#1B5E20" />
-                                ) : (
-                                    <>
-                                        <Ionicons name="download-outline" size={16} color="#1B5E20" style={{ marginRight: 6 }} />
-                                        <Text style={{ color: '#1B5E20', fontSize: 13, fontWeight: 'bold' }}>Unduh Kuitansi Bulan Ini</Text>
-                                    </>
-                                )}
-                            </TouchableOpacity>
-                        )}
-
+        return (
+            <View style={s.periodCard}>
+                <TouchableOpacity
+                    style={s.periodHeader}
+                    onPress={() => toggleExpand(group.id)}
+                    activeOpacity={0.7}
+                >
+                    <View style={{ flex: 1 }}>
+                        <Text style={s.periodMonth}>{group.periodName}</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginTop: 2 }}>
+                            {nonRejectedHistoryCount > 0 && (
+                                <Text style={[s.periodStatus, { color: '#4CAF50', marginTop: 0 }]}>Terbayar {nonRejectedHistoryCount} iuran</Text>
+                            )}
+                            {rejectedHistoryCount > 0 && (
+                                <Text style={[s.periodStatus, { color: '#D32F2F', marginTop: 0, fontWeight: '500' }]}>
+                                    {nonRejectedHistoryCount > 0 ? '• ' : ''}Pembayaran ditolak {rejectedHistoryCount}
+                                </Text>
+                            )}
+                        </View>
                     </View>
-                </View>
-            )}
-        </View>
-    );
+                    <View style={{ alignItems: 'flex-end', marginRight: 12 }}>
+                        <Text style={s.periodAmount}>{formatCurrency(group.totalAmount)}</Text>
+                    </View>
+                    <Ionicons
+                        name={group.isExpanded ? "chevron-up" : "chevron-down"}
+                        size={20}
+                        color="#666"
+                    />
+                </TouchableOpacity>
+
+                {group.isExpanded && (
+                    <View style={s.expandedBox}>
+                        <View style={s.itemsContainer}>
+                            {group.items.map((item: any, idx: number) => (
+                                <View key={item.id}>
+                                    <View style={s.historyItemRow}>
+                                        <Ionicons
+                                            name={item.status === 'Lunas' ? "checkmark-circle" : item.status === 'Ditolak' ? "close-circle" : "time"}
+                                            size={20}
+                                            color={item.status === 'Lunas' ? "#4CAF50" : item.status === 'Ditolak' ? "#F44336" : "#FF9800"}
+                                            style={{ marginRight: 10 }}
+                                        />
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={s.itemName}>{item.feeName}</Text>
+                                            <Text style={s.historyItemSub}>
+                                                {item.status === 'Lunas' ? `${item.date} • ${item.methodName}` : item.status === 'Ditolak' ? 'Pembayaran Ditolak Admin' : 'Menunggu konfirmasi'}
+                                            </Text>
+
+                                            {item.status === 'Ditolak' && item.rejectionReason && (
+                                                <View>
+                                                    <Text style={{ fontSize: 11, color: '#D32F2F', marginTop: 4, fontStyle: 'italic' }}>
+                                                        "{item.rejectionReason}"
+                                                    </Text>
+                                                    <TouchableOpacity
+                                                        style={{ alignSelf: 'flex-start', backgroundColor: '#F44336', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6, marginTop: 6 }}
+                                                        onPress={() => {
+                                                            const mockedPeriod = {
+                                                                id: group.id,
+                                                                periodDate: group.periodName, // usually YYYY-MM-01, but UI doesn't strictly need it to be exact for single repay
+                                                                monthName: group.periodName,
+                                                                status: 'rejected',
+                                                                totalAmount: item.amount,
+                                                                unpaidAmount: item.amount,
+                                                                isCurrentMonth: false,
+                                                                isOverdue: false,
+                                                                items: [{
+                                                                    fee: { id: item.feeId, name: item.feeName, amount: item.amount },
+                                                                    isPaid: false,
+                                                                    status: 'rejected',
+                                                                    amount: item.amount
+                                                                }]
+                                                            };
+
+                                                            router.push({
+                                                                pathname: '/iuran/payment-detail',
+                                                                params: {
+                                                                    selectedPeriods: JSON.stringify([mockedPeriod]),
+                                                                    totalAmount: item.amount.toString(),
+                                                                    isRepayment: 'true',
+                                                                    paymentIdToUpdate: item.rawPaymentId
+                                                                }
+                                                            });
+                                                        }}
+                                                    >
+                                                        <Text style={{ fontSize: 10, color: '#FFF', fontWeight: 'bold' }}>Bayar Ulang</Text>
+                                                    </TouchableOpacity>
+                                                </View>
+                                            )}
+                                        </View>
+                                        <View style={{ alignItems: 'flex-end' }}>
+                                            <Text style={[s.itemAmountText, item.status !== 'Lunas' && { color: item.status === 'Ditolak' ? '#F44336' : '#FF9800' }]}>{item.amountFormatted}</Text>
+
+                                            {item.status === 'Lunas' && (
+                                                <TouchableOpacity
+                                                    onPress={() => handleDownloadReceipt(item, group.periodName)}
+                                                    disabled={isDownloadingId === item.id}
+                                                    style={{ marginTop: 4 }}
+                                                >
+                                                    {isDownloadingId === item.id ? (
+                                                        <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#E8F5E9', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, gap: 4 }}>
+                                                            <ActivityIndicator size="small" color="#1B5E20" />
+                                                        </View>
+                                                    ) : (
+                                                        <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#E8F5E9', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, gap: 4 }}>
+                                                            <Ionicons name="download-outline" size={14} color="#1B5E20" />
+                                                            <Text style={{ color: '#1B5E20', fontSize: 11, fontWeight: 'bold' }}>Kuitansi</Text>
+                                                        </View>
+                                                    )}
+                                                </TouchableOpacity>
+                                            )}
+                                        </View>
+                                    </View>
+                                    {idx < group.items.length - 1 && <View style={s.divider} />}
+                                </View>
+                            ))}
+
+                            {/* Download Period Button */}
+                            {group.items.some((i: any) => i.status === 'Lunas') && (
+                                <TouchableOpacity
+                                    style={{
+                                        flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+                                        backgroundColor: '#E8F5E9', paddingVertical: 10, borderRadius: 12, marginTop: 12, borderWidth: 1, borderColor: '#C8E6C9'
+                                    }}
+                                    onPress={() => handleDownloadPeriodReceipt(group)}
+                                    disabled={isDownloadingId === group.id}
+                                >
+                                    {isDownloadingId === group.id ? (
+                                        <ActivityIndicator size="small" color="#1B5E20" />
+                                    ) : (
+                                        <>
+                                            <Ionicons name="download-outline" size={16} color="#1B5E20" style={{ marginRight: 6 }} />
+                                            <Text style={{ color: '#1B5E20', fontSize: 13, fontWeight: 'bold' }}>Unduh Kuitansi Bulan Ini</Text>
+                                        </>
+                                    )}
+                                </TouchableOpacity>
+                            )}
+
+                        </View>
+                    </View>
+                )}
+            </View>
+        );
+    };
 
     return (
         <SafeAreaView style={s.container}>

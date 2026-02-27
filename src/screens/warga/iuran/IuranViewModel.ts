@@ -14,6 +14,8 @@ export interface HistoryItem {
     date: string;
     methodName: string;
     rejectionReason?: string;
+    feeId?: string;
+    rawPaymentId?: string;
 }
 
 export interface GroupedHistory {
@@ -86,6 +88,8 @@ export const useIuranViewModel = () => {
                     date: p.paid_at ? formatDateSafe(p.paid_at) : '-',
                     methodName: p.payment_method || '-',
                     rejectionReason: p.rejection_reason || 'Ditolak (hubungi admin)',
+                    feeId: p.fee_id?.toString() || '',
+                    rawPaymentId: p.id
                 };
 
                 if (!historyMap.has(periodId)) {

@@ -62,26 +62,32 @@ export default function TimelineScreen() {
                                 {billSummary.periods.map(period => {
                                     const isPayable = period.status === 'unpaid' || period.status === 'partial' || period.status === 'overdue';
                                     const isExpanded = expandedPeriodIds.has(period.id);
-                                    
+
                                     const unpaidItemsInPeriod = period.items.filter(i => i.status === 'unpaid');
                                     const allSelectedInPeriod = unpaidItemsInPeriod.length > 0 && unpaidItemsInPeriod.every(i => selectedItemKeys.has(`${period.id}|${i.fee.id}`));
                                     const someSelectedInPeriod = unpaidItemsInPeriod.length > 0 && unpaidItemsInPeriod.some(i => selectedItemKeys.has(`${period.id}|${i.fee.id}`));
-                                    
+
                                     let statusColor = '#4CAF50';
                                     let statusLabel = 'Lunas';
                                     let statusIcon = 'checkmark-circle';
-                                    
+
                                     if (period.status === 'overdue') {
                                         statusColor = '#D32F2F'; statusLabel = 'Tunggakan'; statusIcon = 'alert-circle';
                                     } else if (period.status === 'pending') {
                                         statusColor = '#FF9800'; statusLabel = 'Menunggu Konfirmasi'; statusIcon = 'time';
                                     } else if (period.status === 'unpaid') {
-                                        statusColor = period.isCurrentMonth ? '#F57C00' : '#888'; 
-                                        statusLabel = period.isCurrentMonth ? 'Bulan Ini' : 'Belum Dibayar'; 
+                                        statusColor = period.isCurrentMonth ? '#F57C00' : '#888';
+                                        statusLabel = period.isCurrentMonth ? 'Bulan Ini' : 'Belum Dibayar';
                                         statusIcon = 'ellipse-outline';
                                     } else if (period.status === 'partial') {
                                         statusColor = '#F57C00'; statusLabel = 'Dibayar Sebagian'; statusIcon = 'pie-chart';
+                                    } else if (period.status === 'rejected') {
+                                        statusColor = '#F44336'; statusLabel = 'Ditolak'; statusIcon = 'close-circle';
+                                    } else if (period.status === 'paid') {
+                                        statusColor = '#4CAF50'; statusLabel = 'Lunas'; statusIcon = 'checkmark-circle';
                                     }
+
+                                    const periodRejectedCount = period.items.filter(i => i.status === 'rejected').length;
 
                                     return (
                                         <View key={period.id} style={{ marginBottom: 8 }}>
@@ -112,16 +118,25 @@ export default function TimelineScreen() {
 
                                                 <View style={s.feeInfo}>
                                                     <Text style={s.feeName}>{period.monthName}</Text>
-                                                    <View style={s.feeMetaRow}>
-                                                        <Ionicons name={statusIcon as any} size={12} color={statusColor} />
-                                                        <Text style={[s.feeStatus, { color: statusColor }]}>{statusLabel}</Text>
+                                                    <View style={[s.feeMetaRow, { flexWrap: 'wrap' }]}>
+                                                        {period.status !== 'rejected' && (
+                                                            <>
+                                                                <Ionicons name={statusIcon as any} size={12} color={statusColor} />
+                                                                <Text style={[s.feeStatus, { color: statusColor, marginRight: 6 }]}>{statusLabel}</Text>
+                                                            </>
+                                                        )}
+                                                        {periodRejectedCount > 0 && (
+                                                            <Text style={[s.feeStatus, { color: '#D32F2F', fontWeight: '500' }]}>
+                                                                {period.status !== 'rejected' ? '• ' : ''}Pembayaran ditolak {periodRejectedCount}
+                                                            </Text>
+                                                        )}
                                                     </View>
                                                 </View>
 
                                                 <Text style={[s.feeAmount, period.status === 'paid' && { color: '#999' }]}>
                                                     {formatCurrency(period.totalAmount)}
                                                 </Text>
-                                                <Ionicons name={isExpanded ? "chevron-up" : "chevron-down"} size={20} color="#888" style={{marginLeft: 8}} />
+                                                <Ionicons name={isExpanded ? "chevron-up" : "chevron-down"} size={20} color="#888" style={{ marginLeft: 8 }} />
                                             </TouchableOpacity>
 
                                             {/* EXPANDED ITEMS LIST */}
@@ -129,7 +144,7 @@ export default function TimelineScreen() {
                                                 <View style={s.expandedBox}>
                                                     <View style={s.itemsContainer}>
                                                         {period.items.map((item: any, idx: number) => {
-                                                            const isItemPayable = item.status === 'unpaid';
+                                                            const isItemPayable = item.status === 'unpaid' || item.status === 'rejected';
                                                             const isItemSelected = selectedItemKeys.has(`${period.id}|${item.fee.id}`);
                                                             return (
                                                                 <View key={item.fee.id}>
@@ -146,12 +161,21 @@ export default function TimelineScreen() {
                                                                             <Ionicons name="checkmark-circle" size={20} color={item.status === 'paid' ? '#4CAF50' : '#FF9800'} style={{ marginRight: 10 }} />
                                                                         )}
                                                                         <View style={{ flex: 1 }}>
-                                                                            <Text style={[s.itemName, !isItemPayable && { color: '#888' }]}>{item.fee.name}</Text>
-                                                                            <Text style={[s.itemStatusLabel, { color: item.status === 'paid' ? '#4CAF50' : item.status === 'pending' ? '#FF9800' : '#888' }]}>
-                                                                                {item.status === 'paid' ? 'Lunas' : item.status === 'pending' ? 'Menunggu Konfirmasi' : 'Belum Dibayar'}
+                                                                            <Text style={[s.itemName, (!isItemPayable && item.status !== 'rejected') && { color: '#888' }]}>{item.fee.name}</Text>
+                                                                            <Text style={[
+                                                                                s.itemStatusLabel,
+                                                                                { color: item.status === 'paid' ? '#4CAF50' : item.status === 'pending' ? '#FF9800' : item.status === 'rejected' ? '#F44336' : '#888' }
+                                                                            ]}>
+                                                                                {item.status === 'paid' ? 'Lunas' : item.status === 'pending' ? 'Menunggu Konfirmasi' : item.status === 'rejected' ? 'Ditolak' : 'Belum Dibayar'}
                                                                             </Text>
+
+                                                                            {item.status === 'rejected' && item.rejectionReason && (
+                                                                                <Text style={{ fontSize: 11, color: '#D32F2F', marginTop: 4, fontStyle: 'italic' }}>
+                                                                                    "{item.rejectionReason}"
+                                                                                </Text>
+                                                                            )}
                                                                         </View>
-                                                                        <Text style={[s.itemAmountText, !isItemPayable && { color: '#888' }]}>{formatCurrency(item.amount)}</Text>
+                                                                        <Text style={[s.itemAmountText, (!isItemPayable && item.status !== 'rejected') && { color: '#888' }]}>{formatCurrency(item.amount)}</Text>
                                                                     </View>
                                                                     {idx < period.items.length - 1 && <View style={s.divider} />}
                                                                 </View>
@@ -196,25 +220,25 @@ const s = StyleSheet.create({
     center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     loadingText: { marginTop: 12, fontSize: 14, color: '#888' },
     content: { padding: 16, paddingBottom: 40 },
-    
+
     sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, marginTop: 8 },
     sectionTitle: { fontSize: 16, fontWeight: 'bold', color: '#333' },
     selectAllText: { fontSize: 13, fontWeight: '600' },
-    
+
     feeCard: {
-        flexDirection: 'row', alignItems: 'center', 
+        flexDirection: 'row', alignItems: 'center',
         paddingVertical: 14, paddingHorizontal: 16, borderRadius: 12, marginBottom: 8,
         borderWidth: 1, borderColor: '#E0E0E0',
     },
     feeCardSelected: { borderColor: '#4CAF50', backgroundColor: '#F1F8E9' },
     feeCardPaid: { borderColor: '#EEE', opacity: 0.8 },
-    
+
     checkbox: {
         width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: '#1B5E20',
         justifyContent: 'center', alignItems: 'center', marginRight: 12, backgroundColor: '#FFF',
     },
     checkboxChecked: { backgroundColor: '#1B5E20' },
-    
+
     feeInfo: { flex: 1, marginLeft: 12 },
     feeName: { fontSize: 14, fontWeight: '600', color: '#333' },
     feeMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 },
