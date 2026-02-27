@@ -4,6 +4,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { fetchNews, NewsItem } from '../../../services/newsService';
 import { fetchBillingPeriods } from '../../../services/iuranService';
 import { triggerPanicButton } from '../../../services/panicService';
+import { getUnreadNotificationCount } from '../../../services/notificationService';
 
 export interface QuickAction {
     id: string;
@@ -24,6 +25,7 @@ export const useHomeViewModel = () => {
     const [weather] = useState({ temp: '28°C', condition: 'Cerah', location: 'Jakarta Selatan' });
     const [billSummary, setBillSummary] = useState({ total: 'Rp 0', label: 'Iuran Keamanan & Sampah', dueDate: '-' });
     const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
+    const [unreadNotifCount, setUnreadNotifCount] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
 
     // Initial Fetch
@@ -42,7 +44,7 @@ export const useHomeViewModel = () => {
             const news = await fetchNews(false);
             setNewsItems(news);
 
-            // 2. Fetch Bill Summary
+            // 2. Fetch Bill Summary & Notification Counts
             if (user?.id) {
                 const bill = await fetchBillingPeriods(user.id);
                 setBillSummary({
@@ -50,6 +52,10 @@ export const useHomeViewModel = () => {
                     label: 'Iuran Bulanan',
                     dueDate: '-'
                 });
+
+                // 3. Unread Notifications Count
+                const count = await getUnreadNotificationCount();
+                setUnreadNotifCount(count);
             }
         } catch (error) {
             console.error('Failed to load home data:', error);
@@ -166,6 +172,7 @@ export const useHomeViewModel = () => {
         weather,
         billSummary,
         newsItems,
+        unreadNotifCount,
         quickActions,
         handleNavigation,
         handleNewsClick,

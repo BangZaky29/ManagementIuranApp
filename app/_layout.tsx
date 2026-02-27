@@ -107,8 +107,11 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+import { usePushNotifications } from '../src/hooks/usePushNotifications';
+
 function RootLayoutInner() {
   const { isDark } = useTheme();
+  usePushNotifications(); // Activate push notifications globally
 
   return (
     <NavThemeProvider value={isDark ? DarkTheme : DefaultTheme}>

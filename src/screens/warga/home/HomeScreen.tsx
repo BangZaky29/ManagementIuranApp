@@ -14,6 +14,7 @@ export default function HomeScreen() {
         weather,
         billSummary,
         newsItems,
+        unreadNotifCount,
         quickActions,
         handleNavigation,
         handleNewsClick,
@@ -43,10 +44,23 @@ export default function HomeScreen() {
 
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <TouchableOpacity
-                        style={{ marginRight: 12, padding: 4 }}
-                        onPress={() => handleNavigation()} // Triggers "Coming Soon" alert
+                        style={{ marginRight: 12, padding: 4, position: 'relative' }}
+                        onPress={() => handleNavigation('/warga/notifications')} // Routing to new Notification Screen
                     >
                         <Ionicons name="notifications-outline" size={24} color={colors.green5} />
+                        {unreadNotifCount > 0 && (
+                            <View style={{
+                                position: 'absolute',
+                                top: 2,
+                                right: 4,
+                                backgroundColor: 'red',
+                                width: 10,
+                                height: 10,
+                                borderRadius: 5,
+                                borderWidth: 1,
+                                borderColor: colors.green1
+                            }} />
+                        )}
                     </TouchableOpacity>
 
                     <TouchableOpacity style={[styles.profileImage, { backgroundColor: colors.green3, overflow: 'hidden' }]} onPress={() => handleNavigation('/(tabs)/profil')}>
