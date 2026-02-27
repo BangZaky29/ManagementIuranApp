@@ -357,7 +357,7 @@
         "roles": "{authenticated}",
         "operation": "INSERT",
         "using_expression": null,
-        "check_expression": "(auth.uid() = user_id)"
+        "check_expression": "true"
     },
     {
         "schemaname": "public",
@@ -366,8 +366,8 @@
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
         "operation": "UPDATE",
-        "using_expression": "(auth.uid() = user_id)",
-        "check_expression": "(auth.uid() = user_id)"
+        "using_expression": "true",
+        "check_expression": "true"
     },
     {
         "schemaname": "public",
