@@ -9,6 +9,7 @@ import { ReportLocationViewer } from '../../../components/ReportLocationViewer';
 import { fetchReportById, Report } from '../../../services/laporanService';
 import { supabase } from '../../../lib/supabaseConfig';
 import { styles } from './LaporanListStyles'; // Reusing styles or creating new ones
+import { formatDateTimeSafe } from '../../../utils/dateUtils';
 
 export default function AdminReportDetailScreen() {
     const { id } = useLocalSearchParams();
@@ -110,9 +111,7 @@ export default function AdminReportDetailScreen() {
         );
     }
 
-    const formattedDate = new Date(data.created_at).toLocaleDateString('id-ID', {
-        day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
-    });
+    const formattedDate = formatDateTimeSafe(data.created_at);
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FAFB' }}>

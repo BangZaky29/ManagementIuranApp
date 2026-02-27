@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useReportDetailViewModel } from './ReportDetailViewModel';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
 import { ReportLocationViewer } from '../../../components/ReportLocationViewer';
+import { formatDateTimeSafe } from '../../../utils/dateUtils';
 
 export default function ReportDetailScreen() {
     const {
@@ -57,9 +58,7 @@ export default function ReportDetailScreen() {
         );
     }
 
-    const formattedDate = new Date(data.created_at).toLocaleDateString('id-ID', {
-        day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
-    });
+    const formattedDate = formatDateTimeSafe(data.created_at);
 
     return (
         <SafeAreaView style={styles.container}>

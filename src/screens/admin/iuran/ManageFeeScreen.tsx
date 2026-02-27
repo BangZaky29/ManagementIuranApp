@@ -120,6 +120,8 @@ export default function ManageFeeScreen() {
     // ====== MONTH NAVIGATION ======
 
     const shiftMonth = (dir: number) => {
+        if (dir < 0 && !canGoBack) return;
+        if (dir > 0 && !canGoForward) return;
         const [y, m] = currentPeriod.split('-').map(Number);
         const d = new Date(y, m - 1 + dir, 1);
         setCurrentPeriod(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`);
@@ -246,8 +248,8 @@ export default function ManageFeeScreen() {
         }
     }
 
-    const canGoBack = !minPeriodStr || currentPeriod > minPeriodStr;
-    const canGoForward = !maxPeriodStr || currentPeriod < maxPeriodStr;
+    const canGoBack = !minPeriodStr || currentPeriod.substring(0, 7) > minPeriodStr.substring(0, 7);
+    const canGoForward = !maxPeriodStr || currentPeriod.substring(0, 7) < maxPeriodStr.substring(0, 7);
 
     // ====== MAIN RENDER ======
 
@@ -309,24 +311,24 @@ export default function ManageFeeScreen() {
             <>
                 {/* Month Selector */}
                 <View style={s.monthSelector}>
-                    <TouchableOpacity 
-                        onPress={() => shiftMonth(-1)} 
-                        style={[s.monthArrow, !canGoBack && { opacity: 0.3 }]}
-                        disabled={!canGoBack}
-                    >
-                        <Ionicons name="chevron-back" size={20} color="#1B5E20" />
-                    </TouchableOpacity>
+                    <View style={s.monthArrow}>
+                        {canGoBack && (
+                            <TouchableOpacity onPress={() => shiftMonth(-1)} style={s.monthArrowBtn}>
+                                <Ionicons name="chevron-back" size={20} color="#1B5E20" />
+                            </TouchableOpacity>
+                        )}
+                    </View>
                     <View style={s.monthLabel}>
                         <Ionicons name="calendar-outline" size={16} color="#1B5E20" />
                         <Text style={s.monthText}>{formatPeriodLabel(currentPeriod)}</Text>
                     </View>
-                    <TouchableOpacity 
-                        onPress={() => shiftMonth(1)} 
-                        style={[s.monthArrow, !canGoForward && { opacity: 0.3 }]}
-                        disabled={!canGoForward}
-                    >
-                        <Ionicons name="chevron-forward" size={20} color="#1B5E20" />
-                    </TouchableOpacity>
+                    <View style={s.monthArrow}>
+                        {canGoForward && (
+                            <TouchableOpacity onPress={() => shiftMonth(1)} style={s.monthArrowBtn}>
+                                <Ionicons name="chevron-forward" size={20} color="#1B5E20" />
+                            </TouchableOpacity>
+                        )}
+                    </View>
                 </View>
 
                 {/* Revenue Summary Card */}
@@ -693,8 +695,9 @@ const s = StyleSheet.create({
     content: { padding: 16, paddingBottom: 40 },
 
     // Month selector
-    monthSelector: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, backgroundColor: '#FFF', borderRadius: 14, padding: 12, ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 3 }, android: { elevation: 2 } }) },
-    monthArrow: { padding: 6 },
+    monthSelector: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, backgroundColor: '#FFF', borderRadius: 14, padding: 8, ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 3 }, android: { elevation: 2 } }) },
+    monthArrow: { width: 40, alignItems: 'center', justifyContent: 'center' },
+    monthArrowBtn: { padding: 6 },
     monthLabel: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     monthText: { fontSize: 16, fontWeight: '700', color: '#1B5E20' },
 

@@ -7,6 +7,7 @@ import { supabase } from '../../../lib/supabaseConfig';
 import { styles } from './LaporanListStyles';
 import { CustomHeader } from '../../../components/CustomHeader';
 import { Colors } from '../../../constants/Colors';
+import { formatDateTimeSafe } from '../../../utils/dateUtils';
 
 // Type definition based on db schema
 type Report = {
@@ -135,10 +136,7 @@ export default function LaporanListScreen() {
                     <View style={{ justifyContent: 'center' }}>
                         <Text style={styles.userName}>{item.user?.full_name || 'Warga'}</Text>
                         <Text style={styles.dateText}>
-                            {new Date(item.created_at).toLocaleDateString('id-ID', {
-                                day: 'numeric', month: 'short', year: 'numeric',
-                                hour: '2-digit', minute: '2-digit'
-                            })}
+                            {formatDateTimeSafe(item.created_at)}
                         </Text>
                     </View>
                 </View>

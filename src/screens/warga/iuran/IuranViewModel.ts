@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../../contexts/AuthContext';
-import { fetchMyPayments, fetchBillingPeriods, SmartBillSummary, BillingPeriod, PaymentRecord } from '../../../services/iuranService';
+import { fetchMyPayments, fetchBillingPeriods, BillingPeriod, BillItem, submitBulkPayments, PaymentRecord, SmartBillSummary } from '../../../services/iuranService';
+import { formatDateSafe } from '../../../utils/dateUtils';
 import { generateAndShareReceipt } from '../../../services/receiptService';
 
 export interface HistoryItem {
@@ -81,7 +82,7 @@ export const useIuranViewModel = () => {
                     amount: p.amount,
                     amountFormatted: `Rp ${p.amount.toLocaleString('id-ID')}`,
                     status: p.status === 'paid' ? 'Lunas' : (p.status === 'overdue' ? 'Terlambat' : 'Pending'),
-                    date: p.paid_at ? new Date(p.paid_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-',
+                    date: p.paid_at ? formatDateSafe(p.paid_at) : '-',
                     methodName: p.payment_method || '-',
                 };
 
@@ -103,7 +104,7 @@ export const useIuranViewModel = () => {
             const formatted = Array.from(historyMap.values())
                 .sort((a, b) => b.id.localeCompare(a.id))
                 .slice(0, 5);
-            setHistory(formatted as any);
+            setHistory(formatted);
         } catch (error) {
             console.error('Failed to load iuran data:', error);
         } finally {
@@ -202,7 +203,7 @@ export const useIuranViewModel = () => {
     };
 
     const toggleExpand = (periodId: string) => {
-        setHistory(prev => (prev as any).map((item: any) =>
+        setHistory(prev => prev.map(item =>
             item.id === periodId ? { ...item, isExpanded: !item.isExpanded } : item
         ));
     };

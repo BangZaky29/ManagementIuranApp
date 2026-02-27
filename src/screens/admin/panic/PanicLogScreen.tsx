@@ -4,8 +4,9 @@ import {
     StatusBar, StyleSheet, ActivityIndicator, Image, Linking, Platform, RefreshControl
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../../contexts/ThemeContext';
-import { fetchPanicLogs, resolvePanicLog, PanicLog } from '../../../services/panicService';
+import { Colors } from '../../../constants/Colors';
+import { formatDateTimeSafe } from '../../../utils/dateUtils';
+import { fetchPanicLogs, PanicLog, resolvePanicLog } from '../../../services/panicService';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
 
 export default function PanicLogScreen() {
@@ -90,7 +91,7 @@ export default function PanicLogScreen() {
         if (minutes < 1) return 'Baru saja';
         if (minutes < 60) return `${minutes} menit lalu`;
         if (hours < 24) return `${hours} jam lalu`;
-        return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        return formatDateTimeSafe(d);
     };
 
     const renderItem = ({ item }: { item: PanicLog }) => {

@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
 import { useHistoryViewModel } from './HistoryViewModel';
 import { FilterCalendar } from '../../../components/FilterCalendar';
+import { formatDateSafe } from '../../../utils/dateUtils';
 
 const formatCurrency = (value: number) =>
     new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
@@ -148,7 +149,7 @@ export default function PaymentHistoryScreen() {
                     >
                         <Ionicons name="calendar-outline" size={16} color={selectedDate ? "#FFF" : "#1B5E20"} style={{ marginRight: 6 }} />
                         <Text style={[s.filterText, selectedDate && s.filterTextActive]}>
-                            {selectedDate ? selectedDate.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' }) : 'Pilih Periode'}
+                            {selectedDate ? formatDateSafe(selectedDate) : 'Pilih Periode'}
                         </Text>
                     </TouchableOpacity>
 

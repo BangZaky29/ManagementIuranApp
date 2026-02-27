@@ -6,6 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useWargaGuestViewModel } from './WargaGuestViewModel';
+import { formatDateSafe } from '../../../utils/dateUtils';
 import { styles } from './WargaGuestStyles';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
 
@@ -98,7 +99,7 @@ export default function WargaGuestScreen() {
                         <View style={styles.timelineRow}>
                             <View style={styles.timelineItem}>
                                 <Ionicons name="time-outline" size={14} color="#888" />
-                                <Text style={styles.timelineText}>Dibuat: {new Date(item.created_at).toLocaleDateString('id-ID')}</Text>
+                                <Text style={styles.timelineText}>Dibuat: {formatDateSafe(item.created_at)}</Text>
                             </View>
                             {item.check_in_time && (
                                 <View style={styles.timelineItem}>

@@ -8,6 +8,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { styles } from './ManageNewsStyles';
 import { Colors } from '../../../constants/Colors';
 import { CustomHeader } from '../../../components/CustomHeader';
+import { formatDateSafe } from '../../../utils/dateUtils';
 import { fetchNews, createNews, updateNews, deleteNews, NewsItem, uploadNewsImage } from '../../../services/newsService';
 import { useAuth } from '../../../contexts/AuthContext';
 
@@ -191,7 +192,7 @@ export default function ManageNewsScreen() {
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                             <Text style={[styles.categoryText, { fontSize: 10, color: Colors.primary }]}>{item.category}</Text>
                             <Text style={[styles.dateText, { fontSize: 10 }]}>
-                                {new Date(item.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                                {formatDateSafe(item.created_at)}
                             </Text>
                         </View>
                         <Text style={[styles.title, { fontSize: 14, lineHeight: 20 }]} numberOfLines={2}>{item.title}</Text>

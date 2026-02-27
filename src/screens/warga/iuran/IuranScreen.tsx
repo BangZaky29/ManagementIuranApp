@@ -198,7 +198,7 @@ export default function IuranScreen() {
                                             {isExpanded && (
                                                 <View style={s.expandedBox}>
                                                     <View style={s.itemsContainer}>
-                                                        {period.items.map((item: any, idx: number) => {
+                                                    {period.items.map((item, idx: number) => {
                                                             const isItemPayable = item.status === 'unpaid';
                                                             const isItemSelected = selectedItemKeys.has(`${period.id}|${item.fee.id}`);
                                                             return (
@@ -283,7 +283,7 @@ export default function IuranScreen() {
                             </View>
                         ) : (
                             <Animated.View entering={FadeInDown.delay(300).duration(400)}>
-                                {history.map((group) => (
+                                {history.map((group: GroupedHistory) => (
                                     <View key={group.id} style={s.periodCard}>
                                         <TouchableOpacity
                                             style={s.periodHeader}
@@ -307,7 +307,7 @@ export default function IuranScreen() {
                                         {group.isExpanded && (
                                             <View style={s.expandedBox}>
                                                 <View style={s.itemsContainer}>
-                                                    {group.items.map((item: any, idx: number) => (
+                                                    {group.items.map((item: HistoryItem, idx: number) => (
                                                         <View key={item.id}>
                                                             <View style={s.historyItemRow}>
                                                                 <Ionicons name="checkmark-circle" size={20} color="#4CAF50" style={{ marginRight: 10 }} />

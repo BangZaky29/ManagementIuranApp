@@ -11,6 +11,7 @@ import { supabase } from '../../../lib/supabaseConfig';
 import { CustomHeader } from '../../../components/CustomHeader';
 import { AdminSidebar } from '../../../components/navigation/AdminSidebar';
 import { styles } from './AdminDashboardStyles';
+import { formatFullDateSafe } from '../../../utils/dateUtils';
 
 export default function AdminDashboardScreen() {
     const [stats, setStats] = useState({ warga: 0, security: 0, activeUsers: 0, laporanMasuk: 0 });
@@ -99,7 +100,7 @@ export default function AdminDashboardScreen() {
             >
                 <View style={styles.welcomeSection}>
                     <Text style={styles.welcomeText}>Selamat Datang, Admin</Text>
-                    <Text style={styles.dateText}>{new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</Text>
+                    <Text style={styles.dateText}>{formatFullDateSafe(new Date())}</Text>
                 </View>
 
                 <View style={styles.statsGrid}>

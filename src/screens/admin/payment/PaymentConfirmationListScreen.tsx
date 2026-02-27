@@ -6,6 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Colors } from '../../../constants/Colors';
+import { formatDateTimeSafe } from '../../../utils/dateUtils';
 import {
     PendingPaymentItem,
     fetchPaymentsByStatus,
@@ -38,9 +39,7 @@ export default function PaymentConfirmationListScreen() {
     };
 
     const formatDate = (dateStr: string) => {
-        return new Date(dateStr).toLocaleDateString('id-ID', {
-            day: '2-digit', month: 'short', year: 'numeric',
-        });
+        return formatDateTimeSafe(dateStr);
     };
 
     const getStatusColor = (status: string) => {

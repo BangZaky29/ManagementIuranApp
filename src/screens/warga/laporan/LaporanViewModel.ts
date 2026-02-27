@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { fetchMyReports, Report } from '../../../services/laporanService';
-import { useAuth } from '../../../contexts/AuthContext'; // To re-fetch on auth change
+import { useAuth } from '../../../contexts/AuthContext';
+import { formatDateSafe } from '../../../utils/dateUtils';
 
 export interface ReportItem {
     id: string;
@@ -41,7 +42,7 @@ export const useLaporanViewModel = () => {
                 id: r.id,
                 title: r.title,
                 status: r.status,
-                date: new Date(r.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }),
+                date: formatDateSafe(r.created_at),
                 category: r.category,
                 description: r.description
             }));

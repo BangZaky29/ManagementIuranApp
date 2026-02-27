@@ -7,6 +7,7 @@ import { countActiveVisitors } from '../../services/guestService';
 import { countPendingPayments } from '../../services/paymentConfirmationService';
 import { getDashboardStats } from '../../services/adminService';
 import { fetchRecentActivityLogs, ActivityLog } from '../../services/activityLogService';
+import { formatDateSafe } from '../../utils/dateUtils';
 import { supabase } from '../../lib/supabaseConfig';
 
 export function useAdminHomeViewModel() {
@@ -114,7 +115,7 @@ export function useAdminHomeViewModel() {
         if (minutes < 1) return 'Baru saja';
         if (minutes < 60) return `${minutes}m lalu`;
         if (hours < 24) return `${hours}j lalu`;
-        return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+        return formatDateSafe(d);
     };
 
     return {

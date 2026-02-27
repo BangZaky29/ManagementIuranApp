@@ -5,6 +5,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { fetchPanicLogs, resolvePanicLog, countActivePanics, PanicLog } from '../../services/panicService';
 import { countActiveVisitors } from '../../services/guestService';
 import { getDashboardStats } from '../../services/adminService';
+import { fetchRecentActivityLogs, ActivityLog } from '../../services/activityLogService';
+import { formatDateSafe } from '../../utils/dateUtils';
 import { supabase } from '../../lib/supabaseConfig';
 
 export function useSecurityHomeViewModel() {
@@ -101,7 +103,7 @@ export function useSecurityHomeViewModel() {
         if (minutes < 1) return 'Baru saja';
         if (minutes < 60) return `${minutes}m lalu`;
         if (hours < 24) return `${hours}j lalu`;
-        return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+        return formatDateSafe(d);
     };
 
     return {

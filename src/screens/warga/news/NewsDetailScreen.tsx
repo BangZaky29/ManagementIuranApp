@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, StatusBar, ActivityIndicator, Image } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { formatDateSafe } from '../../../utils/dateUtils';
 import { Colors } from '../../../constants/Colors';
 import { NewsDetailStyles as styles } from './NewsDetailStyles';
 import { useTheme } from '../../../contexts/ThemeContext';
@@ -65,7 +66,7 @@ export default function NewsDetailScreen() {
                 <View style={styles.metaContainer}>
                     <Ionicons name="calendar-outline" size={14} color={colors.green4} />
                     <Text style={[styles.date, { color: colors.green4 }]}>
-                        {new Date(newsItem.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        {formatDateSafe(newsItem.created_at)}
                     </Text>
                 </View>
 

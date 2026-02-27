@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { fetchMyPayments, PaymentRecord } from '../../../services/iuranService';
+import { formatDateSafe } from '../../../utils/dateUtils';
 import { generateAndShareReceipt } from '../../../services/receiptService';
 
 export interface HistoryItem {
@@ -52,7 +53,7 @@ export const useHistoryViewModel = () => {
                     amountFormatted: `Rp ${p.amount.toLocaleString('id-ID')}`,
                     status: p.status === 'paid' ? 'Lunas' : (p.status === 'overdue' ? 'Terlambat' : 'Pending'),
                     date: p.paid_at
-                        ? new Date(p.paid_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
+                        ? formatDateSafe(p.paid_at)
                         : '-',
                     methodName: p.payment_method || '-',
                     periodRaw: p.period, // keep original for grouping

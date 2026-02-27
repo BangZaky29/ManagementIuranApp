@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useGuestBookViewModel } from './GuestBookViewModel';
+import { formatDateTimeSafe } from '../../../utils/dateUtils';
 import { styles } from './GuestBookStyles';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
 
@@ -68,7 +69,7 @@ export default function GuestBookScreen() {
                                 <Text style={styles.timeText}>{item.status === 'pending' ? 'Dibuat Pada' : 'Masuk Pukul'}</Text>
                                 <Text style={[styles.timeText, { fontWeight: 'bold', color: '#333' }]}>
                                     {item.status === 'pending' 
-                                        ? new Date(item.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+                                        ? formatDateTimeSafe(item.created_at)
                                         : (item.check_in_time ? new Date(item.check_in_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-')}
                                 </Text>
                             </View>

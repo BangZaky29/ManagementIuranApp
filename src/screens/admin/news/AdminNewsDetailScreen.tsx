@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, StatusBar, ActivityIndicator, Image, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { formatDateSafe } from '../../../utils/dateUtils';
 import { Colors } from '../../../constants/Colors';
 import { deleteNews } from '../../../services/newsService';
 import { NewsDetailStyles as styles } from '../../warga/news/NewsDetailStyles'; // Reuse styles
@@ -105,7 +106,7 @@ export default function AdminNewsDetailScreen() {
                 <View style={styles.metaContainer}>
                     <Ionicons name="calendar-outline" size={14} color={colors.textSecondary} />
                     <Text style={[styles.date, { color: colors.textSecondary }]}>
-                        {new Date(newsItem.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        {formatDateSafe(newsItem.created_at)}
                     </Text>
                     <View style={[styles.statusDot, { backgroundColor: newsItem.is_published ? Colors.success : Colors.textSecondary, marginLeft: 16, width: 8, height: 8, borderRadius: 4 }]} />
                     <Text style={{ marginLeft: 6, fontSize: 12, color: newsItem.is_published ? Colors.success : Colors.textSecondary }}>
