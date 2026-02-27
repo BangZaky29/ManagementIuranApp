@@ -143,7 +143,8 @@ export const useHistoryViewModel = () => {
                 period: periodName,
                 paymentMethod: item.methodName,
                 paidAt: item.date,
-                complexName: 'Manajemen Iuran Perumahan'
+                complexName: 'Manajemen Iuran Perumahan',
+                items: [{ name: item.feeName, amount: item.amount }]
             });
             // Show success via alert (assuming parent or internal handles it, but since we don't have robust alert here, we can just let it finish successfully as sharing handles the UI)
         } catch (error: any) {
@@ -153,6 +154,58 @@ export const useHistoryViewModel = () => {
             setIsDownloadingId(null);
         }
     };
+
+    const handleDownloadPeriodReceipt = async (group: GroupedHistory) => {
+        setIsDownloadingId(group.id);
+        try {
+            const paidItems = group.items.filter(i => i.status === 'Lunas');
+            if (paidItems.length === 0) return;
+
+            const itemsList = paidItems.map(i => ({ name: i.feeName, amount: i.amount }));
+            
+            await generateAndShareReceipt({
+                paymentId: group.id + '-' + new Date().getTime(),
+                userName: user?.user_metadata?.full_name || 'Warga',
+                amount: paidItems.reduce((acc, curr) => acc + curr.amount, 0),
+                period: group.periodName,
+                paymentMethod: 'Gabungan Pembayaran Bulan ' + group.periodName,
+                paidAt: paidItems[0].date, // use the first paid date as reference
+                complexName: 'Manajemen Iuran Perumahan',
+                items: itemsList
+            });
+        } catch (error: any) {
+             console.error('Download Period Receipt Error:', error);
+             alert('Gagal mengunduh kuitansi bulanan: ' + error.message);
+        } finally {
+            setIsDownloadingId(null);
+        }
+    };
+
+    const handleDownloadAllReceipts = async () => {
+        setIsDownloadingId('all');
+        try {
+            const allPaidItems = allHistory.filter(i => i.status === 'Lunas');
+            if (allPaidItems.length === 0) return;
+
+            const allItemsList = allPaidItems.map(i => ({ name: `${i.feeName} (${i.periodRaw})`, amount: i.amount }));
+
+            await generateAndShareReceipt({
+                paymentId: 'ALL-HISTORY-' + new Date().getTime(),
+                userName: user?.user_metadata?.full_name || 'Warga',
+                amount: allPaidItems.reduce((acc, curr) => acc + curr.amount, 0),
+                period: 'Semua Riwayat (Total)',
+                paymentMethod: 'Gabungan Seluruh Histori',
+                paidAt: formatDateSafe(new Date().toISOString()), 
+                complexName: 'Manajemen Iuran Perumahan',
+                items: allItemsList
+            });
+        } catch (error: any) {
+             console.error('Download All Receipt Error:', error);
+             alert('Gagal mengunduh kuitansi keseluruhan: ' + error.message);
+        } finally {
+            setIsDownloadingId(null);
+        }
+    }
 
     return {
         searchQuery, setSearchQuery,
@@ -166,6 +219,8 @@ export const useHistoryViewModel = () => {
         toggleExpand,
         isExpanded,
         handleDownloadReceipt,
+        handleDownloadPeriodReceipt,
+        handleDownloadAllReceipts,
         isDownloadingId,
         isLoading,
         refresh: loadHistory,

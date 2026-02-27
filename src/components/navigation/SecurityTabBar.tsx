@@ -34,9 +34,6 @@ export const SecurityTabBar = ({ state, descriptors, navigation }: MaterialTopTa
                     case 'panic-logs':
                         iconName = isFocused ? 'warning' : 'warning-outline';
                         break;
-                    case 'guests':
-                        iconName = isFocused ? 'book' : 'book-outline';
-                        break;
                     case 'profile':
                         iconName = isFocused ? 'person' : 'person-outline';
                         break;
@@ -48,7 +45,7 @@ export const SecurityTabBar = ({ state, descriptors, navigation }: MaterialTopTa
                 }
 
                 // Filter out any route that is not explicitly handled
-                if (!['index', 'panic-logs', 'guests', 'reports', 'profile'].includes(route.name)) return null;
+                if (!['index', 'panic-logs', 'profile'].includes(route.name)) return null;
 
                 return (
                     <TouchableOpacity

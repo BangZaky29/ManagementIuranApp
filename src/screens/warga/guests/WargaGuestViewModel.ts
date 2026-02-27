@@ -4,7 +4,7 @@ import { Visitor, VisitorType } from '../../../services/guestService';
 import { useAuth } from '../../../contexts/AuthContext';
 
 export function useWargaGuestViewModel() {
-    const { user } = useAuth();
+    const { user, profile } = useAuth();
     const [myVisitors, setMyVisitors] = useState<Visitor[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -71,7 +71,8 @@ export function useWargaGuestViewModel() {
                 created_by: user.id,
                 purpose: formPurpose.trim(),
                 status: 'pending',
-                pin_code: pinCode
+                pin_code: pinCode,
+                housing_complex_id: profile?.housing_complex_id
             });
 
             if (error) throw error;
@@ -88,9 +89,11 @@ export function useWargaGuestViewModel() {
                 type: 'success', buttons: [{ text: 'Tutup', onPress: hideAlert }]
             });
             setAlertVisible(true);
-        } catch (error) {
+        } catch (error: any) {
+            console.error('Failed to create guest invitation:', error);
             setAlertConfig({
-                title: 'Gagal', message: 'Gagal membuat undangan. Coba lagi.',
+                title: 'Gagal', 
+                message: error.message || 'Gagal membuat undangan. Coba lagi.',
                 type: 'error', buttons: [{ text: 'Tutup', onPress: hideAlert }]
             });
             setAlertVisible(true);

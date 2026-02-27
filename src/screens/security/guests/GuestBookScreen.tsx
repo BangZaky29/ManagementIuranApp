@@ -8,6 +8,7 @@ import { useGuestBookViewModel } from './GuestBookViewModel';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
 import { styles } from './GuestBookStyles';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { CustomHeader } from '../../../components/CustomHeader';
 
 const VISITOR_TYPES = ['tamu', 'gojek', 'kurir', 'pekerja', 'lainnya'] as const;
 
@@ -27,50 +28,132 @@ export default function GuestBookScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+            <CustomHeader title="Buku Tamu" showBack={true} />
 
-            {/* Header */}
-            <View style={styles.header}>
-                <View style={styles.headerRow}>
-                    <View>
-                        <Text style={styles.title}>Buku Tamu</Text>
-                        <Text style={styles.subtitle}>{vm.activeGuests.length} tamu/kurir sedang di dalam area</Text>
-                    </View>
-                </View>
+            {/* Filter Tabs */}
+            <View style={styles.tabBar}>
+                {(['Aktif', 'Riwayat'] as const).map(tab => (
+                    <TouchableOpacity
+                        key={tab}
+                        style={[styles.filterChip, vm.activeTab === tab && styles.filterChipActive]}
+                        onPress={() => vm.setActiveTab(tab)}
+                    >
+                        <Text style={[styles.filterText, vm.activeTab === tab && styles.filterTextActive]}>
+                            {tab}
+                        </Text>
+                    </TouchableOpacity>
+                ))}
             </View>
 
-            {/* List Active Guests */}
+            {/* Summary Card */}
+            {vm.activeTab === 'Aktif' && (() => {
+                const activeCount = vm.activeGuests.filter(g => g.status === 'active').length;
+                const pendingCount = vm.activeGuests.filter(g => g.status === 'pending').length;
+                const totalCount = vm.activeGuests.length;
+                
+                return (
+                    <View style={styles.summaryCard}>
+                        <View style={styles.summaryItem}>
+                            <Text style={[styles.summaryValue, { color: '#0D47A1' }]}>{activeCount}</Text>
+                            <Text style={styles.summaryLabel}>Aktif / Masuk</Text>
+                        </View>
+                        <View style={styles.summaryDivider} />
+                        <View style={styles.summaryItem}>
+                            <Text style={[styles.summaryValue, { color: '#FF9800' }]}>{pendingCount}</Text>
+                            <Text style={styles.summaryLabel}>Undangan</Text>
+                        </View>
+                        <View style={styles.summaryDivider} />
+                        <View style={styles.summaryItem}>
+                            <Text style={styles.summaryValue}>{totalCount}</Text>
+                            <Text style={styles.summaryLabel}>Total Semua</Text>
+                        </View>
+                    </View>
+                );
+            })()}
+
+            {/* List Visitors */}
             <FlatList
-                data={vm.activeGuests}
+                data={(vm.activeTab === 'Aktif' ? vm.activeGuests : vm.guestHistory).slice(0, vm.visibleHistoryCount)}
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.listContainer}
-                refreshing={vm.isLoading}
-                onRefresh={vm.loadData}
+                refreshing={vm.refreshing}
+                onRefresh={() => vm.loadData(true)}
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
                         <Ionicons name="document-text-outline" size={64} color="#B0BEC5" />
-                        <Text style={styles.emptyTitle}>Tidak Ada Tamu Aktif</Text>
+                        <Text style={styles.emptyTitle}>
+                            {vm.activeTab === 'Aktif' ? 'Tidak Ada Tamu Aktif' : 'Riwayat Kosong'}
+                        </Text>
                         <Text style={styles.emptySubtitle}>
-                            Gunakan tombol "+" di pojok kanan bawah jika ada tamu atau kurir yang datang.
+                            {vm.activeTab === 'Aktif' 
+                                ? 'Gunakan tombol "+" di pojok kanan bawah jika ada tamu atau kurir yang datang.'
+                                : 'Belum ada catatan tamu yang keluar atau selesai.'
+                            }
                         </Text>
                     </View>
                 }
+                ListFooterComponent={() => {
+                    const currentData = vm.activeTab === 'Aktif' ? vm.activeGuests : vm.guestHistory;
+                    if (currentData.length <= 3) return null;
+
+                    return (
+                        <View style={{ marginTop: 8, gap: 8 }}>
+                            {currentData.length > vm.visibleHistoryCount && (
+                                <TouchableOpacity style={styles.showMoreBtn} onPress={vm.handleLoadMoreHistory}>
+                                    <Text style={styles.showMoreText}>
+                                        Lihat Lebih Banyak (+{Math.min(3, currentData.length - vm.visibleHistoryCount)})
+                                    </Text>
+                                    <Ionicons name="chevron-down" size={16} color="#0D47A1" />
+                                </TouchableOpacity>
+                            )}
+                            
+                            {vm.visibleHistoryCount > 3 && (
+                                <TouchableOpacity 
+                                    style={[styles.showMoreBtn, { borderColor: '#E57373', backgroundColor: '#FFEBEE' }]} 
+                                    onPress={vm.handleCollapseHistory}
+                                >
+                                    <Text style={[styles.showMoreText, { color: '#D32F2F' }]}>
+                                        Lihat Lebih Sedikit
+                                    </Text>
+                                    <Ionicons name="chevron-up" size={16} color="#D32F2F" />
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    );
+                }}
                 renderItem={({ item }) => (
-                    <View style={[styles.card, item.status === 'pending' && { borderLeftColor: '#FF9800' }]}>
+                    <View style={[
+                        styles.card, 
+                        item.status === 'pending' && { borderLeftColor: '#FF9800' },
+                        item.status === 'completed' && { borderLeftColor: '#4CAF50' },
+                        item.status === 'rejected' && { borderLeftColor: '#F44336' }
+                    ]}>
                         <View style={styles.cardHeader}>
                             <View style={{ flex: 1 }}>
                                 <Text style={styles.guestName}>{item.visitor_name}</Text>
-                                <View style={[styles.guestTypeBadge, { backgroundColor: item.status === 'pending' ? '#FF9800' : '#0D47A1' }]}>
+                                <View style={[
+                                    styles.guestTypeBadge, 
+                                    { backgroundColor: 
+                                        item.status === 'pending' ? '#FF9800' : 
+                                        (item.status === 'completed' ? '#4CAF50' : '#0D47A1') 
+                                    }
+                                ]}>
                                     <Text style={styles.guestTypeText}>
-                                        {item.status === 'pending' ? 'Undangan (Menunggu)' : item.visitor_type}
+                                        {item.status === 'pending' ? 'Undangan (Menunggu)' : 
+                                         (item.status === 'completed' ? 'Selesai / Keluar' : item.visitor_type)}
                                     </Text>
                                 </View>
                             </View>
                             <View style={{ alignItems: 'flex-end' }}>
-                                <Text style={styles.timeText}>{item.status === 'pending' ? 'Dibuat Pada' : 'Masuk Pukul'}</Text>
+                                <Text style={styles.timeText}>
+                                    {item.status === 'pending' ? 'Dibuat Pada' : (item.status === 'completed' ? 'Keluar Pukul' : 'Masuk Pukul')}
+                                </Text>
                                 <Text style={[styles.timeText, { fontWeight: 'bold', color: '#333' }]}>
                                     {item.status === 'pending' 
                                         ? formatDateTimeSafe(item.created_at)
-                                        : (item.check_in_time ? new Date(item.check_in_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-')}
+                                        : (item.status === 'completed' 
+                                            ? (item.check_out_time ? new Date(item.check_out_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-')
+                                            : (item.check_in_time ? new Date(item.check_in_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'))}
                                 </Text>
                             </View>
                         </View>
@@ -82,7 +165,7 @@ export default function GuestBookScreen() {
                                     {item.profiles?.full_name || 'Tidak diketahui'}
                                 </Text>
                                 <Text style={{ fontSize: 13, color: '#666', marginTop: 2 }} numberOfLines={1}>
-                                    {item.profiles ? `Blok ${item.profiles.rt_rw || item.profiles.housing_complex_id || '?'}` : ''}
+                                    {item.profiles ? `Blok ${item.profiles.rt_rw || '?'}` : ''}
                                 </Text>
                             </View>
                             <View style={styles.detailCol}>
@@ -93,19 +176,31 @@ export default function GuestBookScreen() {
                             </View>
                         </View>
 
-                        {item.status === 'pending' ? (
-                            <TouchableOpacity 
-                                style={[styles.checkoutBtn, { backgroundColor: '#E8F5E9' }]} 
-                                onPress={() => vm.handleCheckInWithPin(item)}
-                            >
-                                <Ionicons name="checkmark-circle-outline" size={18} color="#2E7D32" />
-                                <Text style={[styles.checkoutBtnText, { color: '#2E7D32' }]}>Verifikasi & Izinkan Masuk</Text>
-                            </TouchableOpacity>
-                        ) : (
-                            <TouchableOpacity style={styles.checkoutBtn} onPress={() => vm.handleCheckOut(item)}>
-                                <Ionicons name="exit-outline" size={18} color="#C62828" />
-                                <Text style={styles.checkoutBtnText}>Checkout Keluar</Text>
-                            </TouchableOpacity>
+                        {vm.activeTab === 'Aktif' && (
+                            item.status === 'pending' ? (
+                                <TouchableOpacity 
+                                    style={[styles.checkoutBtn, { backgroundColor: '#E8F5E9' }]} 
+                                    onPress={() => vm.handleCheckInWithPin(item)}
+                                >
+                                    <Ionicons name="checkmark-circle-outline" size={18} color="#2E7D32" />
+                                    <Text style={[styles.checkoutBtnText, { color: '#2E7D32' }]}>Verifikasi & Izinkan Masuk</Text>
+                                </TouchableOpacity>
+                            ) : (
+                                <TouchableOpacity style={styles.checkoutBtn} onPress={() => vm.handleCheckOut(item)}>
+                                    <Ionicons name="exit-outline" size={18} color="#C62828" />
+                                    <Text style={styles.checkoutBtnText}>Checkout Keluar</Text>
+                                </TouchableOpacity>
+                            )
+                        )}
+                        
+                        {item.status === 'completed' && item.check_in_time && (
+                            <View style={{ marginTop: 12, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                                <Ionicons name="time-outline" size={12} color="#888" />
+                                <Text style={{ fontSize: 12, color: '#888' }}>
+                                    Masuk: {new Date(item.check_in_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} • 
+                                    Keluar: {new Date(item.check_out_time!).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                                </Text>
+                            </View>
                         )}
                     </View>
                 )}

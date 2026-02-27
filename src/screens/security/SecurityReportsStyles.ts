@@ -193,4 +193,20 @@ export const styles = StyleSheet.create({
         color: '#AAA',
         marginTop: 6,
     },
+    loadMoreBtn: {
+        backgroundColor: '#FFF',
+        paddingVertical: 12,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: '#0D47A1',
+        marginTop: 8,
+        marginBottom: 20,
+    },
+    loadMoreText: {
+        color: '#0D47A1',
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
 });

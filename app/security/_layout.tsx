@@ -15,6 +15,7 @@ export default function SecurityRootLayout() {
             <Stack.Screen name="edit-profile" />
             <Stack.Screen name="change-password" />
             <Stack.Screen name="reports" />
+            <Stack.Screen name="guests" />
         </Stack>
     );
 }

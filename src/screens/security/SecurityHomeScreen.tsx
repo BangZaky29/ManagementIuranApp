@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSecurityHomeViewModel } from './SecurityHomeViewModel';
 import { styles } from './SecurityHomeStyles';
 import { CustomAlertModal } from '../../components/CustomAlertModal';
+import { CustomHeader } from '../../components/CustomHeader';
 
 export default function SecurityHomeScreen() {
     const vm = useSecurityHomeViewModel();
@@ -23,13 +24,14 @@ export default function SecurityHomeScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#F0F4F8" />
+            <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+            <CustomHeader title="Dashboard Security" showBack={false} />
 
             <ScrollView
                 contentContainerStyle={{ paddingBottom: 100 }}
                 refreshControl={<RefreshControl refreshing={false} onRefresh={vm.refresh} colors={['#0D47A1']} />}
             >
-                {/* Header */}
+                {/* Profile Header Card */}
                 <View style={styles.header}>
                     <View>
                         <Text style={styles.greeting}>Tugas Berjaga,</Text>
@@ -107,6 +109,11 @@ export default function SecurityHomeScreen() {
                     <TouchableOpacity style={styles.quickAction} onPress={vm.navigateToGuestBook}>
                         <View style={[styles.quickIcon, { backgroundColor: '#E3F2FD' }]}>
                             <Ionicons name="id-card" size={24} color="#0D47A1" />
+                            {vm.pendingGuestsCount > 0 && (
+                                <View style={[styles.badge, styles.badgeYellow]}>
+                                    <Text style={styles.badgeTextBlack}>{vm.pendingGuestsCount}</Text>
+                                </View>
+                            )}
                         </View>
                         <Text style={styles.quickLabel}>Buku Tamu</Text>
                     </TouchableOpacity>

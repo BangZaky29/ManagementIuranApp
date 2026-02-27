@@ -1,22 +1,70 @@
 import { StyleSheet, Platform } from 'react-native';
 
 export const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F0F4F8' },
-
-    // Header Area
-    header: {
-        backgroundColor: '#FFF', paddingHorizontal: 20, paddingBottom: 16,
-        paddingTop: Platform.OS === 'android' ? 48 : 16,
-        borderBottomWidth: 1, borderBottomColor: '#E0E0E0',
-    },
-    headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    title: { fontSize: 24, fontWeight: 'bold', color: '#0D47A1' },
-    subtitle: { fontSize: 13, color: '#666', marginTop: 4 },
+    container: { flex: 1, backgroundColor: '#FFF' },
+    subtitle: { fontSize: 13, color: '#666' },
     addButton: {
         backgroundColor: '#0D47A1', paddingHorizontal: 16, paddingVertical: 8,
         borderRadius: 20, flexDirection: 'row', alignItems: 'center', gap: 6
     },
     addButtonText: { color: '#FFF', fontWeight: 'bold', fontSize: 13 },
+    
+    // Tab Bar
+    tabBar: {
+        flexDirection: 'row', paddingHorizontal: 16, backgroundColor: '#FFF',
+        borderBottomWidth: 1, borderBottomColor: '#EEE', paddingVertical: 12
+    },
+    filterChip: {
+        paddingHorizontal: 20, paddingVertical: 8, borderRadius: 20,
+        backgroundColor: '#F5F5F5', marginRight: 10, borderWidth: 1, borderColor: '#EEE'
+    },
+    filterChipActive: {
+        backgroundColor: '#E3F2FD', borderColor: '#0D47A1'
+    },
+    filterText: {
+        fontSize: 14, color: '#666', fontWeight: '600'
+    },
+    filterTextActive: {
+        color: '#0D47A1', fontWeight: 'bold'
+    },
+
+    // Summary Card
+    summaryCard: {
+        backgroundColor: '#FFF',
+        marginHorizontal: 16,
+        marginTop: 12,
+        marginBottom: 4,
+        padding: 16,
+        borderRadius: 16,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
+        ...Platform.select({
+            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 3 },
+            android: { elevation: 2 },
+        }),
+    },
+    summaryItem: {
+        alignItems: 'center',
+        flex: 1,
+    },
+    summaryDivider: {
+        width: 1,
+        backgroundColor: '#EEE',
+        marginHorizontal: 8,
+    },
+    summaryValue: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 4,
+    },
+    summaryLabel: {
+        fontSize: 11,
+        color: '#666',
+        textAlign: 'center',
+    },
 
     // List
     listContainer: { padding: 16, paddingBottom: 100 },
@@ -64,6 +112,10 @@ export const styles = StyleSheet.create({
         maxHeight: '90%',
     },
     modalTitle: { fontSize: 20, fontWeight: 'bold', color: '#333', marginBottom: 20 },
+    headerRow: { 
+        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', 
+        marginBottom: 10 
+    },
 
     inputGroup: { marginBottom: 16 },
     inputLabel: { fontSize: 13, fontWeight: '600', color: '#555', marginBottom: 8 },
@@ -170,5 +222,24 @@ export const styles = StyleSheet.create({
         color: '#666',
         fontSize: 14,
         marginBottom: 10
+    },
+    
+    // Show More
+    showMoreBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 12,
+        marginTop: 4,
+        gap: 6,
+        backgroundColor: '#F5F5F5',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#EEE'
+    },
+    showMoreText: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#0D47A1'
     }
 });

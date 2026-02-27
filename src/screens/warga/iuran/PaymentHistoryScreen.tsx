@@ -28,6 +28,8 @@ export default function PaymentHistoryScreen() {
         toggleExpand,
         isExpanded,
         handleDownloadReceipt,
+        handleDownloadPeriodReceipt,
+        handleDownloadAllReceipts,
         isDownloadingId,
         isLoading,
         refresh
@@ -60,29 +62,66 @@ export default function PaymentHistoryScreen() {
                         {group.items.map((item: any, idx: number) => (
                             <View key={item.id}>
                                 <View style={s.historyItemRow}>
-                                    <Ionicons name="checkmark-circle" size={20} color="#4CAF50" style={{ marginRight: 10 }} />
+                                    <Ionicons 
+                                        name={item.status === 'Lunas' ? "checkmark-circle" : "time"} 
+                                        size={20} 
+                                        color={item.status === 'Lunas' ? "#4CAF50" : "#FF9800"} 
+                                        style={{ marginRight: 10 }} 
+                                    />
                                     <View style={{ flex: 1 }}>
                                         <Text style={s.itemName}>{item.feeName}</Text>
-                                        <Text style={s.historyItemSub}>{item.date} • {item.methodName}</Text>
+                                        <Text style={s.historyItemSub}>
+                                            {item.status === 'Lunas' ? `${item.date} • ${item.methodName}` : 'Menunggu konfirmasi'}
+                                        </Text>
                                     </View>
                                     <View style={{ alignItems: 'flex-end' }}>
-                                        <Text style={s.itemAmountText}>{item.amountFormatted}</Text>
-                                        <TouchableOpacity 
-                                            onPress={() => handleDownloadReceipt(item, group.periodName)}
-                                            disabled={isDownloadingId === item.id}
-                                            style={{ marginTop: 4 }}
-                                        >
-                                            {isDownloadingId === item.id ? (
-                                                <ActivityIndicator size="small" color="#1B5E20" />
-                                            ) : (
-                                                <Text style={{ color: '#1B5E20', fontSize: 11, fontWeight: 'bold' }}>Kuitansi</Text>
-                                            )}
-                                        </TouchableOpacity>
+                                        <Text style={[s.itemAmountText, item.status !== 'Lunas' && { color: '#FF9800' }]}>{item.amountFormatted}</Text>
+                                        
+                                        {item.status === 'Lunas' && (
+                                            <TouchableOpacity 
+                                                onPress={() => handleDownloadReceipt(item, group.periodName)}
+                                                disabled={isDownloadingId === item.id}
+                                                style={{ marginTop: 4 }}
+                                            >
+                                                {isDownloadingId === item.id ? (
+                                                    <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#E8F5E9', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, gap: 4 }}>
+                                                        <ActivityIndicator size="small" color="#1B5E20" />
+                                                    </View>
+                                                ) : (
+                                                    <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#E8F5E9', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, gap: 4 }}>
+                                                        <Ionicons name="download-outline" size={14} color="#1B5E20" />
+                                                        <Text style={{ color: '#1B5E20', fontSize: 11, fontWeight: 'bold' }}>Kuitansi</Text>
+                                                    </View>
+                                                )}
+                                            </TouchableOpacity>
+                                        )}
                                     </View>
                                 </View>
                                 {idx < group.items.length - 1 && <View style={s.divider} />}
                             </View>
                         ))}
+                        
+                        {/* Download Period Button */}
+                        {group.items.some((i: any) => i.status === 'Lunas') && (
+                            <TouchableOpacity 
+                                style={{
+                                    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+                                    backgroundColor: '#E8F5E9', paddingVertical: 10, borderRadius: 12, marginTop: 12, borderWidth: 1, borderColor: '#C8E6C9'
+                                }}
+                                onPress={() => handleDownloadPeriodReceipt(group)}
+                                disabled={isDownloadingId === group.id}
+                            >
+                                {isDownloadingId === group.id ? (
+                                    <ActivityIndicator size="small" color="#1B5E20" />
+                                ) : (
+                                    <>
+                                        <Ionicons name="download-outline" size={16} color="#1B5E20" style={{ marginRight: 6 }} />
+                                        <Text style={{ color: '#1B5E20', fontSize: 13, fontWeight: 'bold' }}>Unduh Kuitansi Bulan Ini</Text>
+                                    </>
+                                )}
+                            </TouchableOpacity>
+                        )}
+
                     </View>
                 </View>
             )}
@@ -153,9 +192,9 @@ export default function PaymentHistoryScreen() {
                         </Text>
                     </TouchableOpacity>
 
-                    <View style={[s.filterRow, { marginTop: 0 }]}>
+                    <View style={{ flex: 1, overflow: 'hidden' }}>
                         {/* Status Filter Row */}
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingRight: 40 }}>
                             {statuses.map(status => (
                                 <TouchableOpacity
                                     key={status}
@@ -175,6 +214,27 @@ export default function PaymentHistoryScreen() {
             {/* List */}
             <FlatList
                 data={filteredHistory}
+                ListHeaderComponent={
+                    filteredHistory.length > 0 && filteredHistory.some((g: any) => g.items.some((i: any) => i.status === 'Lunas')) ? (
+                        <TouchableOpacity 
+                            style={{
+                                flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+                                backgroundColor: '#1B5E20', paddingVertical: 14, borderRadius: 12, marginBottom: 16, marginHorizontal: 20
+                            }}
+                            onPress={handleDownloadAllReceipts}
+                            disabled={isDownloadingId === 'all'}
+                        >
+                            {isDownloadingId === 'all' ? (
+                                <ActivityIndicator size="small" color="#FFF" />
+                            ) : (
+                                <>
+                                    <Ionicons name="download" size={18} color="#FFF" style={{ marginRight: 8 }} />
+                                    <Text style={{ color: '#FFF', fontSize: 14, fontWeight: 'bold' }}>Unduh Semua Kuitansi Riwayat</Text>
+                                </>
+                            )}
+                        </TouchableOpacity>
+                    ) : null
+                }
                 renderItem={renderItem}
                 keyExtractor={item => item.id}
                 contentContainerStyle={s.listContainer}
@@ -213,10 +273,10 @@ const s = StyleSheet.create({
     filterContainer: { paddingHorizontal: 20, paddingBottom: 10, backgroundColor: '#E8F5E9' },
     searchContainer: {
         flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF',
-        borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8,
+        borderRadius: 12, paddingHorizontal: 12, height: 44,
         borderWidth: 1, borderColor: '#A5D6A7'
     },
-    searchInput: { flex: 1, marginLeft: 8, fontSize: 14, color: '#1B5E20' },
+    searchInput: { flex: 1, marginLeft: 8, fontSize: 14, color: '#1B5E20', height: '100%' },
     filterRow: { flexDirection: 'row', gap: 10, marginTop: 12 },
     filterButton: {
         paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,

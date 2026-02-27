@@ -7,8 +7,8 @@ export const styles = StyleSheet.create({
     header: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
         paddingHorizontal: 20, paddingVertical: 16,
-        paddingTop: Platform.OS === 'android' ? 48 : 16,
         backgroundColor: '#FFF',
+        borderBottomWidth: 1, borderBottomColor: '#F0F4F8',
     },
     greeting: { fontSize: 14, color: '#666' },
     userName: { fontSize: 22, fontWeight: 'bold', color: '#0D47A1' }, // Security Blue
@@ -77,6 +77,12 @@ export const styles = StyleSheet.create({
         justifyContent: 'center', alignItems: 'center',
     },
     badgeText: { color: '#FFF', fontSize: 10, fontWeight: 'bold' },
+    badgeYellow: {
+        backgroundColor: '#FBC02D', // Deep Yellow
+    },
+    badgeTextBlack: {
+        color: '#000', fontSize: 10, fontWeight: 'bold'
+    },
 
     // Activity Cards (Ringkasan Aktivitas)
     activityCard: {

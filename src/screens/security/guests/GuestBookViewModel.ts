@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '../../../lib/supabaseConfig';
 import {
     fetchActiveVisitors,
+    fetchVisitorHistory,
     checkInWalkinVisitor,
     checkOutVisitor,
     Visitor,
@@ -27,6 +28,29 @@ export interface Resident {
 export function useGuestBookViewModel() {
     const [isLoading, setIsLoading] = useState(false);
     const [activeGuests, setActiveGuests] = useState<Visitor[]>([]);
+    const [guestHistory, setGuestHistory] = useState<Visitor[]>([]);
+    const [activeTab, setActiveTab] = useState<'Aktif' | 'Riwayat'>('Aktif');
+    const [refreshing, setRefreshing] = useState(false);
+    
+    // Pagination state for history
+    const INITIAL_HISTORY_LIMIT = 3;
+    const [visibleHistoryCount, setVisibleHistoryCount] = useState(INITIAL_HISTORY_LIMIT);
+
+    // Update tab and reset history view state
+    const handleTabChange = (tab: 'Aktif' | 'Riwayat') => {
+        setActiveTab(tab);
+        if (tab === 'Aktif') {
+            setVisibleHistoryCount(INITIAL_HISTORY_LIMIT);
+        }
+    };
+
+    const handleLoadMoreHistory = () => {
+        setVisibleHistoryCount(prev => prev + 3);
+    };
+
+    const handleCollapseHistory = () => {
+        setVisibleHistoryCount(INITIAL_HISTORY_LIMIT);
+    };
 
     const [addModalVisible, setAddModalVisible] = useState(false);
 
@@ -53,13 +77,20 @@ export function useGuestBookViewModel() {
 
     const hideAlert = () => setAlertVisible(false);
 
-    const loadData = useCallback(async () => {
-        setIsLoading(true);
+    const loadData = useCallback(async (isRefresh = false) => {
+        if (isRefresh) setRefreshing(true);
+        else setIsLoading(true);
+
         try {
-            const data = await fetchActiveVisitors();
-            setActiveGuests(data);
+            if (activeTab === 'Aktif') {
+                const data = await fetchActiveVisitors();
+                setActiveGuests(data);
+            } else {
+                const data = await fetchVisitorHistory();
+                setGuestHistory(data);
+            }
         } catch (error: any) {
-            console.error('Failed to load active visitors:', error);
+            console.error('Failed to load visitors:', error);
             setAlertConfig({
                 title: 'Error',
                 message: error.message || 'Gagal memuat daftar tamu',
@@ -69,8 +100,9 @@ export function useGuestBookViewModel() {
             setAlertVisible(true);
         } finally {
             setIsLoading(false);
+            setRefreshing(false);
         }
-    }, []);
+    }, [activeTab]);
 
     const loadResidents = useCallback(async () => {
         try {
@@ -212,11 +244,13 @@ export function useGuestBookViewModel() {
 
         setIsSubmitting(true);
         try {
+            const resident = residents.find(r => r.id === formDestination);
             await checkInWalkinVisitor(
                 formName,
                 formType,
                 formDestination, // Should be the user id from Resident
-                formPurpose
+                formPurpose,
+                resident?.housing_complex_id || null
             );
 
             setAddModalVisible(false);
@@ -276,7 +310,8 @@ export function useGuestBookViewModel() {
                 .from('visitors')
                 .update({
                     status: 'active',
-                    check_in_time: new Date().toISOString()
+                    check_in_time: new Date().toISOString(),
+                    housing_complex_id: selectedGuest.profiles?.housing_complex_id || null
                 })
                 .eq('id', selectedGuest.id);
 
@@ -316,7 +351,14 @@ export function useGuestBookViewModel() {
 
     return {
         isLoading,
+        refreshing,
         activeGuests,
+        guestHistory,
+        activeTab,
+        setActiveTab: handleTabChange,
+        visibleHistoryCount,
+        handleLoadMoreHistory,
+        handleCollapseHistory,
         addModalVisible,
         setAddModalVisible,
         formName,

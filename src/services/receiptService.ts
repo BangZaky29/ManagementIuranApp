@@ -14,6 +14,7 @@ export interface ReceiptData {
     paymentMethod: string;
     paidAt: string;
     complexName: string;
+    items?: { name: string; amount: number }[];
 }
 
 export const generateAndShareReceipt = async (data: ReceiptData): Promise<void> => {
@@ -114,7 +115,7 @@ export const generateAndShareReceipt = async (data: ReceiptData): Promise<void> 
                     </div>
                     
                     <div class="content">
-                        <table>
+                        <table style="margin-bottom: 20px;">
                             <tr class="border-bottom">
                                 <td class="label">ID Transaksi</td>
                                 <td class="value">#${data.paymentId.substring(0, 8).toUpperCase()}</td>
@@ -128,16 +129,35 @@ export const generateAndShareReceipt = async (data: ReceiptData): Promise<void> 
                                 <td class="value">${data.userName}</td>
                             </tr>
                             <tr class="border-bottom">
-                                <td class="label">Periode Iuran</td>
+                                <td class="label">Periode</td>
                                 <td class="value">${data.period}</td>
                             </tr>
                             <tr class="border-bottom">
                                 <td class="label">Metode Pembayaran</td>
-                                <td class="value">${data.paymentMethod || 'Transfer'}</td>
+                                <td class="value">${data.paymentMethod || 'Transfer/Tunai'}</td>
                             </tr>
+                        </table>
+
+                        <h3 style="color: #1B5E20; margin-bottom: 10px; font-size: 16px;">Rincian Pembayaran</h3>
+                        <table style="border: 1px solid #eee;">
+                            <tr style="background-color: #F5F5F5;">
+                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd; color: #555;">Keterangan</th>
+                                <th style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd; color: #555;">Jumlah</th>
+                            </tr>
+                            ${data.items && data.items.length > 0 ? data.items.map(item => `
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #f0f0f0;">${item.name}</td>
+                                    <td style="padding: 10px; text-align: right; border-bottom: 1px solid #f0f0f0;">Rp ${item.amount.toLocaleString('id-ID')}</td>
+                                </tr>
+                            `).join('') : `
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #f0f0f0;">Pembayaran Iuran ${data.period}</td>
+                                    <td style="padding: 10px; text-align: right; border-bottom: 1px solid #f0f0f0;">Rp ${data.amount.toLocaleString('id-ID')}</td>
+                                </tr>
+                            `}
                             <tr class="amount-row">
-                                <td class="label" style="font-weight: bold; color: #333;">Total Pembayaran</td>
-                                <td class="value amount-value">Rp ${data.amount.toLocaleString('id-ID')}</td>
+                                <td class="label" style="font-weight: bold; color: #333; padding: 15px 10px;">Total Pembayaran</td>
+                                <td class="value amount-value" style="padding: 15px 10px;">Rp ${data.amount.toLocaleString('id-ID')}</td>
                             </tr>
                         </table>
                     </div>

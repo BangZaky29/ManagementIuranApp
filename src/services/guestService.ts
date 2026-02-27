@@ -82,9 +82,13 @@ export const checkInWalkinVisitor = async (
     visitor_name: string,
     visitor_type: VisitorType,
     destination_user_id: string,
-    purpose: string
+    purpose: string,
+    housing_complex_id: number | null
 ): Promise<Visitor> => {
     try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new AppError('User not authenticated');
+
         const { data, error } = await supabase
             .from('visitors')
             .insert({
@@ -92,6 +96,8 @@ export const checkInWalkinVisitor = async (
                 visitor_type,
                 destination_user_id,
                 purpose,
+                housing_complex_id,
+                created_by: user.id,
                 status: 'active', // Assuming auto-approve for now (Phase 1)
                 check_in_time: new Date().toISOString()
             })
@@ -132,5 +138,18 @@ export const countActiveVisitors = async (): Promise<number> => {
         return count || 0;
     } catch (error) {
         return 0; // Don't throw for counts, just return 0 to avoid breaking dashboards
+    }
+};
+export const countPendingVisitors = async (): Promise<number> => {
+    try {
+        const { count, error } = await supabase
+            .from('visitors')
+            .select('*', { count: 'exact', head: true })
+            .eq('status', 'pending');
+
+        if (error) throw new AppError(error.message, 'COUNT_ERROR');
+        return count || 0;
+    } catch (error) {
+        return 0;
     }
 };

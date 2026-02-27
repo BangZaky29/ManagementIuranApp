@@ -7,22 +7,36 @@ export function useSecurityReportsViewModel() {
     const [reports, setReports] = useState<Report[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
     const [filterStatus, setFilterStatus] = useState('Semua');
 
-    const loadReports = useCallback(async (isRefresh = false) => {
+    const loadReports = useCallback(async (isRefresh = false, loadMore = false) => {
         try {
-            if (isRefresh) setRefreshing(true);
-            else setIsLoading(true);
+            const limit = 3;
+            const currentPage = isRefresh ? 0 : (loadMore ? page + 1 : 0);
 
-            const data = await fetchAllReports(0, 50, filterStatus);
-            setReports(data);
+            if (isRefresh) setRefreshing(true);
+            else if (!loadMore) setIsLoading(true);
+
+            const data = await fetchAllReports(currentPage, limit, filterStatus);
+            
+            if (isRefresh || !loadMore) {
+                setReports(data);
+                setPage(0);
+            } else {
+                setReports(prev => [...prev, ...data]);
+                setPage(currentPage);
+            }
+
+            setHasMore(data.length === limit);
         } catch (error) {
             console.error('Failed to load reports for security:', error);
         } finally {
             setIsLoading(false);
             setRefreshing(false);
         }
-    }, [filterStatus]);
+    }, [filterStatus, page]);
 
     const handleUpdateStatus = async (reportId: string, status: string) => {
         try {
@@ -38,6 +52,7 @@ export function useSecurityReportsViewModel() {
         reports,
         isLoading,
         refreshing,
+        hasMore,
         filterStatus,
         setFilterStatus,
         loadReports,

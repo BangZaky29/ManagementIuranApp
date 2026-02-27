@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { Linking } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchPanicLogs, resolvePanicLog, countActivePanics, PanicLog } from '../../services/panicService';
-import { countActiveVisitors } from '../../services/guestService';
+import { countActiveVisitors, countPendingVisitors } from '../../services/guestService';
 import { getDashboardStats } from '../../services/adminService';
 import { fetchRecentActivityLogs, ActivityLog } from '../../services/activityLogService';
 import { fetchAllReports, Report } from '../../services/laporanService';
@@ -21,6 +21,7 @@ export function useSecurityHomeViewModel() {
     const [recentPanics, setRecentPanics] = useState<PanicLog[]>([]);
     const [recentReports, setRecentReports] = useState<Report[]>([]);
     const [pendingReportsCount, setPendingReportsCount] = useState(0);
+    const [pendingGuestsCount, setPendingGuestsCount] = useState(0);
     const [securityProfile, setSecurityProfile] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -33,12 +34,13 @@ export function useSecurityHomeViewModel() {
 
     const loadData = useCallback(async () => {
         try {
-            const [statsData, panicCount, guestCount, panicLogs, logsData, reportCount] = await Promise.all([
+            const [statsData, panicCount, guestCount, pendingGuestCount, panicLogs, logsData, reportCount] = await Promise.all([
                 getDashboardStats(),
                 countActivePanics(),
                 countActiveVisitors(),
+                countPendingVisitors(),
                 fetchPanicLogs(0, 5, false), // Latest 5 active panics
-                fetchAllReports(0, 5), // Latest 5 reports
+                fetchAllReports(0, 3), // Latest 3 reports
                 supabase.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'Menunggu')
             ]);
             let profileData = null;
@@ -50,6 +52,7 @@ export function useSecurityHomeViewModel() {
             setStats(statsData);
             setActivePanics(panicCount);
             setActiveGuests(guestCount);
+            setPendingGuestsCount(pendingGuestCount);
             setRecentPanics(panicLogs);
             setRecentReports(logsData as any);
             setPendingReportsCount(reportCount.count || 0);
@@ -115,7 +118,7 @@ export function useSecurityHomeViewModel() {
     };
 
     return {
-        user, stats, activePanics, activeGuests, recentPanics, isLoading, securityProfile,
+        user, stats, activePanics, activeGuests, pendingGuestsCount, recentPanics, isLoading, securityProfile,
         recentReports, pendingReportsCount,
         handleLogout, navigateToPanicLogs, navigateToGuestBook, navigateToProfile, navigateToReports,
         openPanicLocation, handleResolvePanic, formatTime,

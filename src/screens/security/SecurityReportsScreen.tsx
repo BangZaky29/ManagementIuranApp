@@ -164,6 +164,25 @@ export default function SecurityReportsScreen() {
                             colors={['#0D47A1']} 
                         />
                     }
+                    ListFooterComponent={
+                        vm.hasMore ? (
+                            <TouchableOpacity 
+                                style={styles.loadMoreBtn} 
+                                onPress={() => vm.loadReports(false, true)}
+                                disabled={vm.isLoading}
+                            >
+                                {vm.isLoading ? (
+                                    <ActivityIndicator size="small" color="#0D47A1" />
+                                ) : (
+                                    <Text style={styles.loadMoreText}>Lihat Lebih Banyak</Text>
+                                )}
+                            </TouchableOpacity>
+                        ) : (
+                            <View style={{ padding: 20, alignItems: 'center' }}>
+                                <Text style={{ color: '#999', fontSize: 12 }}>Sudah menampilkan semua laporan</Text>
+                            </View>
+                        )
+                    }
                     ListEmptyComponent={
                         <View style={styles.emptyContainer}>
                             <Ionicons name="document-text-outline" size={64} color="#CCC" />
