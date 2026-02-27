@@ -50,19 +50,23 @@ export default function SecurityHomeScreen() {
 
                 {/* Stats Row */}
                 <View style={styles.statsRow}>
-                    <View style={[styles.statCard, { borderLeftColor: '#4CAF50' }]}>
+                    <View style={[styles.statCard, { borderLeftColor: '#4CAF50', position: 'relative' }]}>
+                        {/* Bubbles at top right */}
+                        <View style={{ position: 'absolute', top: 8, right: 8, flexDirection: 'row', gap: 4 }}>
+                            {vm.stats.wargaActive > 0 && (
+                                <View style={{ backgroundColor: '#4CAF50', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
+                                    <Text style={{ fontSize: 10, color: '#FFF', fontWeight: 'bold' }}>{vm.stats.wargaActive}</Text>
+                                </View>
+                            )}
+                            {vm.stats.wargaInactive > 0 && (
+                                <View style={{ backgroundColor: '#F44336', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
+                                    <Text style={{ fontSize: 10, color: '#FFF', fontWeight: 'bold' }}>{vm.stats.wargaInactive}</Text>
+                                </View>
+                            )}
+                        </View>
+
                         <Text style={styles.statNumber}>{vm.stats.warga}</Text>
                         <Text style={styles.statLabel}>Total Warga</Text>
-                        <View style={{ flexDirection: 'row', marginTop: 4, gap: 8 }}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#4CAF50', marginRight: 4 }} />
-                                <Text style={{ fontSize: 10, color: '#666' }}>{vm.stats.wargaActive} Aktif</Text>
-                            </View>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#F44336', marginRight: 4 }} />
-                                <Text style={{ fontSize: 10, color: '#666' }}>{vm.stats.wargaInactive} Non-Aktif</Text>
-                            </View>
-                        </View>
                     </View>
                     <View style={[styles.statCard, { borderLeftColor: '#F44336' }]}>
                         <Text style={styles.statNumber}>{vm.activePanics}</Text>
@@ -218,9 +222,11 @@ export default function SecurityHomeScreen() {
                                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                                         <Text style={styles.activityName} numberOfLines={1}>{report.title}</Text>
                                         <View style={[
-                                            styles.statusDot, 
-                                            { backgroundColor: report.status === 'Selesai' ? '#4CAF50' : 
-                                                            report.status === 'Diproses' ? '#2196F3' : '#FF9800' }
+                                            styles.statusDot,
+                                            {
+                                                backgroundColor: report.status === 'Selesai' ? '#4CAF50' :
+                                                    report.status === 'Diproses' ? '#2196F3' : '#FF9800'
+                                            }
                                         ]} />
                                     </View>
                                     <Text style={styles.activityDesc} numberOfLines={1}>{report.description}</Text>

@@ -132,25 +132,27 @@ export default function IuranScreen() {
                                 {displayPeriods.map(period => {
                                     const isPayable = period.status === 'unpaid' || period.status === 'partial' || period.status === 'overdue';
                                     const isExpanded = expandedPeriodIds.has(period.id);
-                                    
+
                                     const unpaidItemsInPeriod = period.items.filter(i => i.status === 'unpaid');
                                     const allSelectedInPeriod = unpaidItemsInPeriod.length > 0 && unpaidItemsInPeriod.every(i => selectedItemKeys.has(`${period.id}|${i.fee.id}`));
                                     const someSelectedInPeriod = unpaidItemsInPeriod.length > 0 && unpaidItemsInPeriod.some(i => selectedItemKeys.has(`${period.id}|${i.fee.id}`));
-                                    
+
                                     let statusColor = '#4CAF50';
                                     let statusLabel = 'Lunas';
                                     let statusIcon = 'checkmark-circle';
-                                    
+
                                     if (period.status === 'overdue') {
                                         statusColor = '#D32F2F'; statusLabel = 'Tunggakan'; statusIcon = 'alert-circle';
                                     } else if (period.status === 'pending') {
                                         statusColor = '#FF9800'; statusLabel = 'Menunggu Konfirmasi'; statusIcon = 'time';
                                     } else if (period.status === 'unpaid') {
-                                        statusColor = period.isCurrentMonth ? '#F57C00' : '#888'; 
-                                        statusLabel = period.isCurrentMonth ? 'Bulan Ini' : 'Belum Dibayar'; 
+                                        statusColor = period.isCurrentMonth ? '#F57C00' : '#888';
+                                        statusLabel = period.isCurrentMonth ? 'Bulan Ini' : 'Belum Dibayar';
                                         statusIcon = 'ellipse-outline';
                                     } else if (period.status === 'partial') {
                                         statusColor = '#F57C00'; statusLabel = 'Dibayar Sebagian'; statusIcon = 'pie-chart';
+                                    } else if (period.status === 'rejected') {
+                                        statusColor = '#F44336'; statusLabel = 'Ditolak'; statusIcon = 'close-circle';
                                     }
 
                                     return (
@@ -191,15 +193,15 @@ export default function IuranScreen() {
                                                 <Text style={[s.feeAmount, period.status === 'paid' && { color: '#999' }]}>
                                                     {formatCurrency(period.totalAmount)}
                                                 </Text>
-                                                <Ionicons name={isExpanded ? "chevron-up" : "chevron-down"} size={20} color="#888" style={{marginLeft: 8}} />
+                                                <Ionicons name={isExpanded ? "chevron-up" : "chevron-down"} size={20} color="#888" style={{ marginLeft: 8 }} />
                                             </TouchableOpacity>
 
                                             {/* EXPANDED ITEMS LIST */}
                                             {isExpanded && (
                                                 <View style={s.expandedBox}>
                                                     <View style={s.itemsContainer}>
-                                                    {period.items.map((item, idx: number) => {
-                                                            const isItemPayable = item.status === 'unpaid';
+                                                        {period.items.map((item, idx: number) => {
+                                                            const isItemPayable = item.status === 'unpaid' || item.status === 'rejected';
                                                             const isItemSelected = selectedItemKeys.has(`${period.id}|${item.fee.id}`);
                                                             return (
                                                                 <View key={item.fee.id}>
@@ -216,12 +218,21 @@ export default function IuranScreen() {
                                                                             <Ionicons name="checkmark-circle" size={20} color={item.status === 'paid' ? '#4CAF50' : '#FF9800'} style={{ marginRight: 10 }} />
                                                                         )}
                                                                         <View style={{ flex: 1 }}>
-                                                                            <Text style={[s.itemName, !isItemPayable && { color: '#888' }]}>{item.fee.name}</Text>
-                                                                            <Text style={[s.itemStatusLabel, { color: item.status === 'paid' ? '#4CAF50' : item.status === 'pending' ? '#FF9800' : '#888' }]}>
-                                                                                {item.status === 'paid' ? 'Lunas' : item.status === 'pending' ? 'Menunggu Konfirmasi' : 'Belum Dibayar'}
+                                                                            <Text style={[s.itemName, (!isItemPayable && item.status !== 'rejected') && { color: '#888' }]}>{item.fee.name}</Text>
+                                                                            <Text style={[
+                                                                                s.itemStatusLabel,
+                                                                                { color: item.status === 'paid' ? '#4CAF50' : item.status === 'pending' ? '#FF9800' : item.status === 'rejected' ? '#F44336' : '#888' }
+                                                                            ]}>
+                                                                                {item.status === 'paid' ? 'Lunas' : item.status === 'pending' ? 'Menunggu Konfirmasi' : item.status === 'rejected' ? 'Ditolak' : 'Belum Dibayar'}
                                                                             </Text>
+
+                                                                            {item.status === 'rejected' && item.rejectionReason && (
+                                                                                <Text style={{ fontSize: 11, color: '#D32F2F', marginTop: 4, fontStyle: 'italic' }}>
+                                                                                    "{item.rejectionReason}"
+                                                                                </Text>
+                                                                            )}
                                                                         </View>
-                                                                        <Text style={[s.itemAmountText, !isItemPayable && { color: '#888' }]}>{formatCurrency(item.amount)}</Text>
+                                                                        <Text style={[s.itemAmountText, (!isItemPayable && item.status !== 'rejected') && { color: '#888' }]}>{formatCurrency(item.amount)}</Text>
                                                                     </View>
                                                                     {idx < period.items.length - 1 && <View style={s.divider} />}
                                                                 </View>
@@ -317,7 +328,7 @@ export default function IuranScreen() {
                                                                 </View>
                                                                 <View style={{ alignItems: 'flex-end' }}>
                                                                     <Text style={s.itemAmountText}>{item.amountFormatted}</Text>
-                                                                    <TouchableOpacity 
+                                                                    <TouchableOpacity
                                                                         onPress={() => handleDownloadReceipt(item, group.periodName)}
                                                                         disabled={isDownloadingReceiptId === item.id}
                                                                         style={{ marginTop: 4 }}

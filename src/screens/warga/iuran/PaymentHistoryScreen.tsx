@@ -62,23 +62,29 @@ export default function PaymentHistoryScreen() {
                         {group.items.map((item: any, idx: number) => (
                             <View key={item.id}>
                                 <View style={s.historyItemRow}>
-                                    <Ionicons 
-                                        name={item.status === 'Lunas' ? "checkmark-circle" : "time"} 
-                                        size={20} 
-                                        color={item.status === 'Lunas' ? "#4CAF50" : "#FF9800"} 
-                                        style={{ marginRight: 10 }} 
+                                    <Ionicons
+                                        name={item.status === 'Lunas' ? "checkmark-circle" : item.status === 'Ditolak' ? "close-circle" : "time"}
+                                        size={20}
+                                        color={item.status === 'Lunas' ? "#4CAF50" : item.status === 'Ditolak' ? "#F44336" : "#FF9800"}
+                                        style={{ marginRight: 10 }}
                                     />
                                     <View style={{ flex: 1 }}>
                                         <Text style={s.itemName}>{item.feeName}</Text>
                                         <Text style={s.historyItemSub}>
-                                            {item.status === 'Lunas' ? `${item.date} • ${item.methodName}` : 'Menunggu konfirmasi'}
+                                            {item.status === 'Lunas' ? `${item.date} • ${item.methodName}` : item.status === 'Ditolak' ? 'Pembayaran Ditolak Admin' : 'Menunggu konfirmasi'}
                                         </Text>
+
+                                        {item.status === 'Ditolak' && item.rejectionReason && (
+                                            <Text style={{ fontSize: 11, color: '#D32F2F', marginTop: 4, fontStyle: 'italic' }}>
+                                                "{item.rejectionReason}"
+                                            </Text>
+                                        )}
                                     </View>
                                     <View style={{ alignItems: 'flex-end' }}>
-                                        <Text style={[s.itemAmountText, item.status !== 'Lunas' && { color: '#FF9800' }]}>{item.amountFormatted}</Text>
-                                        
+                                        <Text style={[s.itemAmountText, item.status !== 'Lunas' && { color: item.status === 'Ditolak' ? '#F44336' : '#FF9800' }]}>{item.amountFormatted}</Text>
+
                                         {item.status === 'Lunas' && (
-                                            <TouchableOpacity 
+                                            <TouchableOpacity
                                                 onPress={() => handleDownloadReceipt(item, group.periodName)}
                                                 disabled={isDownloadingId === item.id}
                                                 style={{ marginTop: 4 }}
@@ -100,10 +106,10 @@ export default function PaymentHistoryScreen() {
                                 {idx < group.items.length - 1 && <View style={s.divider} />}
                             </View>
                         ))}
-                        
+
                         {/* Download Period Button */}
                         {group.items.some((i: any) => i.status === 'Lunas') && (
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 style={{
                                     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
                                     backgroundColor: '#E8F5E9', paddingVertical: 10, borderRadius: 12, marginTop: 12, borderWidth: 1, borderColor: '#C8E6C9'
@@ -216,7 +222,7 @@ export default function PaymentHistoryScreen() {
                 data={filteredHistory}
                 ListHeaderComponent={
                     filteredHistory.length > 0 && filteredHistory.some((g: any) => g.items.some((i: any) => i.status === 'Lunas')) ? (
-                        <TouchableOpacity 
+                        <TouchableOpacity
                             style={{
                                 flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
                                 backgroundColor: '#1B5E20', paddingVertical: 14, borderRadius: 12, marginBottom: 16, marginHorizontal: 20

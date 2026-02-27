@@ -13,6 +13,7 @@ export interface HistoryItem {
     date: string;
     methodName: string;
     periodRaw: string; // Internal use
+    rejectionReason?: string;
 }
 
 export interface GroupedHistory {
@@ -30,7 +31,7 @@ export const useHistoryViewModel = () => {
 
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-    const [selectedStatus, setSelectedStatus] = useState<'All' | 'Lunas' | 'Terlambat' | 'Pending'>('All');
+    const [selectedStatus, setSelectedStatus] = useState<'All' | 'Lunas' | 'Terlambat' | 'Pending' | 'Ditolak'>('All');
     const [isCalendarVisible, setCalendarVisible] = useState(false);
     const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
     const [isDownloadingId, setIsDownloadingId] = useState<string | null>(null);
@@ -51,12 +52,13 @@ export const useHistoryViewModel = () => {
                     feeName: p.fees?.name || 'Iuran',
                     amount: p.amount,
                     amountFormatted: `Rp ${p.amount.toLocaleString('id-ID')}`,
-                    status: p.status === 'paid' ? 'Lunas' : (p.status === 'overdue' ? 'Terlambat' : 'Pending'),
+                    status: p.status === 'paid' ? 'Lunas' : (p.status === 'overdue' ? 'Terlambat' : (p.status === 'rejected' ? 'Ditolak' : 'Pending')),
                     date: p.paid_at
                         ? formatDateSafe(p.paid_at)
                         : '-',
                     methodName: p.payment_method || '-',
                     periodRaw: p.period, // keep original for grouping
+                    rejectionReason: p.rejection_reason || 'Ditolak (hubungi admin)',
                 } as any;
             });
             setAllHistory(items as any);
@@ -72,7 +74,7 @@ export const useHistoryViewModel = () => {
         const filtered = allHistory.filter((item: any) => {
             const dateObj = new Date(item.periodRaw);
             const periodStr = dateObj.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
-            
+
             const matchesSearch = periodStr.toLowerCase().includes(searchQuery.toLowerCase());
 
             const matchesDate = selectedDate ? (() => {
@@ -112,7 +114,7 @@ export const useHistoryViewModel = () => {
         return Array.from(historyMap.values()).sort((a, b) => b.id.localeCompare(a.id));
     }, [searchQuery, selectedDate, selectedStatus, allHistory, expandedIds]);
 
-    const statuses = ['All', 'Lunas', 'Pending', 'Terlambat'];
+    const statuses = ['All', 'Lunas', 'Pending', 'Terlambat', 'Ditolak'];
 
     const toggleExpand = (id: string) => {
         setExpandedIds(prev => {
@@ -162,7 +164,7 @@ export const useHistoryViewModel = () => {
             if (paidItems.length === 0) return;
 
             const itemsList = paidItems.map(i => ({ name: i.feeName, amount: i.amount }));
-            
+
             await generateAndShareReceipt({
                 paymentId: group.id + '-' + new Date().getTime(),
                 userName: user?.user_metadata?.full_name || 'Warga',
@@ -174,8 +176,8 @@ export const useHistoryViewModel = () => {
                 items: itemsList
             });
         } catch (error: any) {
-             console.error('Download Period Receipt Error:', error);
-             alert('Gagal mengunduh kuitansi bulanan: ' + error.message);
+            console.error('Download Period Receipt Error:', error);
+            alert('Gagal mengunduh kuitansi bulanan: ' + error.message);
         } finally {
             setIsDownloadingId(null);
         }
@@ -195,13 +197,13 @@ export const useHistoryViewModel = () => {
                 amount: allPaidItems.reduce((acc, curr) => acc + curr.amount, 0),
                 period: 'Semua Riwayat (Total)',
                 paymentMethod: 'Gabungan Seluruh Histori',
-                paidAt: formatDateSafe(new Date().toISOString()), 
+                paidAt: formatDateSafe(new Date().toISOString()),
                 complexName: 'Manajemen Iuran Perumahan',
                 items: allItemsList
             });
         } catch (error: any) {
-             console.error('Download All Receipt Error:', error);
-             alert('Gagal mengunduh kuitansi keseluruhan: ' + error.message);
+            console.error('Download All Receipt Error:', error);
+            alert('Gagal mengunduh kuitansi keseluruhan: ' + error.message);
         } finally {
             setIsDownloadingId(null);
         }

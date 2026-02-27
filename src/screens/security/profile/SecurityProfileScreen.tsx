@@ -42,7 +42,7 @@ export default function SecurityProfileScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#F0F4F8" />
-            
+
             {/* Header Aligned with Guest Book */}
             <View style={styles.header}>
                 <Text style={styles.title}>Profil Petugas</Text>
@@ -78,6 +78,10 @@ export default function SecurityProfileScreen() {
                 {/* Personal Info */}
                 <Text style={styles.sectionTitle}>Informasi Pribadi</Text>
                 <View style={styles.infoCard}>
+                    {renderInfoItem('card-outline', 'NIK', user.nik)}
+                    {renderInfoItem('person-outline', 'Username', user.username)}
+                    {renderInfoItem('home-outline', 'Alamat', user.address)}
+                    {renderInfoItem('map-outline', 'RT/RW', user.rt_rw)}
                     {renderInfoItem('mail-outline', 'Email', user.email)}
                     {renderInfoItem('logo-whatsapp', 'WhatsApp', user.phone)}
                 </View>

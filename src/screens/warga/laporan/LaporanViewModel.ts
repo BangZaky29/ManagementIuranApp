@@ -22,7 +22,9 @@ export const useLaporanViewModel = () => {
 
     // Initial load
     useEffect(() => {
-        loadReports();
+        if (user?.id) {
+            loadReports();
+        }
     }, [user?.id]);
 
     // Reload when screen is focused (e.g. returning from detail or create)

@@ -19,8 +19,12 @@ export const useSecurityProfileViewModel = () => {
     // Use real profile data from Supabase, with fallbacks
     const user = {
         name: profile?.full_name || 'Petugas Keamanan',
+        nik: profile?.nik || '-',
+        username: profile?.username || '-',
+        address: profile?.address || '-',
+        rt_rw: profile?.rt_rw || '-',
         email: profile?.email || '-',
-        phone: profile?.wa_phone || '-', 
+        phone: profile?.wa_phone || '-',
         role: profile?.role || 'security',
         avatarUrl: profile?.avatar_url || null,
         housingComplexName: profile?.housing_complexes?.name || null,
@@ -102,7 +106,7 @@ export const useSecurityProfileViewModel = () => {
     };
 
     const handleChangePassword = () => {
-        router.push('/security/change-password' as any); 
+        router.push('/security/change-password' as any);
     };
 
     const handleLogout = () => {

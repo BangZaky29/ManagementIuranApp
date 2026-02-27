@@ -13,6 +13,7 @@ export interface HistoryItem {
     status: string;
     date: string;
     methodName: string;
+    rejectionReason?: string;
 }
 
 export interface GroupedHistory {
@@ -57,12 +58,12 @@ export const useIuranViewModel = () => {
             ]);
             setBillSummary(bill);
 
-            // Auto-select all overdue and unpaid current month periods
+            // Auto-select all overdue, rejected, and unpaid current month periods
             const toSelect = new Set<string>();
             bill.periods.forEach(p => {
-                if (p.isOverdue || (p.isCurrentMonth && (p.status === 'unpaid' || p.status === 'partial'))) {
+                if (p.isOverdue || (p.isCurrentMonth && (p.status === 'unpaid' || p.status === 'partial' || p.status === 'rejected')) || p.items.some(i => i.status === 'rejected')) {
                     p.items.forEach(i => {
-                        if (i.status === 'unpaid') toSelect.add(`${p.id}|${i.fee.id}`);
+                        if (i.status === 'unpaid' || i.status === 'rejected') toSelect.add(`${p.id}|${i.fee.id}`);
                     });
                 }
             });
@@ -70,20 +71,21 @@ export const useIuranViewModel = () => {
 
             // Group history by month
             const historyMap = new Map<string, GroupedHistory>();
-            
+
             rawPayments.forEach(p => {
                 const dateObj = new Date(p.period);
                 const periodId = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
                 const periodName = dateObj.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
-                
+
                 const item: HistoryItem = {
                     id: p.id,
                     feeName: p.fees?.name || 'Iuran',
                     amount: p.amount,
                     amountFormatted: `Rp ${p.amount.toLocaleString('id-ID')}`,
-                    status: p.status === 'paid' ? 'Lunas' : (p.status === 'overdue' ? 'Terlambat' : 'Pending'),
+                    status: p.status === 'paid' ? 'Lunas' : (p.status === 'overdue' ? 'Terlambat' : (p.status === 'rejected' ? 'Ditolak' : 'Pending')),
                     date: p.paid_at ? formatDateSafe(p.paid_at) : '-',
                     methodName: p.payment_method || '-',
+                    rejectionReason: p.rejection_reason || 'Ditolak (hubungi admin)',
                 };
 
                 if (!historyMap.has(periodId)) {
@@ -95,7 +97,7 @@ export const useIuranViewModel = () => {
                         isExpanded: false
                     });
                 }
-                
+
                 const group = historyMap.get(periodId)!;
                 group.items.push(item);
                 group.totalAmount += item.amount;
@@ -126,10 +128,10 @@ export const useIuranViewModel = () => {
         if (!billSummary) return;
         const period = billSummary.periods.find(p => p.id === periodId);
         if (!period) return;
-        
-        const unpaidItems = period.items.filter(i => i.status === 'unpaid');
+
+        const unpaidItems = period.items.filter(i => i.status === 'unpaid' || i.status === 'rejected');
         const allSelected = unpaidItems.every(i => selectedItemKeys.has(`${periodId}|${i.fee.id}`));
-        
+
         setSelectedItemKeys(prev => {
             const next = new Set(prev);
             unpaidItems.forEach(i => {
@@ -156,7 +158,7 @@ export const useIuranViewModel = () => {
         const ids = new Set<string>();
         billSummary.periods.forEach(p => {
             p.items.forEach(i => {
-                if (i.status === 'unpaid') ids.add(`${p.id}|${i.fee.id}`);
+                if (i.status === 'unpaid' || i.status === 'rejected') ids.add(`${p.id}|${i.fee.id}`);
             });
         });
         setSelectedItemKeys(ids);

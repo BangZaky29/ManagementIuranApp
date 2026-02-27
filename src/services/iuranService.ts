@@ -33,15 +33,16 @@ export interface PaymentRecord {
 export interface BillItem {
     fee: Fee;
     isPaid: boolean;
-    status: 'paid' | 'pending' | 'unpaid';
+    status: 'paid' | 'pending' | 'unpaid' | 'rejected';
     amount: number;
+    rejectionReason?: string;
 }
 
 export interface BillingPeriod {
     id: string; // format YYYY-MM
     periodDate: string; // format YYYY-MM-01
     monthName: string; // e.g. "Januari 2026"
-    status: 'paid' | 'pending' | 'unpaid' | 'overdue' | 'partial';
+    status: 'paid' | 'pending' | 'unpaid' | 'overdue' | 'partial' | 'rejected';
     totalAmount: number;
     unpaidAmount: number;
     items: BillItem[];
@@ -61,7 +62,7 @@ export const fetchActiveFees = async (complexId?: number): Promise<Fee[]> => {
         .from('fees')
         .select('*')
         .eq('is_active', true);
-    
+
     if (complexId) {
         query = query.eq('housing_complex_id', complexId);
     }
@@ -88,7 +89,7 @@ export const fetchMyPayments = async (): Promise<PaymentRecord[]> => {
 export const fetchBillingPeriods = async (userId: string): Promise<SmartBillSummary> => {
     // 1. Fetch user to get created_at and housing_complex_id
     const { data: profile } = await supabase.from('profiles').select('created_at, housing_complex_id').eq('id', userId).single();
-    
+
     // Default to Jan 1st of current year if no valid created_at, or max 12 months ago to prevent massive queries
     let startDate = new Date();
     startDate.setMonth(startDate.getMonth() - 11); // max 1 year ago by default
@@ -104,7 +105,7 @@ export const fetchBillingPeriods = async (userId: string): Promise<SmartBillSumm
 
     const currentDate = new Date();
     const currentMonthDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    
+
     const fees = await fetchActiveFees(profile?.housing_complex_id);
     if (fees.length === 0) {
         return { periods: [], totalOverdue: 0, totalCurrent: 0, totalUnpaid: 0 };
@@ -113,7 +114,7 @@ export const fetchBillingPeriods = async (userId: string): Promise<SmartBillSumm
 
     // Determine end date: max(today + 1 month, max fee's active_to)
     let nextMonthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
-    
+
     fees.forEach(fee => {
         if (fee.active_to) {
             const [ty, tm] = fee.active_to.split('-');
@@ -147,7 +148,7 @@ export const fetchBillingPeriods = async (userId: string): Promise<SmartBillSumm
         const periodStr = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}-01`;
         const idStr = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}`;
         const mName = `${localeMonths[monthDate.getMonth()]} ${monthDate.getFullYear()}`;
-        
+
         const isCurrentMonth = monthDate.getTime() === currentMonthDate.getTime();
         const isPastMonth = monthDate.getTime() < currentMonthDate.getTime();
 
@@ -190,17 +191,24 @@ export const fetchBillingPeriods = async (userId: string): Promise<SmartBillSumm
             })
             .map(fee => {
                 const p = paymentMap.get(fee.id);
-                let status: 'paid' | 'pending' | 'unpaid' = 'unpaid';
-                if (p?.status === 'paid') status = 'paid';
-            else if (p?.status === 'pending') status = 'pending';
+                let status: 'paid' | 'pending' | 'unpaid' | 'rejected' = 'unpaid';
+                let rejectionReason = undefined;
 
-            return {
-                fee,
-                isPaid: status === 'paid',
-                status,
-                amount: Number(fee.amount),
-            };
-        });
+                if (p?.status === 'paid') status = 'paid';
+                else if (p?.status === 'pending') status = 'pending';
+                else if (p?.status === 'rejected') {
+                    status = 'rejected';
+                    rejectionReason = p.rejection_reason || 'Ditolak (hubungi admin)';
+                }
+
+                return {
+                    fee,
+                    isPaid: status === 'paid',
+                    status,
+                    amount: Number(fee.amount),
+                    rejectionReason
+                };
+            });
 
         // If no fees are applicable for this month, skip creating a period
         if (items.length === 0) return;
@@ -208,13 +216,14 @@ export const fetchBillingPeriods = async (userId: string): Promise<SmartBillSumm
         // Determine period status
         const paidCount = items.filter(i => i.status === 'paid').length;
         const pendingCount = items.filter(i => i.status === 'pending').length;
-        const unpaidCount = items.filter(i => i.status === 'unpaid').length;
+        const rejectedCount = items.filter(i => i.status === 'rejected').length;
+        const unpaidCount = items.filter(i => i.status === 'unpaid' || i.status === 'rejected').length;
 
         let periodStatus: BillingPeriod['status'] = 'unpaid';
         if (paidCount === items.length) periodStatus = 'paid';
         else if (pendingCount > 0 && unpaidCount === 0) periodStatus = 'pending';
-        else if (paidCount > 0 || pendingCount > 0) periodStatus = 'partial';
-        
+        else if (paidCount > 0 || pendingCount > 0 || rejectedCount > 0) periodStatus = 'partial';
+
         if (periodStatus === 'unpaid' || periodStatus === 'partial') {
             if (isPastMonth) periodStatus = 'overdue';
         }
@@ -255,7 +264,7 @@ export const fetchBillingPeriods = async (userId: string): Promise<SmartBillSumm
  */
 export const submitBulkPayments = async (userId: string, selectedPeriods: BillingPeriod[], totalAmount: number, proofUrl: string, paymentMethod: string) => {
     const payload = [];
-    
+
     for (const period of selectedPeriods) {
         // Only pay for items that are unpaid
         const unpaidItems = period.items.filter(i => i.status === 'unpaid');

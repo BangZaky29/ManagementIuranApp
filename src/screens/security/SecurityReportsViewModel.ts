@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { fetchAllReports, updateReportStatus, Report } from '../../services/laporanService';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -20,7 +20,7 @@ export function useSecurityReportsViewModel() {
             else if (!loadMore) setIsLoading(true);
 
             const data = await fetchAllReports(currentPage, limit, filterStatus);
-            
+
             if (isRefresh || !loadMore) {
                 setReports(data);
                 setPage(0);
@@ -37,6 +37,10 @@ export function useSecurityReportsViewModel() {
             setRefreshing(false);
         }
     }, [filterStatus, page]);
+
+    useEffect(() => {
+        loadReports(true);
+    }, [filterStatus]);
 
     const handleUpdateStatus = async (reportId: string, status: string) => {
         try {
