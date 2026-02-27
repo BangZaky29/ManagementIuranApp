@@ -27,19 +27,10 @@ export const AdminTabBar = ({ state, descriptors, navigation }: MaterialTopTabBa
                 };
 
                 let iconName: keyof typeof Ionicons.glyphMap = 'help-outline';
-                // Admin Route Mapping
+                // Admin Route Mapping — Only 3 main tabs
                 switch (route.name) {
                     case 'index':
                         iconName = isFocused ? 'grid' : 'grid-outline';
-                        break;
-                    case 'users':
-                        iconName = isFocused ? 'people' : 'people-outline';
-                        break;
-                    case 'laporan':
-                        iconName = isFocused ? 'document-text' : 'document-text-outline';
-                        break;
-                    case 'news-management':
-                        iconName = isFocused ? 'newspaper' : 'newspaper-outline';
                         break;
                     case 'panic-logs':
                         iconName = isFocused ? 'warning' : 'warning-outline';
@@ -51,8 +42,8 @@ export const AdminTabBar = ({ state, descriptors, navigation }: MaterialTopTabBa
                         iconName = 'alert-circle-outline';
                 }
 
-                // Filter out any route that is not explicitly handled to avoid '?' icon
-                if (!['index', 'laporan', 'users', 'news-management', 'panic-logs', 'profile'].includes(route.name)) return null;
+                // Only show 3 main tabs — others are accessed via sidebar
+                if (!['index', 'panic-logs', 'profile'].includes(route.name)) return null;
 
                 if (['sitemap', '+not-found', 'explore'].includes(route.name)) return null;
 

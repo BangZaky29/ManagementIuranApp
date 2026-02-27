@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     View, Text, SafeAreaView, ScrollView, TouchableOpacity,
     StatusBar, Image, ActivityIndicator, RefreshControl, Platform
@@ -7,9 +7,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAdminHomeViewModel } from './AdminHomeViewModel';
 import { styles } from './AdminHomeStyles';
 import { CustomAlertModal } from '../../components/CustomAlertModal';
+import { AdminSidebar } from '../../components/navigation/AdminSidebar';
 
 export default function AdminHomeScreen() {
     const vm = useAdminHomeViewModel();
+    const [sidebarVisible, setSidebarVisible] = useState(false);
 
     if (vm.isLoading) {
         return (
@@ -35,8 +37,15 @@ export default function AdminHomeScreen() {
                         <Text style={styles.greeting}>Selamat datang,</Text>
                         <Text style={styles.userName}>{vm.user?.user_metadata?.full_name || 'Admin'}</Text>
                     </View>
-                    <TouchableOpacity style={styles.logoutBtn} onPress={vm.handleLogout}>
-                        <Ionicons name="log-out-outline" size={20} color="#C62828" />
+                    <TouchableOpacity
+                        style={{
+                            padding: 10,
+                            backgroundColor: '#E8F5E9',
+                            borderRadius: 12,
+                        }}
+                        onPress={() => setSidebarVisible(true)}
+                    >
+                        <Ionicons name="menu" size={22} color="#1B5E20" />
                     </TouchableOpacity>
                 </View>
 
@@ -72,46 +81,24 @@ export default function AdminHomeScreen() {
                     </TouchableOpacity>
                 )}
 
-                {/* Quick Actions */}
-                <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Menu Cepat</Text>
-                </View>
-                <View style={styles.quickActionsRow}>
-                    <TouchableOpacity style={styles.quickAction} onPress={vm.navigateToManageResidents}>
-                        <View style={[styles.quickIcon, { backgroundColor: '#E8F5E9' }]}>
-                            <Ionicons name="people" size={24} color="#1B5E20" />
+                {/* Pending Payments Banner */}
+                {vm.pendingPayments > 0 && (
+                    <TouchableOpacity
+                        style={[styles.panicBanner, { backgroundColor: '#F57F17', marginTop: vm.activePanics > 0 ? 8 : 16 }]}
+                        onPress={vm.navigateToPaymentConfirmation}
+                    >
+                        <View style={styles.panicBannerLeft}>
+                            <Ionicons name="receipt" size={24} color="#FFF" />
+                            <View style={{ marginLeft: 12 }}>
+                                <Text style={styles.panicBannerTitle}>
+                                    💰 {vm.pendingPayments} Pembayaran Menunggu
+                                </Text>
+                                <Text style={styles.panicBannerSubtitle}>Tap untuk konfirmasi</Text>
+                            </View>
                         </View>
-                        <Text style={styles.quickLabel}>Kelola Warga</Text>
+                        <Ionicons name="chevron-forward" size={20} color="#FFF" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.quickAction} onPress={vm.navigateToPanicLogs}>
-                        <View style={[styles.quickIcon, { backgroundColor: '#FFEBEE' }]}>
-                            <Ionicons name="warning" size={24} color="#F44336" />
-                            {vm.activePanics > 0 && (
-                                <View style={styles.badge}>
-                                    <Text style={styles.badgeText}>{vm.activePanics}</Text>
-                                </View>
-                            )}
-                        </View>
-                        <Text style={styles.quickLabel}>Log Darurat</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.quickAction} onPress={vm.navigateToPaymentMethods}>
-                        <View style={[styles.quickIcon, { backgroundColor: '#E3F2FD' }]}>
-                            <Ionicons name="card" size={24} color="#1565C0" />
-                        </View>
-                        <Text style={styles.quickLabel}>Metode Bayar</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.quickAction} onPress={vm.navigateToPaymentConfirmation}>
-                        <View style={[styles.quickIcon, { backgroundColor: '#FFF8E1' }]}>
-                            <Ionicons name="receipt" size={24} color="#F57F17" />
-                            {vm.pendingPayments > 0 && (
-                                <View style={styles.badge}>
-                                    <Text style={styles.badgeText}>{vm.pendingPayments}</Text>
-                                </View>
-                            )}
-                        </View>
-                        <Text style={styles.quickLabel}>Konfirmasi</Text>
-                    </TouchableOpacity>
-                </View>
+                )}
 
                 {/* Ringkasan Aktivitas — Recent Panic Logs */}
                 <View style={styles.sectionHeader}>
@@ -172,6 +159,13 @@ export default function AdminHomeScreen() {
                     })
                 )}
             </ScrollView>
+
+            {/* Sidebar Drawer */}
+            <AdminSidebar
+                visible={sidebarVisible}
+                onClose={() => setSidebarVisible(false)}
+                pendingPayments={vm.pendingPayments}
+            />
 
             <CustomAlertModal
                 visible={vm.alertVisible}

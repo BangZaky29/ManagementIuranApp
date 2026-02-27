@@ -7,6 +7,8 @@ export interface Fee {
     amount: number;
     due_date_day: number;
     is_active: boolean;
+    housing_complex_id: number;
+    created_at: string;
 }
 
 export interface PaymentRecord {
