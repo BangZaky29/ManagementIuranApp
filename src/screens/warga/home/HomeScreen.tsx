@@ -118,7 +118,12 @@ export default function HomeScreen() {
 
                 {/* Latest News */}
                 <Animated.View entering={FadeInDown.delay(400).duration(500)} style={styles.newsContainer}>
-                    <Text style={[styles.sectionTitle, { marginLeft: 0, color: colors.green5 }]}>Info Terbaru</Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                        <Text style={[styles.sectionTitle, { marginLeft: 0, marginBottom: 0, color: colors.green5 }]}>Info Terbaru</Text>
+                        <TouchableOpacity onPress={() => handleNavigation('/news')}>
+                            <Text style={{ marginTop: 10, marginRight: 10, fontSize: 13, color: colors.green5, fontWeight: '600' }}>Lihat Semua</Text>
+                        </TouchableOpacity>
+                    </View>
                     <ScrollView
                         horizontal
                         showsHorizontalScrollIndicator={false}
@@ -128,7 +133,7 @@ export default function HomeScreen() {
                             e.stopPropagation();
                         }}
                     >
-                        {newsItems.map((item) => (
+                        {newsItems.slice(0, 3).map((item) => (
                             <TouchableOpacity
                                 key={item.id}
                                 style={[styles.newsCard, { backgroundColor: colors.backgroundCard }]}

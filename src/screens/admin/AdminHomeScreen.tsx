@@ -190,6 +190,30 @@ export default function AdminHomeScreen() {
                                             </View>
                                         )}
                                         <Text style={styles.activityUserName}>{log.profiles?.full_name || 'System'}</Text>
+                                        
+                                        {/* Role Badge */}
+                                        {log.profiles?.role && (
+                                            <View style={[
+                                                { 
+                                                    marginLeft: 6, 
+                                                    paddingHorizontal: 6, 
+                                                    paddingVertical: 2, 
+                                                    borderRadius: 4,
+                                                },
+                                                log.profiles.role === 'admin' ? { backgroundColor: '#E3F2FD' } :
+                                                log.profiles.role === 'security' ? { backgroundColor: '#FFF3E0' } :
+                                                { backgroundColor: '#E8F5E9' } // warga
+                                            ]}>
+                                                <Text style={[
+                                                    { fontSize: 9, fontWeight: 'bold' },
+                                                    log.profiles.role === 'admin' ? { color: '#1565C0' } :
+                                                    log.profiles.role === 'security' ? { color: '#E65100' } :
+                                                    { color: '#2E7D32' } // warga
+                                                ]}>
+                                                    {log.profiles.role.toUpperCase()}
+                                                </Text>
+                                            </View>
+                                        )}
                                     </View>
                                 </View>
                             </View>

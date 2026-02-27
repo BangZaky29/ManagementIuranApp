@@ -103,6 +103,30 @@ export default function ActivityLogScreen() {
                                 <Ionicons name="person-circle-outline" size={14} color="#666" />
                             )}
                             <Text style={styles.userName}>{item.profiles.full_name}</Text>
+                            
+                            {/* Role Badge */}
+                            {item.profiles.role && (
+                                <View style={[
+                                    { 
+                                        marginLeft: 6, 
+                                        paddingHorizontal: 6, 
+                                        paddingVertical: 2, 
+                                        borderRadius: 4,
+                                    },
+                                    item.profiles.role === 'admin' ? { backgroundColor: '#E3F2FD' } :
+                                    item.profiles.role === 'security' ? { backgroundColor: '#FFF3E0' } :
+                                    { backgroundColor: '#E8F5E9' } // warga
+                                ]}>
+                                    <Text style={[
+                                        { fontSize: 9, fontWeight: 'bold' },
+                                        item.profiles.role === 'admin' ? { color: '#1565C0' } :
+                                        item.profiles.role === 'security' ? { color: '#E65100' } :
+                                        { color: '#2E7D32' } // warga
+                                    ]}>
+                                        {item.profiles.role.toUpperCase()}
+                                    </Text>
+                                </View>
+                            )}
                         </View>
                     )}
                 </View>

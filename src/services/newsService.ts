@@ -20,6 +20,18 @@ export interface NewsItem {
 }
 
 export const fetchNews = async (isAdmin: boolean = false) => {
+    // 1. Get current user's housing complex id
+    const { data: authData } = await supabase.auth.getUser();
+    if (!authData.user) return [];
+
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('housing_complex_id')
+        .eq('id', authData.user.id)
+        .single();
+        
+    const complexId = profile?.housing_complex_id;
+
     let query = supabase
         .from('news')
         .select(`
@@ -27,6 +39,11 @@ export const fetchNews = async (isAdmin: boolean = false) => {
             author:profiles(full_name, avatar_url)
         `)
         .order('created_at', { ascending: false });
+
+    // Filter by complex ID if available
+    if (complexId) {
+        query = query.eq('housing_complex_id', complexId);
+    }
 
     // If not admin, only show published news
     if (!isAdmin) {

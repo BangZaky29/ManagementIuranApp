@@ -13,6 +13,7 @@ export interface ActivityLog {
         full_name: string;
         avatar_url: string | null;
         wa_phone: string | null;
+        role?: string;
     };
 }
 
@@ -25,7 +26,7 @@ export const fetchRecentActivityLogs = async (limit: number = 20, offset: number
         .from('activity_logs')
         .select(`
             *,
-            profiles:user_id (full_name, avatar_url, wa_phone)
+            profiles:user_id (full_name, avatar_url, wa_phone, role)
         `)
         .order('created_at', { ascending: false })
         .range(offset, offset + limit - 1);

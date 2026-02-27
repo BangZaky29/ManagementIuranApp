@@ -89,24 +89,30 @@ export default function PaymentConfirmationListScreen() {
             </View>
 
             {/* Filter Tabs */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterContainer}>
-                {filters.map((f) => (
-                    <TouchableOpacity
-                        key={f.key}
-                        style={[styles.filterTab, activeFilter === f.key && styles.filterTabActive]}
-                        onPress={() => setActiveFilter(f.key)}
-                    >
-                        <Ionicons
-                            name={f.icon as any}
-                            size={16}
-                            color={activeFilter === f.key ? Colors.green5 : Colors.textSecondary}
-                        />
-                        <Text style={[styles.filterLabel, activeFilter === f.key && styles.filterLabelActive]}>
-                            {f.label}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
-            </ScrollView>
+            <View style={{ flexGrow: 0, marginBottom: 12 }}>
+                <ScrollView 
+                    horizontal 
+                    showsHorizontalScrollIndicator={false} 
+                    contentContainerStyle={{ paddingHorizontal: 20, paddingRight: 32, alignItems: 'center' }}
+                >
+                    {filters.map((f) => (
+                        <TouchableOpacity
+                            key={f.key}
+                            style={[styles.filterTab, activeFilter === f.key && styles.filterTabActive]}
+                            onPress={() => setActiveFilter(f.key)}
+                        >
+                            <Ionicons
+                                name={f.icon as any}
+                                size={16}
+                                color={activeFilter === f.key ? Colors.green5 : Colors.textSecondary}
+                            />
+                            <Text style={[styles.filterLabel, activeFilter === f.key && styles.filterLabelActive]}>
+                                {f.label}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
+            </View>
 
             {isLoading ? (
                 <View style={styles.centerContainer}>
@@ -208,7 +214,7 @@ const styles = StyleSheet.create({
     backButton: { padding: 5, marginRight: 10 },
     headerTitle: { fontSize: 20, fontWeight: 'bold', color: Colors.green5 },
     filterContainer: {
-        maxHeight: 50, paddingHorizontal: 16, marginBottom: 8,
+        marginBottom: 8,
     },
     filterTab: {
         flexDirection: 'row', alignItems: 'center', gap: 6,

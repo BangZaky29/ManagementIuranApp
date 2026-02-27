@@ -5,6 +5,7 @@ export default function IuranLayout() {
         <Stack>
             <Stack.Screen name="history" options={{ headerShown: false }} />
             <Stack.Screen name="payment-detail" options={{ headerShown: false }} />
+            <Stack.Screen name="timeline" options={{ headerShown: false }} />
         </Stack>
     );
 }

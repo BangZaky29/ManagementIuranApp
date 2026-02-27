@@ -34,7 +34,7 @@ export default function TimelineScreen() {
     return (
         <SafeAreaView style={[s.container, { backgroundColor: colors.background }]}>
             <StatusBar barStyle={colors.statusBar} backgroundColor={colors.green1} />
-            <CustomHeader title="Timeline Tagihan Lengkap" />
+            <CustomHeader title="Timeline Tagihan Lengkap" showBack={true} />
 
             {isLoading ? (
                 <View style={s.center}>
