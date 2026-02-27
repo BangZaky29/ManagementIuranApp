@@ -154,7 +154,7 @@ export default function LaporanListScreen() {
     return (
         <View style={styles.container}>
             <StatusBar style="dark" />
-            <CustomHeader title="Laporan Warga" showBack={false} />
+            <CustomHeader title="Laporan Warga" showBack={true} />
 
             {/* Filters */}
             <View style={styles.filterContainer}>

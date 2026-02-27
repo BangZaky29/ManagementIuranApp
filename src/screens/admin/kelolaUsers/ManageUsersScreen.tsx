@@ -343,7 +343,7 @@ export default function ManageUsersScreen() {
     return (
         <View style={styles.container}>
             <StatusBar style="dark" />
-            <CustomHeader title="Kelola User" showBack={false} />
+            <CustomHeader title="Kelola User" showBack={true} />
 
             {/* Search */}
             <View style={styles.filterContainer}>

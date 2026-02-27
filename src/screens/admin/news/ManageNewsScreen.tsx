@@ -211,7 +211,7 @@ export default function ManageNewsScreen() {
     return (
         <View style={styles.container}>
             <StatusBar style="dark" />
-            <CustomHeader title="Kelola Berita" showBack={false} />
+            <CustomHeader title="Kelola Berita" showBack={true} />
 
             {isLoading ? (
                 <View style={styles.centered}>

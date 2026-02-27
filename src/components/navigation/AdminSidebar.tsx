@@ -64,9 +64,9 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     }, [visible]);
 
     const menuItems: MenuItem[] = [
-        { key: 'laporan', label: 'Laporan Warga', icon: 'document-text-outline', route: '/admin/laporan' },
         { key: 'users', label: 'Kelola User', icon: 'people-outline', route: '/admin/users' },
         { key: 'news', label: 'Kelola Berita', icon: 'newspaper-outline', route: '/admin/news-management' },
+        { key: 'laporan', label: 'Laporan Warga', icon: 'document-text-outline', route: '/admin/laporan' },
         { key: 'iuran', label: 'Management Iuran', icon: 'wallet-outline', route: '/admin/iuran-management' },
     ];
 
@@ -97,9 +97,13 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
             </Animated.View>
 
             {/* Sidebar */}
+            {/* Sidebar */}
             <Animated.View style={[styles.sidebar, { transform: [{ translateX }] }]}>
                 {/* Profile Section */}
                 <View style={styles.profileSection}>
+                    <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                        <Ionicons name="close" size={24} color="#666" />
+                    </TouchableOpacity>
                     <View style={styles.avatarContainer}>
                         {profile?.avatar_url ? (
                             <Image source={{ uri: profile.avatar_url }} style={styles.avatar} />
@@ -153,8 +157,13 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
 const styles = StyleSheet.create({
     overlay: {
-        ...StyleSheet.absoluteFillObject,
-        zIndex: 999,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: -100,
+        zIndex: 99999,
+        elevation: 99999,
     },
     backdrop: {
         ...StyleSheet.absoluteFillObject,
@@ -182,6 +191,15 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#F0F0F0',
         alignItems: 'center',
+    },
+    closeButton: {
+        position: 'absolute',
+        top: 0,
+        right: 24,
+        padding: 6,
+        backgroundColor: '#F0F0F0',
+        borderRadius: 20,
+        zIndex: 10,
     },
     avatarContainer: {
         marginBottom: 12,
