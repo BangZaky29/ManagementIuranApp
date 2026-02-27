@@ -8,6 +8,7 @@ import { Colors } from '../../../constants/Colors';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
 import { fetchPanicLogs, PanicLog, resolvePanicLog } from '../../../services/panicService';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 export default function PanicLogScreen() {
     const { colors } = useTheme();

@@ -133,6 +133,13 @@ export interface MonthlyRevenue {
     collectionRate: number;
 }
 
+export interface OverallRevenue {
+    totalExpected: number;
+    totalCollected: number;
+    totalPending: number;
+    totalWarga: number;
+}
+
 /**
  * Fetch payment stats per fee for a given month period.
  */
@@ -144,7 +151,10 @@ export const fetchFeePaymentStats = async (period: string): Promise<FeePaymentSt
     const targetM = parseInt(pm) - 1;
 
     const activeFees = fees.filter(f => {
-        if (!f.is_active) return false;
+        // If it's current or future period, respect is_active
+        const now = new Date();
+        const isCurrentOrFuture = targetY > now.getFullYear() || (targetY === now.getFullYear() && targetM >= now.getMonth());
+        if (isCurrentOrFuture && !f.is_active) return false;
         
         if (f.active_from) {
             const [fy, fm] = f.active_from.split('-');
@@ -304,5 +314,80 @@ export const fetchMonthlyRevenueSummary = async (period: string): Promise<Monthl
         totalWarga,
         paidWargaCount: paidUserIds.size,
         collectionRate: totalExpected > 0 ? Math.round((totalCollected / totalExpected) * 100) : 0,
+    };
+};
+
+/**
+ * Total revenue summary across all history for active/past billing periods.
+ */
+export const fetchOverallRevenueSummary = async (): Promise<OverallRevenue> => {
+    const fees = await fetchAdminFees();
+    if (fees.length === 0) return { totalExpected: 0, totalCollected: 0, totalPending: 0, totalWarga: 0 };
+
+    // Get total warga count
+    const { count: wargaCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'warga');
+    const totalWarga = wargaCount || 0;
+
+    // Get all payments recorded
+    const { data: allPayments } = await supabase
+        .from('payments')
+        .select('fee_id, period, status, amount');
+    const paymentList = allPayments || [];
+
+    const now = new Date();
+    const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    let totalExpected = 0;
+    let totalCollected = 0;
+    let totalPending = 0;
+
+    fees.forEach(fee => {
+        // 1. Calculate Expected (Target)
+        // Start from active_from or created_at
+        let start = fee.active_from ? new Date(fee.active_from) : new Date(fee.created_at);
+        start = new Date(start.getFullYear(), start.getMonth(), 1);
+
+        // End at active_to or currentMonth
+        let end = fee.active_to ? new Date(fee.active_to) : currentMonth;
+        end = new Date(end.getFullYear(), end.getMonth(), 1);
+
+        if (start <= end) {
+            let months = 0;
+            let temp = new Date(start);
+            while (temp <= end) {
+                months++;
+                temp.setMonth(temp.getMonth() + 1);
+            }
+            totalExpected += fee.amount * months * totalWarga;
+        }
+
+        // 2. Filter Payments for this fee that fall within its active range
+        const feePayments = paymentList.filter(p => {
+            if (p.fee_id !== fee.id) return false;
+            
+            const pDate = new Date(p.period);
+            const pMonth = new Date(pDate.getFullYear(), pDate.getMonth(), 1);
+            
+            // Should be within [start, end]
+            return pMonth >= start && pMonth <= end;
+        });
+
+        totalCollected += feePayments
+            .filter(p => p.status === 'paid')
+            .reduce((sum, p) => sum + Number(p.amount), 0);
+        
+        totalPending += feePayments
+            .filter(p => p.status === 'pending')
+            .reduce((sum, p) => sum + Number(p.amount), 0);
+    });
+
+    return {
+        totalExpected,
+        totalCollected,
+        totalPending,
+        totalWarga,
     };
 };

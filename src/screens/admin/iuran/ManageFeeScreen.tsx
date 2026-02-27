@@ -23,6 +23,8 @@ import {
     fetchFeePaymentStats,
     fetchFeePayerList,
     fetchMonthlyRevenueSummary,
+    fetchOverallRevenueSummary,
+    OverallRevenue,
 } from '../../../services/feeService';
 
 // ====== TYPES ======
@@ -70,6 +72,7 @@ export default function ManageFeeScreen() {
     const [fees, setFees] = useState<AdminFee[]>([]);
     const [feeStats, setFeeStats] = useState<FeePaymentStat[]>([]);
     const [revenue, setRevenue] = useState<MonthlyRevenue | null>(null);
+    const [overallRevenue, setOverallRevenue] = useState<OverallRevenue | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     // Payer modal
@@ -86,7 +89,7 @@ export default function ManageFeeScreen() {
     const [isSaving, setIsSaving] = useState(false);
 
     // Date Picker
-    const [datePickerVisible, setDatePickerVisible] = useState<'from' | 'to' | null>(null);
+    const [datePickerVisible, setDatePickerVisible] = useState<'from' | 'to' | 'nav' | null>(null);
     const [pickerTempYear, setPickerTempYear] = useState(new Date().getFullYear());
 
     // Alert
@@ -100,14 +103,16 @@ export default function ManageFeeScreen() {
     const loadAllData = useCallback(async () => {
         setIsLoading(true);
         try {
-            const [feesData, statsData, revenueData] = await Promise.all([
+            const [feesData, statsData, revenueData, overallData] = await Promise.all([
                 fetchAdminFees(),
                 fetchFeePaymentStats(currentPeriod),
                 fetchMonthlyRevenueSummary(currentPeriod),
+                fetchOverallRevenueSummary(),
             ]);
             setFees(feesData);
             setFeeStats(statsData);
             setRevenue(revenueData);
+            setOverallRevenue(overallData);
         } catch (error) {
             console.error('Failed to load data:', error);
         } finally {
@@ -251,6 +256,13 @@ export default function ManageFeeScreen() {
     const canGoBack = !minPeriodStr || currentPeriod.substring(0, 7) > minPeriodStr.substring(0, 7);
     const canGoForward = !maxPeriodStr || currentPeriod.substring(0, 7) < maxPeriodStr.substring(0, 7);
 
+    const isMonthActive = (y: number, mIdx: number) => {
+        const periodStr = `${y}-${String(mIdx + 1).padStart(2, '0')}`;
+        const isBeforeStart = minPeriodStr && periodStr < minPeriodStr.substring(0, 7);
+        const isAfterEnd = maxPeriodStr && periodStr > maxPeriodStr.substring(0, 7);
+        return !isBeforeStart && !isAfterEnd;
+    };
+
     // ====== MAIN RENDER ======
 
     return (
@@ -318,10 +330,16 @@ export default function ManageFeeScreen() {
                             </TouchableOpacity>
                         )}
                     </View>
-                    <View style={s.monthLabel}>
+                    <TouchableOpacity 
+                        style={s.monthLabel} 
+                        onPress={() => {
+                            setPickerTempYear(parseInt(currentPeriod.split('-')[0]));
+                            setDatePickerVisible('nav');
+                        }}
+                    >
                         <Ionicons name="calendar-outline" size={16} color="#1B5E20" />
                         <Text style={s.monthText}>{formatPeriodLabel(currentPeriod)}</Text>
-                    </View>
+                    </TouchableOpacity>
                     <View style={s.monthArrow}>
                         {canGoForward && (
                             <TouchableOpacity onPress={() => shiftMonth(1)} style={s.monthArrowBtn}>
@@ -331,10 +349,37 @@ export default function ManageFeeScreen() {
                     </View>
                 </View>
 
+                {/* Overall Revenue Card */}
+                {overallRevenue && (
+                    <View style={[s.revenueCard, { backgroundColor: '#E8F5E9', borderLeftWidth: 4, borderLeftColor: '#1B5E20', marginBottom: 16 }]}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                            <Text style={[s.revenueTitle, { color: '#2E7D32', fontWeight: 'bold' }]}>Total Pemasukan Keseluruhan</Text>
+                            <View style={{ backgroundColor: '#1B5E20', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 }}>
+                                <Text style={{ fontSize: 10, color: '#FFF', fontWeight: 'bold' }}>AKUMULASI</Text>
+                            </View>
+                        </View>
+                        
+                        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4 }}>
+                            <Text style={[s.revenueAmount, { color: '#1B5E20' }]}>{formatCurrency(overallRevenue.totalCollected)}</Text>
+                            <Text style={{ fontSize: 16, color: '#666', fontWeight: '600' }}>/</Text>
+                            <Text style={{ fontSize: 16, color: '#666', fontWeight: '600' }}>{formatCurrency(overallRevenue.totalExpected)}</Text>
+                        </View>
+
+                        <View style={[s.revenueMeta, { borderTopColor: 'rgba(27,94,32,0.1)', marginTop: 10 }]}>
+                            <Text style={[s.revenueMetaText, { color: '#558B2F' }]}>
+                                💸 Piutang Tertunda: {formatCurrency(overallRevenue.totalPending)}
+                            </Text>
+                            <Text style={[s.revenueMetaText, { color: '#1B5E20', marginTop: 4, fontWeight: '700' }]}>
+                                🎯 Total yang akan didapatkan: {formatCurrency(overallRevenue.totalExpected)}
+                            </Text>
+                        </View>
+                    </View>
+                )}
+
                 {/* Revenue Summary Card */}
                 {revenue && (
                     <View style={s.revenueCard}>
-                        <Text style={s.revenueTitle}>Total Pemasukan</Text>
+                        <Text style={s.revenueTitle}>Total Pemasukan Bulan ini</Text>
                         <Text style={s.revenueAmount}>{formatCurrency(revenue.totalCollected)}</Text>
                         <View style={s.revenueBar}>
                             <View style={[s.revenueBarFill, { width: `${Math.min(revenue.collectionRate, 100)}%` }]} />
@@ -627,6 +672,10 @@ export default function ManageFeeScreen() {
                 const lastDay = new Date(pickerTempYear, monthIdx + 1, 0).getDate();
                 const val = `${pickerTempYear}-${String(monthIdx + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
                 setForm({ ...form, active_to: val });
+            } else if (datePickerVisible === 'nav') {
+                if (!isMonthActive(pickerTempYear, monthIdx)) return;
+                const val = `${pickerTempYear}-${String(monthIdx + 1).padStart(2, '0')}-01`;
+                setCurrentPeriod(val);
             }
             setDatePickerVisible(null);
         };
@@ -651,13 +700,23 @@ export default function ManageFeeScreen() {
                         <View style={s.datePickerGrid}>
                             {MONTHS.map((m, idx) => {
                                 const isSelected = currentM === idx && currentY === pickerTempYear;
+                                const isActive = datePickerVisible === 'nav' ? isMonthActive(pickerTempYear, idx) : true;
                                 return (
                                     <TouchableOpacity 
                                         key={m} 
-                                        style={[s.monthBox, isSelected && s.monthBoxSelected]} 
+                                        style={[
+                                            s.monthBox, 
+                                            isSelected && s.monthBoxSelected,
+                                            !isActive && s.monthBoxDisabled
+                                        ]} 
                                         onPress={() => handleSelectMonth(idx)}
+                                        disabled={!isActive}
                                     >
-                                        <Text style={[s.monthBoxText, isSelected && s.monthBoxTextSelected]}>{m}</Text>
+                                        <Text style={[
+                                            s.monthBoxText, 
+                                            isSelected && s.monthBoxTextSelected,
+                                            !isActive && { color: '#CCC' }
+                                        ]}>{m}</Text>
                                     </TouchableOpacity>
                                 );
                             })}
@@ -791,6 +850,7 @@ const s = StyleSheet.create({
     datePickerGrid: { flexDirection: 'row', flexWrap: 'wrap', padding: 16, justifyContent: 'space-between' },
     monthBox: { width: '30%', paddingVertical: 14, alignItems: 'center', borderRadius: 12, marginBottom: 12, backgroundColor: '#F5F5F5' },
     monthBoxSelected: { backgroundColor: '#1B5E20' },
+    monthBoxDisabled: { opacity: 0.4, backgroundColor: '#FAFAFA' },
     monthBoxText: { fontSize: 15, fontWeight: '600', color: '#555' },
     monthBoxTextSelected: { color: '#FFF' },
 });
