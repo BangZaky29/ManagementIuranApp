@@ -49,8 +49,16 @@ export default function IuranScreen() {
 
     const allPaid = billSummary?.periods.length && unpaidItemCount === 0 && pendingCount === 0;
 
-    const displayPeriods = billSummary?.periods.slice(0, 5) || [];
-    const hasMorePeriods = (billSummary?.periods.length || 0) > 5;
+    const unpaidPeriods = billSummary?.periods.filter(p => ['unpaid', 'partial', 'overdue', 'pending'].includes(p.status)) || [];
+    const displayPeriods = unpaidPeriods;
+
+    // Find oldest and newest paid periods for empty state message
+    const paidPeriods = billSummary?.periods.filter(p => p.status === 'paid') || [];
+    const sortedPaid = [...paidPeriods].sort((a, b) => a.id.localeCompare(b.id));
+    const isAllPaid = unpaidPeriods.length === 0 && sortedPaid.length > 0;
+    const paidMessage = isAllPaid
+        ? `Iuran sudah lunas semua dari bulan ${sortedPaid[0].monthName} hingga ${sortedPaid[sortedPaid.length - 1].monthName}`
+        : 'Admin belum menetapkan iuran untuk bulan ini.';
 
     return (
         <SafeAreaView style={[s.container, { backgroundColor: colors.background }]}>
@@ -116,7 +124,7 @@ export default function IuranScreen() {
                         </Animated.View>
 
                         {/* Fee Periods — Checklist */}
-                        {billSummary && billSummary.periods.length > 0 && (
+                        {unpaidPeriods.length > 0 && (
                             <Animated.View entering={FadeInDown.delay(200).duration(400)}>
                                 <View style={s.sectionHeader}>
                                     <Text style={s.sectionTitle}>Timeline Tagihan</Text>
@@ -288,12 +296,18 @@ export default function IuranScreen() {
                             </View>
                         )}
 
-                        {/* Empty state */}
-                        {billSummary && billSummary.periods.length === 0 && (
+                        {/* Empty state (Lunas atau Kosong) */}
+                        {billSummary && unpaidPeriods.length === 0 && (
                             <View style={s.emptyBox}>
-                                <Ionicons name="receipt-outline" size={48} color="#CCC" />
-                                <Text style={s.emptyTitle}>Belum Ada Iuran</Text>
-                                <Text style={s.emptySubtext}>Admin belum menetapkan iuran untuk bulan ini.</Text>
+                                <Ionicons name={isAllPaid ? "checkmark-circle" : "receipt-outline"} size={48} color={isAllPaid ? "#4CAF50" : "#CCC"} />
+                                <Text style={s.emptyTitle}>{isAllPaid ? "Semua Kewajiban Lunas!" : "Belum Ada Iuran"}</Text>
+                                <Text style={s.emptySubtext}>{paidMessage}</Text>
+                                <TouchableOpacity
+                                    style={{ marginTop: 12, paddingVertical: 8, paddingHorizontal: 16, backgroundColor: '#E8F5E9', borderRadius: 8 }}
+                                    onPress={() => router.push('/iuran/timeline')}
+                                >
+                                    <Text style={{ color: '#1B5E20', fontWeight: 'bold', fontSize: 13 }}>Lihat Semua Timeline Lengkap</Text>
+                                </TouchableOpacity>
                             </View>
                         )}
 

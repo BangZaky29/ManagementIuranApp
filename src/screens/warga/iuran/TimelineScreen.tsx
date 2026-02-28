@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator, StatusBar, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -31,6 +31,16 @@ export default function TimelineScreen() {
     const unpaidItemCount = billSummary?.periods.flatMap(p => p.items.filter(i => i.status === 'unpaid')).length || 0;
     const allPaid = billSummary?.periods.length && unpaidItemCount === 0;
 
+    const [timelineFilter, setTimelineFilter] = useState<'Semua' | 'Belum Lunas' | 'Lunas'>('Semua');
+    const filters = ['Semua', 'Belum Lunas', 'Lunas'];
+
+    const filteredPeriods = billSummary?.periods.filter(period => {
+        if (timelineFilter === 'Semua') return true;
+        if (timelineFilter === 'Belum Lunas') return period.status !== 'paid'; // which means unpaid, partial, overdue, pending, rejected
+        if (timelineFilter === 'Lunas') return period.status === 'paid';
+        return true;
+    }) || [];
+
     return (
         <SafeAreaView style={[s.container, { backgroundColor: colors.background }]}>
             <StatusBar barStyle={colors.statusBar} backgroundColor={colors.green1} />
@@ -48,7 +58,7 @@ export default function TimelineScreen() {
                             <View>
                                 <View style={s.sectionHeader}>
                                     <Text style={s.sectionTitle}>Semua Tagihan</Text>
-                                    {unpaidItemCount > 0 && (
+                                    {unpaidItemCount > 0 && timelineFilter !== 'Lunas' && (
                                         <TouchableOpacity
                                             onPress={selectedCount === unpaidItemCount ? deselectAll : selectAllUnpaid}
                                         >
@@ -59,7 +69,24 @@ export default function TimelineScreen() {
                                     )}
                                 </View>
 
-                                {billSummary.periods.map(period => {
+                                <View style={s.filterRow}>
+                                    {filters.map(f => (
+                                        <TouchableOpacity
+                                            key={f}
+                                            style={[s.filterChip, timelineFilter === f && s.filterChipActive]}
+                                            onPress={() => setTimelineFilter(f as any)}
+                                        >
+                                            <Text style={[s.filterText, timelineFilter === f && s.filterTextActive]}>{f}</Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+
+                                {filteredPeriods.length === 0 ? (
+                                    <View style={s.emptyBox}>
+                                        <Ionicons name="documents-outline" size={48} color="#CCC" />
+                                        <Text style={s.emptyTitle}>Tidak ada tagihan {timelineFilter}</Text>
+                                    </View>
+                                ) : filteredPeriods.map(period => {
                                     const isPayable = period.status === 'unpaid' || period.status === 'partial' || period.status === 'overdue';
                                     const isExpanded = expandedPeriodIds.has(period.id);
 
@@ -272,4 +299,10 @@ const s = StyleSheet.create({
     payBtnText: { fontSize: 15, fontWeight: 'bold', color: '#FFF' },
     emptyBox: { alignItems: 'center', paddingVertical: 30, backgroundColor: '#FFF', borderRadius: 16, padding: 20 },
     emptyTitle: { fontSize: 16, fontWeight: 'bold', color: '#333', marginTop: 12 },
+
+    filterRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
+    filterChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: '#E8F5E9', borderWidth: 1, borderColor: 'transparent' },
+    filterChipActive: { backgroundColor: '#1B5E20' },
+    filterText: { fontSize: 13, color: '#1B5E20', fontWeight: '600' },
+    filterTextActive: { color: '#FFF' },
 });

@@ -37,7 +37,7 @@ export const removePushToken = async (userId: string, token: string) => {
     }
 };
 
-export const fetchMyNotifications = async (): Promise<AppNotification[]> => {
+export const fetchMyNotifications = async (limitCount: number = 10): Promise<AppNotification[]> => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Not authenticated');
 
@@ -45,7 +45,8 @@ export const fetchMyNotifications = async (): Promise<AppNotification[]> => {
         .from('notifications')
         .select('*')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(limitCount);
 
     if (error) throw error;
     return data as AppNotification[];

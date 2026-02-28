@@ -82,4 +82,62 @@ export const styles = StyleSheet.create({
         color: Colors.textSecondary,
         textAlign: 'center',
     },
+    // Filter Styles
+    filterContainer: {
+        backgroundColor: 'white',
+        borderBottomWidth: 1,
+        borderBottomColor: '#F0F0F0',
+    },
+    filterContent: {
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        gap: 8,
+    },
+    filterChip: {
+        paddingHorizontal: 16,
+        paddingVertical: 6,
+        borderRadius: 20,
+        backgroundColor: '#F5F5F5',
+        marginRight: 8,
+    },
+    filterChipActive: {
+        backgroundColor: Colors.primary,
+    },
+    filterText: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: Colors.textSecondary,
+    },
+    filterTextActive: {
+        color: 'white',
+    },
+    // Footer Styles
+    footerContainer: {
+        paddingVertical: 16,
+        alignItems: 'center',
+    },
+    loadMoreButton: {
+        paddingVertical: 8,
+        paddingHorizontal: 20,
+        borderRadius: 20,
+        backgroundColor: '#E3F2FD',
+        borderWidth: 1,
+        borderColor: Colors.primary,
+    },
+    loadMoreText: {
+        color: Colors.primary,
+        fontWeight: '600',
+        fontSize: 13,
+    },
+    showLessButton: {
+        paddingVertical: 8,
+        paddingHorizontal: 20,
+        borderRadius: 20,
+        backgroundColor: '#F5F5F5',
+    },
+    showLessText: {
+        color: Colors.textSecondary,
+        fontWeight: '600',
+        fontSize: 13,
+    }
 });
