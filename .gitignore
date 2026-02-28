@@ -44,8 +44,11 @@ app-example
 /android
 
 
-*.json
-# atau spesifik nama filenya:
-# Abaikan hanya file kunci akses Google Cloud
+# JANGAN GUNAKAN *.json karena akan menghapus package.json!
+
+# Abaikan hanya file kunci akses Google Cloud (Keamanan)
 warga-pintar-*.json
-google-services.json
+
+# File ini boleh diabaikan jika Anda sudah upload ke EAS, 
+# tapi pastikan package.json TIDAK ikut terabaikan.
+# google-services.json
