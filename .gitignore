@@ -46,4 +46,6 @@ app-example
 
 *.json
 # atau spesifik nama filenya:
-warga-pintar-a7e29-ffdef71aa378.json
+# Abaikan hanya file kunci akses Google Cloud
+warga-pintar-*.json
+google-services.json
