@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, SafeAreaView, StatusBar, StyleSheet, Alert, Platform } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useRouter } from 'expo-router';
 import { Colors } from '../../../constants/Colors';
 import { CustomHeader } from '../../../components/CustomHeader';
@@ -47,7 +48,13 @@ export default function EditProfileScreen() {
             <StatusBar barStyle="dark-content" backgroundColor={Colors.green1} />
             <CustomHeader title="Edit Profil" showBack={true} />
 
-            <ScrollView contentContainerStyle={styles.content}>
+            <KeyboardAwareScrollView
+                contentContainerStyle={styles.content}
+                enableOnAndroid={true}
+                extraScrollHeight={Platform.OS === 'ios' ? 20 : 40}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+            >
                 <View style={styles.formCard}>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Nama Lengkap</Text>
@@ -83,7 +90,7 @@ export default function EditProfileScreen() {
                 </View>
 
                 <CustomButton title="Simpan Perubahan" onPress={handleSave} />
-            </ScrollView>
+            </KeyboardAwareScrollView>
 
             <CustomAlertModal
                 visible={alertVisible}

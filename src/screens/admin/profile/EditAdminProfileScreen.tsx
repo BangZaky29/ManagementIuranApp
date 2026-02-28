@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -50,7 +51,13 @@ export default function EditAdminProfileScreen() {
             <StatusBar style="dark" />
             <CustomHeader title="Edit Profil Admin" showBack={true} />
 
-            <ScrollView contentContainerStyle={styles.formContainer} showsVerticalScrollIndicator={false}>
+            <KeyboardAwareScrollView
+                contentContainerStyle={styles.formContainer}
+                showsVerticalScrollIndicator={false}
+                enableOnAndroid={true}
+                extraScrollHeight={Platform.OS === 'ios' ? 20 : 40}
+                keyboardShouldPersistTaps="handled"
+            >
 
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Nama Lengkap</Text>
@@ -128,7 +135,7 @@ export default function EditAdminProfileScreen() {
                 </TouchableOpacity>
 
                 <View style={{ height: 120 }} />
-            </ScrollView>
+            </KeyboardAwareScrollView>
         </SafeAreaView>
     );
 }

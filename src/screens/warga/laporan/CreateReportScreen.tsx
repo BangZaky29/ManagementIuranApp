@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, Image, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, SafeAreaView, StatusBar, Image, ActivityIndicator, Platform } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { CreateReportStyles as styles } from './CreateReportStyles';
 import { Colors } from '../../../constants/Colors';
 import { CustomHeader } from '../../../components/CustomHeader';
@@ -42,7 +43,13 @@ export default function CreateReportScreen() {
             <StatusBar barStyle="dark-content" backgroundColor={Colors.green1} />
             <CustomHeader title={isEditMode ? "Edit Laporan" : "Buat Laporan Baru"} showBack={true} />
 
-            <ScrollView contentContainerStyle={styles.content}>
+            <KeyboardAwareScrollView
+                contentContainerStyle={styles.content}
+                enableOnAndroid={true}
+                extraScrollHeight={Platform.OS === 'ios' ? 20 : 40}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+            >
 
                 <View style={styles.formCard}>
                     {/* Title Input */}
@@ -207,7 +214,7 @@ export default function CreateReportScreen() {
                     disabled={isLoading}
                     icon={!isLoading ? <Ionicons name="send" size={18} color={Colors.white} style={{ marginRight: 8 }} /> : undefined}
                 />
-            </ScrollView>
+            </KeyboardAwareScrollView>
 
             <LocationPickerModal
                 visible={showMapPicker}

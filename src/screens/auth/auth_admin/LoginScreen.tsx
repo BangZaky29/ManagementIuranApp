@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Dimensions, Keyboard } from 'react-native';
+import { StyleSheet, View, Text, Image, TouchableOpacity, Platform, Dimensions, Keyboard } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useRouter } from 'expo-router';
 import { Colors } from '../../../constants/Colors';
 import { CustomButton } from '../../../components/CustomButton';
@@ -144,74 +145,75 @@ export default function LoginScreen() {
     return (
         <View style={styles.container}>
             <StatusBar style="dark" />
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={styles.keyboardView}
+            <KeyboardAwareScrollView
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+                enableOnAndroid={true}
+                extraScrollHeight={Platform.OS === 'ios' ? 20 : 40}
+                keyboardShouldPersistTaps="handled"
             >
-                <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
-                    <View style={styles.headerContainer}>
-                        <View style={styles.logoContainer}>
-                            <Ionicons name="key" size={40} color={Colors.primary} />
-                        </View>
-                        <Text style={styles.welcomeText}>Masuk sebagai Admin</Text>
-                        <Text style={styles.subtitleText}>Kelola perumahan dan warga anda</Text>
+                <View style={styles.headerContainer}>
+                    <View style={styles.logoContainer}>
+                        <Ionicons name="key" size={40} color={Colors.primary} />
                     </View>
+                    <Text style={styles.welcomeText}>Masuk sebagai Admin</Text>
+                    <Text style={styles.subtitleText}>Kelola perumahan dan warga anda</Text>
+                </View>
 
-                    <View style={styles.formContainer}>
-                        <CustomInput
-                            label="Email atau Username"
-                            placeholder="admin@example.com atau username"
-                            value={identifier}
-                            onChangeText={setIdentifier}
-                            keyboardType="email-address"
-                            iconName="person-outline"
-                            autoCapitalize="none"
-                        />
+                <View style={styles.formContainer}>
+                    <CustomInput
+                        label="Email atau Username"
+                        placeholder="admin@example.com atau username"
+                        value={identifier}
+                        onChangeText={setIdentifier}
+                        keyboardType="email-address"
+                        iconName="person-outline"
+                        autoCapitalize="none"
+                    />
 
-                        <CustomInput
-                            label="Kata Sandi"
-                            placeholder="Masukkan kata sandi"
-                            value={password}
-                            onChangeText={setPassword}
-                            secureTextEntry
-                            iconName="lock-closed-outline"
-                        />
+                    <CustomInput
+                        label="Kata Sandi"
+                        placeholder="Masukkan kata sandi"
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry
+                        iconName="lock-closed-outline"
+                    />
 
-                        <TouchableOpacity style={styles.forgotPasswordContainer} onPress={() => router.push('/forgot-password')}>
-                            <Text style={styles.forgotPasswordText}>Lupa Kata Sandi?</Text>
+                    <TouchableOpacity style={styles.forgotPasswordContainer} onPress={() => router.push('/forgot-password')}>
+                        <Text style={styles.forgotPasswordText}>Lupa Kata Sandi?</Text>
+                    </TouchableOpacity>
+
+                    <CustomButton
+                        title="Masuk Sebagai Admin"
+                        onPress={handleLogin}
+                        loading={isLoading}
+                        style={styles.loginButton}
+                    />
+
+                    <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 16, marginBottom: 16 }}>
+                        <Text style={{ color: Colors.green4 }}>Belum punya akun admin? </Text>
+                        <TouchableOpacity onPress={navigateToRegisterAdmin}>
+                            <Text style={{ color: Colors.primary, fontWeight: 'bold' }}>Daftar Admin</Text>
                         </TouchableOpacity>
-
-                        <CustomButton
-                            title="Masuk Sebagai Admin"
-                            onPress={handleLogin}
-                            loading={isLoading}
-                            style={styles.loginButton}
-                        />
-
-                        <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 16, marginBottom: 16 }}>
-                            <Text style={{ color: Colors.green4 }}>Belum punya akun admin? </Text>
-                            <TouchableOpacity onPress={navigateToRegisterAdmin}>
-                                <Text style={{ color: Colors.primary, fontWeight: 'bold' }}>Daftar Admin</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        <View style={styles.dividerContainer}>
-                            <View style={styles.dividerLine} />
-                            <Text style={styles.dividerText}>atau</Text>
-                            <View style={styles.dividerLine} />
-                        </View>
-
-                        <CustomButton
-                            title="Masuk sebagai Warga atau Sekuriti"
-                            onPress={navigateToWargaLogin}
-                            variant="outline"
-                            style={{ marginBottom: 16, borderColor: Colors.primary }}
-                            textStyle={{ color: Colors.primary }}
-                        />
                     </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
+
+                    <View style={styles.dividerContainer}>
+                        <View style={styles.dividerLine} />
+                        <Text style={styles.dividerText}>atau</Text>
+                        <View style={styles.dividerLine} />
+                    </View>
+
+                    <CustomButton
+                        title="Masuk sebagai Warga atau Sekuriti"
+                        onPress={navigateToWargaLogin}
+                        variant="outline"
+                        style={{ marginBottom: 16, borderColor: Colors.primary }}
+                        textStyle={{ color: Colors.primary }}
+                    />
+                </View>
+            </KeyboardAwareScrollView>
 
             <CustomAlertModal
                 visible={alertVisible}

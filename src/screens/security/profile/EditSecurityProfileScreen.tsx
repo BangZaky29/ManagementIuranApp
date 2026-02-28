@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, ScrollView, SafeAreaView, StatusBar, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, SafeAreaView, StatusBar, StyleSheet, Platform } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useRouter } from 'expo-router';
 import { CustomHeader } from '../../../components/CustomHeader';
 import { CustomButton } from '../../../components/CustomButton';
@@ -70,92 +71,89 @@ export default function EditSecurityProfileScreen() {
             <StatusBar barStyle="dark-content" backgroundColor="#F0F4F8" />
             <CustomHeader title="Edit Profil" showBack={true} />
 
-            <KeyboardAvoidingView
-                style={{ flex: 1 }}
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : Platform.OS === 'android' ? 20 : 0}
+            <KeyboardAwareScrollView
+                contentContainerStyle={[styles.content, { paddingBottom: 100 }]}
+                enableOnAndroid={true}
+                extraScrollHeight={Platform.OS === 'ios' ? 20 : 40}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
             >
-                <ScrollView
-                    contentContainerStyle={[styles.content, { paddingBottom: 100 }]}
-                    keyboardShouldPersistTaps="handled"
-                >
-                    <View style={styles.formCard}>
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Nama Lengkap</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={name}
-                                onChangeText={setName}
-                                placeholder="Nama Lengkap"
-                            />
-                        </View>
-
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Nomor Telepon (WA)</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={phone}
-                                onChangeText={setPhone}
-                                keyboardType="phone-pad"
-                                placeholder="Nomor Telepon WhatsApp"
-                            />
-                        </View>
-
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>NIK</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={nik}
-                                onChangeText={setNik}
-                                keyboardType="numeric"
-                                placeholder="Nomor Induk Kependudukan"
-                            />
-                        </View>
-
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Username</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={username}
-                                onChangeText={setUsername}
-                                placeholder="Username"
-                            />
-                        </View>
-
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Alamat Lengkap</Text>
-                            <TextInput
-                                style={[styles.input, { height: 80, textAlignVertical: 'top' }]}
-                                value={address}
-                                onChangeText={setAddress}
-                                placeholder="Alamat Lengkap"
-                                multiline
-                            />
-                        </View>
-
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>RT/RW</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={rtRw}
-                                onChangeText={setRtRw}
-                                placeholder="Contoh: 001/005"
-                            />
-                        </View>
-
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Email (Tidak dapat diubah)</Text>
-                            <TextInput
-                                style={[styles.input, { backgroundColor: '#EEEEEE', color: '#999' }]}
-                                value={profile?.email || ''}
-                                editable={false}
-                            />
-                        </View>
+                <View style={styles.formCard}>
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Nama Lengkap</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={name}
+                            onChangeText={setName}
+                            placeholder="Nama Lengkap"
+                        />
                     </View>
 
-                    <CustomButton title="Simpan Perubahan" onPress={handleSave} />
-                </ScrollView>
-            </KeyboardAvoidingView>
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Nomor Telepon (WA)</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={phone}
+                            onChangeText={setPhone}
+                            keyboardType="phone-pad"
+                            placeholder="Nomor Telepon WhatsApp"
+                        />
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>NIK</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={nik}
+                            onChangeText={setNik}
+                            keyboardType="numeric"
+                            placeholder="Nomor Induk Kependudukan"
+                        />
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Username</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={username}
+                            onChangeText={setUsername}
+                            placeholder="Username"
+                        />
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Alamat Lengkap</Text>
+                        <TextInput
+                            style={[styles.input, { height: 80, textAlignVertical: 'top' }]}
+                            value={address}
+                            onChangeText={setAddress}
+                            placeholder="Alamat Lengkap"
+                            multiline
+                        />
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>RT/RW</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={rtRw}
+                            onChangeText={setRtRw}
+                            placeholder="Contoh: 001/005"
+                        />
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Email (Tidak dapat diubah)</Text>
+                        <TextInput
+                            style={[styles.input, { backgroundColor: '#EEEEEE', color: '#999' }]}
+                            value={profile?.email || ''}
+                            editable={false}
+                        />
+                    </View>
+                </View>
+
+                <CustomButton title="Simpan Perubahan" onPress={handleSave} />
+            </KeyboardAwareScrollView>
 
             <CustomAlertModal
                 visible={alertVisible}

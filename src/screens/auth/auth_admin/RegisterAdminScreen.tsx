@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Platform, Keyboard } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useRouter } from 'expo-router';
 import { Colors } from '../../../constants/Colors';
 import { CustomButton } from '../../../components/CustomButton';
@@ -169,151 +170,152 @@ export default function RegisterAdminScreen() {
     return (
         <View style={styles.container}>
             <StatusBar style="dark" />
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={styles.keyboardView}
+            <KeyboardAwareScrollView
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+                enableOnAndroid={true}
+                extraScrollHeight={Platform.OS === 'ios' ? 20 : 40}
+                keyboardShouldPersistTaps="handled"
             >
-                <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
-                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={24} color={Colors.green5} />
-                    </TouchableOpacity>
+                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                    <Ionicons name="arrow-back" size={24} color={Colors.green5} />
+                </TouchableOpacity>
 
-                    <View style={styles.headerContainer}>
-                        <Text style={styles.welcomeText}>Daftar Admin</Text>
-                        <Text style={styles.subtitleText}>Buat akun Administrator baru</Text>
-                    </View>
+                <View style={styles.headerContainer}>
+                    <Text style={styles.welcomeText}>Daftar Admin</Text>
+                    <Text style={styles.subtitleText}>Buat akun Administrator baru</Text>
+                </View>
 
-                    <View style={styles.formContainer}>
-                        <CustomInput
-                            label="Nama Lengkap"
-                            placeholder="Nama Anda"
-                            value={fullName}
-                            onChangeText={setFullName}
-                            iconName="person-outline"
-                        />
-                        <CustomInput
-                            label="Username"
-                            placeholder="Username (untuk login)"
-                            value={username}
-                            onChangeText={setUsername}
-                            iconName="at-outline"
-                            autoCapitalize="none"
-                        />
-                        <CustomInput
-                            label="No. WhatsApp"
-                            placeholder="08xxxxxxxxxx"
-                            value={phone}
-                            onChangeText={setPhone}
-                            keyboardType="phone-pad"
-                            iconName="logo-whatsapp"
-                        />
-                        <CustomInput
-                            label="Alamat Domisili"
-                            placeholder="Alamat tempat tinggal Anda"
-                            value={address}
-                            onChangeText={setAddress}
-                            iconName="home-outline"
-                        />
+                <View style={styles.formContainer}>
+                    <CustomInput
+                        label="Nama Lengkap"
+                        placeholder="Nama Anda"
+                        value={fullName}
+                        onChangeText={setFullName}
+                        iconName="person-outline"
+                    />
+                    <CustomInput
+                        label="Username"
+                        placeholder="Username (untuk login)"
+                        value={username}
+                        onChangeText={setUsername}
+                        iconName="at-outline"
+                        autoCapitalize="none"
+                    />
+                    <CustomInput
+                        label="No. WhatsApp"
+                        placeholder="08xxxxxxxxxx"
+                        value={phone}
+                        onChangeText={setPhone}
+                        keyboardType="phone-pad"
+                        iconName="logo-whatsapp"
+                    />
+                    <CustomInput
+                        label="Alamat Domisili"
+                        placeholder="Alamat tempat tinggal Anda"
+                        value={address}
+                        onChangeText={setAddress}
+                        iconName="home-outline"
+                    />
 
-                        <View style={{ height: 1, backgroundColor: '#E0E0E0', marginVertical: 16 }} />
-                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: Colors.green5, marginBottom: 12 }}>Data Perumahan / Cluster</Text>
+                    <View style={{ height: 1, backgroundColor: '#E0E0E0', marginVertical: 16 }} />
+                    <Text style={{ fontSize: 16, fontWeight: 'bold', color: Colors.green5, marginBottom: 12 }}>Data Perumahan / Cluster</Text>
 
-                        <CustomInput
-                            label="Nama Cluster / Apartemen"
-                            placeholder="GREEN VALLEY RESIDENCE"
-                            value={complexName}
-                            onChangeText={(text) => setComplexName(text.toUpperCase())}
-                            iconName="business-outline"
-                            autoCapitalize="characters"
-                        />
-                        <CustomInput
-                            label="Alamat Cluster"
-                            placeholder="Alamat Lokasi Perumahan"
-                            value={complexAddress}
-                            onChangeText={setComplexAddress}
-                            iconName="location-outline"
-                        />
-                        <CustomInput
-                            label="RT / RW / No. Unit"
-                            placeholder="Contoh: RT 005 / RW 010 / Apt Lt.10"
-                            value={rtRw}
-                            onChangeText={setRtRw}
-                            iconName="map-outline"
-                        />
+                    <CustomInput
+                        label="Nama Cluster / Apartemen"
+                        placeholder="GREEN VALLEY RESIDENCE"
+                        value={complexName}
+                        onChangeText={(text) => setComplexName(text.toUpperCase())}
+                        iconName="business-outline"
+                        autoCapitalize="characters"
+                    />
+                    <CustomInput
+                        label="Alamat Cluster"
+                        placeholder="Alamat Lokasi Perumahan"
+                        value={complexAddress}
+                        onChangeText={setComplexAddress}
+                        iconName="location-outline"
+                    />
+                    <CustomInput
+                        label="RT / RW / No. Unit"
+                        placeholder="Contoh: RT 005 / RW 010 / Apt Lt.10"
+                        value={rtRw}
+                        onChangeText={setRtRw}
+                        iconName="map-outline"
+                    />
 
-                        <View style={{ height: 1, backgroundColor: '#E0E0E0', marginVertical: 16 }} />
-                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: Colors.green5, marginBottom: 12 }}>Akun Login</Text>
+                    <View style={{ height: 1, backgroundColor: '#E0E0E0', marginVertical: 16 }} />
+                    <Text style={{ fontSize: 16, fontWeight: 'bold', color: Colors.green5, marginBottom: 12 }}>Akun Login</Text>
 
-                        <CustomInput
-                            label="Email (Verifikasi Email)"
-                            placeholder="contoh@email.com"
-                            value={email}
-                            onChangeText={setEmail}
-                            keyboardType="email-address"
-                            iconName="mail-outline"
-                            autoCapitalize="none"
-                        />
+                    <CustomInput
+                        label="Email (Verifikasi Email)"
+                        placeholder="contoh@email.com"
+                        value={email}
+                        onChangeText={setEmail}
+                        keyboardType="email-address"
+                        iconName="mail-outline"
+                        autoCapitalize="none"
+                    />
 
-                        <CustomInput
-                            label="Kata Sandi"
-                            placeholder="Minimal 6 karakter"
-                            value={password}
-                            onChangeText={setPassword}
-                            secureTextEntry
-                            iconName="lock-closed-outline"
-                            autoCapitalize="none"
-                        />
-                        {/* Password Strength Indicator */}
-                        {password.length > 0 && (
-                            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, marginLeft: 4 }}>
-                                <Text style={{ fontSize: 12, color: Colors.textSecondary, marginRight: 8 }}>Kekuatan:</Text>
-                                <Text style={{
-                                    fontSize: 12,
-                                    fontWeight: 'bold',
-                                    color: password.length < 6 ? Colors.danger : (password.length < 8 ? Colors.warning : Colors.success)
-                                }}>
-                                    {password.length < 6 ? 'Sangat Lemah (Kurang dari 6 karakter!)' : (password.length < 8 ? 'Sedang (Medium)' : 'Kuat (High)')}
-                                </Text>
-                            </View>
-                        )}
+                    <CustomInput
+                        label="Kata Sandi"
+                        placeholder="Minimal 6 karakter"
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry
+                        iconName="lock-closed-outline"
+                        autoCapitalize="none"
+                    />
+                    {/* Password Strength Indicator */}
+                    {password.length > 0 && (
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, marginLeft: 4 }}>
+                            <Text style={{ fontSize: 12, color: Colors.textSecondary, marginRight: 8 }}>Kekuatan:</Text>
+                            <Text style={{
+                                fontSize: 12,
+                                fontWeight: 'bold',
+                                color: password.length < 6 ? Colors.danger : (password.length < 8 ? Colors.warning : Colors.success)
+                            }}>
+                                {password.length < 6 ? 'Sangat Lemah (Kurang dari 6 karakter!)' : (password.length < 8 ? 'Sedang (Medium)' : 'Kuat (High)')}
+                            </Text>
+                        </View>
+                    )}
 
-                        <CustomInput
-                            label="Konfirmasi Kata Sandi"
-                            placeholder="Ulangi kata sandi"
-                            value={confirmPassword}
-                            onChangeText={setConfirmPassword}
-                            secureTextEntry
-                            iconName="lock-closed-outline"
-                            autoCapitalize="none"
-                        />
-                        {/* Password Match Indicator */}
-                        {confirmPassword.length > 0 && (
-                            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, marginLeft: 4 }}>
-                                <Ionicons
-                                    name={password === confirmPassword ? "checkmark-circle" : "close-circle"}
-                                    size={16}
-                                    color={password === confirmPassword ? Colors.success : Colors.danger}
-                                />
-                                <Text style={{
-                                    fontSize: 12,
-                                    marginLeft: 6,
-                                    color: password === confirmPassword ? Colors.success : Colors.danger
-                                }}>
-                                    {password === confirmPassword ? 'Password Cocok' : 'Password Belum Cocok'}
-                                </Text>
-                            </View>
-                        )}
+                    <CustomInput
+                        label="Konfirmasi Kata Sandi"
+                        placeholder="Ulangi kata sandi"
+                        value={confirmPassword}
+                        onChangeText={setConfirmPassword}
+                        secureTextEntry
+                        iconName="lock-closed-outline"
+                        autoCapitalize="none"
+                    />
+                    {/* Password Match Indicator */}
+                    {confirmPassword.length > 0 && (
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, marginLeft: 4 }}>
+                            <Ionicons
+                                name={password === confirmPassword ? "checkmark-circle" : "close-circle"}
+                                size={16}
+                                color={password === confirmPassword ? Colors.success : Colors.danger}
+                            />
+                            <Text style={{
+                                fontSize: 12,
+                                marginLeft: 6,
+                                color: password === confirmPassword ? Colors.success : Colors.danger
+                            }}>
+                                {password === confirmPassword ? 'Password Cocok' : 'Password Belum Cocok'}
+                            </Text>
+                        </View>
+                    )}
 
-                        <CustomButton
-                            title="Daftar & Buat Cluster"
-                            onPress={handleRegister}
-                            loading={isLoading}
-                            style={styles.loginButton}
-                        />
-                    </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
+                    <CustomButton
+                        title="Daftar & Buat Cluster"
+                        onPress={handleRegister}
+                        loading={isLoading}
+                        style={styles.loginButton}
+                    />
+                </View>
+            </KeyboardAwareScrollView>
 
             <CustomAlertModal
                 visible={alertVisible}
