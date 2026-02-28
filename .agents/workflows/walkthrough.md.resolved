@@ -1,46 +1,43 @@
-# Panduan Pengujian Fitur Notifikasi & Panic Button 🚀
-
+Panduan Pengujian Fitur Notifikasi & Panic Button 🚀
 Selamat! Seluruh pembaruan kode dan infrastruktur backend (Edge Function + Database Trigger) kini telah rampung dan diamankan.
 
-Untuk memastikan bahwa seluruh _flow_ bekerja dengan sempurna, mari kita lakukan simulasi pengujian (*testing*) bersama. Siapkan setidaknya 1 *Smartphone* fisik (karena emulator tidak bisa menerima *Push Notifications*) yang sudah menginstal aplikasi Anda, dan biarkan aplikasi menyala.
+Untuk memastikan bahwa seluruh flow bekerja dengan sempurna, mari kita lakukan simulasi pengujian (testing) bersama. Siapkan setidaknya 1 Smartphone fisik (karena emulator tidak bisa menerima Push Notifications) yang sudah menginstal aplikasi Anda, dan biarkan aplikasi menyala.
 
-## 1. Uji Coba Lonceng Notifikasi (Realtime)
-**Tujuan:** Memvalidasi bahwa lonceng notifikasi di Warga akan otomatis bertambah saat ada *record* baru di *database*, tanpa warga perlu melakukan _refresh_.
+1. Uji Coba Lonceng Notifikasi (Realtime)
+Tujuan: Memvalidasi bahwa lonceng notifikasi di Warga akan otomatis bertambah saat ada record baru di database, tanpa warga perlu melakukan refresh.
 
-**Cara Tes:**
-1. Login sebagai Warga di HP fisik. Buka halaman _Home_ (Beranda).
-2. Perhatikan ikon Lonceng di sudut kanan atas layar HP Anda.
-3. Buka **Supabase Dashboard -> Table Editor -> `notifications`** di komputer Anda.
-4. Klik **Insert new row**.
-5. Isi:
-   - `user_id`: Pilih UUID Warga yang sedang login di HP.
-   - `title`: Pengujian Realtime
-   - `body`: Tes lonceng bertambah.
-   - `is_read`: false
-6. Simpan (Save).
-7. **Hasil yang diharapkan:** Dalam 1-2 detik, lihat layar HP. Ikon lonceng merah dengan angka *unread* akan langsung otomatis bertambah, dan bersamaan dengan itu (jika aplikasi ditutup/HP dikunci), *Push Notification* dari atas layar seharusnya ikut muncul! 🔔
+Cara Tes:
 
-## 2. Uji Coba Broadcast Satpam & Panic Alert (Realtime)
-**Tujuan:** Memastikan notifikasi SMS Darurat masuk spontan ke satpam tanpa tertunda.
+Login sebagai Warga di HP fisik. Buka halaman Home (Beranda).
+Perhatikan ikon Lonceng di sudut kanan atas layar HP Anda.
+Buka Supabase Dashboard -> Table Editor -> notifications di komputer Anda.
+Klik Insert new row.
+Isi:
+user_id: Pilih UUID Warga yang sedang login di HP.
+title: Pengujian Realtime
+body: Tes lonceng bertambah.
+is_read: false
+Simpan (Save).
+Hasil yang diharapkan: Dalam 1-2 detik, lihat layar HP. Ikon lonceng merah dengan angka unread akan langsung otomatis bertambah, dan bersamaan dengan itu (jika aplikasi ditutup/HP dikunci), Push Notification dari atas layar seharusnya ikut muncul! 🔔
+2. Uji Coba Broadcast Satpam & Panic Alert (Realtime)
+Tujuan: Memastikan notifikasi SMS Darurat masuk spontan ke satpam tanpa tertunda.
 
-**Cara Tes:**
-1. Login dengan akun yang memiliki _role_ `security` di 1 HP (atau cek di terminal/console Anda jika belum punya HP ke-2). Buka layar _Home_ Satpam.
-2. Di Dashboard Supabase, buka tabel `panic_logs`.
-3. Klik **Insert new row**, isi:
-   - `user_id`: Pilih UUID sembarang warga.
-   - `location`: `https://maps.google.com/?q=1,1`
-4. Simpan.
-5. **Hasil yang diharapkan:** Di layar HP Satpam, tampilan tabel darurat atau jumlah *Active Panics* akan langsung berkedip me-refresh menampilkan entri baru tersebut detik itu juga (berkat WebSocket).
+Cara Tes:
 
-## 3. Uji Coba SMS Fallback (Simulasi Kuota Habis)
-**Tujuan:** Memastikan logika *fallback* pelindung keselamatan berfungsi tatkala paket data internet warga tiba-tiba mati saat menekan SOS.
+Login dengan akun yang memiliki role security di 1 HP (atau cek di terminal/console Anda jika belum punya HP ke-2). Buka layar Home Satpam.
+Di Dashboard Supabase, buka tabel panic_logs.
+Klik Insert new row, isi:
+user_id: Pilih UUID sembarang warga.
+location: https://maps.google.com/?q=1,1
+Simpan.
+Hasil yang diharapkan: Di layar HP Satpam, tampilan tabel darurat atau jumlah Active Panics akan langsung berkedip me-refresh menampilkan entri baru tersebut detik itu juga (berkat WebSocket).
+3. Uji Coba SMS Fallback (Simulasi Kuota Habis)
+Tujuan: Memastikan logika fallback pelindung keselamatan berfungsi tatkala paket data internet warga tiba-tiba mati saat menekan SOS.
 
-**Cara Tes:**
-1. Di HP Warga, buka aplikasi dan masuk ke Beranda.
-2. 📴 **Matikan Koneksi Internet HP** (Matikan Wi-Fi dan matikan Data Seluler/Airplane Mode).
-3. Di Beranda, **tekan tombol "Darurat" (Panic Button) sebanyak 3x berturut-turut** dalam 3 detik.
-4. **Hasil yang diharapkan:** Aplikasi secara pintar akan gagal *fetch* ke Supabase (karena *offline*), lalu menembakkan alert peringatan kegagalan, dan menyodorkan sebuah tombol **"Kirim SMS Darurat"**. Bila tombol itu ditekan, HP akan melompat (*redirect*) membuka aplikasi SMS bawaan Android/iOS, dengan nomor tujuan satpam dan draf isi pesan berisikan link GPS yang sudah tercetak rapi! 🆘
+Cara Tes:
 
----
-
-Silakan dilakukan pengujiannya di waktu luang Anda. Bila lolos ketiga tes di atas, artinya arsitektur Notifikasi Anda saat ini sudah masuk ke level **Production-Ready**! 🌟
+Di HP Warga, buka aplikasi dan masuk ke Beranda.
+📴 Matikan Koneksi Internet HP (Matikan Wi-Fi dan matikan Data Seluler/Airplane Mode).
+Di Beranda, tekan tombol "Darurat" (Panic Button) sebanyak 3x berturut-turut dalam 3 detik.
+Hasil yang diharapkan: Aplikasi secara pintar akan gagal fetch ke Supabase (karena offline), lalu menembakkan alert peringatan kegagalan, dan menyodorkan sebuah tombol "Kirim SMS Darurat". Bila tombol itu ditekan, HP akan melompat (redirect) membuka aplikasi SMS bawaan Android/iOS, dengan nomor tujuan satpam dan draf isi pesan berisikan link GPS yang sudah tercetak rapi! 🆘
+Silakan dilakukan pengujiannya di waktu luang Anda. Bila lolos ketiga tes di atas, artinya arsitektur Notifikasi Anda saat ini sudah masuk ke level Production-Ready! 🌟

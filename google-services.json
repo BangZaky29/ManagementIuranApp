@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "171035259930",
+    "project_id": "warga-pintar-a7e29",
+    "storage_bucket": "warga-pintar-a7e29.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:171035259930:android:016428434e3957029c0da3",
+        "android_client_info": {
+          "package_name": "com.ruangimaji29.ManagementIuranApp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDp0akZZi3A-c-EMSXS615NHSiVDlCAkKE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
