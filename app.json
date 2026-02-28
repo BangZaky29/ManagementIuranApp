@@ -11,6 +11,10 @@
     "ios": {
       "supportsTablet": true
     },
+    "notification": {
+      "icon": "./assets/images/android-icon-monochrome.png",
+      "color": "#0D47A1"
+    },
     "android": {
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
