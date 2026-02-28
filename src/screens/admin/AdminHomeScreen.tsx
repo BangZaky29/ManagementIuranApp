@@ -51,8 +51,15 @@ export default function AdminHomeScreen() {
                         <View style={[styles.statIconContainer, { backgroundColor: '#E8F5E9' }]}>
                             <Ionicons name="people" size={18} color="#4CAF50" />
                         </View>
-                        <Text style={styles.statNumber}>{vm.stats.warga}</Text>
+                        <Text style={styles.statNumber}>{vm.stats.wargaActive}</Text>
                         <Text style={styles.statLabel}>Warga Aktif</Text>
+                    </View>
+                    <View style={styles.statCard}>
+                        <View style={[styles.statIconContainer, { backgroundColor: '#FFEBEE' }]}>
+                            <Ionicons name="person-remove" size={18} color="#F44336" />
+                        </View>
+                        <Text style={styles.statNumber}>{vm.stats.wargaInactive}</Text>
+                        <Text style={styles.statLabel}>Warga Non-aktif</Text>
                     </View>
                     <View style={styles.statCard}>
                         <View style={[styles.statIconContainer, { backgroundColor: '#E3F2FD' }]}>
@@ -190,25 +197,25 @@ export default function AdminHomeScreen() {
                                             </View>
                                         )}
                                         <Text style={styles.activityUserName}>{log.profiles?.full_name || 'System'}</Text>
-                                        
+
                                         {/* Role Badge */}
                                         {log.profiles?.role && (
                                             <View style={[
-                                                { 
-                                                    marginLeft: 6, 
-                                                    paddingHorizontal: 6, 
-                                                    paddingVertical: 2, 
+                                                {
+                                                    marginLeft: 6,
+                                                    paddingHorizontal: 6,
+                                                    paddingVertical: 2,
                                                     borderRadius: 4,
                                                 },
                                                 log.profiles.role === 'admin' ? { backgroundColor: '#E3F2FD' } :
-                                                log.profiles.role === 'security' ? { backgroundColor: '#FFF3E0' } :
-                                                { backgroundColor: '#E8F5E9' } // warga
+                                                    log.profiles.role === 'security' ? { backgroundColor: '#FFF3E0' } :
+                                                        { backgroundColor: '#E8F5E9' } // warga
                                             ]}>
                                                 <Text style={[
                                                     { fontSize: 9, fontWeight: 'bold' },
                                                     log.profiles.role === 'admin' ? { color: '#1565C0' } :
-                                                    log.profiles.role === 'security' ? { color: '#E65100' } :
-                                                    { color: '#2E7D32' } // warga
+                                                        log.profiles.role === 'security' ? { color: '#E65100' } :
+                                                            { color: '#2E7D32' } // warga
                                                 ]}>
                                                     {log.profiles.role.toUpperCase()}
                                                 </Text>

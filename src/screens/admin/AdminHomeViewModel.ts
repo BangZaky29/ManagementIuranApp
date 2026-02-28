@@ -15,7 +15,7 @@ export function useAdminHomeViewModel() {
     const router = useRouter();
 
     // Dashboard stats
-    const [stats, setStats] = useState({ warga: 0, security: 0, activeUsers: 0 });
+    const [stats, setStats] = useState({ warga: 0, wargaActive: 0, wargaInactive: 0, security: 0, activeUsers: 0 });
     const [activePanics, setActivePanics] = useState(0);
     const [activeGuests, setActiveGuests] = useState(0);
     const [recentPanics, setRecentPanics] = useState<PanicLog[]>([]);

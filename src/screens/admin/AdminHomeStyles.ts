@@ -25,7 +25,7 @@ export const styles = StyleSheet.create({
         flexDirection: 'row', flexWrap: 'wrap', gap: 12, paddingHorizontal: 20, paddingTop: 20,
     },
     statCard: {
-        flex: 1, minWidth: '30%', backgroundColor: '#FFF', borderRadius: 16, padding: 16,
+        flex: 1, minWidth: '45%', backgroundColor: '#FFF', borderRadius: 16, padding: 16,
         alignItems: 'flex-start',
         borderWidth: 1, borderColor: '#F0F0F0',
         ...Platform.select({
