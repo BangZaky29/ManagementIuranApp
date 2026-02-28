@@ -85,7 +85,7 @@ async function registerForPushNotificationsAsync() {
 
     if (Platform.OS === 'android') {
         await Notifications.setNotificationChannelAsync('default', {
-            name: 'Pemberitahuan Warga',
+            name: 'Warga Lokal',
             importance: Notifications.AndroidImportance.MAX,
             vibrationPattern: [0, 250, 250, 250],
             lightColor: '#1B5E20',
