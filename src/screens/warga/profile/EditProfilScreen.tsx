@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Alert, ActivityIndicator, StatusBar } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Alert, ActivityIndicator, StatusBar, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../../contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../../contexts/ThemeContext';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 export default function EditProfilScreen() {
     const router = useRouter();
@@ -52,7 +53,7 @@ export default function EditProfilScreen() {
             <StatusBar barStyle={colors.statusBar} backgroundColor={colors.backgroundCard} />
 
             {/* Header */}
-            <View style={[styles.header, { backgroundColor: colors.backgroundCard, borderBottomColor: colors.border, marginTop: 40 }]}>
+            <View style={[styles.header, { backgroundColor: colors.backgroundCard, borderBottomColor: colors.border, paddingTop: Platform.OS === 'android' ? 40 : 0 }]}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
                 </TouchableOpacity>
@@ -60,7 +61,13 @@ export default function EditProfilScreen() {
                 <View style={{ width: 24 }} />
             </View>
 
-            <View style={styles.form}>
+            <KeyboardAwareScrollView
+                style={{ flex: 1 }}
+                contentContainerStyle={styles.form}
+                enableOnAndroid={true}
+                extraScrollHeight={100}
+                keyboardShouldPersistTaps="handled"
+            >
                 <View style={styles.inputGroup}>
                     <Text style={[styles.label, { color: colors.textSecondary }]}>Nama Lengkap</Text>
                     <TextInput
@@ -136,7 +143,7 @@ export default function EditProfilScreen() {
                 >
                     {isLoading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.saveButtonText}>Simpan Perubahan</Text>}
                 </TouchableOpacity>
-            </View>
+            </KeyboardAwareScrollView>
         </SafeAreaView>
     );
 }
