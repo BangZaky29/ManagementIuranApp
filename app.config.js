@@ -1,6 +1,11 @@
 export default ({ config }) => {
     return {
         ...config,
+        // Tambahkan plugins di level utama
+        plugins: [
+            ...(config.plugins || []),
+            "@react-native-community/datetimepicker"
+        ],
         android: {
             ...config.android,
             config: {

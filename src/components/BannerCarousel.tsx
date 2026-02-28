@@ -3,6 +3,7 @@ import {
     View, Text, StyleSheet, Image, Dimensions,
     FlatList, TouchableOpacity, Linking, Platform
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Banner } from '../services/bannerService';
 import { Colors } from '../constants/Colors';
 
@@ -40,9 +41,27 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({ banners }) => {
         };
     }, [activeIndex, banners.length]);
 
-    const handleBannerClick = (targetUrl: string | null) => {
-        if (targetUrl && targetUrl.startsWith('http')) {
-            Linking.openURL(targetUrl).catch(err => console.error("Couldn't load page", err));
+    const handleBannerClick = async (targetUrl: string | null) => {
+        if (!targetUrl) return;
+
+        try {
+            // Ensure URL has a protocol
+            let url = targetUrl;
+            if (!url.startsWith('http') && !url.startsWith('wa.me')) {
+                // If it's just a domain or simple text, we don't open it
+                return;
+            }
+
+            // Handle wa.me links specifically if needed, but openURL handles it usually
+            const supported = await Linking.canOpenURL(url);
+            if (supported) {
+                await Linking.openURL(url);
+            } else {
+                // Fallback for some devices where canOpenURL might fail but openURL works
+                await Linking.openURL(url);
+            }
+        } catch (err) {
+            console.error("Error opening link:", err);
         }
     };
 
@@ -60,6 +79,16 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({ banners }) => {
                 <Text style={styles.bannerTitleText} numberOfLines={1}>{item.title}</Text>
                 {item.description && (
                     <Text style={styles.bannerSubtitleText} numberOfLines={2}>{item.description}</Text>
+                )}
+
+                {item.target_url && (
+                    <TouchableOpacity
+                        style={styles.bannerActionBtn}
+                        onPress={() => handleBannerClick(item.target_url)}
+                    >
+                        <Text style={styles.bannerActionText}>Lihat Selengkapnya</Text>
+                        <Ionicons name="chevron-forward" size={12} color="#000" />
+                    </TouchableOpacity>
                 )}
             </View>
         </TouchableOpacity>
@@ -176,6 +205,24 @@ const styles = StyleSheet.create({
     bannerSubtitleText: {
         fontSize: 13,
         color: 'rgba(255,255,255,0.8)',
+    },
+    bannerActionBtn: {
+        backgroundColor: '#FFD700',
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
+        alignSelf: 'flex-start',
+        marginTop: 12,
+        borderWidth: 1,
+        borderColor: 'rgba(0,0,0,0.1)',
+    },
+    bannerActionText: {
+        fontSize: 11,
+        fontWeight: '800',
+        color: '#000',
+        marginRight: 4,
     },
     pagination: {
         position: 'absolute',

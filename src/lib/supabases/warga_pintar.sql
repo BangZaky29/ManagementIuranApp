@@ -21,6 +21,19 @@ CREATE TABLE public.auth_debug_logs (
   details text,
   CONSTRAINT auth_debug_logs_pkey PRIMARY KEY (id)
 );
+CREATE TABLE public.banners (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  housing_complex_id bigint,
+  title text NOT NULL,
+  description text,
+  image_url text NOT NULL,
+  target_url text,
+  is_active boolean DEFAULT true,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT banners_pkey PRIMARY KEY (id),
+  CONSTRAINT banners_housing_complex_id_fkey FOREIGN KEY (housing_complex_id) REFERENCES public.housing_complexes(id)
+);
 CREATE TABLE public.ewallet_va_codes (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   ewallet_name text NOT NULL,

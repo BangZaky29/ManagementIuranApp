@@ -2,9 +2,10 @@ import React from 'react';
 import {
     View, Text, SafeAreaView, FlatList, TouchableOpacity,
     Image, Switch, Modal, TextInput, ActivityIndicator,
-    StatusBar, ScrollView, RefreshControl
+    StatusBar, ScrollView, RefreshControl, Platform
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useAdminBannerViewModel } from './AdminBannerViewModel';
 import { styles } from './AdminBannerStyles';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
@@ -28,6 +29,15 @@ export default function AdminBannerScreen() {
                         </TouchableOpacity>
                     </View>
                 </View>
+
+                {(item.start_date || item.end_date) && (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 5 }}>
+                        <Ionicons name="calendar-outline" size={12} color="#666" />
+                        <Text style={{ fontSize: 11, color: '#666' }}>
+                            {item.start_date ? new Date(item.start_date).toLocaleDateString('id-ID') : '-'} s/d {item.end_date ? new Date(item.end_date).toLocaleDateString('id-ID') : 'Seterusnya'}
+                        </Text>
+                    </View>
+                )}
 
                 <View style={styles.metaRow}>
                     <View style={[
@@ -172,6 +182,68 @@ export default function AdminBannerScreen() {
                                     autoCapitalize="none"
                                 />
                             </View>
+
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>Periode Aktif Iklan</Text>
+                                <View style={styles.dateInputRow}>
+                                    <TouchableOpacity
+                                        style={styles.dateInputBtn}
+                                        onPress={() => vm.setShowStartPicker(true)}
+                                    >
+                                        <Ionicons name="calendar" size={18} color="#1B5E20" />
+                                        <View>
+                                            <Text style={styles.dateInputText}>Mulai</Text>
+                                            <Text style={styles.dateValueText}>{vm.startDate.toLocaleDateString('id-ID')}</Text>
+                                        </View>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        style={styles.dateInputBtn}
+                                        onPress={() => vm.setShowEndPicker(true)}
+                                    >
+                                        <Ionicons name="calendar" size={18} color="#1B5E20" />
+                                        <View>
+                                            <Text style={styles.dateInputText}>Berakhir</Text>
+                                            <Text style={styles.dateValueText}>
+                                                {vm.endDate ? vm.endDate.toLocaleDateString('id-ID') : 'Seterusnya'}
+                                            </Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                </View>
+                                {vm.endDate && (
+                                    <TouchableOpacity
+                                        onPress={() => vm.setEndDate(null)}
+                                        style={{ marginTop: 8, alignSelf: 'flex-end' }}
+                                    >
+                                        <Text style={{ fontSize: 12, color: '#F44336', fontWeight: 'bold' }}>Reset Tanggal Berakhir</Text>
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+
+                            {vm.showStartPicker && (
+                                <DateTimePicker
+                                    value={vm.startDate}
+                                    mode="date"
+                                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                    onChange={(event: DateTimePickerEvent, date?: Date) => {
+                                        vm.setShowStartPicker(false);
+                                        if (date) vm.setStartDate(date);
+                                    }}
+                                />
+                            )}
+
+                            {vm.showEndPicker && (
+                                <DateTimePicker
+                                    value={vm.endDate || new Date()}
+                                    mode="date"
+                                    minimumDate={vm.startDate}
+                                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                    onChange={(event: DateTimePickerEvent, date?: Date) => {
+                                        vm.setShowEndPicker(false);
+                                        if (date) vm.setEndDate(date);
+                                    }}
+                                />
+                            )}
 
                             <TouchableOpacity
                                 style={[styles.submitBtn, vm.isSubmitting && { opacity: 0.7 }]}

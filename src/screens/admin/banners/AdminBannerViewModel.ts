@@ -19,6 +19,12 @@ export const useAdminBannerViewModel = () => {
     const [selectedImage, setSelectedImage] = useState<{ uri: string, base64: string, name: string } | null>(null);
     const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
 
+    // Scheduling states
+    const [startDate, setStartDate] = useState(new Date());
+    const [endDate, setEndDate] = useState<Date | null>(null);
+    const [showStartPicker, setShowStartPicker] = useState(false);
+    const [showEndPicker, setShowEndPicker] = useState(false);
+
     const [alertVisible, setAlertVisible] = useState(false);
     const [alertConfig, setAlertConfig] = useState({
         title: '', message: '', type: 'info' as 'success' | 'info' | 'warning' | 'error',
@@ -112,6 +118,8 @@ export const useAdminBannerViewModel = () => {
         setNewDescription(banner.description || '');
         setNewTargetUrl(banner.target_url || '');
         setExistingImageUrl(banner.image_url);
+        setStartDate(banner.start_date ? new Date(banner.start_date) : new Date());
+        setEndDate(banner.end_date ? new Date(banner.end_date) : null);
         setSelectedImage(null);
         setModalVisible(true);
     };
@@ -124,6 +132,8 @@ export const useAdminBannerViewModel = () => {
         setNewTargetUrl('');
         setSelectedImage(null);
         setExistingImageUrl(null);
+        setStartDate(new Date());
+        setEndDate(null);
         setModalVisible(true);
     };
 
@@ -164,8 +174,19 @@ export const useAdminBannerViewModel = () => {
             }
 
             // 2. Save record to DB (Update or Create)
+            const startDateStr = startDate.toISOString();
+            const endDateStr = endDate?.toISOString();
+
             if (isEditing && editingBannerId) {
-                await updateBanner(editingBannerId, newTitle, finalImageUrl, newTargetUrl, newDescription);
+                await updateBanner(
+                    editingBannerId,
+                    newTitle,
+                    finalImageUrl,
+                    newTargetUrl,
+                    newDescription,
+                    startDateStr,
+                    endDateStr
+                );
 
                 // 3. If image was updated, try to delete the old one
                 if (selectedImage && existingImageUrl && existingImageUrl !== finalImageUrl) {
@@ -180,7 +201,14 @@ export const useAdminBannerViewModel = () => {
                     }
                 }
             } else {
-                await createBanner(newTitle, finalImageUrl, newTargetUrl, newDescription);
+                await createBanner(
+                    newTitle,
+                    finalImageUrl,
+                    newTargetUrl,
+                    newDescription,
+                    startDateStr,
+                    endDateStr
+                );
             }
 
             setModalVisible(false);
@@ -244,6 +272,14 @@ export const useAdminBannerViewModel = () => {
         pickImage,
         newTargetUrl,
         setNewTargetUrl,
+        startDate,
+        setStartDate,
+        endDate,
+        setEndDate,
+        showStartPicker,
+        setShowStartPicker,
+        showEndPicker,
+        setShowEndPicker,
         alertVisible,
         alertConfig,
         hideAlert,

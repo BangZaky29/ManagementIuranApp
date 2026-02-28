@@ -78,6 +78,14 @@ export const styles = StyleSheet.create({
     },
     submitBtnText: { color: '#FFF', fontSize: 16, fontWeight: 'bold' },
 
+    dateInputRow: { flexDirection: 'row', gap: 12 },
+    dateInputBtn: {
+        flex: 1, backgroundColor: '#F5F5F5', borderRadius: 12, padding: 14,
+        borderWidth: 1, borderColor: '#EEE', flexDirection: 'row', alignItems: 'center', gap: 10
+    },
+    dateInputText: { fontSize: 14, color: '#333', fontWeight: '500' },
+    dateValueText: { fontSize: 14, color: '#1B5E20', fontWeight: 'bold' },
+
     emptyState: { alignItems: 'center', justifyContent: 'center', paddingTop: 60 },
     emptyTitle: { fontSize: 18, fontWeight: 'bold', color: '#CCC', marginTop: 16 },
     emptySub: { fontSize: 14, color: '#999', marginTop: 8, textAlign: 'center' },

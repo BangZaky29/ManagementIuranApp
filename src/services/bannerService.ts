@@ -10,18 +10,25 @@ export interface Banner {
     image_url: string;
     target_url: string | null;
     is_active: boolean;
+    start_date?: string;
+    end_date?: string;
     created_at: string;
 }
 
 /**
  * Fetch active banners for the current user's housing complex.
- * Used by Warga and Security.
+ * Filters by current date.
  */
 export const fetchActiveBanners = async (): Promise<Banner[]> => {
+    const now = new Date().toISOString();
+
+    // We use Supabase filters for date
     const { data, error } = await supabase
         .from('banners')
         .select('*')
         .eq('is_active', true)
+        .or(`start_date.is.null,start_date.lte.${now}`)
+        .or(`end_date.is.null,end_date.gte.${now}`)
         .order('created_at', { ascending: false })
         .limit(5);
 
@@ -55,7 +62,9 @@ export const createBanner = async (
     title: string,
     imageUrl: string,
     targetUrl?: string,
-    description?: string
+    description?: string,
+    startDate?: string,
+    endDate?: string
 ): Promise<void> => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new AppError('Unauthorized', 'AUTH_ERROR');
@@ -79,7 +88,9 @@ export const createBanner = async (
             image_url: imageUrl,
             target_url: targetUrl || null,
             housing_complex_id: profile.housing_complex_id,
-            is_active: true
+            is_active: true,
+            start_date: startDate || new Date().toISOString(),
+            end_date: endDate || null
         });
 
     if (error) {
@@ -95,7 +106,9 @@ export const updateBanner = async (
     title: string,
     imageUrl: string,
     targetUrl?: string,
-    description?: string
+    description?: string,
+    startDate?: string,
+    endDate?: string
 ): Promise<void> => {
     const { error } = await supabase
         .from('banners')
@@ -104,6 +117,8 @@ export const updateBanner = async (
             description,
             image_url: imageUrl,
             target_url: targetUrl || null,
+            start_date: startDate,
+            end_date: endDate,
             updated_at: new Date().toISOString()
         })
         .eq('id', id);
