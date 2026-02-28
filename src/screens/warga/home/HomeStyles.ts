@@ -243,4 +243,50 @@ export const HomeStyles = StyleSheet.create({
         fontSize: 12,
         color: Colors.textSecondary,
     },
+
+    // Banner Styles
+    bannerContainerHome: {
+        marginHorizontal: 20,
+        marginBottom: 25,
+        height: 160,
+        borderRadius: 20,
+        overflow: 'hidden',
+        position: 'relative',
+        backgroundColor: Colors.green2,
+    },
+    bannerImage: {
+        width: '100%',
+        height: '100%',
+    },
+    bannerOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0,0,0,0.4)',
+        padding: 20,
+        justifyContent: 'center',
+    },
+    bannerTag: {
+        backgroundColor: '#FFD700',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 6,
+        alignSelf: 'flex-start',
+        marginBottom: 8,
+    },
+    bannerTagText: {
+        fontSize: 10,
+        fontWeight: 'bold',
+        color: '#000',
+        textTransform: 'uppercase',
+    },
+    bannerTitleText: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: Colors.white,
+        marginBottom: 4,
+    },
+    bannerSubtitleText: {
+        fontSize: 13,
+        color: 'rgba(255,255,255,0.8)',
+        lineHeight: 18,
+    },
 });

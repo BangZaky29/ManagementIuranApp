@@ -119,7 +119,7 @@ export default function AdminProfileScreen() {
                 </TouchableOpacity>
 
                 <Text style={[styles.versionText, { color: Colors.textSecondary }]}>
-                    WargaPintar Admin v{Constants.expoConfig?.version ?? '1.0.0'} (beta)
+                    Warlok Admin v{Constants.expoConfig?.version ?? '1.0.0'} (beta)
                 </Text>
 
             </ScrollView>

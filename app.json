@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Warga Pintar",
-    "slug": "ManagementIuranApp",
+    "name": "Warlok",
+    "slug": "wargaLokal",
     "version": "1.1.4",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "wargapintar",
+    "scheme": "warlok",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -25,7 +25,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.ruangimaji29.ManagementIuranApp",
+      "package": "com.ruangimaji29.warlok",
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.ACCESS_NETWORK_STATE",

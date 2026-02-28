@@ -21,7 +21,10 @@ export default function HomeScreen() {
         handlePanicButton,
         alertVisible,
         alertConfig,
-        hideAlert
+        hideAlert,
+        isLoading,
+        refresh: loadData,
+        verifyLocation
     } = useHomeViewModel();
     const { colors } = useTheme();
 
@@ -77,7 +80,7 @@ export default function HomeScreen() {
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
-                {/* Weather Widget (New) */}
+                {/* Weather Widget (Dynamic) */}
                 <Animated.View entering={FadeInDown.delay(100).duration(500)} style={[styles.weatherCard, { backgroundColor: colors.backgroundCard }]}>
                     <View style={styles.weatherGradient}>
                         <View style={styles.weatherInfo}>
@@ -85,24 +88,39 @@ export default function HomeScreen() {
                             <Text style={[styles.weatherLocation, { color: colors.green4 }]}>
                                 <Ionicons name="location-sharp" size={12} color={colors.green4} /> {weather.location}
                             </Text>
+                            <Text style={{ fontSize: 10, color: colors.green4, marginTop: 4 }}>
+                                Kondisi: {weather.condition}
+                            </Text>
                         </View>
-                        <Ionicons name="partly-sunny" size={48} color="#FFB300" />
+                        <View style={{ alignItems: 'center' }}>
+                            <Ionicons
+                                name={weather.condition.includes('Hujan') ? 'rainy' : (weather.condition.includes('Berawan') ? 'cloud' : 'sunny')}
+                                size={44}
+                                color={weather.condition.includes('Hujan') ? '#1976D2' : '#FFB300'}
+                            />
+                            <TouchableOpacity
+                                style={{ marginTop: 8, padding: 4 }}
+                                onPress={verifyLocation}
+                            >
+                                <Ionicons name="refresh-circle" size={24} color={colors.green3} />
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </Animated.View>
 
-                {/* Bill Summary Widget (New Priority Feature) */}
-                <Animated.View entering={FadeInDown.delay(200).duration(500)} style={[styles.billCard, { backgroundColor: colors.backgroundCard }]}>
-                    <View style={styles.billTextContainer}>
-                        <Text style={[styles.billLabel, { color: colors.textSecondary }]}>Tagihan Belum Dibayar</Text>
-                        <Text style={[styles.billAmount, { color: colors.green5 }]}>{billSummary.total}</Text>
-                        <Text style={{ fontSize: 10, color: colors.textSecondary }}>Jatuh tempo: {billSummary.dueDate}</Text>
+                {/* Banner Coming Soon (Replacement for Bill Summary) */}
+                <Animated.View entering={FadeInDown.delay(200).duration(500)} style={styles.bannerContainerHome}>
+                    <Image
+                        source={{ uri: 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=500&auto=format&fit=crop' }}
+                        style={styles.bannerImage}
+                    />
+                    <View style={styles.bannerOverlay}>
+                        <View style={styles.bannerTag}>
+                            <Text style={styles.bannerTagText}>Coming Soon</Text>
+                        </View>
+                        <Text style={styles.bannerTitleText}>Layanan Premium</Text>
+                        <Text style={styles.bannerSubtitleText}>Segera hadir fitur marketplace khusus warga.</Text>
                     </View>
-                    <TouchableOpacity
-                        style={[styles.payButtonSmall, { backgroundColor: colors.green3 }]}
-                        onPress={() => handleNavigation('/(tabs)/iuran')}
-                    >
-                        <Text style={styles.payButtonText}>Bayar</Text>
-                    </TouchableOpacity>
                 </Animated.View>
 
                 {/* Quick Actions Grid */}

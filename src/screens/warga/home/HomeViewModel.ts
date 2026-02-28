@@ -8,6 +8,7 @@ import { getUnreadNotificationCount } from '../../../services/notificationServic
 import { supabase } from '../../../lib/supabaseConfig';
 import * as Linking from 'expo-linking';
 import { Platform } from 'react-native';
+import * as Location from 'expo-location';
 
 export interface QuickAction {
     id: string;
@@ -25,7 +26,7 @@ export const useHomeViewModel = () => {
     // State
     const [userName, setUserName] = useState(profile?.full_name || 'Warga');
     const [avatarUrl, setAvatarUrl] = useState<string | null>(profile?.avatar_url || null);
-    const [weather] = useState({ temp: '28°C', condition: 'Cerah', location: 'Jakarta Selatan' });
+    const [weather, setWeather] = useState({ temp: '...', condition: 'Memuat...', location: 'Mencari lokasi...' });
     const [billSummary, setBillSummary] = useState({ total: 'Rp 0', label: 'Iuran Keamanan & Sampah', dueDate: '-' });
     const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
     const [unreadNotifCount, setUnreadNotifCount] = useState(0);
@@ -38,6 +39,7 @@ export const useHomeViewModel = () => {
             setAvatarUrl(profile.avatar_url);
         }
         loadData();
+        verifyLocation(); // Auto fetch location on mount
 
         // 🟢 REALTIME SUBSCRIPTION FOR NOTIFICATIONS
         if (!user?.id) return;
@@ -91,6 +93,49 @@ export const useHomeViewModel = () => {
             console.error('Failed to load home data:', error);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const verifyLocation = async () => {
+        try {
+            setWeather(prev => ({ ...prev, location: 'Mencari...' }));
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                setWeather({ temp: '--', condition: 'Akses Ditolak', location: 'Izinkan Lokasi' });
+                return;
+            }
+
+            const location = await Location.getCurrentPositionAsync({});
+            const { latitude, longitude } = location.coords;
+
+            // Optional: Reverse Geocoding
+            const reverseGeocode = await Location.reverseGeocodeAsync({ latitude, longitude });
+            const city = reverseGeocode[0]?.city || reverseGeocode[0]?.subregion || 'Lokasi Terdeteksi';
+
+            // Fetch Weather from Open-Meteo (No API Key Required)
+            const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
+            const weatherData = await weatherRes.json();
+
+            if (weatherData && weatherData.current_weather) {
+                const temp = Math.round(weatherData.current_weather.temperature);
+                const code = weatherData.current_weather.weathercode;
+
+                // Map weather code to simple condition
+                let condition = 'Cerah';
+                if (code >= 1 && code <= 3) condition = 'Berawan';
+                if (code >= 51 && code <= 67) condition = 'Gerimis/Hujan';
+                if (code >= 71 && code <= 86) condition = 'Salju';
+                if (code >= 95) condition = 'Badai';
+
+                setWeather({
+                    temp: `${temp}°C`,
+                    condition,
+                    location: city
+                });
+            }
+        } catch (error) {
+            console.error('Location/Weather Error:', error);
+            setWeather({ temp: '--', condition: 'Error', location: 'Gagal memuat' });
         }
     };
 
@@ -228,6 +273,7 @@ export const useHomeViewModel = () => {
         alertConfig,
         hideAlert,
         isLoading,
-        refresh: loadData
+        refresh: loadData,
+        verifyLocation
     };
 };

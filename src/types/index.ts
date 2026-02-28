@@ -1,5 +1,5 @@
 /**
- * Shared TypeScript Interfaces — Warga Pintar
+ * Shared TypeScript Interfaces — Warga Lokal
  */
 
 // ─── Auth ────────────────────────────────────────

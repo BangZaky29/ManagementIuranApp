@@ -165,7 +165,7 @@ export const generateAndShareReceipt = async (data: ReceiptData): Promise<void> 
                     <div class="footer">
                         <p>Kuitansi ini adalah bukti pembayaran yang sah dan dibuat secara otomatis oleh sistem.</p>
                         <p>Terima kasih atas pembayaran iuran Anda.</p>
-                        <p style="margin-top: 20px; font-weight: bold; color: #1B5E20;">Warga Pintar App</p>
+                        <p style="margin-top: 20px; font-weight: bold; color: #1B5E20;">Warga Lokal App</p>
                     </div>
                 </body>
             </html>
@@ -183,7 +183,7 @@ export const generateAndShareReceipt = async (data: ReceiptData): Promise<void> 
             return;
         }
 
-        const filename = `Kuitansi_WargaPintar_${data.paymentId.substring(0, 8)}.pdf`;
+        const filename = `Kuitansi_WargaLokal_${data.paymentId.substring(0, 8)}.pdf`;
 
         if (Platform.OS === 'android') {
             // Cek apakah sebelumnya user sudah pernah memilih folder
@@ -193,7 +193,7 @@ export const generateAndShareReceipt = async (data: ReceiptData): Promise<void> 
                 // Jika belum, minta user pilih folder (HANYA 1 KALI)
                 alert('Untuk menyimpan kuitansi secara otomatis, silakan pilih folder tujuan (misal: Downloads/Documents) satu kali ini saja.');
                 const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-                
+
                 if (permissions.granted) {
                     directoryUri = permissions.directoryUri;
                     await AsyncStorage.setItem(SAF_KEY, directoryUri);
@@ -206,17 +206,17 @@ export const generateAndShareReceipt = async (data: ReceiptData): Promise<void> 
             try {
                 // Baca file PDF yang dihasilkan expo-print
                 const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
-                
+
                 // Buat file baru di direktori yang sudah tersimpan
                 const newUri = await FileSystem.StorageAccessFramework.createFileAsync(
-                    directoryUri, 
-                    filename, 
+                    directoryUri,
+                    filename,
                     'application/pdf'
                 );
-                
+
                 // Tulis konten
                 await FileSystem.writeAsStringAsync(newUri, base64, { encoding: FileSystem.EncodingType.Base64 });
-                
+
                 // Alert sukses opsional (bisa dihapus jika ingin completely silent download)
                 // alert('Kuitansi berhasil disimpan langsung ke perangkat!');
             } catch (err) {

@@ -1,5 +1,5 @@
 /**
- * Shared Error Handling — Warga Pintar
+ * Shared Error Handling — Warga Lokal
  * Standardized error class and helper for consistent error handling across services.
  */
 
