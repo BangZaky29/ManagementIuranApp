@@ -42,3 +42,8 @@ app-example
 # generated native folders
 /ios
 /android
+
+
+*.json
+# atau spesifik nama filenya:
+warga-pintar-a7e29-ffdef71aa378.json

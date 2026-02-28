@@ -2,7 +2,7 @@
   "expo": {
     "name": "Warga Pintar",
     "slug": "ManagementIuranApp",
-    "version": "1.1.2",
+    "version": "1.1.3",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "wargapintar",
@@ -65,8 +65,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "11070607-66e3-4bf4-afbe-62614da8cf81"
+        "projectId": "2ea96a46-46a9-490f-b897-e82fc4af3a8a"
       }
-    }
+    },
+    "owner": "bangzaky0029"
   }
 }
