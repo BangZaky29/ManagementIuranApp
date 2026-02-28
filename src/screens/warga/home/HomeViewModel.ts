@@ -9,6 +9,7 @@ import { supabase } from '../../../lib/supabaseConfig';
 import * as Linking from 'expo-linking';
 import { Platform } from 'react-native';
 import * as Location from 'expo-location';
+import { fetchActiveBanners, Banner } from '../../../services/bannerService';
 
 export interface QuickAction {
     id: string;
@@ -30,6 +31,7 @@ export const useHomeViewModel = () => {
     const [billSummary, setBillSummary] = useState({ total: 'Rp 0', label: 'Iuran Keamanan & Sampah', dueDate: '-' });
     const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
     const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+    const [banners, setBanners] = useState<Banner[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     // Initial Fetch & Realtime Subscription
@@ -88,6 +90,10 @@ export const useHomeViewModel = () => {
                 // 3. Unread Notifications Count
                 const count = await getUnreadNotificationCount();
                 setUnreadNotifCount(count);
+
+                // 4. Fetch Banners
+                const activeBanners = await fetchActiveBanners();
+                setBanners(activeBanners);
             }
         } catch (error) {
             console.error('Failed to load home data:', error);
@@ -265,6 +271,7 @@ export const useHomeViewModel = () => {
         billSummary,
         newsItems,
         unreadNotifCount,
+        banners,
         quickActions,
         handleNavigation,
         handleNewsClick,

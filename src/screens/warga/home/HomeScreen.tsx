@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { useHomeViewModel } from './HomeViewModel';
 import { HomeStyles as styles } from './HomeStyles';
+import { BannerCarousel } from '../../../components/BannerCarousel';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
 
 export default function HomeScreen() {
@@ -15,6 +16,7 @@ export default function HomeScreen() {
         billSummary,
         newsItems,
         unreadNotifCount,
+        banners,
         quickActions,
         handleNavigation,
         handleNewsClick,
@@ -54,15 +56,27 @@ export default function HomeScreen() {
                         {unreadNotifCount > 0 && (
                             <View style={{
                                 position: 'absolute',
-                                top: 2,
-                                right: 4,
-                                backgroundColor: 'red',
-                                width: 10,
-                                height: 10,
-                                borderRadius: 5,
-                                borderWidth: 1,
+                                top: -2,
+                                right: -2,
+                                backgroundColor: '#E53935',
+                                minWidth: 16,
+                                height: 16,
+                                borderRadius: 8,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                paddingHorizontal: 4,
+                                borderWidth: 1.5,
                                 borderColor: colors.green1
-                            }} />
+                            }}>
+                                <Text style={{
+                                    color: 'white',
+                                    fontSize: 9,
+                                    fontWeight: '800',
+                                    textAlign: 'center'
+                                }}>
+                                    {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
+                                </Text>
+                            </View>
                         )}
                     </TouchableOpacity>
 
@@ -108,19 +122,9 @@ export default function HomeScreen() {
                     </View>
                 </Animated.View>
 
-                {/* Banner Coming Soon (Replacement for Bill Summary) */}
-                <Animated.View entering={FadeInDown.delay(200).duration(500)} style={styles.bannerContainerHome}>
-                    <Image
-                        source={{ uri: 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=500&auto=format&fit=crop' }}
-                        style={styles.bannerImage}
-                    />
-                    <View style={styles.bannerOverlay}>
-                        <View style={styles.bannerTag}>
-                            <Text style={styles.bannerTagText}>Coming Soon</Text>
-                        </View>
-                        <Text style={styles.bannerTitleText}>Layanan Premium</Text>
-                        <Text style={styles.bannerSubtitleText}>Segera hadir fitur marketplace khusus warga.</Text>
-                    </View>
+                {/* Dynamic Banner Carousel */}
+                <Animated.View entering={FadeInDown.delay(200).duration(500)}>
+                    <BannerCarousel banners={banners} />
                 </Animated.View>
 
                 {/* Quick Actions Grid */}

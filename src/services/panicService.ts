@@ -13,6 +13,7 @@ export interface PanicLog {
         full_name: string;
         avatar_url: string | null;
         housing_complex_id: number | null;
+        rt_rw: string | null;
     } | null;
 }
 
@@ -87,7 +88,8 @@ export const fetchPanicLogs = async (
             profiles:user_id (
                 full_name,
                 avatar_url,
-                housing_complex_id
+                housing_complex_id,
+                rt_rw
             )
         `)
         .order('created_at', { ascending: false })

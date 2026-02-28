@@ -66,6 +66,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     const menuItems: MenuItem[] = [
         { key: 'users', label: 'Kelola User', icon: 'people-outline', route: '/admin/users' },
         { key: 'news', label: 'Kelola Berita', icon: 'newspaper-outline', route: '/admin/news-management' },
+        { key: 'banners', label: 'Kelola Iklan', icon: 'images-outline', route: '/admin/banners' },
         { key: 'laporan', label: 'Laporan Warga', icon: 'document-text-outline', route: '/admin/laporan' },
         { key: 'iuran', label: 'Management Iuran', icon: 'wallet-outline', route: '/admin/iuran-management' },
     ];

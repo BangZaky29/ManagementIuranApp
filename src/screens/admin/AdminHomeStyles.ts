@@ -22,12 +22,21 @@ export const styles = StyleSheet.create({
 
     // Stats Grid
     statsContainer: {
-        flexDirection: 'row', flexWrap: 'wrap', gap: 12, paddingHorizontal: 20, paddingTop: 20,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        paddingHorizontal: 20,
+        paddingTop: 20,
     },
     statCard: {
-        flex: 1, minWidth: '45%', backgroundColor: '#FFF', borderRadius: 16, padding: 16,
+        width: '48%',
+        backgroundColor: '#FFF',
+        borderRadius: 16,
+        padding: 16,
         alignItems: 'flex-start',
-        borderWidth: 1, borderColor: '#F0F0F0',
+        borderWidth: 1,
+        borderColor: '#F0F0F0',
+        marginBottom: 15,
         ...Platform.select({
             ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8 },
             android: { elevation: 2 },

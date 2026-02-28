@@ -8,6 +8,7 @@ import { useSecurityHomeViewModel } from './SecurityHomeViewModel';
 import { styles } from './SecurityHomeStyles';
 import { CustomAlertModal } from '../../components/CustomAlertModal';
 import { CustomHeader } from '../../components/CustomHeader';
+import { PanicLogCard } from '../../components/PanicLogCard';
 
 export default function SecurityHomeScreen() {
     const vm = useSecurityHomeViewModel();
@@ -151,46 +152,13 @@ export default function SecurityHomeScreen() {
                         <Text style={styles.emptySubtext}>Lingkungan aman terkendali 👍</Text>
                     </View>
                 ) : (
-                    vm.recentPanics.map((log) => {
-                        const hasLocation = log.location?.startsWith('http');
-                        return (
-                            <TouchableOpacity
-                                key={log.id}
-                                style={styles.activityCard}
-                                onPress={() => vm.openPanicLocation(log)}
-                                activeOpacity={hasLocation ? 0.7 : 1}
-                            >
-                                <View style={styles.activityLeft}>
-                                    {log.profiles?.avatar_url ? (
-                                        <Image source={{ uri: log.profiles.avatar_url }} style={styles.activityAvatar} />
-                                    ) : (
-                                        <View style={[styles.activityAvatar, styles.avatarPlaceholder]}>
-                                            <Ionicons name="person" size={16} color="#F44336" />
-                                        </View>
-                                    )}
-                                    <View style={{ marginLeft: 12, flex: 1 }}>
-                                        <Text style={styles.activityName} numberOfLines={1}>
-                                            {log.profiles?.full_name || 'Warga'}
-                                        </Text>
-                                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
-                                            <Ionicons
-                                                name={hasLocation ? 'location' : 'location-outline'}
-                                                size={12}
-                                                color={hasLocation ? '#1976D2' : '#999'}
-                                            />
-                                            <Text style={[styles.activityLocation, { color: hasLocation ? '#1976D2' : '#999' }]} numberOfLines={1}>
-                                                {hasLocation ? 'Buka Lokasi GPS' : (log.location || 'Lokasi tidak diketahui')}
-                                            </Text>
-                                        </View>
-                                    </View>
-                                </View>
-                                <View style={styles.activityRight}>
-                                    <Text style={styles.activityTime}>{vm.formatTime(log.created_at)}</Text>
-                                    {hasLocation && <Ionicons name="open-outline" size={14} color="#1976D2" style={{ marginTop: 4 }} />}
-                                </View>
-                            </TouchableOpacity>
-                        );
-                    })
+                    vm.recentPanics.map((log) => (
+                        <PanicLogCard
+                            key={log.id}
+                            log={log}
+                            showResolveButton={false}
+                        />
+                    ))
                 )}
 
                 {/* Ringkasan Laporan Warga */}

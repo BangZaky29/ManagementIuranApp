@@ -9,6 +9,7 @@ import { formatDateTimeSafe } from '../../../utils/dateUtils';
 import { fetchPanicLogs, PanicLog, resolvePanicLog } from '../../../services/panicService';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
 import { useTheme } from '../../../contexts/ThemeContext';
+import { PanicLogCard } from '../../../components/PanicLogCard';
 
 export default function PanicLogScreen() {
     const { colors } = useTheme();
@@ -96,70 +97,12 @@ export default function PanicLogScreen() {
     };
 
     const renderItem = ({ item }: { item: PanicLog }) => {
-        const isResolved = !!item.resolved_at;
-        const hasLocation = item.location && item.location.startsWith('http');
-
         return (
-            <View style={[
-                styles.card,
-                { backgroundColor: colors.backgroundCard, borderLeftColor: isResolved ? '#4CAF50' : '#F44336' }
-            ]}>
-                {/* Header: Avatar + Name + Time */}
-                <View style={styles.cardHeader}>
-                    <View style={styles.userInfo}>
-                        {item.profiles?.avatar_url ? (
-                            <Image source={{ uri: item.profiles.avatar_url }} style={styles.avatar} />
-                        ) : (
-                            <View style={[styles.avatar, { backgroundColor: '#FFCDD2', justifyContent: 'center', alignItems: 'center' }]}>
-                                <Ionicons name="person" size={18} color="#F44336" />
-                            </View>
-                        )}
-                        <View style={{ marginLeft: 12, flex: 1 }}>
-                            <Text style={[styles.userName, { color: colors.textPrimary }]}>
-                                {item.profiles?.full_name || 'Warga Tidak Dikenal'}
-                            </Text>
-                        </View>
-                    </View>
-                    <View style={styles.timeContainer}>
-                        <View style={[styles.statusBadge, { backgroundColor: isResolved ? '#E8F5E9' : '#FFEBEE' }]}>
-                            <Text style={{ fontSize: 10, fontWeight: 'bold', color: isResolved ? '#4CAF50' : '#F44336' }}>
-                                {isResolved ? 'SELESAI' : 'AKTIF'}
-                            </Text>
-                        </View>
-                        <Text style={[styles.timeText, { color: colors.textSecondary }]}>
-                            {formatTime(item.created_at)}
-                        </Text>
-                    </View>
-                </View>
-
-                {/* Location */}
-                <TouchableOpacity
-                    style={[styles.locationRow, { backgroundColor: hasLocation ? '#E3F2FD' : '#F5F5F5' }]}
-                    onPress={() => openLocation(item.location)}
-                    disabled={!hasLocation}
-                >
-                    <Ionicons
-                        name={hasLocation ? 'location' : 'location-outline'}
-                        size={16}
-                        color={hasLocation ? '#1976D2' : '#999'}
-                    />
-                    <Text style={[styles.locationText, { color: hasLocation ? '#1976D2' : '#999' }]} numberOfLines={1}>
-                        {hasLocation ? 'Buka di Google Maps' : (item.location || 'Lokasi tidak tersedia')}
-                    </Text>
-                    {hasLocation && <Ionicons name="open-outline" size={14} color="#1976D2" />}
-                </TouchableOpacity>
-
-                {/* Action Button */}
-                {!isResolved && (
-                    <TouchableOpacity
-                        style={styles.resolveButton}
-                        onPress={() => handleResolve(item)}
-                    >
-                        <Ionicons name="checkmark-circle" size={18} color="#FFF" />
-                        <Text style={styles.resolveText}>Tandai Selesai</Text>
-                    </TouchableOpacity>
-                )}
-            </View>
+            <PanicLogCard
+                log={item}
+                onResolve={handleResolve}
+                showResolveButton={!item.resolved_at}
+            />
         );
     };
 
