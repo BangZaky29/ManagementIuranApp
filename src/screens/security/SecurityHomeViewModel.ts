@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'expo-router';
-import { Linking } from 'react-native';
+import { Linking, Platform } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchPanicLogs, resolvePanicLog, countActivePanics, PanicLog } from '../../services/panicService';
 import { countActiveVisitors, countPendingVisitors } from '../../services/guestService';
@@ -62,14 +62,35 @@ export function useSecurityHomeViewModel() {
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [user?.id]);
 
     useEffect(() => {
         loadData();
-        // Auto-refresh every 15 seconds
+        // Auto-refresh every 15 seconds (Fallback)
         const interval = setInterval(loadData, 15000);
-        return () => clearInterval(interval);
+
+        // 🟢 REALTIME SUBSCRIPTION FOR PANIC LOGS
+        const panicSubscription = supabase
+            .channel('public:panic_logs')
+            .on(
+                'postgres_changes',
+                { event: 'INSERT', schema: 'public', table: 'panic_logs' },
+                (payload) => {
+                    console.log('Realtime Panic Alert!', payload);
+                    // Refresh data immediately when a new SOS comes in
+                    loadData();
+                }
+            )
+            .subscribe((status) => {
+                console.log('Supabase Realtime Status (Panic logs):', status);
+            });
+
+        return () => {
+            clearInterval(interval);
+            supabase.removeChannel(panicSubscription);
+        };
     }, [loadData]);
+
 
     const handleLogout = async () => {
         await signOut();

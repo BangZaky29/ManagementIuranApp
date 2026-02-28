@@ -5,6 +5,9 @@ import { fetchNews, NewsItem } from '../../../services/newsService';
 import { fetchBillingPeriods } from '../../../services/iuranService';
 import { triggerPanicButton } from '../../../services/panicService';
 import { getUnreadNotificationCount } from '../../../services/notificationService';
+import { supabase } from '../../../lib/supabaseConfig';
+import * as Linking from 'expo-linking';
+import { Platform } from 'react-native';
 
 export interface QuickAction {
     id: string;
@@ -28,14 +31,41 @@ export const useHomeViewModel = () => {
     const [unreadNotifCount, setUnreadNotifCount] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Initial Fetch
+    // Initial Fetch & Realtime Subscription
     useEffect(() => {
         if (profile?.full_name) {
             setUserName(profile.full_name);
             setAvatarUrl(profile.avatar_url);
         }
         loadData();
-    }, [profile]);
+
+        // 🟢 REALTIME SUBSCRIPTION FOR NOTIFICATIONS
+        if (!user?.id) return;
+
+        const notificationSubscription = supabase
+            .channel(`public:notifications:user_id=eq.${user.id}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'notifications',
+                    filter: `user_id=eq.${user.id}`
+                },
+                (payload) => {
+                    console.log('Realtime Notification Received!', payload);
+                    // Increment count immediately without fetching
+                    setUnreadNotifCount((prev) => prev + 1);
+                }
+            )
+            .subscribe((status) => {
+                console.log('Supabase Realtime Status (Notifications):', status);
+            });
+
+        return () => {
+            supabase.removeChannel(notificationSubscription);
+        };
+    }, [profile, user?.id]);
 
     const loadData = async () => {
         setIsLoading(true);
@@ -155,11 +185,28 @@ export const useHomeViewModel = () => {
                     buttons: [{ text: 'OK', style: 'destructive', onPress: hideAlert }]
                 });
             } catch (error) {
+                // 🆘 SMS FALLBACK IF INTERNET/API FAILS
                 setAlertConfig({
-                    title: 'Gagal Mengirim SOS',
-                    message: 'Terjadi kesalahan saat mengirim sinyal darurat. Coba lagi.',
+                    title: 'Gagal Mengirim SOS 📶',
+                    message: 'Tidak ada koneksi internet. Ingin memanggil satpam lewat SMS Standar (berlaku tarif pulsa)?',
                     type: 'error',
-                    buttons: [{ text: 'Coba Lagi', onPress: hideAlert }]
+                    buttons: [
+                        { text: 'Batal', style: 'cancel', onPress: hideAlert },
+                        {
+                            text: 'Kirim SMS Darurat',
+                            style: 'destructive',
+                            onPress: () => {
+                                hideAlert();
+                                // Example Phone Number (Ganti dengan nomor satpam sesungguhnya yg diset dinamis nantinya)
+                                const securityPhone = '081234567890';
+                                const smsBody = '🚨 DARURAT (SOS) - Tolong secepatnya datang ke rumah saya!';
+                                const separator = Platform.OS === 'ios' ? '&' : '?';
+                                const smsUrl = `sms:${securityPhone}${separator}body=${encodeURIComponent(smsBody)}`;
+
+                                Linking.openURL(smsUrl).catch(err => console.error('Error opening SMS app', err));
+                            }
+                        }
+                    ]
                 });
             }
             setAlertVisible(true);

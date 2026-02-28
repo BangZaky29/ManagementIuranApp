@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
+import { useRouter } from 'expo-router';
 import { useAuth } from '../contexts/AuthContext';
 import { savePushToken, removePushToken } from '../services/notificationService';
 
@@ -19,6 +20,7 @@ Notifications.setNotificationHandler({
 
 export const usePushNotifications = () => {
     const { user } = useAuth();
+    const router = useRouter();
     const [expoPushToken, setExpoPushToken] = useState<string>('');
     const [notification, setNotification] = useState<Notifications.Notification | null>(null);
     const notificationListener = useRef<Notifications.Subscription | null>(null);
@@ -43,9 +45,14 @@ export const usePushNotifications = () => {
         // Listener when user taps on the notification
         responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
             console.log('User tapped notification:', response.notification.request.content);
-            // Example: Route to specific screen based on data payload
-            // const data = response.notification.request.content.data;
-            // if (data?.url) router.push(data.url);
+            const data = response.notification.request.content.data;
+
+            // Navigate based on specific payload structures
+            if (data?.url) {
+                router.push(data.url as any);
+            } else if (data?.route) {
+                router.push(data.route as any);
+            }
         });
 
         return () => {
