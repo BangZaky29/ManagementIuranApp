@@ -82,6 +82,11 @@ export const styles = StyleSheet.create({
         marginTop: 10
     },
     submitBtnText: { color: '#FFF', fontSize: 16, fontWeight: 'bold' },
+    cancelBtn: {
+        backgroundColor: '#F5F5F5', borderRadius: 12, padding: 16, alignItems: 'center',
+        marginTop: 10, borderWidth: 1, borderColor: '#EEE'
+    },
+    cancelBtnText: { color: '#666', fontSize: 16, fontWeight: 'bold' },
 
     dateInputRow: { flexDirection: 'row', gap: 12 },
     dateInputBtn: {

@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert, ActivityIndicator, Modal, TextInput, Switch, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, ScrollView, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,6 +12,7 @@ import { CustomHeader } from '../../../components/CustomHeader';
 import { formatDateSafe } from '../../../utils/dateUtils';
 import { fetchNews, createNews, updateNews, deleteNews, NewsItem, uploadNewsImage } from '../../../services/newsService';
 import { useAuth } from '../../../contexts/AuthContext';
+import { CustomAlertModal } from '../../../components/CustomAlertModal';
 
 export default function ManageNewsScreen() {
     const router = useRouter();
@@ -23,6 +25,33 @@ export default function ManageNewsScreen() {
     const [showModal, setShowModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editId, setEditId] = useState<number | null>(null);
+
+    // Alert Modal State
+    const [alertConfig, setAlertConfig] = useState<{
+        visible: boolean;
+        title: string;
+        message: string;
+        type: 'success' | 'info' | 'warning' | 'error';
+        buttons: any[];
+    }>({
+        visible: false,
+        title: '',
+        message: '',
+        type: 'info',
+        buttons: []
+    });
+
+    const showAlert = (title: string, message: string, type: 'success' | 'info' | 'warning' | 'error' = 'info', buttons?: any[]) => {
+        setAlertConfig({
+            visible: true,
+            title,
+            message,
+            type,
+            buttons: buttons || [{ text: 'OK', onPress: hideAlert }]
+        });
+    };
+
+    const hideAlert = () => setAlertConfig(prev => ({ ...prev, visible: false }));
 
     // Form State
     const [title, setTitle] = useState('');
@@ -38,21 +67,16 @@ export default function ManageNewsScreen() {
     const params = useLocalSearchParams();
 
     useEffect(() => {
-        if (params.action === 'edit' && params.id) {
+        if (!showModal && params.action === 'edit' && params.id) {
             const newsId = Number(params.id);
             const itemToEdit = news.find(n => n.id === newsId);
             if (itemToEdit) {
                 openEdit(itemToEdit);
-                // Clear params? Hard to do without pushing again. 
-                // Just opening the modal is enough.
-            } else {
-                // If news list not loaded yet, we might need to fetch it or fetch specific item
-                // For now, assume list loads fast or we rely on loadNews
-                // Actually, if list isn't loaded, news is empty.
-                // We should add a dependency on news.
+                // Clear action=edit from params to prevent re-opening or infinite loop
+                router.setParams({ action: undefined, id: undefined });
             }
         }
-    }, [params, news]);
+    }, [params, news, showModal]);
 
     const pickImage = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({
@@ -72,7 +96,7 @@ export default function ManageNewsScreen() {
             setNews(data);
         } catch (error) {
             console.error('Error fetching news:', error);
-            Alert.alert('Error', 'Gagal memuat berita');
+            showAlert('Error', 'Gagal memuat berita', 'error');
         } finally {
             setIsLoading(false);
         }
@@ -80,7 +104,7 @@ export default function ManageNewsScreen() {
 
     const handleSave = async () => {
         if (!title || !content) {
-            Alert.alert('Peringatan', 'Judul dan Konten wajib diisi');
+            showAlert('Peringatan', 'Judul dan Konten wajib diisi', 'warning');
             return;
         }
 
@@ -101,7 +125,7 @@ export default function ManageNewsScreen() {
                     is_published: isPublished,
                     image_url: imageUrl
                 });
-                Alert.alert('Sukses', 'Berita berhasil diperbarui');
+                showAlert('Sukses', 'Berita berhasil diperbarui', 'success');
             } else {
                 await createNews({
                     title,
@@ -112,34 +136,36 @@ export default function ManageNewsScreen() {
                     image_url: imageUrl,
                     housing_complex_id: profile?.housing_complex_id || null // Auto-link to admin's housing
                 });
-                Alert.alert('Sukses', 'Berita berhasil dibuat');
+                showAlert('Sukses', 'Berita berhasil dibuat', 'success');
             }
             setShowModal(false);
             resetForm();
             loadNews();
         } catch (error: any) {
             console.error('Error saving news:', error);
-            Alert.alert('Gagal', error.message || 'Gagal menyimpan berita');
+            showAlert('Gagal', error.message || 'Gagal menyimpan berita', 'error');
         } finally {
             setIsSubmitting(false);
         }
     };
 
     const handleDelete = (id: number) => {
-        Alert.alert(
+        showAlert(
             'Konfirmasi Hapus',
             'Apakah anda yakin ingin menghapus berita ini?',
+            'warning',
             [
-                { text: 'Batal', style: 'cancel' },
+                { text: 'Batal', style: 'cancel', onPress: hideAlert },
                 {
                     text: 'Hapus',
                     style: 'destructive',
                     onPress: async () => {
+                        hideAlert();
                         try {
                             await deleteNews(id);
                             loadNews();
                         } catch (error) {
-                            Alert.alert('Error', 'Gagal menghapus berita');
+                            showAlert('Error', 'Gagal menghapus berita', 'error');
                         }
                     }
                 }
@@ -211,27 +237,31 @@ export default function ManageNewsScreen() {
 
     return (
         <View style={styles.container}>
-            <StatusBar style="dark" />
-            <CustomHeader title="Kelola Berita" showBack={true} />
+            <SafeAreaView edges={['top']} style={{ backgroundColor: '#FFF' }}>
+                <StatusBar style="dark" />
+                <CustomHeader title="Kelola Berita" showBack={true} />
+            </SafeAreaView>
 
-            {isLoading ? (
-                <View style={styles.centered}>
-                    <ActivityIndicator size="large" color={Colors.primary} />
-                </View>
-            ) : (
-                <FlatList
-                    data={news}
-                    keyExtractor={(item) => item.id.toString()}
-                    renderItem={renderItem}
-                    contentContainerStyle={styles.listContent}
-                    ListEmptyComponent={
-                        <View style={styles.emptyState}>
-                            <Ionicons name="newspaper-outline" size={48} color={Colors.textSecondary} />
-                            <Text style={styles.emptyText}>Belum ada berita.</Text>
-                        </View>
-                    }
-                />
-            )}
+            <SafeAreaView edges={['left', 'right', 'bottom']} style={{ flex: 1 }}>
+                {isLoading ? (
+                    <View style={styles.centered}>
+                        <ActivityIndicator size="large" color={Colors.primary} />
+                    </View>
+                ) : (
+                    <FlatList
+                        data={news}
+                        keyExtractor={(item) => item.id.toString()}
+                        renderItem={renderItem}
+                        contentContainerStyle={styles.listContent}
+                        ListEmptyComponent={
+                            <View style={styles.emptyState}>
+                                <Ionicons name="newspaper-outline" size={48} color={Colors.textSecondary} />
+                                <Text style={styles.emptyText}>Belum ada berita.</Text>
+                            </View>
+                        }
+                    />
+                )}
+            </SafeAreaView>
 
             <TouchableOpacity
                 style={styles.fab}
@@ -245,9 +275,9 @@ export default function ManageNewsScreen() {
                 visible={showModal}
                 animationType="slide"
                 transparent={true}
-                onRequestClose={() => setShowModal(false)}
+                onRequestClose={() => { setShowModal(false); resetForm(); }}
             >
-                <TouchableWithoutFeedback onPress={() => setShowModal(false)}>
+                <TouchableWithoutFeedback onPress={() => { setShowModal(false); resetForm(); }}>
                     <View style={styles.modalOverlay}>
                         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                             <KeyboardAvoidingView
@@ -256,39 +286,49 @@ export default function ManageNewsScreen() {
                             >
                                 <View style={styles.formHeader}>
                                     <Text style={styles.formTitle}>{isEditing ? 'Edit Berita' : 'Buat Berita Baru'}</Text>
-                                    <TouchableOpacity onPress={() => setShowModal(false)}>
+                                    <TouchableOpacity onPress={() => { setShowModal(false); resetForm(); }}>
                                         <Ionicons name="close" size={24} color={Colors.textSecondary} />
                                     </TouchableOpacity>
                                 </View>
 
                                 <ScrollView showsVerticalScrollIndicator={false}>
                                     <Text style={styles.inputLabel}>Gambar Berita (Opsional)</Text>
-                                    <TouchableOpacity onPress={pickImage} style={{
-                                        height: 150,
-                                        backgroundColor: '#F5F7FA',
-                                        borderRadius: 12,
-                                        borderWidth: 1,
-                                        borderColor: '#E0E0E0',
-                                        borderStyle: 'dashed',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        marginBottom: 16,
-                                        overflow: 'hidden'
-                                    }}>
+                                    <View style={styles.imagePickerContainer}>
                                         {image ? (
-                                            <Image source={{ uri: image }} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
+                                            <>
+                                                <Image source={{ uri: image }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                                                <View style={styles.imageActionOverlay}>
+                                                    <TouchableOpacity
+                                                        style={[styles.imageActionButton, styles.replaceImageButton]}
+                                                        onPress={pickImage}
+                                                    >
+                                                        <Ionicons name="camera" size={16} color={Colors.primary} />
+                                                        <Text style={[styles.imageActionText, { color: Colors.primary }]}>Ganti</Text>
+                                                    </TouchableOpacity>
+                                                    <TouchableOpacity
+                                                        style={[styles.imageActionButton, styles.removeImageButton]}
+                                                        onPress={() => setImage(null)}
+                                                    >
+                                                        <Ionicons name="trash" size={16} color="#FFF" />
+                                                        <Text style={[styles.imageActionText, { color: '#FFF' }]}>Hapus</Text>
+                                                    </TouchableOpacity>
+                                                </View>
+                                            </>
                                         ) : (
-                                            <View style={{ alignItems: 'center' }}>
-                                                <Ionicons name="image-outline" size={40} color={Colors.textSecondary} />
-                                                <Text style={{ marginTop: 8, color: Colors.textSecondary }}>Ketuk untuk pilih gambar</Text>
-                                            </View>
+                                            <TouchableOpacity onPress={pickImage} style={styles.imagePickerContent}>
+                                                <View style={{ backgroundColor: '#E3F2FD', padding: 15, borderRadius: 30, marginBottom: 10 }}>
+                                                    <Ionicons name="image" size={32} color={Colors.primary} />
+                                                </View>
+                                                <Text style={{ fontSize: 13, color: Colors.textSecondary, fontWeight: '500' }}>Ketuk untuk pilih gambar</Text>
+                                                <Text style={{ fontSize: 11, color: '#94A3B8', marginTop: 4 }}>Rekomendasi 16:9 atau Square</Text>
+                                            </TouchableOpacity>
                                         )}
-                                    </TouchableOpacity>
+                                    </View>
 
-                                    <Text style={styles.inputLabel}>Judul</Text>
+                                    <Text style={styles.inputLabel}>Judul Berita</Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="Judul Berita"
+                                        placeholder="Tulis judul pengumuman..."
                                         value={title}
                                         onChangeText={setTitle}
                                     />
@@ -296,29 +336,29 @@ export default function ManageNewsScreen() {
                                     <Text style={styles.inputLabel}>Kategori</Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="Kategori (misal: PENGUMUMAN)"
+                                        placeholder="Misal: PENGUMUMAN, KEGIATAN, KEUANGAN"
                                         value={category}
                                         onChangeText={setCategory}
                                     />
 
-                                    <Text style={styles.inputLabel}>Konten</Text>
+                                    <Text style={styles.inputLabel}>Isi Berita</Text>
                                     <TextInput
                                         style={[styles.input, styles.textArea]}
-                                        placeholder="Isi Berita..."
+                                        placeholder="Berikan detail informasi selengkapnya..."
                                         value={content}
                                         onChangeText={setContent}
                                         multiline
-                                        numberOfLines={4}
+                                        numberOfLines={6}
                                     />
 
                                     <View style={styles.checkboxContainer}>
                                         <Switch
                                             value={isPublished}
                                             onValueChange={setIsPublished}
-                                            trackColor={{ false: '#767577', true: Colors.primary }}
-                                            thumbColor={isPublished ? '#f4f3f4' : '#f4f3f4'}
+                                            trackColor={{ false: '#CBD5E1', true: Colors.primary }}
+                                            thumbColor="#FFF"
                                         />
-                                        <Text style={styles.checkboxLabel}>Publikasikan Langsung</Text>
+                                        <Text style={[styles.checkboxLabel, { fontSize: 14, color: '#475569' }]}>Publikasikan sekarang</Text>
                                     </View>
 
                                     <TouchableOpacity
@@ -329,16 +369,34 @@ export default function ManageNewsScreen() {
                                         {isSubmitting ? (
                                             <ActivityIndicator color="#FFF" />
                                         ) : (
-                                            <Text style={styles.saveButtonText}>Simpan</Text>
+                                            <Text style={styles.saveButtonText}>{isEditing ? 'Simpan Perubahan' : 'Terbitkan Berita'}</Text>
                                         )}
                                     </TouchableOpacity>
-                                    <View style={{ height: 20 }} />
+
+                                    <TouchableOpacity
+                                        style={[styles.saveButton, { backgroundColor: '#F1F5F9', marginTop: 12 }]}
+                                        onPress={() => { setShowModal(false); resetForm(); }}
+                                        disabled={isSubmitting}
+                                    >
+                                        <Text style={[styles.saveButtonText, { color: '#64748B' }]}>Batal</Text>
+                                    </TouchableOpacity>
+
+                                    <View style={{ height: 30 }} />
                                 </ScrollView>
                             </KeyboardAvoidingView>
                         </TouchableWithoutFeedback>
                     </View>
                 </TouchableWithoutFeedback>
             </Modal>
+
+            <CustomAlertModal
+                visible={alertConfig.visible}
+                title={alertConfig.title}
+                message={alertConfig.message}
+                type={alertConfig.type}
+                buttons={alertConfig.buttons}
+                onClose={hideAlert}
+            />
         </View>
     );
 }

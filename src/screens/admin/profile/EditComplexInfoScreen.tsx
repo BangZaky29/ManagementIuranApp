@@ -114,12 +114,12 @@ export default function EditComplexInfoScreen() {
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Catatan Bantuan (Opsional)</Text>
                     <TextInput
-                        style={[styles.input, { height: 80, textAlignVertical: 'top' }]}
+                        style={[styles.input, { height: 120, textAlignVertical: 'top', paddingTop: 12 }]}
                         value={helpNote}
                         onChangeText={setHelpNote}
                         placeholder="Misal: Aktif jam 08.00 - 20.00"
                         multiline={true}
-                        numberOfLines={3}
+                        numberOfLines={4}
                     />
                 </View>
 

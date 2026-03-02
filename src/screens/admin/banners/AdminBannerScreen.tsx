@@ -123,9 +123,6 @@ export default function AdminBannerScreen() {
                             <Text style={styles.modalTitle}>
                                 {vm.isEditing ? 'Edit Iklan' : 'Tambah Iklan Baru'}
                             </Text>
-                            <TouchableOpacity onPress={() => vm.setModalVisible(false)}>
-                                <Ionicons name="close" size={24} color="#333" />
-                            </TouchableOpacity>
                         </View>
 
                         <ScrollView showsVerticalScrollIndicator={false}>
@@ -269,6 +266,15 @@ export default function AdminBannerScreen() {
                                     </Text>
                                 )}
                             </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.cancelBtn}
+                                onPress={() => vm.setModalVisible(false)}
+                                disabled={vm.isSubmitting}
+                            >
+                                <Text style={styles.cancelBtnText}>Batal</Text>
+                            </TouchableOpacity>
+                            <View style={{ height: 20 }} />
                         </ScrollView>
                     </View>
                 </View>
