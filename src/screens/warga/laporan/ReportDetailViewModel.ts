@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { fetchReportById, deleteReport, Report } from '../../../services/laporanService';
-import { Alert, Image } from 'react-native';
+import { Image } from 'react-native';
 import { Colors } from '../../../constants/Colors';
 
 export const useReportDetailViewModel = () => {
@@ -55,7 +55,13 @@ export const useReportDetailViewModel = () => {
         if (data?.location) {
             import('react-native').then(({ Linking }) => {
                 Linking.openURL(data.location!).catch(err => {
-                    Alert.alert('Gagal Membuka Peta', 'Tidak dapat membuka aplikasi peta.');
+                    setAlertConfig({
+                        title: 'Gagal Membuka Peta',
+                        message: 'Tidak dapat membuka aplikasi peta.',
+                        type: 'error',
+                        buttons: [{ text: 'OK', onPress: hideAlert }]
+                    });
+                    setAlertVisible(true);
                 });
             });
         }

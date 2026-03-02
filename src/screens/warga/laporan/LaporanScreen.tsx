@@ -22,6 +22,7 @@ export default function LaporanScreen() {
         switch (status) {
             case 'Selesai': return colors.success;
             case 'Diproses': return colors.warning;
+            case 'Ditolak': return colors.danger;
             default: return colors.textSecondary;
         }
     };
@@ -30,6 +31,7 @@ export default function LaporanScreen() {
         switch (status) {
             case 'Selesai': return '#E8F5E9';
             case 'Diproses': return '#FFF3E0';
+            case 'Ditolak': return '#FFEBEE';
             default: return '#F5F5F5';
         }
     };

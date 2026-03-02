@@ -4,13 +4,16 @@ import { decode } from 'base64-arraybuffer';
 
 export interface Report {
     id: string;
+    user_id: string;
     title: string;
     description: string;
     category: 'Fasilitas' | 'Kebersihan' | 'Keamanan' | 'Lainnya';
     status: 'Menunggu' | 'Diproses' | 'Selesai' | 'Ditolak';
     image_url: string | null;
     location: string | null;
+    rejection_reason?: string | null;
     created_at: string;
+    updated_at?: string;
     profiles?: {
         full_name: string;
         avatar_url: string | null;
@@ -219,10 +222,19 @@ export const updateReport = async (
     return data;
 };
 
-export const updateReportStatus = async (id: string, status: string): Promise<void> => {
+export const updateReportStatus = async (id: string, status: string, rejectionReason?: string): Promise<void> => {
+    const updateData: any = {
+        status,
+        updated_at: new Date().toISOString()
+    };
+
+    if (rejectionReason !== undefined) {
+        updateData.rejection_reason = rejectionReason;
+    }
+
     const { error } = await supabase
         .from('reports')
-        .update({ status, updated_at: new Date().toISOString() })
+        .update(updateData)
         .eq('id', id);
 
     if (error) throw error;

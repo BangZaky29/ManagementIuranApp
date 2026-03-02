@@ -9,22 +9,32 @@ interface CustomHeaderProps {
     title: string;
     showBack?: boolean;
     rightIcon?: React.ReactNode;
+    onBack?: () => void;
 }
 
 export const CustomHeader: React.FC<CustomHeaderProps> = ({
     title,
     showBack = false,
     rightIcon,
+    onBack,
 }) => {
     const router = useRouter();
     const { colors } = useTheme();
+
+    const handleBack = () => {
+        if (onBack) {
+            onBack();
+        } else {
+            router.back();
+        }
+    };
 
     return (
         <SafeAreaView edges={['top', 'left', 'right']} style={[styles.safeArea, { backgroundColor: colors.green1 }]}>
             <View style={styles.container}>
                 <View style={styles.leftContainer}>
                     {showBack && (
-                        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
                             <Ionicons name="arrow-back" size={24} color={colors.green5} />
                         </TouchableOpacity>
                     )}

@@ -58,7 +58,13 @@ export const useCreateReportViewModel = () => {
             }
         } catch (error) {
             console.error('Failed to load report:', error);
-            Alert.alert('Error', 'Gagal memuat data laporan.');
+            setAlertConfig({
+                title: 'Error',
+                message: 'Gagal memuat data laporan.',
+                type: 'error',
+                buttons: [{ text: 'OK', onPress: hideAlert }]
+            });
+            setAlertVisible(true);
         } finally {
             setIsLoading(false);
         }
@@ -82,7 +88,13 @@ export const useCreateReportViewModel = () => {
             }
         } catch (error) {
             console.error('Image picker error:', error);
-            Alert.alert('Error', 'Gagal memuat galeri foto');
+            setAlertConfig({
+                title: 'Error',
+                message: 'Gagal memuat galeri foto',
+                type: 'error',
+                buttons: [{ text: 'OK', onPress: hideAlert }]
+            });
+            setAlertVisible(true);
         }
     };
 
@@ -91,7 +103,13 @@ export const useCreateReportViewModel = () => {
         try {
             let { status } = await Location.requestForegroundPermissionsAsync();
             if (status !== 'granted') {
-                Alert.alert('Izin Ditolak', 'Izin lokasi diperlukan.');
+                setAlertConfig({
+                    title: 'Izin Ditolak',
+                    message: 'Izin lokasi diperlukan.',
+                    type: 'warning',
+                    buttons: [{ text: 'OK', onPress: hideAlert }]
+                });
+                setAlertVisible(true);
                 setLocationStatus('error');
                 return;
             }
@@ -102,7 +120,13 @@ export const useCreateReportViewModel = () => {
             setLocationStatus('success');
         } catch (error) {
             console.warn('Location Error:', error);
-            Alert.alert('Gagal', 'Tidak dapat mengambil lokasi saat ini.');
+            setAlertConfig({
+                title: 'Gagal',
+                message: 'Tidak dapat mengambil lokasi saat ini.',
+                type: 'error',
+                buttons: [{ text: 'OK', onPress: hideAlert }]
+            });
+            setAlertVisible(true);
             setLocationStatus('error');
         }
     };

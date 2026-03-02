@@ -237,10 +237,12 @@ export default function ManageNewsScreen() {
 
     return (
         <View style={styles.container}>
-            <SafeAreaView edges={['top']} style={{ backgroundColor: '#FFF' }}>
-                <StatusBar style="dark" />
-                <CustomHeader title="Kelola Berita" showBack={true} />
-            </SafeAreaView>
+            <StatusBar style="dark" />
+            <CustomHeader
+                title="Kelola Berita"
+                showBack={true}
+                onBack={() => router.replace('/admin')}
+            />
 
             <SafeAreaView edges={['left', 'right', 'bottom']} style={{ flex: 1 }}>
                 {isLoading ? (

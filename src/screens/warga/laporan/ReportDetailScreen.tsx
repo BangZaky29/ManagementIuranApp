@@ -107,6 +107,20 @@ export default function ReportDetailScreen() {
                             resizeMode="contain"
                         />
                     )}
+
+                    {data.status === 'Ditolak' && data.rejection_reason && (
+                        <View style={{
+                            marginTop: 16,
+                            backgroundColor: '#FFEBEE',
+                            padding: 16,
+                            borderRadius: 12,
+                            borderLeftWidth: 4,
+                            borderLeftColor: Colors.danger
+                        }}>
+                            <Text style={{ fontWeight: 'bold', color: Colors.danger, marginBottom: 4, fontSize: 13 }}>Alasan Penolakan:</Text>
+                            <Text style={{ color: Colors.textPrimary, lineHeight: 20, fontSize: 14 }}>{data.rejection_reason}</Text>
+                        </View>
+                    )}
                 </View>
 
                 {/* Timeline Placeholder - Logic can be added later if we have a history table */}
