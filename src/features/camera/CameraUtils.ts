@@ -20,7 +20,7 @@ export const handleCameraCapture = async (onSuccess: (uri: string) => void) => {
     // 2. Launch Camera
     try {
         const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: 'images',
             allowsEditing: false,
             quality: 0.7,
         });

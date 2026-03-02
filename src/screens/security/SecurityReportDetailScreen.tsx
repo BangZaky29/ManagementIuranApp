@@ -99,7 +99,7 @@ export default function SecurityReportDetailScreen() {
 
     const pickImage = async () => {
         const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: 'images',
             allowsEditing: true,
             quality: 0.7,
         });
