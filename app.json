@@ -12,7 +12,7 @@
       "supportsTablet": true
     },
     "notification": {
-      "icon": "./assets/logo_warlok/warlok_48x48_Transparant.png",
+      "icon": "./assets/logo_warlok/warlok_48x48_noTransparant.png",
       "color": "#0D47A1"
     },
     "android": {
