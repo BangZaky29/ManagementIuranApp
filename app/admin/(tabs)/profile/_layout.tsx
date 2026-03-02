@@ -5,6 +5,7 @@ export default function AdminProfileLayout() {
         <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="index" />
             <Stack.Screen name="edit" options={{ presentation: 'card' }} />
+            <Stack.Screen name="edit-complex" options={{ presentation: 'card' }} />
         </Stack>
     );
 }

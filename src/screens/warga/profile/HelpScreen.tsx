@@ -1,36 +1,87 @@
-import React from 'react';
-import { View, Text, ScrollView, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Colors } from '../../../constants/Colors';
 import { CustomHeader } from '../../../components/CustomHeader';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../../../contexts/AuthContext';
+import { fetchComplexInfo, ComplexInfo } from '../../../services/complexService';
+import * as Linking from 'expo-linking';
 
 export default function HelpScreen() {
+    const { profile } = useAuth();
+    const [info, setInfo] = useState<ComplexInfo | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        loadData();
+    }, []);
+
+    const loadData = async () => {
+        if (!profile?.housing_complex_id) {
+            setIsLoading(false);
+            return;
+        }
+        try {
+            const data = await fetchComplexInfo(profile.housing_complex_id);
+            setInfo(data);
+        } catch (error) {
+            console.error('HelpScreen load error:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleCall = (phone: string) => {
+        Linking.openURL(`tel:${phone}`);
+    };
+
+    const handleWA = (phone: string) => {
+        const cleanPhone = phone.replace(/[^0-9]/g, '');
+        Linking.openURL(`whatsapp://send?phone=${cleanPhone}`);
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor={Colors.green1} />
             <CustomHeader title="Bantuan" showBack={true} />
 
             <ScrollView contentContainerStyle={styles.content}>
-                <View style={styles.card}>
-                    <Text style={styles.cardTitle}>Hubungi Pengurus RT</Text>
-                    <Text style={styles.cardText}>
-                        Jika anda mengalami kendala teknis atau memiliki pertanyaan seputar iuran dan laporan, silahkan hubungi pengurus RT melalui kontak di bawah ini.
-                    </Text>
+                {isLoading ? (
+                    <View style={{ padding: 40, alignItems: 'center' }}>
+                        <ActivityIndicator color={Colors.primary} />
+                    </View>
+                ) : (
+                    <View style={styles.card}>
+                        <Text style={styles.cardTitle}>Hubungi Pengurus RT</Text>
+                        <Text style={styles.cardText}>
+                            {info?.help_note || 'Jika anda mengalami kendala teknis atau memiliki pertanyaan seputar iuran dan laporan, silahkan hubungi pengurus RT melalui kontak di bawah ini.'}
+                        </Text>
 
-                    <TouchableOpacity style={styles.contactRow}>
-                        <View style={styles.iconBox}>
-                            <Ionicons name="call" size={20} color={Colors.white} />
-                        </View>
-                        <Text style={styles.contactText}>+62 812 3456 7890 (Pak RT)</Text>
-                    </TouchableOpacity>
+                        {info?.help_phone && (
+                            <TouchableOpacity style={styles.contactRow} onPress={() => handleCall(info.help_phone!)}>
+                                <View style={styles.iconBox}>
+                                    <Ionicons name="call" size={20} color={Colors.white} />
+                                </View>
+                                <Text style={styles.contactText}>{info.help_phone} (Pak RT)</Text>
+                            </TouchableOpacity>
+                        )}
 
-                    <TouchableOpacity style={styles.contactRow}>
-                        <View style={styles.iconBox}>
-                            <Ionicons name="logo-whatsapp" size={20} color={Colors.white} />
-                        </View>
-                        <Text style={styles.contactText}>+62 812 3456 7890 (WhatsApp)</Text>
-                    </TouchableOpacity>
-                </View>
+                        {info?.help_whatsapp && (
+                            <TouchableOpacity style={styles.contactRow} onPress={() => handleWA(info.help_whatsapp!)}>
+                                <View style={styles.iconBox}>
+                                    <Ionicons name="logo-whatsapp" size={20} color={Colors.white} />
+                                </View>
+                                <Text style={styles.contactText}>{info.help_whatsapp} (WhatsApp)</Text>
+                            </TouchableOpacity>
+                        )}
+
+                        {!info?.help_phone && !info?.help_whatsapp && (
+                            <Text style={[styles.cardText, { fontStyle: 'italic', color: Colors.textSecondary }]}>
+                                Belum ada kontak yang tersedia untuk komplek ini.
+                            </Text>
+                        )}
+                    </View>
+                )}
 
                 <View style={[styles.card, { marginTop: 20 }]}>
                     <Text style={styles.cardTitle}>FAQ</Text>
@@ -43,6 +94,13 @@ export default function HelpScreen() {
                         <Text style={styles.faqAnswer}>Saat ini sistem hanya mendukung pembayaran penuh per periode bulan.</Text>
                     </View>
                 </View>
+
+                {info?.terms_conditions && (
+                    <View style={[styles.card, { marginTop: 20 }]}>
+                        <Text style={styles.cardTitle}>Syarat & Ketentuan Komplek</Text>
+                        <Text style={styles.cardText}>{info.terms_conditions}</Text>
+                    </View>
+                )}
             </ScrollView>
         </SafeAreaView>
     );

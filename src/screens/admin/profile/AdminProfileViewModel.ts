@@ -136,9 +136,14 @@ export const useAdminProfileViewModel = () => {
         setAlertVisible(true);
     };
 
+    const handleEditComplexInfo = () => {
+        router.push('/admin/profile/edit-complex');
+    };
+
     return {
         user,
         handleEditProfile,
+        handleEditComplexInfo,
         handleLogout,
         handleAvatarUpdate,
         isUploading,

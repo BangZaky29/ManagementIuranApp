@@ -468,5 +468,25 @@
         "operation": "INSERT",
         "using_expression": null,
         "check_expression": "((created_by = auth.uid()) AND (destination_user_id = auth.uid()))"
+    },
+    {
+        "schemaname": "public",
+        "tablename": "complex_info",
+        "policyname": "Users can view complex info of their own complex",
+        "permissive": "PERMISSIVE",
+        "roles": "{authenticated}",
+        "operation": "SELECT",
+        "using_expression": "(housing_complex_id = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid())))",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "complex_info",
+        "policyname": "Admins can manage complex info of their own complex",
+        "permissive": "PERMISSIVE",
+        "roles": "{authenticated}",
+        "operation": "ALL",
+        "using_expression": "(is_admin() AND (housing_complex_id = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid()))))",
+        "check_expression": "(is_admin() AND (housing_complex_id = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid()))))"
     }
 ]

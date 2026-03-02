@@ -227,3 +227,16 @@ CREATE TABLE public.visitors (
   CONSTRAINT visitors_destination_user_id_fkey FOREIGN KEY (destination_user_id) REFERENCES public.profiles(id),
   CONSTRAINT visitors_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id)
 );
+
+CREATE TABLE public.complex_info (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  housing_complex_id bigint NOT NULL,
+  help_phone text,
+  help_whatsapp text,
+  help_note text,
+  terms_conditions text,
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT complex_info_pkey PRIMARY KEY (id),
+  CONSTRAINT complex_info_housing_complex_id_key UNIQUE (housing_complex_id),
+  CONSTRAINT complex_info_housing_complex_id_fkey FOREIGN KEY (housing_complex_id) REFERENCES public.housing_complexes(id)
+);
