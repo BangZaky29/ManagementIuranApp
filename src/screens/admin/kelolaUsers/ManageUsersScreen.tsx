@@ -9,6 +9,7 @@ import { CustomHeader } from '../../../components/CustomHeader';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
 import { Colors } from '../../../constants/Colors';
 import { styles } from './ManageUsersStyles';
+import * as Clipboard from 'expo-clipboard';
 
 export default function ManageUsersScreen() {
     const router = useRouter();
@@ -123,25 +124,47 @@ export default function ManageUsersScreen() {
     };
 
     const handleDelete = (id: string) => {
-        Alert.alert(
-            'Konfirmasi Hapus',
-            'Apakah anda yakin ingin menghapus data ini?',
-            [
-                { text: 'Batal', style: 'cancel' },
+        setAlertConfig({
+            visible: true,
+            title: 'Konfirmasi Hapus',
+            message: 'Apakah anda yakin ingin menghapus data ini?',
+            type: 'warning',
+            buttons: [
+                { text: 'Batal', style: 'cancel', onPress: hideAlert },
                 {
                     text: 'Hapus',
                     style: 'destructive',
                     onPress: async () => {
+                        hideAlert();
                         try {
                             await deleteVerifiedResident(id);
                             loadData();
                         } catch (error) {
-                            Alert.alert('Error', 'Gagal menghapus data');
+                            setAlertConfig({
+                                visible: true,
+                                title: 'Error',
+                                message: 'Gagal menghapus data',
+                                type: 'error'
+                            });
                         }
                     }
                 }
             ]
-        );
+        });
+    };
+
+    const handleCopyToken = async (token: string) => {
+        try {
+            await Clipboard.setStringAsync(token);
+            setAlertConfig({
+                visible: true,
+                title: 'Sukses',
+                message: 'Kode akses berhasil disalin ke clipboard',
+                type: 'success'
+            });
+        } catch (error) {
+            console.error('Failed to copy token:', error);
+        }
     };
 
     const resetForm = () => {
@@ -167,6 +190,7 @@ export default function ManageUsersScreen() {
         title: string;
         message: string;
         type: 'success' | 'info' | 'warning' | 'error';
+        buttons?: { text: string; onPress?: () => void; style?: 'default' | 'cancel' | 'destructive' }[];
     }>({
         visible: false,
         title: '',
@@ -321,8 +345,17 @@ export default function ManageUsersScreen() {
                         {/* Note: Address is usually null now for new users until they register/update */}
 
                         <View style={styles.tokenContainer}>
-                            <Text style={styles.tokenLabel}>Kode Akses:</Text>
-                            <Text style={styles.tokenValue}>{item.access_token}</Text>
+                            <View style={{ flex: 1 }}>
+                                <Text style={styles.tokenLabel}>Kode Akses:</Text>
+                                <Text style={styles.tokenValue}>{item.access_token}</Text>
+                            </View>
+                            <TouchableOpacity
+                                style={styles.copyTokenButton}
+                                onPress={() => handleCopyToken(item.access_token)}
+                            >
+                                <Ionicons name="copy-outline" size={18} color={Colors.primary} />
+                                <Text style={styles.copyTokenText}>Salin</Text>
+                            </TouchableOpacity>
                         </View>
 
                         <View style={styles.cardFooter}>
@@ -405,14 +438,19 @@ export default function ManageUsersScreen() {
                     </View>
                 </View>
 
-                {/* Import/Export Buttons */}
-                <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-start', paddingTop: 4 }}>
-                    <TouchableOpacity style={styles.actionIconButton} onPress={handleExport}>
-                        <Ionicons name="download-outline" size={20} color={Colors.primary} />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionIconButton} onPress={() => setShowImportModal(true)}>
-                        <Ionicons name="cloud-upload-outline" size={20} color={Colors.primary} />
-                    </TouchableOpacity>
+                {/* Import/Export Buttons & Total User */}
+                <View style={{ alignItems: 'flex-end', gap: 10 }}>
+                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                        <TouchableOpacity style={styles.actionIconButton} onPress={handleExport}>
+                            <Ionicons name="download-outline" size={20} color={Colors.primary} />
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.actionIconButton} onPress={() => setShowImportModal(true)}>
+                            <Ionicons name="cloud-upload-outline" size={20} color={Colors.primary} />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.totalUserContainer}>
+                        <Text style={styles.totalUserText}>Total: {residents.length}</Text>
+                    </View>
                 </View>
             </View>
 
@@ -727,6 +765,7 @@ export default function ManageUsersScreen() {
                 title={alertConfig.title}
                 message={alertConfig.message}
                 type={alertConfig.type}
+                buttons={alertConfig.buttons}
                 onClose={hideAlert}
             />
         </View>

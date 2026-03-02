@@ -163,10 +163,26 @@ export const styles = StyleSheet.create({
         marginRight: 8,
     },
     tokenValue: {
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: 'bold',
         color: Colors.primary,
-        letterSpacing: 1,
+        letterSpacing: 2,
+    },
+    copyTokenButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#F1F8E9',
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: Colors.green2,
+    },
+    copyTokenText: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: Colors.primary,
+        marginLeft: 6,
     },
     cardFooter: {
         flexDirection: 'row',
@@ -331,5 +347,20 @@ export const styles = StyleSheet.create({
     emptyText: {
         color: Colors.textSecondary,
         fontSize: 14,
+    },
+    totalUserContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 12,
+        backgroundColor: '#E3F2FD',
+        borderWidth: 1,
+        borderColor: '#BBDEFB',
+    },
+    totalUserText: {
+        fontSize: 12,
+        color: '#1565C0', // Stronger blue
+        fontWeight: 'bold',
     },
 });

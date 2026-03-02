@@ -177,14 +177,16 @@ export default function PaymentConfirmationDetailScreen() {
 
     if (isLoading) {
         return (
-            <SafeAreaView style={styles.container}>
-                <StatusBar barStyle="dark-content" backgroundColor={Colors.green1} />
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={24} color={Colors.green5} />
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Detail Pembayaran</Text>
-                </View>
+            <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+                <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+                <SafeAreaView edges={['top']} style={{ backgroundColor: '#FFF' }}>
+                    <View style={styles.header}>
+                        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                            <Ionicons name="arrow-back" size={24} color={Colors.green5} />
+                        </TouchableOpacity>
+                        <Text style={styles.headerTitle}>Detail Pembayaran</Text>
+                    </View>
+                </SafeAreaView>
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <ActivityIndicator size="large" color={Colors.green3} />
                 </View>
@@ -194,14 +196,16 @@ export default function PaymentConfirmationDetailScreen() {
 
     if (!payment) {
         return (
-            <SafeAreaView style={styles.container}>
-                <StatusBar barStyle="dark-content" backgroundColor={Colors.green1} />
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={24} color={Colors.green5} />
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Detail Pembayaran</Text>
-                </View>
+            <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+                <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+                <SafeAreaView edges={['top']} style={{ backgroundColor: '#FFF' }}>
+                    <View style={styles.header}>
+                        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                            <Ionicons name="arrow-back" size={24} color={Colors.green5} />
+                        </TouchableOpacity>
+                        <Text style={styles.headerTitle}>Detail Pembayaran</Text>
+                    </View>
+                </SafeAreaView>
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <Text style={{ color: Colors.textSecondary }}>Pembayaran tidak ditemukan.</Text>
                 </View>
@@ -210,16 +214,18 @@ export default function PaymentConfirmationDetailScreen() {
     }
 
     return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor={Colors.green1} />
+        <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+            <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
 
             {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color={Colors.green5} />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Detail Pembayaran</Text>
-            </View>
+            <SafeAreaView edges={['top']} style={{ backgroundColor: '#FFF' }}>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                        <Ionicons name="arrow-back" size={24} color={Colors.green5} />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Detail Pembayaran</Text>
+                </View>
+            </SafeAreaView>
 
             <ScrollView contentContainerStyle={styles.content}>
 
@@ -428,7 +434,8 @@ const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: Colors.green1 },
     header: {
         flexDirection: 'row', alignItems: 'center',
-        paddingHorizontal: 20, paddingTop: 50, paddingBottom: 15,
+        paddingHorizontal: 20, paddingBottom: 15,
+        backgroundColor: '#FFF',
     },
     backButton: { padding: 5, marginRight: 10 },
     headerTitle: { fontSize: 20, fontWeight: 'bold', color: Colors.green5 },

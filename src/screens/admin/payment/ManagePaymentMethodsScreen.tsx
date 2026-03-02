@@ -218,19 +218,21 @@ export default function ManagePaymentMethodsScreen() {
     // ====== RENDER ======
 
     return (
-        <SafeAreaView style={st.container}>
+        <SafeAreaView style={st.container} edges={['left', 'right', 'bottom']}>
             <StatusBar barStyle="dark-content" backgroundColor="#F5F7F5" />
 
             {/* Header */}
-            <View style={st.header}>
-                <TouchableOpacity onPress={() => router.back()} style={st.backBtn}>
-                    <Ionicons name="arrow-back" size={24} color="#1B5E20" />
-                </TouchableOpacity>
-                <Text style={st.headerTitle}>Metode Pembayaran</Text>
-                <TouchableOpacity onPress={openAddForm} style={st.addBtn}>
-                    <Ionicons name="add-circle" size={28} color="#1B5E20" />
-                </TouchableOpacity>
-            </View>
+            <SafeAreaView edges={['top']} style={{ backgroundColor: '#FFF' }}>
+                <View style={st.header}>
+                    <TouchableOpacity onPress={() => router.back()} style={st.backBtn}>
+                        <Ionicons name="arrow-back" size={24} color="#1B5E20" />
+                    </TouchableOpacity>
+                    <Text style={st.headerTitle}>Metode Pembayaran</Text>
+                    <TouchableOpacity onPress={openAddForm} style={st.addBtn}>
+                        <Ionicons name="add-circle" size={28} color="#1B5E20" />
+                    </TouchableOpacity>
+                </View>
+            </SafeAreaView>
 
             {isLoading ? (
                 <View style={st.center}><ActivityIndicator size="large" color="#1B5E20" /></View>
@@ -571,7 +573,7 @@ const st = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F5F7F5' },
     header: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-        paddingHorizontal: 20, paddingTop: Platform.OS === 'android' ? 48 : 16, paddingBottom: 12, backgroundColor: '#FFF',
+        paddingHorizontal: 20, paddingBottom: 12, backgroundColor: '#FFF',
     },
     backBtn: { padding: 5 },
     headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#1B5E20', flex: 1, marginLeft: 10 },

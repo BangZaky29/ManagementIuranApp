@@ -66,16 +66,18 @@ export default function IuranManagementScreen() {
     ];
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
             <StatusBar barStyle="dark-content" backgroundColor="#F5F7F5" />
 
             {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color="#1B5E20" />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Management Iuran</Text>
-            </View>
+            <SafeAreaView edges={['top']} style={{ backgroundColor: '#FFF' }}>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                        <Ionicons name="arrow-back" size={24} color="#1B5E20" />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Management Iuran</Text>
+                </View>
+            </SafeAreaView>
 
             <ScrollView contentContainerStyle={styles.content}>
                 {/* Info Banner */}
@@ -121,7 +123,6 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: 20,
-        paddingTop: Platform.OS === 'android' ? 48 : 16,
         paddingBottom: 15,
         backgroundColor: '#FFF',
     },

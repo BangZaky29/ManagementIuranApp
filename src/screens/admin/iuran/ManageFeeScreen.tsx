@@ -267,19 +267,21 @@ export default function ManageFeeScreen() {
     // ====== MAIN RENDER ======
 
     return (
-        <SafeAreaView style={s.container}>
+        <SafeAreaView style={s.container} edges={['left', 'right', 'bottom']}>
             <StatusBar barStyle="dark-content" backgroundColor="#F5F7F5" />
 
             {/* Header */}
-            <View style={s.header}>
-                <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
-                    <Ionicons name="arrow-back" size={24} color="#1B5E20" />
-                </TouchableOpacity>
-                <Text style={s.headerTitle}>Kelola Iuran</Text>
-                <TouchableOpacity onPress={openAddForm} style={s.addBtn}>
-                    <Ionicons name="add-circle" size={28} color="#1B5E20" />
-                </TouchableOpacity>
-            </View>
+            <SafeAreaView edges={['top']} style={{ backgroundColor: '#FFF' }}>
+                <View style={s.header}>
+                    <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
+                        <Ionicons name="arrow-back" size={24} color="#1B5E20" />
+                    </TouchableOpacity>
+                    <Text style={s.headerTitle}>Kelola Iuran</Text>
+                    <TouchableOpacity onPress={openAddForm} style={s.addBtn}>
+                        <Ionicons name="add-circle" size={28} color="#1B5E20" />
+                    </TouchableOpacity>
+                </View>
+            </SafeAreaView>
 
             {/* Tab Switcher */}
             <View style={s.tabRow}>
@@ -738,14 +740,14 @@ const s = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F5F7F5' },
     header: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-        paddingHorizontal: 20, paddingTop: Platform.OS === 'android' ? 48 : 16, paddingBottom: 12, backgroundColor: '#FFF',
+        paddingHorizontal: 20, paddingBottom: 12, backgroundColor: '#FFF',
     },
     backBtn: { padding: 5 },
     headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#1B5E20', flex: 1, marginLeft: 10 },
     addBtn: { padding: 5 },
 
     // Tabs
-    tabRow: { flexDirection: 'row', paddingHorizontal: 20, paddingVertical: 10, backgroundColor: '#FFF', gap: 10, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
+    tabRow: { flexDirection: 'row', paddingHorizontal: 20, paddingVertical: 10, marginTop: 10, backgroundColor: '#FFF', gap: 10, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
     tab: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderRadius: 12, backgroundColor: '#F1F8E9' },
     tabActive: { backgroundColor: '#1B5E20' },
     tabText: { fontSize: 14, fontWeight: '600', color: '#1B5E20' },
