@@ -1,8 +1,9 @@
 import React from 'react';
 import {
-    View, Text, ScrollView, TouchableOpacity, SafeAreaView,
+    View, Text, ScrollView, TouchableOpacity,
     StatusBar, ActivityIndicator, RefreshControl, Platform, StyleSheet
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { CustomHeader } from '../../../components/CustomHeader';

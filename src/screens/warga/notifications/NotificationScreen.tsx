@@ -4,11 +4,11 @@ import {
     Text,
     FlatList,
     TouchableOpacity,
-    SafeAreaView,
     StatusBar,
     RefreshControl,
     ActivityIndicator
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomHeader } from '../../../components/CustomHeader';
 import { useNotificationViewModel } from './NotificationViewModel';

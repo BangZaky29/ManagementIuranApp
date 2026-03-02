@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-    View, Text, SafeAreaView, ScrollView, TouchableOpacity,
+    View, Text, ScrollView, TouchableOpacity,
     StatusBar, ActivityIndicator, StyleSheet, TextInput, Modal, RefreshControl,
     Image, Platform, Alert
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';

@@ -1,8 +1,9 @@
 import React from 'react';
 import {
-    View, Text, SafeAreaView, ScrollView, TouchableOpacity,
+    View, Text, ScrollView, TouchableOpacity,
     StatusBar, Image, ActivityIndicator, RefreshControl, Platform
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useSecurityHomeViewModel } from './SecurityHomeViewModel';
 import { styles } from './SecurityHomeStyles';

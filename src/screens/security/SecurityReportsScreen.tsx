@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import {
-    View, Text, SafeAreaView, FlatList, TouchableOpacity,
+    View, Text, FlatList, TouchableOpacity,
     Image, RefreshControl, StatusBar, ActivityIndicator, Linking
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useSecurityReportsViewModel } from './SecurityReportsViewModel';
 import { styles } from './SecurityReportsStyles';
@@ -59,7 +60,7 @@ export default function SecurityReportsScreen() {
                 <View style={styles.cardBody}>
                     <Text style={styles.reportTitle}>{item.title}</Text>
                     <Text style={styles.reportDesc}>{item.description}</Text>
-                    
+
                     <View style={styles.categoryTag}>
                         <Text style={styles.categoryText}>{item.category}</Text>
                     </View>
@@ -69,8 +70,8 @@ export default function SecurityReportsScreen() {
                     )}
 
                     {item.location && (
-                        <TouchableOpacity 
-                            style={styles.locationRow} 
+                        <TouchableOpacity
+                            style={styles.locationRow}
                             onPress={() => openLocation(item.location)}
                             disabled={!hasLocation}
                         >
@@ -87,7 +88,7 @@ export default function SecurityReportsScreen() {
                 {item.status !== 'Selesai' && item.status !== 'Ditolak' && (
                     <View style={styles.actionRow}>
                         {item.status === 'Menunggu' ? (
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 style={[styles.actionButton, styles.btnBlue]}
                                 onPress={() => vm.handleUpdateStatus(item.id, 'Diproses')}
                             >
@@ -95,7 +96,7 @@ export default function SecurityReportsScreen() {
                                 <Text style={styles.btnText}>Proses</Text>
                             </TouchableOpacity>
                         ) : (
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 style={[styles.actionButton, styles.btnGreen]}
                                 onPress={() => vm.handleUpdateStatus(item.id, 'Selesai')}
                             >
@@ -103,8 +104,8 @@ export default function SecurityReportsScreen() {
                                 <Text style={styles.btnText}>Selesaikan</Text>
                             </TouchableOpacity>
                         )}
-                        
-                        <TouchableOpacity 
+
+                        <TouchableOpacity
                             style={[styles.actionButton, { backgroundColor: '#F5F5F5' }]}
                             onPress={() => vm.handleUpdateStatus(item.id, 'Ditolak')}
                         >
@@ -158,16 +159,16 @@ export default function SecurityReportsScreen() {
                     keyExtractor={(item) => item.id}
                     contentContainerStyle={styles.listContent}
                     refreshControl={
-                        <RefreshControl 
-                            refreshing={vm.refreshing} 
-                            onRefresh={() => vm.loadReports(true)} 
-                            colors={['#0D47A1']} 
+                        <RefreshControl
+                            refreshing={vm.refreshing}
+                            onRefresh={() => vm.loadReports(true)}
+                            colors={['#0D47A1']}
                         />
                     }
                     ListFooterComponent={
                         vm.hasMore ? (
-                            <TouchableOpacity 
-                                style={styles.loadMoreBtn} 
+                            <TouchableOpacity
+                                style={styles.loadMoreBtn}
                                 onPress={() => vm.loadReports(false, true)}
                                 disabled={vm.isLoading}
                             >

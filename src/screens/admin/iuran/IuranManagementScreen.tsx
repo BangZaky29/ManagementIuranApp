@@ -1,8 +1,9 @@
 import React from 'react';
 import {
-    View, Text, SafeAreaView, ScrollView, TouchableOpacity,
+    View, Text, ScrollView, TouchableOpacity,
     StatusBar, StyleSheet, Platform
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Colors } from '../../../constants/Colors';
@@ -100,7 +101,7 @@ export default function IuranManagementScreen() {
                             <Text style={styles.cardTitle}>{card.title}</Text>
                             <Text style={styles.cardSubtitle}>{card.subtitle}</Text>
                         </View>
-                        
+
                         {card.key === 'confirmation' && pendingCount > 0 && (
                             <View style={styles.badgeContainer}>
                                 <Text style={styles.badgeText}>{pendingCount}</Text>

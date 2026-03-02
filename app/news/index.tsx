@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, StatusBar, Platform } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ActivityIndicator, StatusBar, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { fetchNews, NewsItem } from '../../src/services/newsService';
@@ -54,7 +55,7 @@ export default function AllNewsScreen() {
                     <Ionicons name="newspaper-outline" size={32} color={colors.green4} />
                 </View>
             )}
-            
+
             <View style={styles.newsContent}>
                 <View style={[styles.newsBadge, { backgroundColor: colors.green1 }]}>
                     <Text style={[styles.newsBadgeText, { color: colors.green5 }]}>{item.category || 'PENGUMUMAN'}</Text>

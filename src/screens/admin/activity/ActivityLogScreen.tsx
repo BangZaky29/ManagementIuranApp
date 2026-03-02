@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-    View, Text, FlatList, TouchableOpacity, SafeAreaView,
+    View, Text, FlatList, TouchableOpacity,
     StatusBar, StyleSheet, ActivityIndicator, Image, RefreshControl, Platform
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
@@ -26,7 +27,7 @@ export default function ActivityLogScreen() {
             else setIsLoading(true);
 
             const data = await fetchRecentActivityLogs(PAGE_SIZE, 0);
-            
+
             // If we want oldest first, we could re-sort here or change service
             // But the requirement says "always show latest on top"
             setActivities(data);
@@ -41,11 +42,11 @@ export default function ActivityLogScreen() {
 
     const loadMore = async () => {
         if (isLoadingMore || !hasMore) return;
-        
+
         try {
             setIsLoadingMore(true);
             const nextData = await fetchRecentActivityLogs(PAGE_SIZE, activities.length);
-            
+
             if (nextData.length === 0) {
                 setHasMore(false);
             } else {
@@ -103,25 +104,25 @@ export default function ActivityLogScreen() {
                                 <Ionicons name="person-circle-outline" size={14} color="#666" />
                             )}
                             <Text style={styles.userName}>{item.profiles.full_name}</Text>
-                            
+
                             {/* Role Badge */}
                             {item.profiles.role && (
                                 <View style={[
-                                    { 
-                                        marginLeft: 6, 
-                                        paddingHorizontal: 6, 
-                                        paddingVertical: 2, 
+                                    {
+                                        marginLeft: 6,
+                                        paddingHorizontal: 6,
+                                        paddingVertical: 2,
                                         borderRadius: 4,
                                     },
                                     item.profiles.role === 'admin' ? { backgroundColor: '#E3F2FD' } :
-                                    item.profiles.role === 'security' ? { backgroundColor: '#FFF3E0' } :
-                                    { backgroundColor: '#E8F5E9' } // warga
+                                        item.profiles.role === 'security' ? { backgroundColor: '#FFF3E0' } :
+                                            { backgroundColor: '#E8F5E9' } // warga
                                 ]}>
                                     <Text style={[
                                         { fontSize: 9, fontWeight: 'bold' },
                                         item.profiles.role === 'admin' ? { color: '#1565C0' } :
-                                        item.profiles.role === 'security' ? { color: '#E65100' } :
-                                        { color: '#2E7D32' } // warga
+                                            item.profiles.role === 'security' ? { color: '#E65100' } :
+                                                { color: '#2E7D32' } // warga
                                     ]}>
                                         {item.profiles.role.toUpperCase()}
                                     </Text>
@@ -143,8 +144,8 @@ export default function ActivityLogScreen() {
         }
 
         return (
-            <TouchableOpacity 
-                style={styles.loadMoreButton} 
+            <TouchableOpacity
+                style={styles.loadMoreButton}
                 onPress={loadMore}
                 disabled={isLoadingMore}
             >

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, SafeAreaView, StatusBar, Image, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, StatusBar, Image, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ReportDetailStyles as styles } from './ReportDetailStyles';
 import { useFocusEffect } from 'expo-router';
 import { Colors } from '../../../constants/Colors';

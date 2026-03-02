@@ -1,9 +1,10 @@
 import React from 'react';
 import {
-    View, Text, SafeAreaView, FlatList, TouchableOpacity,
+    View, Text, FlatList, TouchableOpacity,
     Image, Switch, Modal, TextInput, ActivityIndicator,
     StatusBar, ScrollView, RefreshControl, Platform
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useAdminBannerViewModel } from './AdminBannerViewModel';

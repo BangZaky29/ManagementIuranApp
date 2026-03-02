@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
-    View, Text, SafeAreaView, ScrollView, TouchableOpacity,
+    View, Text, ScrollView, TouchableOpacity,
     StatusBar, ActivityIndicator, StyleSheet, Image, TextInput, Dimensions
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Colors } from '../../../constants/Colors';

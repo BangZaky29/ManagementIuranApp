@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, ScrollView, SafeAreaView, StatusBar, StyleSheet } from 'react-native';
+import { View, Text, TextInput, ScrollView, StatusBar, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { CustomHeader } from '../../../components/CustomHeader';
 import { CustomButton } from '../../../components/CustomButton';

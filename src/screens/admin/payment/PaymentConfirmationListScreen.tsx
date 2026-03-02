@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-    View, Text, SafeAreaView, ScrollView, TouchableOpacity,
+    View, Text, ScrollView, TouchableOpacity,
     StatusBar, ActivityIndicator, StyleSheet, Image, RefreshControl
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Colors } from '../../../constants/Colors';
@@ -90,9 +91,9 @@ export default function PaymentConfirmationListScreen() {
 
             {/* Filter Tabs */}
             <View style={{ flexGrow: 0, marginBottom: 12 }}>
-                <ScrollView 
-                    horizontal 
-                    showsHorizontalScrollIndicator={false} 
+                <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{ paddingHorizontal: 20, paddingRight: 32, alignItems: 'center' }}
                 >
                     {filters.map((f) => (

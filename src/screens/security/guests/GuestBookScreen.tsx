@@ -1,8 +1,9 @@
 import React from 'react';
 import {
-    View, Text, SafeAreaView, TouchableOpacity, FlatList,
+    View, Text, TouchableOpacity, FlatList,
     StatusBar, Modal, TextInput, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, Image
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useGuestBookViewModel } from './GuestBookViewModel';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
@@ -50,7 +51,7 @@ export default function GuestBookScreen() {
                 const activeCount = vm.activeGuests.filter(g => g.status === 'active').length;
                 const pendingCount = vm.activeGuests.filter(g => g.status === 'pending').length;
                 const totalCount = vm.activeGuests.length;
-                
+
                 return (
                     <View style={styles.summaryCard}>
                         <View style={styles.summaryItem}>
@@ -85,7 +86,7 @@ export default function GuestBookScreen() {
                             {vm.activeTab === 'Aktif' ? 'Tidak Ada Tamu Aktif' : 'Riwayat Kosong'}
                         </Text>
                         <Text style={styles.emptySubtitle}>
-                            {vm.activeTab === 'Aktif' 
+                            {vm.activeTab === 'Aktif'
                                 ? 'Gunakan tombol "+" di pojok kanan bawah jika ada tamu atau kurir yang datang.'
                                 : 'Belum ada catatan tamu yang keluar atau selesai.'
                             }
@@ -106,10 +107,10 @@ export default function GuestBookScreen() {
                                     <Ionicons name="chevron-down" size={16} color="#0D47A1" />
                                 </TouchableOpacity>
                             )}
-                            
+
                             {vm.visibleHistoryCount > 3 && (
-                                <TouchableOpacity 
-                                    style={[styles.showMoreBtn, { borderColor: '#E57373', backgroundColor: '#FFEBEE' }]} 
+                                <TouchableOpacity
+                                    style={[styles.showMoreBtn, { borderColor: '#E57373', backgroundColor: '#FFEBEE' }]}
                                     onPress={vm.handleCollapseHistory}
                                 >
                                     <Text style={[styles.showMoreText, { color: '#D32F2F' }]}>
@@ -123,7 +124,7 @@ export default function GuestBookScreen() {
                 }}
                 renderItem={({ item }) => (
                     <View style={[
-                        styles.card, 
+                        styles.card,
                         item.status === 'pending' && { borderLeftColor: '#FF9800' },
                         item.status === 'completed' && { borderLeftColor: '#4CAF50' },
                         item.status === 'rejected' && { borderLeftColor: '#F44336' }
@@ -132,15 +133,16 @@ export default function GuestBookScreen() {
                             <View style={{ flex: 1 }}>
                                 <Text style={styles.guestName}>{item.visitor_name}</Text>
                                 <View style={[
-                                    styles.guestTypeBadge, 
-                                    { backgroundColor: 
-                                        item.status === 'pending' ? '#FF9800' : 
-                                        (item.status === 'completed' ? '#4CAF50' : '#0D47A1') 
+                                    styles.guestTypeBadge,
+                                    {
+                                        backgroundColor:
+                                            item.status === 'pending' ? '#FF9800' :
+                                                (item.status === 'completed' ? '#4CAF50' : '#0D47A1')
                                     }
                                 ]}>
                                     <Text style={styles.guestTypeText}>
-                                        {item.status === 'pending' ? 'Undangan (Menunggu)' : 
-                                         (item.status === 'completed' ? 'Selesai / Keluar' : item.visitor_type)}
+                                        {item.status === 'pending' ? 'Undangan (Menunggu)' :
+                                            (item.status === 'completed' ? 'Selesai / Keluar' : item.visitor_type)}
                                     </Text>
                                 </View>
                             </View>
@@ -149,9 +151,9 @@ export default function GuestBookScreen() {
                                     {item.status === 'pending' ? 'Dibuat Pada' : (item.status === 'completed' ? 'Keluar Pukul' : 'Masuk Pukul')}
                                 </Text>
                                 <Text style={[styles.timeText, { fontWeight: 'bold', color: '#333' }]}>
-                                    {item.status === 'pending' 
+                                    {item.status === 'pending'
                                         ? formatDateTimeSafe(item.created_at)
-                                        : (item.status === 'completed' 
+                                        : (item.status === 'completed'
                                             ? (item.check_out_time ? new Date(item.check_out_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-')
                                             : (item.check_in_time ? new Date(item.check_in_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'))}
                                 </Text>
@@ -178,8 +180,8 @@ export default function GuestBookScreen() {
 
                         {vm.activeTab === 'Aktif' && (
                             item.status === 'pending' ? (
-                                <TouchableOpacity 
-                                    style={[styles.checkoutBtn, { backgroundColor: '#E8F5E9' }]} 
+                                <TouchableOpacity
+                                    style={[styles.checkoutBtn, { backgroundColor: '#E8F5E9' }]}
                                     onPress={() => vm.handleCheckInWithPin(item)}
                                 >
                                     <Ionicons name="checkmark-circle-outline" size={18} color="#2E7D32" />
@@ -192,12 +194,12 @@ export default function GuestBookScreen() {
                                 </TouchableOpacity>
                             )
                         )}
-                        
+
                         {item.status === 'completed' && item.check_in_time && (
                             <View style={{ marginTop: 12, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                                 <Ionicons name="time-outline" size={12} color="#888" />
                                 <Text style={{ fontSize: 12, color: '#888' }}>
-                                    Masuk: {new Date(item.check_in_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} • 
+                                    Masuk: {new Date(item.check_in_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} •
                                     Keluar: {new Date(item.check_out_time!).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
                                 </Text>
                             </View>
@@ -311,10 +313,10 @@ export default function GuestBookScreen() {
 
                         <View style={styles.pinInputContainer}>
                             {[...Array(6)].map((_, i) => (
-                                <View 
-                                    key={i} 
+                                <View
+                                    key={i}
                                     style={[
-                                        styles.pinDigitBox, 
+                                        styles.pinDigitBox,
                                         vm.pinInput.length === i && styles.pinDigitBoxActive
                                     ]}
                                 >
@@ -333,7 +335,7 @@ export default function GuestBookScreen() {
 
                         <TouchableOpacity
                             style={[
-                                styles.submitBtn, 
+                                styles.submitBtn,
                                 (vm.pinInput.length < 6 || vm.isLoading) && { opacity: 0.5 }
                             ]}
                             onPress={vm.handleVerifyPin}
@@ -346,8 +348,8 @@ export default function GuestBookScreen() {
                             )}
                         </TouchableOpacity>
 
-                        <TouchableOpacity 
-                            style={styles.cancelBtn} 
+                        <TouchableOpacity
+                            style={styles.cancelBtn}
                             onPress={() => vm.setPinModalVisible(false)}
                         >
                             <Text style={styles.cancelBtnText}>Batal</Text>

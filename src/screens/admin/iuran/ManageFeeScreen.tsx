@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-    View, Text, SafeAreaView, ScrollView, TouchableOpacity,
+    View, Text, ScrollView, TouchableOpacity,
     StatusBar, ActivityIndicator, StyleSheet, TextInput, Modal,
     RefreshControl, Platform, Image, FlatList
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Colors } from '../../../constants/Colors';
@@ -169,9 +170,9 @@ export default function ManageFeeScreen() {
 
     const openEditForm = (fee: AdminFee) => {
         setEditingFee(fee);
-        setForm({ 
-            name: fee.name, 
-            amount: fee.amount.toString(), 
+        setForm({
+            name: fee.name,
+            amount: fee.amount.toString(),
             due_date_day: fee.due_date_day.toString(),
             active_from: fee.active_from || '',
             active_to: fee.active_to || ''
@@ -238,14 +239,14 @@ export default function ManageFeeScreen() {
     // Calculate Boundaries for Month Selector
     let minPeriodStr: string | null = null;
     let maxPeriodStr: string | null = null;
-    
+
     if (fees.length > 0) {
         // If there's ANY fee without active_from, we can go back infinitely
         if (!fees.some(f => !f.active_from)) {
             // Otherwise, find the earliest active_from
             minPeriodStr = fees.reduce((min, f) => (f.active_from! < min ? f.active_from! : min), fees[0].active_from!);
         }
-        
+
         // If there's ANY fee without active_to, we can go forward infinitely
         if (!fees.some(f => !f.active_to)) {
             // Otherwise, find the latest active_to
@@ -330,8 +331,8 @@ export default function ManageFeeScreen() {
                             </TouchableOpacity>
                         )}
                     </View>
-                    <TouchableOpacity 
-                        style={s.monthLabel} 
+                    <TouchableOpacity
+                        style={s.monthLabel}
                         onPress={() => {
                             setPickerTempYear(parseInt(currentPeriod.split('-')[0]));
                             setDatePickerVisible('nav');
@@ -358,7 +359,7 @@ export default function ManageFeeScreen() {
                                 <Text style={{ fontSize: 10, color: '#FFF', fontWeight: 'bold' }}>AKUMULASI</Text>
                             </View>
                         </View>
-                        
+
                         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4 }}>
                             <Text style={[s.revenueAmount, { color: '#1B5E20' }]}>{formatCurrency(overallRevenue.totalCollected)}</Text>
                             <Text style={{ fontSize: 16, color: '#666', fontWeight: '600' }}>/</Text>
@@ -506,8 +507,8 @@ export default function ManageFeeScreen() {
                     <View style={[s.feeDetails, { marginTop: 4, paddingTop: 0, borderTopWidth: 0 }]}>
                         <Ionicons name="time-outline" size={13} color="#1B5E20" />
                         <Text style={[s.feeDetailText, { color: '#1B5E20' }]}>
-                            Aktif: {fee.active_from ? formatPeriodLabel(fee.active_from) : 'Awal'} 
-                            {' - '} 
+                            Aktif: {fee.active_from ? formatPeriodLabel(fee.active_from) : 'Awal'}
+                            {' - '}
                             {fee.active_to ? formatPeriodLabel(fee.active_to) : 'Seterusnya'}
                         </Text>
                     </View>
@@ -615,10 +616,10 @@ export default function ManageFeeScreen() {
                             <Text style={s.formLabel}>Jatuh Tempo (tanggal)</Text>
                             <TextInput style={s.input} value={form.due_date_day} onChangeText={t => { const n = t.replace(/[^0-9]/g, ''); if (Number(n) <= 31) setForm({ ...form, due_date_day: n }); }} placeholder="10" placeholderTextColor="#999" keyboardType="numeric" />
                             <Text style={s.helper}>Warga melihat jatuh tempo pada tanggal ini setiap bulan.</Text>
-                            
+
                             <Text style={s.formLabel}>Mulai Berlaku (Bulan/Tahun) Opsional</Text>
-                            <TouchableOpacity 
-                                style={s.inputBtn} 
+                            <TouchableOpacity
+                                style={s.inputBtn}
                                 onPress={() => { setPickerTempYear(form.active_from ? parseInt(form.active_from.split('-')[0]) : new Date().getFullYear()); setDatePickerVisible('from'); }}
                             >
                                 <Text style={form.active_from ? s.inputText : s.inputPlaceholder}>
@@ -634,8 +635,8 @@ export default function ManageFeeScreen() {
                             </TouchableOpacity>
 
                             <Text style={s.formLabel}>Berakhir Pada (Bulan/Tahun) Opsional</Text>
-                            <TouchableOpacity 
-                                style={s.inputBtn} 
+                            <TouchableOpacity
+                                style={s.inputBtn}
                                 onPress={() => { setPickerTempYear(form.active_to ? parseInt(form.active_to.split('-')[0]) : new Date().getFullYear()); setDatePickerVisible('to'); }}
                             >
                                 <Text style={form.active_to ? s.inputText : s.inputPlaceholder}>
@@ -702,18 +703,18 @@ export default function ManageFeeScreen() {
                                 const isSelected = currentM === idx && currentY === pickerTempYear;
                                 const isActive = datePickerVisible === 'nav' ? isMonthActive(pickerTempYear, idx) : true;
                                 return (
-                                    <TouchableOpacity 
-                                        key={m} 
+                                    <TouchableOpacity
+                                        key={m}
                                         style={[
-                                            s.monthBox, 
+                                            s.monthBox,
                                             isSelected && s.monthBoxSelected,
                                             !isActive && s.monthBoxDisabled
-                                        ]} 
+                                        ]}
                                         onPress={() => handleSelectMonth(idx)}
                                         disabled={!isActive}
                                     >
                                         <Text style={[
-                                            s.monthBoxText, 
+                                            s.monthBoxText,
                                             isSelected && s.monthBoxTextSelected,
                                             !isActive && { color: '#CCC' }
                                         ]}>{m}</Text>

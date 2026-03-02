@@ -1,8 +1,9 @@
 import React from 'react';
 import {
-    View, Text, SafeAreaView, TouchableOpacity, FlatList,
+    View, Text, TouchableOpacity, FlatList,
     StatusBar, Modal, TextInput, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useWargaGuestViewModel } from './WargaGuestViewModel';

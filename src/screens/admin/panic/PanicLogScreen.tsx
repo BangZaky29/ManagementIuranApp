@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-    View, Text, FlatList, TouchableOpacity, SafeAreaView,
+    View, Text, FlatList, TouchableOpacity,
     StatusBar, StyleSheet, ActivityIndicator, Image, Linking, Platform, RefreshControl
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
