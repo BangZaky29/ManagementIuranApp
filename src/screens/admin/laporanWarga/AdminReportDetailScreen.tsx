@@ -42,6 +42,7 @@ export default function AdminReportDetailScreen() {
     const [rejectionReason, setRejectionReason] = useState('');
     const [showCompletionModal, setShowCompletionModal] = useState(false);
     const [completionImage, setCompletionImage] = useState<string | null>(null);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
     const showAlert = (title: string, message: string, type: 'success' | 'info' | 'warning' | 'error' = 'info', buttons?: any[]) => {
         setAlertConfig({
@@ -68,7 +69,9 @@ export default function AdminReportDetailScreen() {
                     .from('reports')
                     .select(`
                         *,
-                        user:profiles!reports_user_id_fkey(full_name, avatar_url)
+                        user:profiles!reports_user_id_fkey(full_name, avatar_url),
+                        processed_by:profiles!reports_processed_by_id_fkey(full_name, role),
+                        completed_by:profiles!reports_completed_by_id_fkey(full_name, role)
                     `)
                     .eq('id', id)
                     .single();
@@ -145,6 +148,14 @@ export default function AdminReportDetailScreen() {
         } catch (error) {
             console.error('Pick completion image error:', error);
         }
+    };
+
+    const getRoleColor = (role?: string) => {
+        return role === 'admin' ? '#2A6F2B' : '#0ea5e9'; // Green 4 for Admin, Blue for Security
+    };
+
+    const getRoleBg = (role?: string) => {
+        return role === 'admin' ? '#EEF2E3' : '#e0f2fe'; // Green 1 or Soft Blue
     };
 
     const handleRewindStatus = () => {
@@ -238,26 +249,33 @@ export default function AdminReportDetailScreen() {
 
                     {/* Image Section */}
                     {data.image_url && (
-                        <View style={{
-                            width: '100%',
-                            borderRadius: 16,
-                            backgroundColor: '#F3F4F6',
-                            borderWidth: 4,
-                            borderColor: 'white',
-                            marginBottom: 20,
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: 4 },
-                            shadowOpacity: 0.1,
-                            shadowRadius: 8,
-                            elevation: 5,
-                            overflow: 'hidden'
-                        }}>
+                        <TouchableOpacity
+                            activeOpacity={0.9}
+                            onPress={() => setSelectedImage(data.image_url ?? null)}
+                            style={{
+                                width: '100%',
+                                borderRadius: 16,
+                                backgroundColor: '#F3F4F6',
+                                borderWidth: 4,
+                                borderColor: 'white',
+                                marginBottom: 20,
+                                shadowColor: '#000',
+                                shadowOffset: { width: 0, height: 4 },
+                                shadowOpacity: 0.1,
+                                shadowRadius: 8,
+                                elevation: 5,
+                                overflow: 'hidden'
+                            }}
+                        >
                             <Image
                                 source={{ uri: data.image_url }}
                                 style={{ width: '100%', aspectRatio: imageAspectRatio }}
                                 resizeMode="cover"
                             />
-                        </View>
+                            <View style={{ position: 'absolute', bottom: 12, right: 12, backgroundColor: 'rgba(0,0,0,0.5)', padding: 6, borderRadius: 20 }}>
+                                <Ionicons name="expand" size={16} color="white" />
+                            </View>
+                        </TouchableOpacity>
                     )}
 
                     {/* Main Content */}
@@ -328,10 +346,10 @@ export default function AdminReportDetailScreen() {
                             <View style={{ flexDirection: 'row', marginBottom: 12 }}>
                                 <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: Colors.success, marginTop: 4, marginRight: 12 }} />
                                 <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                    <View style={{ flex: 1, marginRight: 8 }}>
+                                    <View style={{ flex: 1 }}>
                                         <Text style={{ fontWeight: 'bold', fontSize: 14 }}>Laporan Diterima</Text>
+                                        <Text style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>{formattedDate}</Text>
                                     </View>
-                                    <Text style={{ fontSize: 11, color: '#9CA3AF', fontWeight: '600', marginTop: 2 }}>{formattedDate}</Text>
                                 </View>
                             </View>
 
@@ -339,10 +357,22 @@ export default function AdminReportDetailScreen() {
                                 <View style={{ flexDirection: 'row', marginBottom: 12 }}>
                                     <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: Colors.warning, marginTop: 4, marginRight: 12 }} />
                                     <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                        <View style={{ flex: 1, marginRight: 8 }}>
-                                            <Text style={{ fontWeight: 'bold', fontSize: 14 }}>
-                                                Sedang Diproses oleh {data.processed_by?.role === 'admin' ? 'Admin' : 'Security'} {data.processed_by?.full_name || 'Petugas'}
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={{ fontWeight: 'bold', fontSize: 13, color: Colors.textPrimary, marginBottom: 4 }}>
+                                                Sedang Diproses oleh{' '}
+                                                <Text style={{
+                                                    color: getRoleColor(data.processed_by?.role),
+                                                    fontWeight: 'bold',
+                                                    backgroundColor: getRoleBg(data.processed_by?.role),
+                                                    paddingHorizontal: 6,
+                                                    paddingVertical: 2,
+                                                    borderRadius: 4,
+                                                    overflow: 'hidden'
+                                                }}>
+                                                    {data.processed_by?.role === 'admin' ? 'Admin' : 'Security'} {data.processed_by?.full_name || 'Petugas'}
+                                                </Text>
                                             </Text>
+                                            <Text style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>{formatDateTimeSafe(data.updated_at || data.created_at)}</Text>
                                             <Text style={{ fontSize: 12, color: Colors.textSecondary }}>Laporan sedang ditangani petugas.</Text>
                                         </View>
                                     </View>
@@ -353,15 +383,47 @@ export default function AdminReportDetailScreen() {
                                 <View style={{ flexDirection: 'row' }}>
                                     <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: data.status === 'Selesai' ? Colors.success : Colors.danger, marginTop: 4, marginRight: 12 }} />
                                     <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                        <View style={{ flex: 1, marginRight: 8 }}>
-                                            <Text style={{ fontWeight: 'bold', fontSize: 14 }}>
-                                                {data.status === 'Selesai'
-                                                    ? `Laporan Selesai oleh ${data.completed_by?.role === 'admin' ? 'Admin' : 'Security'} ${data.completed_by?.full_name || 'Petugas'}`
-                                                    : 'Laporan Ditolak'}
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={{ fontWeight: 'bold', fontSize: 13, color: Colors.textPrimary, marginBottom: 4 }}>
+                                                {data.status === 'Selesai' ? (
+                                                    <>
+                                                        Laporan Selesai oleh{' '}
+                                                        <Text style={{
+                                                            color: getRoleColor(data.completed_by?.role),
+                                                            fontWeight: 'bold',
+                                                            backgroundColor: getRoleBg(data.completed_by?.role),
+                                                            paddingHorizontal: 6,
+                                                            paddingVertical: 2,
+                                                            borderRadius: 4,
+                                                            overflow: 'hidden'
+                                                        }}>
+                                                            {data.completed_by?.role === 'admin' ? 'Admin' : 'Security'} {data.completed_by?.full_name || 'Petugas'}
+                                                        </Text>
+                                                    </>
+                                                ) : 'Laporan Ditolak'}
                                             </Text>
-                                            <Text style={{ fontSize: 12, color: Colors.textSecondary }}>{data.status === 'Selesai' ? 'Kendala telah diatasi.' : 'Laporan belum dapat diproses.'}</Text>
-                                            {data.completion_image_url && (
-                                                <Image source={{ uri: data.completion_image_url }} style={{ width: 80, height: 80, borderRadius: 8, marginTop: 8 }} />
+                                            <Text style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>{formatDateTimeSafe(data.updated_at || data.created_at)}</Text>
+                                            <Text style={{ fontSize: 12, color: Colors.textSecondary, marginBottom: 10 }}>{data.status === 'Selesai' ? 'Kendala telah diatasi.' : 'Laporan belum dapat diproses.'}</Text>
+
+                                            {data.status === 'Selesai' && data.completion_image_url && (
+                                                <TouchableOpacity
+                                                    style={{
+                                                        flexDirection: 'row',
+                                                        alignItems: 'center',
+                                                        backgroundColor: '#F0FDF4',
+                                                        paddingVertical: 8,
+                                                        paddingHorizontal: 12,
+                                                        borderRadius: 8,
+                                                        borderWidth: 1,
+                                                        borderColor: '#DCFCE7',
+                                                        alignSelf: 'flex-start',
+                                                        marginTop: 4
+                                                    }}
+                                                    onPress={() => setSelectedImage(data.completion_image_url ?? null)}
+                                                >
+                                                    <Ionicons name="image-outline" size={16} color={Colors.success} />
+                                                    <Text style={{ marginLeft: 8, fontSize: 13, fontWeight: 'bold', color: Colors.success }}>Lihat Bukti Penanganan</Text>
+                                                </TouchableOpacity>
                                             )}
                                         </View>
                                     </View>
@@ -588,6 +650,46 @@ export default function AdminReportDetailScreen() {
                 buttons={alertConfig.buttons}
                 onClose={hideAlert}
             />
+
+            {/* In-App Image Viewer Modal */}
+            <Modal
+                visible={!!selectedImage}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setSelectedImage(null)}
+            >
+                <TouchableOpacity
+                    style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.9)', justifyContent: 'center', alignItems: 'center' }}
+                    activeOpacity={1}
+                    onPress={() => setSelectedImage(null)}
+                >
+                    <View style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
+                        {selectedImage && (
+                            <Image
+                                source={{ uri: selectedImage }}
+                                style={{ width: '100%', height: '70%' }}
+                                resizeMode="contain"
+                            />
+                        )}
+                        <TouchableOpacity
+                            style={{
+                                position: 'absolute',
+                                top: 50,
+                                right: 20,
+                                width: 44,
+                                height: 44,
+                                borderRadius: 22,
+                                backgroundColor: 'rgba(255,255,255,0.2)',
+                                justifyContent: 'center',
+                                alignItems: 'center'
+                            }}
+                            onPress={() => setSelectedImage(null)}
+                        >
+                            <Ionicons name="close" size={28} color="white" />
+                        </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
         </View>
     );
 }

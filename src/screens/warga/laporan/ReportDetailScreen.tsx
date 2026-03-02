@@ -29,6 +29,14 @@ export default function ReportDetailScreen() {
     } = useReportDetailViewModel();
     const [showProofModal, setShowProofModal] = useState(false);
 
+    const getRoleColor = (role?: string) => {
+        return role === 'admin' ? '#2A6F2B' : '#0ea5e9'; // Green 4 for Admin, Blue for Security
+    };
+
+    const getRoleBg = (role?: string) => {
+        return role === 'admin' ? '#EEF2E3' : '#e0f2fe'; // Green 1 or Soft Blue
+    };
+
     // Reload data when screen is focused (in case we return from Edit)
     useFocusEffect(
         React.useCallback(() => {
@@ -149,7 +157,7 @@ export default function ReportDetailScreen() {
                                 <View style={[styles.line, (isProcessed || isFinal) && styles.lineActive]} />
                             </View>
                             <View style={styles.timelineContent}>
-                                <View style={styles.timelineHeader}>
+                                <View style={{ flex: 1 }}>
                                     <Text style={styles.timelineTitle}>Laporan Diterima</Text>
                                     <Text style={styles.timelineDate}>{formattedDate}</Text>
                                 </View>
@@ -166,11 +174,25 @@ export default function ReportDetailScreen() {
                                 <View style={[styles.line, isFinal && styles.lineActive]} />
                             </View>
                             <View style={styles.timelineContent}>
-                                <View style={styles.timelineHeader}>
+                                <View style={{ flex: 1 }}>
                                     <Text style={[styles.timelineTitle, !isProcessed && { color: '#9CA3AF' }]}>
-                                        {isProcessed
-                                            ? `Sedang Diproses oleh ${data.processed_by?.role === 'admin' ? 'Admin' : 'Security'} ${data.processed_by?.full_name || 'Petugas'}`
-                                            : 'Tahap Peninjauan'}
+                                        {isProcessed ? (
+                                            <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
+                                                <Text style={[styles.timelineTitle, { flex: 0, marginRight: 4 }]}>Sedang Diproses oleh </Text>
+                                                <Text style={{
+                                                    color: getRoleColor(data.processed_by?.role),
+                                                    fontWeight: 'bold',
+                                                    backgroundColor: getRoleBg(data.processed_by?.role),
+                                                    paddingHorizontal: 6,
+                                                    paddingVertical: 2,
+                                                    borderRadius: 4,
+                                                    fontSize: 12,
+                                                    overflow: 'hidden'
+                                                }}>
+                                                    {data.processed_by?.role === 'admin' ? 'Admin' : 'Security'} {data.processed_by?.full_name || 'Petugas'}
+                                                </Text>
+                                            </View>
+                                        ) : 'Tahap Peninjauan'}
                                     </Text>
                                     {isProcessed && updatedDate && (
                                         <Text style={styles.timelineDate}>{updatedDate}</Text>
@@ -192,11 +214,27 @@ export default function ReportDetailScreen() {
                                 </View>
                             </View>
                             <View style={[styles.timelineContent, { paddingBottom: 0 }]}>
-                                <View style={styles.timelineHeader}>
-                                    <Text style={[styles.timelineTitle, !isFinal && { color: '#9CA3AF' }]}>
-                                        {data.status === 'Ditolak' ? 'Laporan Ditolak' :
-                                            data.status === 'Selesai' ? `Laporan Selesai oleh ${data.completed_by?.role === 'admin' ? 'Admin' : 'Security'} ${data.completed_by?.full_name || 'Petugas'}` : 'Laporan Ditutup'}
-                                    </Text>
+                                <View style={{ flex: 1 }}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
+                                        <Text style={[styles.timelineTitle, !isFinal && { color: '#9CA3AF' }, { flex: 0, marginRight: 4 }]}>
+                                            {data.status === 'Ditolak' ? 'Laporan Ditolak' :
+                                                data.status === 'Selesai' ? 'Laporan Selesai oleh ' : 'Laporan Ditutup'}
+                                        </Text>
+                                        {isFinal && data.status === 'Selesai' && (
+                                            <Text style={{
+                                                color: getRoleColor(data.completed_by?.role),
+                                                fontWeight: 'bold',
+                                                backgroundColor: getRoleBg(data.completed_by?.role),
+                                                paddingHorizontal: 6,
+                                                paddingVertical: 2,
+                                                borderRadius: 4,
+                                                fontSize: 12,
+                                                overflow: 'hidden'
+                                            }}>
+                                                {data.completed_by?.role === 'admin' ? 'Admin' : 'Security'} {data.completed_by?.full_name || 'Petugas'}
+                                            </Text>
+                                        )}
+                                    </View>
                                     {isFinal && updatedDate && (
                                         <Text style={styles.timelineDate}>{updatedDate}</Text>
                                     )}

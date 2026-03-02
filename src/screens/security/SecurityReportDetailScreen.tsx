@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { fetchReportById, updateReportStatus } from '../../services/laporanService';
-import { formatDateSafe } from '../../utils/dateUtils';
+import { formatDateSafe, formatDateTimeSafe } from '../../utils/dateUtils';
 import { CustomHeader } from '../../components/CustomHeader';
 import { CustomAlertModal } from '../../components/CustomAlertModal';
 import { Colors } from '../../constants/Colors';
@@ -54,6 +54,14 @@ export default function SecurityReportDetailScreen() {
     useEffect(() => {
         loadData();
     }, [id]);
+
+    const getRoleColor = (role?: string) => {
+        return role === 'admin' ? '#2A6F2B' : '#0ea5e9'; // Green 4 for Admin, Blue for Security
+    };
+
+    const getRoleBg = (role?: string) => {
+        return role === 'admin' ? '#EEF2E3' : '#e0f2fe'; // Green 1 or Soft Blue
+    };
 
     const handleUpdateStatus = async (status: string, options?: { reason?: string; completionImageUri?: string }) => {
         setIsUpdating(true);
@@ -164,7 +172,7 @@ export default function SecurityReportDetailScreen() {
 
                     {data.image_url && (
                         <TouchableOpacity
-                            onPress={() => setSelectedImage(data.image_url)}
+                            onPress={() => setSelectedImage(data.image_url ?? null)}
                             style={styles.imageWrapper}
                         >
                             <Image source={{ uri: data.image_url }} style={styles.reportImage} resizeMode="cover" />
@@ -203,6 +211,7 @@ export default function SecurityReportDetailScreen() {
                             </View>
                             <View style={styles.timelineContent}>
                                 <Text style={styles.timelineLabel}>Laporan Diterima</Text>
+                                <Text style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 2 }}>{formatDateTimeSafe(data.created_at)}</Text>
                                 <Text style={styles.timelineSublabel}>Laporan masuk antrean penanganan.</Text>
                             </View>
                         </View>
@@ -216,11 +225,27 @@ export default function SecurityReportDetailScreen() {
                                 <View style={[styles.timelineLine, isFinished && styles.lineActive]} />
                             </View>
                             <View style={styles.timelineContent}>
-                                <Text style={[styles.timelineLabel, !isProcessed && styles.textInactive]}>
-                                    {data.status === 'Diproses' || data.status === 'Selesai'
-                                        ? `Sedang Diproses oleh ${data.processed_by?.role === 'admin' ? 'Admin' : 'Security'} ${data.processed_by?.full_name || 'Petugas'}`
-                                        : 'Tahap Peninjauan'}
-                                </Text>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                                    <Text style={[styles.timelineLabel, !isProcessed && styles.textInactive, { flex: 0 }]}>
+                                        {isProcessed ? 'Sedang Diproses oleh ' : 'Tahap Peninjauan'}
+                                    </Text>
+                                    {isProcessed && (
+                                        <Text style={{
+                                            color: getRoleColor(data.processed_by?.role),
+                                            fontWeight: 'bold',
+                                            backgroundColor: getRoleBg(data.processed_by?.role),
+                                            paddingHorizontal: 6,
+                                            paddingVertical: 2,
+                                            borderRadius: 4,
+                                            fontSize: 12,
+                                            overflow: 'hidden',
+                                            marginLeft: 4
+                                        }}>
+                                            {data.processed_by?.role === 'admin' ? 'Admin' : 'Security'} {data.processed_by?.full_name || 'Petugas'}
+                                        </Text>
+                                    )}
+                                </View>
+                                <Text style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6 }}>{isProcessed ? formatDateTimeSafe(data.updated_at || data.created_at) : '-'}</Text>
                                 <Text style={[styles.timelineSublabel, !isProcessed && styles.textInactive]}>
                                     Petugas sedang menindaklanjuti laporan ini.
                                 </Text>
@@ -235,28 +260,53 @@ export default function SecurityReportDetailScreen() {
                                 </View>
                             </View>
                             <View style={styles.timelineContent}>
-                                <Text style={[styles.timelineLabel, !isFinished && styles.textInactive]}>
-                                    {data.status === 'Ditolak' ? 'Laporan Ditolak' :
-                                        data.status === 'Selesai'
-                                            ? `Laporan Selesai oleh ${data.completed_by?.role === 'admin' ? 'Admin' : 'Security'} ${data.completed_by?.full_name || 'Petugas'}`
-                                            : 'Selesai Penanganan'}
-                                </Text>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4, flexWrap: 'wrap' }}>
+                                    <Text style={[styles.timelineLabel, !isFinished && styles.textInactive, { flex: 0 }]}>
+                                        {data.status === 'Ditolak' ? 'Laporan Ditolak' :
+                                            data.status === 'Selesai' ? 'Laporan Selesai oleh ' : 'Selesai Penanganan'}
+                                    </Text>
+                                    {isFinished && data.status === 'Selesai' && (
+                                        <Text style={{
+                                            color: getRoleColor(data.completed_by?.role),
+                                            fontWeight: 'bold',
+                                            backgroundColor: getRoleBg(data.completed_by?.role),
+                                            paddingHorizontal: 6,
+                                            paddingVertical: 2,
+                                            borderRadius: 4,
+                                            fontSize: 12,
+                                            overflow: 'hidden',
+                                            marginLeft: 4,
+                                            marginTop: 2
+                                        }}>
+                                            {data.completed_by?.role === 'admin' ? 'Admin' : 'Security'} {data.completed_by?.full_name || 'Petugas'}
+                                        </Text>
+                                    )}
+                                </View>
+                                <Text style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6 }}>{isFinished ? formatDateTimeSafe(data.updated_at || data.created_at) : '-'}</Text>
                                 <Text style={[styles.timelineSublabel, !isFinished && styles.textInactive]}>
                                     {data.status === 'Selesai' ? 'Kendala telah diatasi sepenuhnya.' :
                                         data.status === 'Ditolak' ? `Ditolak: ${data.rejection_reason || '-'}` :
                                             'Hasil akhir penanganan laporan.'}
                                 </Text>
 
-                                {data.completion_image_url && (
+                                {isFinished && data.status === 'Selesai' && data.completion_image_url && (
                                     <TouchableOpacity
-                                        style={styles.proofBox}
-                                        onPress={() => setSelectedImage(data.completion_image_url)}
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            backgroundColor: '#F0FDF4',
+                                            paddingVertical: 8,
+                                            paddingHorizontal: 12,
+                                            borderRadius: 8,
+                                            borderWidth: 1,
+                                            borderColor: '#DCFCE7',
+                                            alignSelf: 'flex-start',
+                                            marginTop: 8
+                                        }}
+                                        onPress={() => setSelectedImage(data.completion_image_url ?? null)}
                                     >
-                                        <Image source={{ uri: data.completion_image_url }} style={styles.proofImage} />
-                                        <View style={styles.proofBadge}>
-                                            <Ionicons name="camera" size={10} color="white" />
-                                            <Text style={styles.proofText}>Bukti Selesai</Text>
-                                        </View>
+                                        <Ionicons name="image-outline" size={16} color={Colors.success} />
+                                        <Text style={{ marginLeft: 8, fontSize: 13, fontWeight: 'bold', color: Colors.success }}>Lihat Bukti Penanganan</Text>
                                     </TouchableOpacity>
                                 )}
                             </View>
