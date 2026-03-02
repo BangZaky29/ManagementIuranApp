@@ -31,6 +31,8 @@ CREATE TABLE public.banners (
   is_active boolean DEFAULT true,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
+  start_date timestamp with time zone DEFAULT now(),
+  end_date timestamp with time zone,
   CONSTRAINT banners_pkey PRIMARY KEY (id),
   CONSTRAINT banners_housing_complex_id_fkey FOREIGN KEY (housing_complex_id) REFERENCES public.housing_complexes(id)
 );
@@ -166,21 +168,6 @@ CREATE TABLE public.profiles (
   CONSTRAINT profiles_housing_complex_id_fkey FOREIGN KEY (housing_complex_id) REFERENCES public.housing_complexes(id),
   CONSTRAINT profiles_nik_fkey FOREIGN KEY (nik) REFERENCES public.verified_residents(nik)
 );
-
-CREATE OR REPLACE FUNCTION public.sync_full_name_to_verified_residents()
-RETURNS TRIGGER AS $$
-BEGIN
-    -- Cek apakah full_name berubah
-    IF (OLD.full_name IS DISTINCT FROM NEW.full_name) THEN
-        UPDATE public.verified_residents
-        SET full_name = NEW.full_name
-        WHERE nik = NEW.nik;
-    END IF;
-    
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
-
 CREATE TABLE public.reports (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,

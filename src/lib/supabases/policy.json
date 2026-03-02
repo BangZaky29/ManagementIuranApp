@@ -12,16 +12,6 @@
     {
         "schemaname": "public",
         "tablename": "activity_logs",
-        "policyname": "Admins can view activity logs of their complex",
-        "permissive": "PERMISSIVE",
-        "roles": "{public}",
-        "operation": "SELECT",
-        "using_expression": "(is_admin() AND (housing_complex_id = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid()))))",
-        "check_expression": null
-    },
-    {
-        "schemaname": "public",
-        "tablename": "activity_logs",
         "policyname": "Semua user bisa insert log aktivitas",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
@@ -31,12 +21,42 @@
     },
     {
         "schemaname": "public",
+        "tablename": "activity_logs",
+        "policyname": "Admins can view activity logs of their complex",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "operation": "SELECT",
+        "using_expression": "(is_admin() AND (housing_complex_id = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid()))))",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
         "tablename": "auth_debug_logs",
         "policyname": "Admin can manage auth_debug_logs",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
         "operation": "ALL",
         "using_expression": "is_admin()",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "banners",
+        "policyname": "Users can view active banners in their complex",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "operation": "SELECT",
+        "using_expression": "((is_active = true) AND (housing_complex_id = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid()))) AND ((start_date IS NULL) OR (start_date <= now())) AND ((end_date IS NULL) OR (end_date >= now())))",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "banners",
+        "policyname": "Admins can manage banners in their complex",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "operation": "ALL",
+        "using_expression": "(housing_complex_id = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid())))",
         "check_expression": null
     },
     {
@@ -52,21 +72,21 @@
     {
         "schemaname": "public",
         "tablename": "fees",
-        "policyname": "Admins can manage fees",
-        "permissive": "PERMISSIVE",
-        "roles": "{authenticated}",
-        "operation": "ALL",
-        "using_expression": "is_admin()",
-        "check_expression": null
-    },
-    {
-        "schemaname": "public",
-        "tablename": "fees",
         "policyname": "Authenticated can view active fees",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
         "operation": "SELECT",
         "using_expression": "(is_active = true)",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "fees",
+        "policyname": "Admins can manage fees",
+        "permissive": "PERMISSIVE",
+        "roles": "{authenticated}",
+        "operation": "ALL",
+        "using_expression": "is_admin()",
         "check_expression": null
     },
     {
@@ -83,16 +103,6 @@
         "schemaname": "public",
         "tablename": "housing_complexes",
         "policyname": "Admin can insert housing complexes",
-        "permissive": "PERMISSIVE",
-        "roles": "{authenticated}",
-        "operation": "INSERT",
-        "using_expression": null,
-        "check_expression": "is_admin()"
-    },
-    {
-        "schemaname": "public",
-        "tablename": "news",
-        "policyname": "Admin can insert news",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
         "operation": "INSERT",
@@ -122,6 +132,16 @@
     {
         "schemaname": "public",
         "tablename": "news",
+        "policyname": "Admin can insert news",
+        "permissive": "PERMISSIVE",
+        "roles": "{authenticated}",
+        "operation": "INSERT",
+        "using_expression": null,
+        "check_expression": "is_admin()"
+    },
+    {
+        "schemaname": "public",
+        "tablename": "news",
         "policyname": "Authenticated can read published news",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
@@ -132,20 +152,20 @@
     {
         "schemaname": "public",
         "tablename": "notifications",
-        "policyname": "Users can view own notifications",
+        "policyname": "Users can update own notifications",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
-        "operation": "SELECT",
+        "operation": "UPDATE",
         "using_expression": "(auth.uid() = user_id)",
         "check_expression": null
     },
     {
         "schemaname": "public",
         "tablename": "notifications",
-        "policyname": "Users can update own notifications",
+        "policyname": "Users can view own notifications",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
-        "operation": "UPDATE",
+        "operation": "SELECT",
         "using_expression": "(auth.uid() = user_id)",
         "check_expression": null
     },
@@ -192,21 +212,21 @@
     {
         "schemaname": "public",
         "tablename": "payment_methods",
-        "policyname": "Admin can manage own complex payment methods",
-        "permissive": "PERMISSIVE",
-        "roles": "{authenticated}",
-        "operation": "ALL",
-        "using_expression": "(is_admin() AND (housing_complex_id = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid()))))",
-        "check_expression": null
-    },
-    {
-        "schemaname": "public",
-        "tablename": "payment_methods",
         "policyname": "Users can view payment methods of their complex",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
         "operation": "SELECT",
         "using_expression": "((is_active = true) AND (housing_complex_id = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid()))))",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "payment_methods",
+        "policyname": "Admin can manage own complex payment methods",
+        "permissive": "PERMISSIVE",
+        "roles": "{authenticated}",
+        "operation": "ALL",
+        "using_expression": "(is_admin() AND (housing_complex_id = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid()))))",
         "check_expression": null
     },
     {
@@ -222,11 +242,11 @@
     {
         "schemaname": "public",
         "tablename": "payments",
-        "policyname": "Users can update own pending or rejected payments",
+        "policyname": "Payment Isolation",
         "permissive": "PERMISSIVE",
-        "roles": "{public}",
-        "operation": "UPDATE",
-        "using_expression": "((auth.uid() = user_id) AND ((status = 'pending'::text) OR (status = 'rejected'::text)))",
+        "roles": "{authenticated}",
+        "operation": "SELECT",
+        "using_expression": "((user_id = auth.uid()) OR (is_admin() AND (( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = payments.user_id)) = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid())))))",
         "check_expression": null
     },
     {
@@ -252,11 +272,11 @@
     {
         "schemaname": "public",
         "tablename": "payments",
-        "policyname": "Payment Isolation",
+        "policyname": "Users can update own pending or rejected payments",
         "permissive": "PERMISSIVE",
-        "roles": "{authenticated}",
-        "operation": "SELECT",
-        "using_expression": "((user_id = auth.uid()) OR (is_admin() AND (( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = payments.user_id)) = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid())))))",
+        "roles": "{public}",
+        "operation": "UPDATE",
+        "using_expression": "((auth.uid() = user_id) AND ((status = 'pending'::text) OR (status = 'rejected'::text)))",
         "check_expression": null
     },
     {
@@ -292,20 +312,40 @@
     {
         "schemaname": "public",
         "tablename": "reports",
-        "policyname": "Users can update own reports",
+        "policyname": "Users can view own reports",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
-        "operation": "UPDATE",
+        "operation": "SELECT",
         "using_expression": "(auth.uid() = user_id)",
         "check_expression": null
     },
     {
         "schemaname": "public",
         "tablename": "reports",
-        "policyname": "Users can view own reports",
+        "policyname": "Staff can manage reports",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "operation": "ALL",
+        "using_expression": "((is_admin() OR is_security()) AND ((( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid())) IS NULL) OR (( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = reports.user_id)) = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid())))))",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "reports",
+        "policyname": "Users can delete own reports",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
-        "operation": "SELECT",
+        "operation": "DELETE",
+        "using_expression": "(auth.uid() = user_id)",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "reports",
+        "policyname": "Users can update own reports",
+        "permissive": "PERMISSIVE",
+        "roles": "{authenticated}",
+        "operation": "UPDATE",
         "using_expression": "(auth.uid() = user_id)",
         "check_expression": null
     },
@@ -322,16 +362,6 @@
     {
         "schemaname": "public",
         "tablename": "reports",
-        "policyname": "Users can delete own reports",
-        "permissive": "PERMISSIVE",
-        "roles": "{authenticated}",
-        "operation": "DELETE",
-        "using_expression": "(auth.uid() = user_id)",
-        "check_expression": null
-    },
-    {
-        "schemaname": "public",
-        "tablename": "reports",
         "policyname": "Report Isolation",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
@@ -341,12 +371,12 @@
     },
     {
         "schemaname": "public",
-        "tablename": "reports",
-        "policyname": "Staff can manage reports",
+        "tablename": "user_tokens",
+        "policyname": "Users can delete own tokens",
         "permissive": "PERMISSIVE",
-        "roles": "{public}",
-        "operation": "ALL",
-        "using_expression": "((is_admin() OR is_security()) AND ((( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid())) IS NULL) OR (( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = reports.user_id)) = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid())))))",
+        "roles": "{authenticated}",
+        "operation": "DELETE",
+        "using_expression": "(auth.uid() = user_id)",
         "check_expression": null
     },
     {
@@ -362,12 +392,12 @@
     {
         "schemaname": "public",
         "tablename": "user_tokens",
-        "policyname": "Users can delete own tokens",
+        "policyname": "Users can update own tokens",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
-        "operation": "DELETE",
+        "operation": "UPDATE",
         "using_expression": "(auth.uid() = user_id)",
-        "check_expression": null
+        "check_expression": "(auth.uid() = user_id)"
     },
     {
         "schemaname": "public",
@@ -381,13 +411,13 @@
     },
     {
         "schemaname": "public",
-        "tablename": "user_tokens",
-        "policyname": "Users can update own tokens",
+        "tablename": "verified_residents",
+        "policyname": "Allow read access for authenticated users to verified_residents",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
-        "operation": "UPDATE",
-        "using_expression": "(auth.uid() = user_id)",
-        "check_expression": "(auth.uid() = user_id)"
+        "operation": "SELECT",
+        "using_expression": "true",
+        "check_expression": null
     },
     {
         "schemaname": "public",
@@ -401,12 +431,22 @@
     },
     {
         "schemaname": "public",
-        "tablename": "verified_residents",
-        "policyname": "Allow read access for authenticated users to verified_residents",
+        "tablename": "visitors",
+        "policyname": "Residents can view their own visitors",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
         "operation": "SELECT",
-        "using_expression": "true",
+        "using_expression": "((destination_user_id = auth.uid()) OR (created_by = auth.uid()))",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "visitors",
+        "policyname": "Admins and Security can manage all visitors",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "operation": "ALL",
+        "using_expression": "((is_admin() OR is_security()) AND ((( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid())) IS NULL) OR (housing_complex_id = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid())))))",
         "check_expression": null
     },
     {
@@ -428,25 +468,5 @@
         "operation": "INSERT",
         "using_expression": null,
         "check_expression": "((created_by = auth.uid()) AND (destination_user_id = auth.uid()))"
-    },
-    {
-        "schemaname": "public",
-        "tablename": "visitors",
-        "policyname": "Residents can view their own visitors",
-        "permissive": "PERMISSIVE",
-        "roles": "{authenticated}",
-        "operation": "SELECT",
-        "using_expression": "((destination_user_id = auth.uid()) OR (created_by = auth.uid()))",
-        "check_expression": null
-    },
-    {
-        "schemaname": "public",
-        "tablename": "visitors",
-        "policyname": "Admins and Security can manage all visitors",
-        "permissive": "PERMISSIVE",
-        "roles": "{public}",
-        "operation": "ALL",
-        "using_expression": "((is_admin() OR is_security()) AND ((( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid())) IS NULL) OR (housing_complex_id = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid())))))",
-        "check_expression": null
     }
 ]

@@ -429,7 +429,10 @@ export default function IuranScreen() {
                                                                                 {isDownloadingReceiptId === item.id ? (
                                                                                     <ActivityIndicator size="small" color="#1B5E20" />
                                                                                 ) : (
-                                                                                    <Text style={{ color: '#1B5E20', fontSize: 11, fontWeight: 'bold' }}>Kuitansi</Text>
+                                                                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                                                                                        <Text style={{ color: '#1B5E20', fontSize: 11, fontWeight: 'bold' }}>Kuitansi</Text>
+                                                                                        <Ionicons name="download-outline" size={12} color="#1B5E20" />
+                                                                                    </View>
                                                                                 )}
                                                                             </TouchableOpacity>
                                                                         )}

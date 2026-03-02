@@ -144,8 +144,8 @@ export default function PaymentHistoryScreen() {
                                                         </View>
                                                     ) : (
                                                         <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#E8F5E9', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, gap: 4 }}>
-                                                            <Ionicons name="download-outline" size={14} color="#1B5E20" />
                                                             <Text style={{ color: '#1B5E20', fontSize: 11, fontWeight: 'bold' }}>Kuitansi</Text>
+                                                            <Ionicons name="download-outline" size={14} color="#1B5E20" />
                                                         </View>
                                                     )}
                                                 </TouchableOpacity>
