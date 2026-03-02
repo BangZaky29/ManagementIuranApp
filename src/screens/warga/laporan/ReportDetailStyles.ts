@@ -171,18 +171,21 @@ export const ReportDetailStyles = StyleSheet.create({
     timelineHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: 'flex-start', // Change to flex-start for multi-line titles
         marginBottom: 6,
     },
     timelineTitle: {
-        fontSize: 16,
+        flex: 1, // Allow title to take available space and wrap
+        fontSize: 15, // Slightly smaller for better fit
         fontWeight: '700',
         color: Colors.green5,
+        marginRight: 12, // Gap between title and date
     },
     timelineDate: {
-        fontSize: 11,
+        fontSize: 10, // Slightly smaller
         color: '#9CA3AF',
         fontWeight: '600',
+        marginTop: 2, // Align better with top of title
     },
     timelineDesc: {
         fontSize: 13,

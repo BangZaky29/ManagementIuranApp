@@ -327,20 +327,24 @@ export default function AdminReportDetailScreen() {
                             {/* Simple Logic for Progress Log */}
                             <View style={{ flexDirection: 'row', marginBottom: 12 }}>
                                 <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: Colors.success, marginTop: 4, marginRight: 12 }} />
-                                <View style={{ flex: 1 }}>
-                                    <Text style={{ fontWeight: 'bold', fontSize: 14 }}>Laporan Diterima</Text>
-                                    <Text style={{ fontSize: 12, color: Colors.textSecondary }}>{formattedDate}</Text>
+                                <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                    <View style={{ flex: 1, marginRight: 8 }}>
+                                        <Text style={{ fontWeight: 'bold', fontSize: 14 }}>Laporan Diterima</Text>
+                                    </View>
+                                    <Text style={{ fontSize: 11, color: '#9CA3AF', fontWeight: '600', marginTop: 2 }}>{formattedDate}</Text>
                                 </View>
                             </View>
 
                             {data.status !== 'Menunggu' && (
                                 <View style={{ flexDirection: 'row', marginBottom: 12 }}>
                                     <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: Colors.warning, marginTop: 4, marginRight: 12 }} />
-                                    <View style={{ flex: 1 }}>
-                                        <Text style={{ fontWeight: 'bold', fontSize: 14 }}>
-                                            Sedang Diproses oleh {data.processed_by?.role === 'admin' ? 'Admin' : 'Security'} {data.processed_by?.full_name || 'Petugas'}
-                                        </Text>
-                                        <Text style={{ fontSize: 12, color: Colors.textSecondary }}>Laporan sedang ditangani petugas.</Text>
+                                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                        <View style={{ flex: 1, marginRight: 8 }}>
+                                            <Text style={{ fontWeight: 'bold', fontSize: 14 }}>
+                                                Sedang Diproses oleh {data.processed_by?.role === 'admin' ? 'Admin' : 'Security'} {data.processed_by?.full_name || 'Petugas'}
+                                            </Text>
+                                            <Text style={{ fontSize: 12, color: Colors.textSecondary }}>Laporan sedang ditangani petugas.</Text>
+                                        </View>
                                     </View>
                                 </View>
                             )}
@@ -348,16 +352,18 @@ export default function AdminReportDetailScreen() {
                             {(data.status === 'Selesai' || data.status === 'Ditolak') && (
                                 <View style={{ flexDirection: 'row' }}>
                                     <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: data.status === 'Selesai' ? Colors.success : Colors.danger, marginTop: 4, marginRight: 12 }} />
-                                    <View style={{ flex: 1 }}>
-                                        <Text style={{ fontWeight: 'bold', fontSize: 14 }}>
-                                            {data.status === 'Selesai'
-                                                ? `Laporan Selesai oleh ${data.completed_by?.role === 'admin' ? 'Admin' : 'Security'} ${data.completed_by?.full_name || 'Petugas'}`
-                                                : 'Laporan Ditolak'}
-                                        </Text>
-                                        <Text style={{ fontSize: 12, color: Colors.textSecondary }}>{data.status === 'Selesai' ? 'Kendala telah diatasi.' : 'Laporan belum dapat diproses.'}</Text>
-                                        {data.completion_image_url && (
-                                            <Image source={{ uri: data.completion_image_url }} style={{ width: 80, height: 80, borderRadius: 8, marginTop: 8 }} />
-                                        )}
+                                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                        <View style={{ flex: 1, marginRight: 8 }}>
+                                            <Text style={{ fontWeight: 'bold', fontSize: 14 }}>
+                                                {data.status === 'Selesai'
+                                                    ? `Laporan Selesai oleh ${data.completed_by?.role === 'admin' ? 'Admin' : 'Security'} ${data.completed_by?.full_name || 'Petugas'}`
+                                                    : 'Laporan Ditolak'}
+                                            </Text>
+                                            <Text style={{ fontSize: 12, color: Colors.textSecondary }}>{data.status === 'Selesai' ? 'Kendala telah diatasi.' : 'Laporan belum dapat diproses.'}</Text>
+                                            {data.completion_image_url && (
+                                                <Image source={{ uri: data.completion_image_url }} style={{ width: 80, height: 80, borderRadius: 8, marginTop: 8 }} />
+                                            )}
+                                        </View>
                                     </View>
                                 </View>
                             )}

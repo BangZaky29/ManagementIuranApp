@@ -176,9 +176,11 @@ export const styles = StyleSheet.create({
         marginLeft: 16,
     },
     timelineLabel: {
+        flex: 1,
         fontSize: 15,
         fontWeight: 'bold',
         color: '#333',
+        marginRight: 8,
     },
     timelineSublabel: {
         fontSize: 13,
@@ -346,5 +348,34 @@ export const styles = StyleSheet.create({
         borderRadius: 16,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    // Image Viewer Styles
+    imageViewerOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.9)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    imageViewerContent: {
+        width: '100%',
+        height: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    fullImage: {
+        width: width,
+        height: width * 1.5,
+        maxHeight: '80%',
+    },
+    closeImageBtn: {
+        position: 'absolute',
+        top: Platform.OS === 'ios' ? 60 : 40,
+        right: 20,
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });

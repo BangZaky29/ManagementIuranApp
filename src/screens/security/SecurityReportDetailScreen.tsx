@@ -28,6 +28,7 @@ export default function SecurityReportDetailScreen() {
     const [rejectionReason, setRejectionReason] = useState('');
     const [showCompletionModal, setShowCompletionModal] = useState(false);
     const [completionImage, setCompletionImage] = useState<string | null>(null);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [isUpdating, setIsUpdating] = useState(false);
 
     // Alert
@@ -163,7 +164,7 @@ export default function SecurityReportDetailScreen() {
 
                     {data.image_url && (
                         <TouchableOpacity
-                            onPress={() => Linking.openURL(data.image_url)}
+                            onPress={() => setSelectedImage(data.image_url)}
                             style={styles.imageWrapper}
                         >
                             <Image source={{ uri: data.image_url }} style={styles.reportImage} resizeMode="cover" />
@@ -249,7 +250,7 @@ export default function SecurityReportDetailScreen() {
                                 {data.completion_image_url && (
                                     <TouchableOpacity
                                         style={styles.proofBox}
-                                        onPress={() => Linking.openURL(data.completion_image_url)}
+                                        onPress={() => setSelectedImage(data.completion_image_url)}
                                     >
                                         <Image source={{ uri: data.completion_image_url }} style={styles.proofImage} />
                                         <View style={styles.proofBadge}>
@@ -385,6 +386,36 @@ export default function SecurityReportDetailScreen() {
                 buttons={alertConfig.buttons}
                 onClose={() => setAlertConfig({ ...alertConfig, visible: false })}
             />
+
+            {/* Full Screen Image Viewer Modal */}
+            <Modal
+                visible={!!selectedImage}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setSelectedImage(null)}
+            >
+                <TouchableOpacity
+                    style={styles.imageViewerOverlay}
+                    activeOpacity={1}
+                    onPress={() => setSelectedImage(null)}
+                >
+                    <View style={styles.imageViewerContent}>
+                        {selectedImage && (
+                            <Image
+                                source={{ uri: selectedImage }}
+                                style={styles.fullImage}
+                                resizeMode="contain"
+                            />
+                        )}
+                        <TouchableOpacity
+                            style={styles.closeImageBtn}
+                            onPress={() => setSelectedImage(null)}
+                        >
+                            <Ionicons name="close" size={28} color="white" />
+                        </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
         </SafeAreaView>
     );
 }
