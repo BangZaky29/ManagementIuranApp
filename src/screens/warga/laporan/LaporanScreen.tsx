@@ -55,18 +55,33 @@ export default function LaporanScreen() {
                 <ScrollView contentContainerStyle={styles.content}>
 
                     {/* Filter Tabs */}
-                    <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.filterContainer}>
-                        {['Semua', 'Diproses', 'Selesai'].map((filter) => (
-                            <TouchableOpacity
-                                key={filter}
-                                style={[styles.filterTab, { backgroundColor: colors.backgroundCard, borderColor: colors.border }, selectedFilter === filter && { backgroundColor: colors.green5, borderColor: colors.green5 }]}
-                                onPress={() => setSelectedFilter(filter as any)}
-                            >
-                                <Text style={[styles.filterText, { color: colors.green5 }, selectedFilter === filter && { color: colors.backgroundCard }]}>
-                                    {filter}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
+                    <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            style={styles.filterScrollView}
+                            contentContainerStyle={styles.filterContainer}
+                        >
+                            {['Semua', 'Menunggu', 'Diproses', 'Selesai', 'Ditolak'].map((filter) => (
+                                <TouchableOpacity
+                                    key={filter}
+                                    style={[
+                                        styles.filterTab,
+                                        { backgroundColor: colors.backgroundCard, borderColor: colors.border },
+                                        selectedFilter === filter && { backgroundColor: colors.green5, borderColor: colors.green5 }
+                                    ]}
+                                    onPress={() => setSelectedFilter(filter as any)}
+                                >
+                                    <Text style={[
+                                        styles.filterText,
+                                        { color: colors.green5 },
+                                        selectedFilter === filter && { color: colors.backgroundCard }
+                                    ]}>
+                                        {filter}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
                     </Animated.View>
 
                     {/* Report List */}

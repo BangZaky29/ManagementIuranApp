@@ -16,7 +16,7 @@ export interface ReportItem {
 export const useLaporanViewModel = () => {
     const router = useRouter();
     const { user } = useAuth();
-    const [selectedFilter, setSelectedFilter] = useState<'Semua' | 'Diproses' | 'Selesai'>('Semua');
+    const [selectedFilter, setSelectedFilter] = useState<'Semua' | 'Menunggu' | 'Diproses' | 'Selesai' | 'Ditolak'>('Semua');
     const [reports, setReports] = useState<ReportItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 

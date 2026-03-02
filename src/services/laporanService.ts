@@ -12,6 +12,7 @@ export interface Report {
     image_url: string | null;
     location: string | null;
     rejection_reason?: string | null;
+    completion_image_url?: string | null;
     created_at: string;
     updated_at?: string;
     profiles?: {
@@ -222,14 +223,53 @@ export const updateReport = async (
     return data;
 };
 
-export const updateReportStatus = async (id: string, status: string, rejectionReason?: string): Promise<void> => {
+export const updateReportStatus = async (
+    id: string,
+    status: string,
+    options?: {
+        rejectionReason?: string;
+        completionImageUri?: string;
+    }
+): Promise<void> => {
+    let completionImageUrl = undefined;
+
+    // Handle completion image upload if provided
+    if (options?.completionImageUri) {
+        const fileName = `completion_${id}_${Date.now()}.jpg`;
+        const base64 = await FileSystem.readAsStringAsync(options.completionImageUri, {
+            encoding: 'base64',
+        });
+
+        const { error: uploadError } = await supabase.storage
+            .from('konfirmasi-laporan') // Use the specific bucket requested
+            .upload(fileName, decode(base64), {
+                contentType: 'image/jpeg',
+                upsert: true
+            });
+
+        if (uploadError) {
+            console.error('Completion image upload error:', uploadError);
+            throw uploadError;
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+            .from('konfirmasi-laporan')
+            .getPublicUrl(fileName);
+
+        completionImageUrl = publicUrl;
+    }
+
     const updateData: any = {
         status,
         updated_at: new Date().toISOString()
     };
 
-    if (rejectionReason !== undefined) {
-        updateData.rejection_reason = rejectionReason;
+    if (options?.rejectionReason !== undefined) {
+        updateData.rejection_reason = options.rejectionReason;
+    }
+
+    if (completionImageUrl) {
+        updateData.completion_image_url = completionImageUrl;
     }
 
     const { error } = await supabase

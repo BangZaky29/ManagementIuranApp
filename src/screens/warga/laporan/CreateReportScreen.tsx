@@ -32,6 +32,7 @@ export default function CreateReportScreen() {
         hideAlert,
 
         handlePickImage,
+        handleLaunchCamera,
         handleGetCurrentLocation,
         handleSelectLocation,
         handleSubmit
@@ -180,30 +181,45 @@ export default function CreateReportScreen() {
                         </View>
                     </View>
 
-                    {/* Photo Upload Placeholder */}
+                    {/* Photo Upload Section */}
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Lampirkan Foto (Opsional)</Text>
-                        <TouchableOpacity
-                            style={[
-                                styles.uploadArea,
-                                image ? { height: undefined, aspectRatio: imageAspectRatio, padding: 0, borderWidth: 0 } : {}
-                            ]}
-                            onPress={handlePickImage}
-                            disabled={isLoading}
-                        >
-                            {image ? (
-                                <Image source={{ uri: image }} style={{ width: '100%', height: '100%', borderRadius: 12 }} resizeMode="contain" />
-                            ) : (
-                                <>
-                                    <Ionicons name="camera-outline" size={32} color={Colors.green3} />
-                                    <Text style={styles.uploadText}>Ketuk untuk ambil/pilih foto</Text>
-                                </>
-                            )}
-                        </TouchableOpacity>
-                        {image && (
-                            <TouchableOpacity onPress={() => setImage(null)} style={{ marginTop: 8, alignSelf: 'center' }} disabled={isLoading}>
-                                <Text style={{ color: Colors.danger, fontSize: 13 }}>Hapus Foto</Text>
-                            </TouchableOpacity>
+
+                        {!image ? (
+                            <View style={styles.photoActionRow}>
+                                <TouchableOpacity
+                                    style={[styles.photoButton, styles.galleryButton]}
+                                    onPress={handlePickImage}
+                                    disabled={isLoading}
+                                >
+                                    <Ionicons name="images-outline" size={20} color={Colors.green5} />
+                                    <Text style={styles.photoButtonText}>Pilih Foto</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    style={[styles.photoButton, styles.cameraButton]}
+                                    onPress={handleLaunchCamera}
+                                    disabled={isLoading}
+                                >
+                                    <Ionicons name="camera-outline" size={20} color={Colors.green5} />
+                                    <Text style={styles.photoButtonText}>Buka Kamera</Text>
+                                </TouchableOpacity>
+                            </View>
+                        ) : (
+                            <View style={styles.imagePreviewContainer}>
+                                <Image
+                                    source={{ uri: image }}
+                                    style={{ width: '100%', aspectRatio: imageAspectRatio }}
+                                    resizeMode="cover"
+                                />
+                                <TouchableOpacity
+                                    style={styles.removeImageBtn}
+                                    onPress={() => setImage(null)}
+                                    disabled={isLoading}
+                                >
+                                    <Ionicons name="close" size={20} color={Colors.danger} />
+                                </TouchableOpacity>
+                            </View>
                         )}
                     </View>
 

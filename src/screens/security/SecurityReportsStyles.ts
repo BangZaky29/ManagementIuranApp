@@ -209,4 +209,81 @@ export const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: 'bold',
     },
+    // Rejection UI
+    rejectionBox: {
+        marginTop: 10,
+        backgroundColor: '#FEF2F2',
+        padding: 10,
+        borderRadius: 8,
+        borderLeftWidth: 3,
+        borderLeftColor: '#EF4444',
+    },
+    rejectionLabel: {
+        fontSize: 11,
+        fontWeight: 'bold',
+        color: '#EF4444',
+        marginBottom: 2,
+    },
+    rejectionText: {
+        fontSize: 12,
+        color: '#333',
+        lineHeight: 16,
+    },
+
+    // Modal Styles (copied pattern from Admin)
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        padding: 20,
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 24,
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 8,
+    },
+    modalSubtitle: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 20,
+        lineHeight: 20,
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+        borderRadius: 12,
+        padding: 12,
+        fontSize: 14,
+        color: '#333',
+        backgroundColor: '#F9FAFB',
+        textAlignVertical: 'top',
+        marginBottom: 20,
+    },
+    modalButtons: {
+        flexDirection: 'row',
+        gap: 12,
+    },
+    modalButton: {
+        flex: 1,
+        paddingVertical: 12,
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+    btnCancel: {
+        backgroundColor: '#F3F4F6',
+    },
+    btnConfirm: {
+        backgroundColor: '#EF4444',
+    },
 });

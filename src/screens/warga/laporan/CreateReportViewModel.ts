@@ -98,6 +98,45 @@ export const useCreateReportViewModel = () => {
         }
     };
 
+    const handleLaunchCamera = async () => {
+        try {
+            const { status } = await ImagePicker.requestCameraPermissionsAsync();
+            if (status !== 'granted') {
+                setAlertConfig({
+                    title: 'Izin Ditolak',
+                    message: 'Izin kamera diperlukan untuk mengambil foto.',
+                    type: 'warning',
+                    buttons: [{ text: 'OK', onPress: hideAlert }]
+                });
+                setAlertVisible(true);
+                return;
+            }
+
+            const result = await ImagePicker.launchCameraAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: false,
+                quality: 0.5,
+            });
+
+            if (!result.canceled && result.assets[0].uri) {
+                const asset = result.assets[0];
+                setImage(asset.uri);
+                if (asset.width && asset.height) {
+                    setImageAspectRatio(asset.width / asset.height);
+                }
+            }
+        } catch (error) {
+            console.error('Camera error:', error);
+            setAlertConfig({
+                title: 'Error',
+                message: 'Gagal membuka kamera',
+                type: 'error',
+                buttons: [{ text: 'OK', onPress: hideAlert }]
+            });
+            setAlertVisible(true);
+        }
+    };
+
     const handleGetCurrentLocation = async () => {
         setLocationStatus('fetching');
         try {
@@ -232,6 +271,7 @@ export const useCreateReportViewModel = () => {
 
         // Actions
         handlePickImage,
+        handleLaunchCamera,
         handleGetCurrentLocation,
         handleSelectLocation,
         handleSubmit

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StatusBar, Image, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, StatusBar, Image, TouchableOpacity, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ReportDetailStyles as styles } from './ReportDetailStyles';
 import { useFocusEffect } from 'expo-router';
@@ -27,6 +27,7 @@ export default function ReportDetailScreen() {
         getStatusBg,
         refresh
     } = useReportDetailViewModel();
+    const [showProofModal, setShowProofModal] = useState(false);
 
     // Reload data when screen is focused (in case we return from Edit)
     useFocusEffect(
@@ -60,95 +61,174 @@ export default function ReportDetailScreen() {
     }
 
     const formattedDate = formatDateTimeSafe(data.created_at);
+    const updatedDate = data.updated_at ? formatDateTimeSafe(data.updated_at) : null;
+
+    // Timeline helpers
+    const isProcessed = data.status !== 'Menunggu';
+    const isFinal = data.status === 'Selesai' || data.status === 'Ditolak';
+
+    const getCategoryIcon = (category: string): keyof typeof Ionicons.glyphMap => {
+        switch (category) {
+            case 'Fasilitas': return 'construct-outline';
+            case 'Kebersihan': return 'leaf-outline';
+            case 'Keamanan': return 'shield-checkmark-outline';
+            case 'Infrastruktur': return 'build-outline';
+            default: return 'help-circle-outline';
+        }
+    };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor={Colors.green1} />
+        <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
+            <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
             <CustomHeader title="Detail Laporan" showBack={true} />
 
-            <ScrollView contentContainerStyle={styles.content}>
+            <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
-                {/* Status Card */}
+                {/* Main Card */}
                 <View style={styles.card}>
                     <View style={styles.headerRow}>
                         <View style={[styles.statusBadge, { backgroundColor: getStatusBg(data.status) }]}>
                             <Text style={[styles.statusText, { color: getStatusColor(data.status) }]}>{data.status}</Text>
                         </View>
 
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <View style={{ flexDirection: 'row' }}>
-                                {/* Edit Button */}
-                                <TouchableOpacity onPress={handleEdit} style={{ padding: 4, marginRight: 8 }}>
-                                    <Ionicons name="create-outline" size={20} color={Colors.primary} />
+                        <View style={styles.actionButtonsRow}>
+                            {/* Edit Button */}
+                            {data.status === 'Menunggu' && (
+                                <TouchableOpacity onPress={handleEdit} style={styles.iconBtn}>
+                                    <Ionicons name="create-outline" size={18} color={Colors.primary} />
                                 </TouchableOpacity>
-                                {/* Delete Button */}
-                                <TouchableOpacity onPress={handleDelete} style={{ padding: 4 }}>
-                                    <Ionicons name="trash-outline" size={20} color={Colors.danger} />
-                                </TouchableOpacity>
-                            </View>
+                            )}
+                            {/* Delete Button */}
+                            <TouchableOpacity onPress={handleDelete} style={styles.iconBtn}>
+                                <Ionicons name="trash-outline" size={18} color={Colors.danger} />
+                            </TouchableOpacity>
                         </View>
                     </View>
+
                     <Text style={styles.title}>{data.title}</Text>
-                    <Text style={styles.category}>{data.category}</Text>
+
+                    <View style={styles.categoryRow}>
+                        <View style={styles.categoryIcon}>
+                            <Ionicons name={getCategoryIcon(data.category)} size={16} color={Colors.green5} />
+                        </View>
+                        <Text style={styles.category}>{data.category}</Text>
+                    </View>
+
+                    <Text style={styles.description}>{data.description}</Text>
+
+                    {data.image_url && (
+                        <View style={styles.imageContainer}>
+                            <Image
+                                source={{ uri: data.image_url }}
+                                style={[styles.image, { aspectRatio: imageAspectRatio }]}
+                                resizeMode="cover"
+                            />
+                        </View>
+                    )}
 
                     <ReportLocationViewer
                         locationUrl={data.location}
                         onOpenLocation={handleOpenLocation}
                     />
-
-                    <View style={styles.divider} />
-
-                    <Text style={styles.description}>{data.description}</Text>
-
-                    {data.image_url && (
-                        <Image
-                            source={{ uri: data.image_url }}
-                            style={[styles.image, { height: undefined, aspectRatio: imageAspectRatio }]}
-                            resizeMode="contain"
-                        />
-                    )}
-
-                    {data.status === 'Ditolak' && data.rejection_reason && (
-                        <View style={{
-                            marginTop: 16,
-                            backgroundColor: '#FFEBEE',
-                            padding: 16,
-                            borderRadius: 12,
-                            borderLeftWidth: 4,
-                            borderLeftColor: Colors.danger
-                        }}>
-                            <Text style={{ fontWeight: 'bold', color: Colors.danger, marginBottom: 4, fontSize: 13 }}>Alasan Penolakan:</Text>
-                            <Text style={{ color: Colors.textPrimary, lineHeight: 20, fontSize: 14 }}>{data.rejection_reason}</Text>
-                        </View>
-                    )}
                 </View>
 
-                {/* Timeline Placeholder - Logic can be added later if we have a history table */}
-                <Text style={styles.sectionTitle}>Status Laporan</Text>
-                <View style={styles.timelineContainer}>
-                    <View style={styles.timelineItem}>
-                        <View style={styles.timelineLeft}>
-                            <View style={[styles.dot, { backgroundColor: Colors.green5 }]} />
-                        </View>
-                        <View style={styles.timelineContent}>
-                            <Text style={styles.timelineTitle}>Laporan Dibuat</Text>
-                            <Text style={styles.timelineDate}>{formattedDate}</Text>
-                            <Text style={styles.timelineDesc}>Laporan anda telah masuk ke sistem.</Text>
-                        </View>
+                {/* Modern Status Timeline */}
+                <View style={styles.timelineSection}>
+                    <View style={styles.sectionTitleRow}>
+                        <Ionicons name="time-outline" size={24} color={Colors.green5} />
+                        <Text style={styles.sectionTitle}>Alur Penanganan</Text>
                     </View>
 
-                    {data.status !== 'Menunggu' && (
+                    <View style={styles.timelineWrapper}>
+                        {/* Status 1: Created */}
                         <View style={styles.timelineItem}>
                             <View style={styles.timelineLeft}>
-                                <View style={styles.line} />
-                                <View style={[styles.dot, { backgroundColor: Colors.green5 }]} />
+                                <View style={[styles.dot, styles.dotActive]}>
+                                    <Ionicons name="checkmark" size={10} color="white" />
+                                </View>
+                                <View style={[styles.line, (isProcessed || isFinal) && styles.lineActive]} />
                             </View>
                             <View style={styles.timelineContent}>
-                                <Text style={styles.timelineTitle}>Status: {data.status}</Text>
-                                <Text style={styles.timelineDesc}>Admin memperbarui status laporan.</Text>
+                                <View style={styles.timelineHeader}>
+                                    <Text style={styles.timelineTitle}>Laporan Diterima</Text>
+                                    <Text style={styles.timelineDate}>{formattedDate}</Text>
+                                </View>
+                                <Text style={styles.timelineDesc}>Laporan berhasil dikirim dan masuk ke sistem Antrean Manajemen Laporan.</Text>
                             </View>
                         </View>
-                    )}
+
+                        {/* Status 2: Processed */}
+                        <View style={styles.timelineItem}>
+                            <View style={styles.timelineLeft}>
+                                <View style={[styles.dot, isProcessed ? styles.dotActive : styles.dotInactive]}>
+                                    {isProcessed && <Ionicons name="search" size={10} color="white" />}
+                                </View>
+                                <View style={[styles.line, isFinal && styles.lineActive]} />
+                            </View>
+                            <View style={styles.timelineContent}>
+                                <View style={styles.timelineHeader}>
+                                    <Text style={[styles.timelineTitle, !isProcessed && { color: '#9CA3AF' }]}>
+                                        {isProcessed ? 'Sedang Diproses' : 'Tahap Peninjauan'}
+                                    </Text>
+                                    {isProcessed && updatedDate && (
+                                        <Text style={styles.timelineDate}>{updatedDate}</Text>
+                                    )}
+                                </View>
+                                <Text style={[styles.timelineDesc, !isProcessed && { color: '#9CA3AF' }]}>
+                                    {isProcessed
+                                        ? 'Laporan telah divalidasi dan saat ini dalam tahap penanganan oleh petugas terkait.'
+                                        : 'Laporan Anda menunggu konfirmasi petugas untuk segera ditindaklanjuti.'}
+                                </Text>
+                            </View>
+                        </View>
+
+                        {/* Status 3: Final */}
+                        <View style={[styles.timelineItem, { minHeight: undefined }]}>
+                            <View style={styles.timelineLeft}>
+                                <View style={[styles.dot, isFinal ? styles.dotActive : styles.dotInactive]}>
+                                    {isFinal && <Ionicons name={data.status === 'Ditolak' ? 'close' : 'star'} size={10} color="white" />}
+                                </View>
+                            </View>
+                            <View style={[styles.timelineContent, { paddingBottom: 0 }]}>
+                                <View style={styles.timelineHeader}>
+                                    <Text style={[styles.timelineTitle, !isFinal && { color: '#9CA3AF' }]}>
+                                        {data.status === 'Ditolak' ? 'Laporan Ditolak' :
+                                            data.status === 'Selesai' ? 'Laporan Selesai' : 'Laporan Ditutup'}
+                                    </Text>
+                                    {isFinal && updatedDate && (
+                                        <Text style={styles.timelineDate}>{updatedDate}</Text>
+                                    )}
+                                </View>
+                                <Text style={[styles.timelineDesc, !isFinal && { color: '#9CA3AF' }]}>
+                                    {data.status === 'Selesai' ? 'Terima kasih atas laporan Anda. Kendala telah berhasil diatasi sepenuhnya.' :
+                                        data.status === 'Ditolak' ? 'Mohon maaf, laporan Anda belum dapat kami proses saat ini karena alasan tertentu.' :
+                                            'Status akhir laporan akan diperbarui setelah penanganan dinyatakan selesai.'}
+                                </Text>
+
+                                {/* Proof Button for Completed Reports */}
+                                {data.status === 'Selesai' && data.completion_image_url && (
+                                    <TouchableOpacity
+                                        style={styles.proofButton}
+                                        onPress={() => setShowProofModal(true)}
+                                    >
+                                        <Ionicons name="image-outline" size={18} color={Colors.green5} />
+                                        <Text style={styles.proofButtonText}>Lihat Bukti Penanganan</Text>
+                                    </TouchableOpacity>
+                                )}
+
+                                {/* Improved Rejection Reason Box */}
+                                {data.status === 'Ditolak' && data.rejection_reason && (
+                                    <View style={styles.rejectionReasonBox}>
+                                        <View style={styles.rejectionHeader}>
+                                            <Ionicons name="alert-circle" size={18} color={Colors.danger} />
+                                            <Text style={styles.rejectionLabel}>Catatan Petugas:</Text>
+                                        </View>
+                                        <Text style={styles.rejectionText}>{data.rejection_reason}</Text>
+                                    </View>
+                                )}
+                            </View>
+                        </View>
+                    </View>
                 </View>
 
             </ScrollView>
@@ -161,6 +241,36 @@ export default function ReportDetailScreen() {
                 buttons={alertConfig.buttons}
                 onClose={hideAlert}
             />
+
+            {/* Proof Modal */}
+            <Modal
+                visible={showProofModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowProofModal(false)}
+            >
+                <TouchableOpacity
+                    style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.9)', justifyContent: 'center', alignItems: 'center' }}
+                    activeOpacity={1}
+                    onPress={() => setShowProofModal(false)}
+                >
+                    <View style={{ width: '90%', maxHeight: '80%', backgroundColor: 'black', borderRadius: 16, overflow: 'hidden' }}>
+                        {data.completion_image_url && (
+                            <Image
+                                source={{ uri: data.completion_image_url }}
+                                style={{ width: '100%', height: '100%' }}
+                                resizeMode="contain"
+                            />
+                        )}
+                        <TouchableOpacity
+                            style={{ position: 'absolute', top: 20, right: 20, backgroundColor: 'white', width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' }}
+                            onPress={() => setShowProofModal(false)}
+                        >
+                            <Ionicons name="close" size={24} color="black" />
+                        </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
         </SafeAreaView>
     );
 }

@@ -12,9 +12,13 @@ export const LaporanStyles = StyleSheet.create({
     },
 
     // Filters
+    filterScrollView: {
+        marginBottom: 20,
+        marginHorizontal: -20, // To allow scrolling from edge to edge
+    },
     filterContainer: {
         flexDirection: 'row',
-        marginBottom: 20,
+        paddingHorizontal: 20,
         gap: 10,
     },
     filterTab: {
