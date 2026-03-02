@@ -18,6 +18,9 @@ export default function PanicLogScreen() {
     const [refreshing, setRefreshing] = useState(false);
     const [showResolved, setShowResolved] = useState(false);
 
+    // Pagination state
+    const [visibleCount, setVisibleCount] = useState(5);
+
     // Alert
     const [alertVisible, setAlertVisible] = useState(false);
     const [alertConfig, setAlertConfig] = useState({
@@ -27,7 +30,8 @@ export default function PanicLogScreen() {
 
     const loadLogs = useCallback(async () => {
         try {
-            const data = await fetchPanicLogs(0, 50, showResolved);
+            // Fetch more to support pagination locally without frequent DB hits
+            const data = await fetchPanicLogs(0, 100, showResolved);
             setLogs(data);
         } catch (error) {
             console.error('Failed to load panic logs:', error);
@@ -39,14 +43,22 @@ export default function PanicLogScreen() {
 
     useEffect(() => {
         loadLogs();
-        // Auto-refresh every 10 seconds for real-time-ish updates
         const interval = setInterval(loadLogs, 10000);
         return () => clearInterval(interval);
     }, [loadLogs]);
 
     const onRefresh = () => {
         setRefreshing(true);
+        setVisibleCount(5); // Reset pagination on refresh
         loadLogs();
+    };
+
+    const handleSeeMore = () => {
+        setVisibleCount(prev => prev + 5);
+    };
+
+    const handleSeeLess = () => {
+        setVisibleCount(5);
     };
 
     const handleResolve = (log: PanicLog) => {
@@ -76,26 +88,6 @@ export default function PanicLogScreen() {
         setAlertVisible(true);
     };
 
-    const openLocation = (location: string | null) => {
-        if (!location) return;
-        if (location.startsWith('http')) {
-            Linking.openURL(location);
-        }
-    };
-
-    const formatTime = (dateString: string) => {
-        const d = new Date(dateString);
-        const now = new Date();
-        const diff = now.getTime() - d.getTime();
-        const minutes = Math.floor(diff / 60000);
-        const hours = Math.floor(diff / 3600000);
-
-        if (minutes < 1) return 'Baru saja';
-        if (minutes < 60) return `${minutes} menit lalu`;
-        if (hours < 24) return `${hours} jam lalu`;
-        return formatDateTimeSafe(d);
-    };
-
     const renderItem = ({ item }: { item: PanicLog }) => {
         return (
             <PanicLogCard
@@ -103,6 +95,36 @@ export default function PanicLogScreen() {
                 onResolve={handleResolve}
                 showResolveButton={!item.resolved_at}
             />
+        );
+    };
+
+    const renderFooter = () => {
+        if (logs.length <= 5) return null;
+
+        const hasMore = visibleCount < logs.length;
+
+        return (
+            <View style={styles.footerContainer}>
+                {hasMore ? (
+                    <TouchableOpacity
+                        style={styles.seeMoreButton}
+                        onPress={handleSeeMore}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={styles.seeMoreText}>Lihat lebih banyak ({logs.length - visibleCount} lagi)</Text>
+                        <Ionicons name="chevron-down" size={18} color={Colors.primary} />
+                    </TouchableOpacity>
+                ) : (
+                    <TouchableOpacity
+                        style={styles.seeLessButton}
+                        onPress={handleSeeLess}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={styles.seeLessText}>Lihat lebih sedikit</Text>
+                        <Ionicons name="chevron-up" size={18} color={Colors.textSecondary} />
+                    </TouchableOpacity>
+                )}
+            </View>
         );
     };
 
@@ -116,44 +138,66 @@ export default function PanicLogScreen() {
         );
     }
 
+    const displayedLogs = logs.slice(0, visibleCount);
+
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <SafeAreaView style={[styles.container, { backgroundColor: '#F8F9FA' }]}>
             <StatusBar barStyle="dark-content" />
 
             {/* Header */}
-            <View style={[styles.header, { backgroundColor: colors.backgroundCard }]}>
+            <View style={styles.header}>
                 <View>
-                    <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>🚨 Log Darurat</Text>
-                    <Text style={{ fontSize: 12, color: colors.textSecondary }}>
-                        {logs.length} sinyal {showResolved ? '(semua)' : 'aktif'}
-                    </Text>
+                    <Text style={styles.headerTitle}>🚨 Log Darurat</Text>
+                    <View style={styles.headerSubtitleRow}>
+                        <View style={[styles.indicator, { backgroundColor: showResolved ? '#4CAF50' : '#F44336' }]} />
+                        <Text style={styles.headerSubtitle}>
+                            {logs.length} Sinyal {showResolved ? 'Selesai' : 'Aktif'}
+                        </Text>
+                    </View>
                 </View>
                 <TouchableOpacity
                     style={[styles.filterButton, { backgroundColor: showResolved ? '#E8F5E9' : '#FFEBEE' }]}
-                    onPress={() => setShowResolved(!showResolved)}
+                    onPress={() => {
+                        setShowResolved(!showResolved);
+                        setVisibleCount(5); // Reset count when filter changes
+                    }}
                 >
-                    <Text style={{ fontSize: 12, fontWeight: '600', color: showResolved ? '#4CAF50' : '#F44336' }}>
-                        {showResolved ? 'Semua' : 'Aktif Saja'}
+                    <Ionicons
+                        name={showResolved ? "checkmark-circle" : "alert-circle"}
+                        size={16}
+                        color={showResolved ? '#4CAF50' : '#F44336'}
+                        style={{ marginRight: 6 }}
+                    />
+                    <Text style={{ fontSize: 13, fontWeight: '700', color: showResolved ? '#4CAF50' : '#F44336' }}>
+                        {showResolved ? 'Riwayat' : 'Aktif'}
                     </Text>
                 </TouchableOpacity>
             </View>
 
             {/* List */}
             <FlatList
-                data={logs}
+                data={displayedLogs}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id}
-                contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+                contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#F44336']} />}
+                ListFooterComponent={renderFooter}
                 ListEmptyComponent={
-                    <View style={{ alignItems: 'center', paddingTop: 60 }}>
-                        <Ionicons name="shield-checkmark" size={64} color="#4CAF50" />
-                        <Text style={{ fontSize: 16, fontWeight: '600', color: colors.textPrimary, marginTop: 16 }}>
-                            Tidak Ada Darurat Aktif
+                    <View style={styles.emptyContainer}>
+                        <View style={styles.emptyIconCircle}>
+                            <Ionicons name="shield-checkmark" size={64} color="#4CAF50" />
+                        </View>
+                        <Text style={styles.emptyTitle}>
+                            {showResolved ? 'Belum Ada Riwayat' : 'Lingkungan Aman'}
                         </Text>
-                        <Text style={{ fontSize: 13, color: colors.textSecondary, marginTop: 4 }}>
-                            Lingkungan aman — tarik ke bawah untuk refresh
+                        <Text style={styles.emptyDesc}>
+                            {showResolved
+                                ? 'Data darurat yang telah diselesaikan akan muncul di sini.'
+                                : 'Tidak ada sinyal darurat aktif saat ini. Tetap waspada!'}
                         </Text>
+                        <TouchableOpacity style={styles.refreshButton} onPress={onRefresh}>
+                            <Text style={styles.refreshButtonText}>Refresh Data</Text>
+                        </TouchableOpacity>
                     </View>
                 }
             />
@@ -173,38 +217,127 @@ export default function PanicLogScreen() {
 const styles = StyleSheet.create({
     container: { flex: 1 },
     header: {
-        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-        paddingHorizontal: 20, paddingVertical: 16, paddingTop: Platform.OS === 'android' ? 48 : 16,
-        borderBottomWidth: 1, borderBottomColor: '#EEE',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingVertical: 20,
+        paddingTop: Platform.OS === 'android' ? 48 : 20,
+        backgroundColor: '#FFF',
+        borderBottomWidth: 1,
+        borderBottomColor: '#F0F0F0',
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 3,
     },
-    headerTitle: { fontSize: 22, fontWeight: 'bold' },
+    headerTitle: {
+        fontSize: 24,
+        fontWeight: '900',
+        color: '#1A1A1A',
+        letterSpacing: -0.5,
+    },
+    headerSubtitleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 4,
+    },
+    indicator: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        marginRight: 6,
+    },
+    headerSubtitle: {
+        fontSize: 13,
+        color: '#666',
+        fontWeight: '500',
+    },
     filterButton: {
-        paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+        borderRadius: 20,
     },
-    card: {
-        borderRadius: 16, padding: 16, marginBottom: 12,
-        borderLeftWidth: 4,
-        ...Platform.select({
-            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 6 },
-            android: { elevation: 3 },
-        }),
+    footerContainer: {
+        marginTop: 8,
+        marginBottom: 20,
+        alignItems: 'center',
     },
-    cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-    userInfo: { flexDirection: 'row', alignItems: 'center', flex: 1 },
-    avatar: { width: 42, height: 42, borderRadius: 21 },
-    userName: { fontSize: 15, fontWeight: '700' },
-    userPhone: { fontSize: 12, marginTop: 2 },
-    timeContainer: { alignItems: 'flex-end' },
-    statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, marginBottom: 4 },
-    timeText: { fontSize: 11 },
-    locationRow: {
-        flexDirection: 'row', alignItems: 'center', gap: 8,
-        padding: 10, borderRadius: 10, marginTop: 12,
+    seeMoreButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#FFF',
+        paddingHorizontal: 20,
+        paddingVertical: 12,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: Colors.primary,
+        gap: 8,
+        elevation: 2,
+        shadowColor: Colors.primary,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
     },
-    locationText: { flex: 1, fontSize: 13, fontWeight: '500' },
-    resolveButton: {
-        flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-        backgroundColor: '#4CAF50', paddingVertical: 10, borderRadius: 10, marginTop: 12,
+    seeMoreText: {
+        color: Colors.primary,
+        fontWeight: '700',
+        fontSize: 14,
     },
-    resolveText: { color: '#FFF', fontWeight: '700', fontSize: 14 },
+    seeLessButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 12,
+        gap: 6,
+    },
+    seeLessText: {
+        color: Colors.textSecondary,
+        fontWeight: '600',
+        fontSize: 14,
+    },
+    emptyContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingTop: 80,
+        paddingHorizontal: 40,
+    },
+    emptyIconCircle: {
+        width: 120,
+        height: 120,
+        borderRadius: 60,
+        backgroundColor: '#E8F5E9',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 24,
+    },
+    emptyTitle: {
+        fontSize: 20,
+        fontWeight: '800',
+        color: '#1A1A1A',
+        textAlign: 'center',
+    },
+    emptyDesc: {
+        fontSize: 14,
+        color: '#666',
+        marginTop: 8,
+        textAlign: 'center',
+        lineHeight: 20,
+    },
+    refreshButton: {
+        marginTop: 32,
+        paddingHorizontal: 24,
+        paddingVertical: 12,
+        borderRadius: 25,
+        backgroundColor: '#FFF',
+        borderWidth: 1,
+        borderColor: '#DDD',
+    },
+    refreshButtonText: {
+        color: '#666',
+        fontWeight: '700',
+        fontSize: 14,
+    },
 });

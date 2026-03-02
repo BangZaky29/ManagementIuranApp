@@ -155,6 +155,7 @@ export default function ManageUsersScreen() {
     };
 
     const [activeRoleFilter, setActiveRoleFilter] = useState<'Semua' | 'warga' | 'security'>('Semua');
+    const [activeStatusFilter, setActiveStatusFilter] = useState<'Semua' | 'Aktif' | 'Belum Daftar'>('Semua');
     const [showImportModal, setShowImportModal] = useState(false);
     const [showExportModal, setShowExportModal] = useState(false);
     const [importRole, setImportRole] = useState<'warga' | 'security'>('warga');
@@ -251,7 +252,14 @@ export default function ManageUsersScreen() {
             result = result.filter(item => item.role === activeRoleFilter);
         }
 
-        // 2. Filter by Search
+        // 2. Filter by Status (Aktif / Belum Daftar)
+        if (activeStatusFilter === 'Aktif') {
+            result = result.filter(item => item.is_claimed === true);
+        } else if (activeStatusFilter === 'Belum Daftar') {
+            result = result.filter(item => item.is_claimed === false);
+        }
+
+        // 3. Filter by Search
         if (searchQuery) {
             const lowerQuery = searchQuery.toLowerCase();
             result = result.filter(item =>
@@ -261,7 +269,7 @@ export default function ManageUsersScreen() {
         }
 
         return result;
-    }, [residents, searchQuery, activeRoleFilter]);
+    }, [residents, searchQuery, activeRoleFilter, activeStatusFilter]);
 
     const renderItem = ({ item }: { item: VerifiedResident }) => {
         const isExpanded = expandedId === item.id;
@@ -365,22 +373,40 @@ export default function ManageUsersScreen() {
 
             {/* Filter Chips & Actions */}
             <View style={styles.filterChipsContainer}>
-                <View style={{ flexDirection: 'row', gap: 8, flex: 1 }}>
-                    {(['Semua', 'warga', 'security'] as const).map((filter) => (
-                        <TouchableOpacity
-                            key={filter}
-                            style={[styles.filterChip, activeRoleFilter === filter && styles.filterChipActive]}
-                            onPress={() => setActiveRoleFilter(filter)}
-                        >
-                            <Text style={[styles.filterChipText, activeRoleFilter === filter && styles.filterChipTextActive]}>
-                                {filter === 'Semua' ? 'All' : filter === 'warga' ? 'Warga' : 'Security'}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
+                <View style={{ flex: 1, gap: 12 }}>
+                    {/* Role Filter */}
+                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                        {(['Semua', 'warga', 'security'] as const).map((filter) => (
+                            <TouchableOpacity
+                                key={filter}
+                                style={[styles.filterChip, activeRoleFilter === filter && styles.filterChipActive]}
+                                onPress={() => setActiveRoleFilter(filter)}
+                            >
+                                <Text style={[styles.filterChipText, activeRoleFilter === filter && styles.filterChipTextActive]}>
+                                    {filter === 'Semua' ? 'All' : filter === 'warga' ? 'Warga' : 'Security'}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+
+                    {/* Status Filter */}
+                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                        {(['Semua', 'Aktif', 'Belum Daftar'] as const).map((filter) => (
+                            <TouchableOpacity
+                                key={filter}
+                                style={[styles.filterChip, activeStatusFilter === filter && styles.filterChipActive]}
+                                onPress={() => setActiveStatusFilter(filter)}
+                            >
+                                <Text style={[styles.filterChipText, activeStatusFilter === filter && styles.filterChipTextActive]}>
+                                    {filter}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
                 </View>
 
                 {/* Import/Export Buttons */}
-                <View style={{ flexDirection: 'row', gap: 8 }}>
+                <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-start', paddingTop: 4 }}>
                     <TouchableOpacity style={styles.actionIconButton} onPress={handleExport}>
                         <Ionicons name="download-outline" size={20} color={Colors.primary} />
                     </TouchableOpacity>

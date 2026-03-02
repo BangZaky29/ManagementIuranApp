@@ -29,6 +29,11 @@ export const styles = StyleSheet.create({
         borderRadius: 12, gap: 5
     },
     statusText: { fontSize: 11, fontWeight: '700' },
+    expiredBadge: {
+        flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 4,
+        borderRadius: 12, gap: 5, marginTop: 6, backgroundColor: '#FFEBEE'
+    },
+    expiredText: { fontSize: 11, fontWeight: '700', color: '#C62828' },
     actions: { flexDirection: 'row', gap: 15 },
 
     fab: {

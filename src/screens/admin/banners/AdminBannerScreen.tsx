@@ -40,20 +40,30 @@ export default function AdminBannerScreen() {
                 )}
 
                 <View style={styles.metaRow}>
-                    <View style={[
-                        styles.statusBadge,
-                        { backgroundColor: item.is_active ? '#E8F5E9' : '#F5F5F5' }
-                    ]}>
-                        <View style={{
-                            width: 6, height: 6, borderRadius: 3,
-                            backgroundColor: item.is_active ? '#4CAF50' : '#9E9E9E'
-                        }} />
-                        <Text style={[
-                            styles.statusText,
-                            { color: item.is_active ? '#2E7D32' : '#666' }
+                    <View>
+                        <View style={[
+                            styles.statusBadge,
+                            { backgroundColor: item.is_active ? '#E8F5E9' : '#F5F5F5' }
                         ]}>
-                            {item.is_active ? 'AKTIF' : 'NON-AKTIF'}
-                        </Text>
+                            <View style={{
+                                width: 6, height: 6, borderRadius: 3,
+                                backgroundColor: item.is_active ? '#4CAF50' : '#9E9E9E'
+                            }} />
+                            <Text style={[
+                                styles.statusText,
+                                { color: item.is_active ? '#2E7D32' : '#666' }
+                            ]}>
+                                {item.is_active ? 'AKTIF' : 'NON-AKTIF'}
+                            </Text>
+                        </View>
+
+                        {/* Expired Label */}
+                        {item.end_date && new Date(item.end_date) < new Date() && (
+                            <View style={styles.expiredBadge}>
+                                <Ionicons name="time-outline" size={12} color="#C62828" />
+                                <Text style={styles.expiredText}>TELAH KADALUARSA</Text>
+                            </View>
+                        )}
                     </View>
 
                     <Switch

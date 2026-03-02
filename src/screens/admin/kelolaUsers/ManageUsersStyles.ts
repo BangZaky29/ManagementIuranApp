@@ -56,7 +56,7 @@ export const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingBottom: 16,
         backgroundColor: '#F5F7FA',
-        gap: 8,
+        gap: 12,
     },
     filterChip: {
         paddingHorizontal: 16,

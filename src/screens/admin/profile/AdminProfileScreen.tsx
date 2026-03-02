@@ -98,7 +98,6 @@ export default function AdminProfileScreen() {
                 <View style={[styles.infoCard, { backgroundColor: '#FFF' }]}>
                     {renderInfoItem('person-outline', 'Nama Lengkap', user.name)}
                     {renderInfoItem('at-outline', 'Username', user.username)}
-                    {renderInfoItem('id-card-outline', 'NIK', user.nik)}
                     {renderInfoItem('mail-outline', 'Email', user.email, true)}
                     {renderInfoItem('logo-whatsapp', 'WhatsApp', user.wa_phone)}
                     {renderInfoItem('home-outline', 'Alamat Domisili', user.address)}
