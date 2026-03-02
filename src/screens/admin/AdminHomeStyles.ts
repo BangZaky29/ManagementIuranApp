@@ -6,7 +6,7 @@ export const styles = StyleSheet.create({
     // Header
     header: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start',
-        paddingHorizontal: 20, paddingTop: Platform.OS === 'android' ? 56 : 24, paddingBottom: 20,
+        paddingHorizontal: 20, paddingTop: Platform.OS === 'android' ? 12 : 24, paddingBottom: 20,
         backgroundColor: '#FFF',
         borderBottomWidth: 1, borderBottomColor: '#F0F0F0',
     },

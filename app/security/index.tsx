@@ -1,2 +1,5 @@
-import SecurityHomeScreen from '../../src/screens/security/SecurityHomeScreen';
-export default SecurityHomeScreen;
+import { Redirect } from 'expo-router';
+
+export default function SecurityIndex() {
+    return <Redirect href="/security/(tabs)" />;
+}

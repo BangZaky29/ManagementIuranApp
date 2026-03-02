@@ -40,7 +40,7 @@ export default function CreateReportScreen() {
     const categories = ['Fasilitas', 'Kebersihan', 'Keamanan', 'Lainnya'];
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor={Colors.green1} />
             <CustomHeader title={isEditMode ? "Edit Laporan" : "Buat Laporan Baru"} showBack={true} />
 

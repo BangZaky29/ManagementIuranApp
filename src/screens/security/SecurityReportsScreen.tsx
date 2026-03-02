@@ -119,7 +119,7 @@ export default function SecurityReportsScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
             <CustomHeader title="Laporan Warga" showBack={true} />
 

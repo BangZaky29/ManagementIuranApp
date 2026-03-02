@@ -18,7 +18,7 @@ export default function GuestBookScreen() {
 
     if (vm.isLoading && vm.activeGuests.length === 0) {
         return (
-            <SafeAreaView style={styles.container}>
+            <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <ActivityIndicator size="large" color="#0D47A1" />
                 </View>

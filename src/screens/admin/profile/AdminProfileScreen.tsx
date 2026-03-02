@@ -57,7 +57,7 @@ export default function AdminProfileScreen() {
     );
 
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: '#F5F7FA' }]}>
+        <SafeAreaView edges={['left', 'right', 'bottom']} style={[styles.container, { backgroundColor: '#F5F7FA' }]}>
             <StatusBar barStyle="dark-content" backgroundColor="#F5F7FA" />
             <CustomHeader title="Profil Admin" showBack={false} />
 

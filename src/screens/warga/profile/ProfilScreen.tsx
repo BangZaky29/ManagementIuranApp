@@ -100,7 +100,7 @@ export default function ProfilScreen() {
     );
 
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <SafeAreaView edges={['left', 'right', 'bottom']} style={[styles.container, { backgroundColor: colors.background }]}>
             <StatusBar barStyle={colors.statusBar} backgroundColor={colors.green1} />
             <CustomHeader title="Profil Saya" showBack={false} />
 

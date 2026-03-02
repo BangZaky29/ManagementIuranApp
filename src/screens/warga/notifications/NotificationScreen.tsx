@@ -55,7 +55,7 @@ export default function NotificationScreen() {
     );
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
             <StatusBar barStyle="dark-content" />
             <CustomHeader
                 title="Notifikasi"

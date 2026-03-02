@@ -37,7 +37,7 @@ export default function ReportDetailScreen() {
 
     if (loading) {
         return (
-            <SafeAreaView style={styles.container}>
+            <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
                 <StatusBar barStyle="dark-content" backgroundColor={Colors.green1} />
                 <CustomHeader title="Detail Laporan" showBack={true} />
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -49,7 +49,7 @@ export default function ReportDetailScreen() {
 
     if (!data) {
         return (
-            <SafeAreaView style={styles.container}>
+            <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
                 <StatusBar barStyle="dark-content" backgroundColor={Colors.green1} />
                 <CustomHeader title="Detail Laporan" showBack={true} />
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>

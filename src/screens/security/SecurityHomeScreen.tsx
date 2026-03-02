@@ -16,7 +16,7 @@ export default function SecurityHomeScreen() {
 
     if (vm.isLoading) {
         return (
-            <SafeAreaView style={styles.container}>
+            <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <ActivityIndicator size="large" color="#0D47A1" />
                 </View>
@@ -25,7 +25,7 @@ export default function SecurityHomeScreen() {
     }
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
             <CustomHeader title="Dashboard Security" showBack={false} />
 

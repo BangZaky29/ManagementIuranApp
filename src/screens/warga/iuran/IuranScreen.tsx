@@ -62,7 +62,7 @@ export default function IuranScreen() {
         : 'Admin belum menetapkan iuran untuk bulan ini.';
 
     return (
-        <SafeAreaView style={[s.container, { backgroundColor: colors.background }]}>
+        <SafeAreaView edges={['left', 'right', 'bottom']} style={[s.container, { backgroundColor: colors.background }]}>
             <StatusBar barStyle={colors.statusBar} backgroundColor={colors.green1} />
             <CustomHeader title="Manajemen Iuran" showBack={false} />
 

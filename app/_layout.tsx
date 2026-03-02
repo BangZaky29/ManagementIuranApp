@@ -32,6 +32,15 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isLoading) return;
 
+    const inAdmin = segments[0] === 'admin';
+    const inSecurity = segments[0] === 'security';
+    const inWarga = segments[0] === '(tabs)' || segments[0] === 'warga';
+    const inProfile = segments[0] === 'profile';
+    const inLaporan = segments[0] === 'laporan';
+    const inIuran = segments[0] === 'iuran';
+    const inNews = segments[0] === 'news';
+    const isAtLogin = (segments[0] as string) === 'login'; // Check if at admin login
+
     if (!isAuthenticated) {
       if (!inAuthGroup) {
         // Gunakan replace untuk membersihkan history stack
@@ -40,22 +49,13 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     } else {
       if (inAuthGroup) {
         if (role === 'admin') router.replace('/admin');
-        else if (role === 'security') router.replace('/security');
+        else if (role === 'security') router.replace('/security/(tabs)');
         else router.replace('/(tabs)');
       } else {
-        const inAdmin = segments[0] === 'admin';
-        const inSecurity = segments[0] === 'security';
-        const inWarga = segments[0] === '(tabs)' || segments[0] === 'warga';
-        const inProfile = segments[0] === 'profile';
-        const inLaporan = segments[0] === 'laporan';
-        const inIuran = segments[0] === 'iuran';
-        const inNews = segments[0] === 'news';
-        const isAtLogin = (segments[0] as string) === 'login'; // Check if at admin login
-
         if (inProfile || inLaporan || inIuran || inNews) return;
 
         if (role === 'admin' && !inAdmin) router.replace('/admin');
-        else if (role === 'security' && !inSecurity) router.replace('/security');
+        else if (role === 'security' && !inSecurity) router.replace('/security/(tabs)');
         else if (role === 'warga' && !inWarga) {
           // IF on Admin Login screen, DO NOT redirect. Allow LoginScreen to show alert.
           if (isAtLogin) return;
@@ -127,7 +127,7 @@ function RootLayoutInner() {
           <Stack.Screen name="forgot-password" />
           <Stack.Screen name="register-admin" />
           <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-          <Stack.Screen name="security/index" />
+          <Stack.Screen name="security" />
           <Stack.Screen name="news" />
         </Stack>
       </AuthGate>

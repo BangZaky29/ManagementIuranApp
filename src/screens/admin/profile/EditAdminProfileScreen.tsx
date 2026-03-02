@@ -47,7 +47,7 @@ export default function EditAdminProfileScreen() {
     };
 
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: '#F5F7FA' }]}>
+        <SafeAreaView edges={['left', 'right', 'bottom']} style={[styles.container, { backgroundColor: '#F5F7FA' }]}>
             <StatusBar style="dark" />
             <CustomHeader title="Edit Profil Admin" showBack={true} />
 

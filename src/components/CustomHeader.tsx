@@ -20,7 +20,7 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({
     const { colors } = useTheme();
 
     return (
-        <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.green1 }]}>
+        <SafeAreaView edges={['top', 'left', 'right']} style={[styles.safeArea, { backgroundColor: colors.green1 }]}>
             <View style={styles.container}>
                 <View style={styles.leftContainer}>
                     {showBack && (
@@ -42,7 +42,6 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({
 
 const styles = StyleSheet.create({
     safeArea: {
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
     container: {
         height: 60,

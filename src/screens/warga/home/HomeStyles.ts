@@ -7,7 +7,6 @@ export const HomeStyles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: Colors.green1,
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
     scrollContent: {
         paddingBottom: 120, // Extra padding for floating tab bar

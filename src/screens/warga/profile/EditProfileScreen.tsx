@@ -45,7 +45,7 @@ export default function EditProfileScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor={Colors.green1} />
             <CustomHeader title="Edit Profil" showBack={true} />
 

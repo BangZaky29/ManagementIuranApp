@@ -160,7 +160,7 @@ export default function ActivityLogScreen() {
 
     if (isLoading) {
         return (
-            <SafeAreaView style={styles.container}>
+            <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
                 <CustomHeader title="Riwayat Aktivitas" showBack={true} />
                 <View style={styles.centered}>
                     <ActivityIndicator size="large" color={Colors.primary} />
@@ -170,7 +170,7 @@ export default function ActivityLogScreen() {
     }
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
             <StatusBar barStyle="dark-content" />
             <CustomHeader title="Riwayat Aktivitas" showBack={true} />
 

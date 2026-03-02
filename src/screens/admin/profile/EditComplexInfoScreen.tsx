@@ -76,7 +76,7 @@ export default function EditComplexInfoScreen() {
     }
 
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: '#F5F7FA' }]}>
+        <SafeAreaView edges={['left', 'right', 'bottom']} style={[styles.container, { backgroundColor: '#F5F7FA' }]}>
             <StatusBar style="dark" />
             <CustomHeader title="Edit Informasi Komplek" showBack={true} />
 

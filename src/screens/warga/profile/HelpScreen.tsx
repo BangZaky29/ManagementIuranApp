@@ -42,7 +42,7 @@ export default function HelpScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor={Colors.green1} />
             <CustomHeader title="Bantuan" showBack={true} />
 

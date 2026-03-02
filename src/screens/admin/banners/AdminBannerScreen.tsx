@@ -79,7 +79,7 @@ export default function AdminBannerScreen() {
     );
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
             <StatusBar barStyle="dark-content" />
             <CustomHeader title="Kelola Iklan Banner" showBack />
 
