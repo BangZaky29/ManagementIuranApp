@@ -70,20 +70,21 @@ export default function LoginScreen() {
                 loginEmail = data;
             }
 
-            // Perform Sign In
-            const { user } = await signIn({ email: loginEmail, password });
+            // 1. PRE-CHECK ROLE (PREVENT WRONG DOOR ACCESS)
+            const { data: roleData, error: roleError } = await (require('../../../lib/supabaseConfig').supabase)
+                .rpc('get_user_role_by_identifier', { identifier: loginEmail });
 
-            // STRICT ADMIN CHECKS
-            // Ensure we use the freshly returned user object or fallback to checking session
-            const role = user?.user_metadata?.role;
+            if (roleError) {
+                console.error('Role check error:', roleError);
+                // Continue to signIn if RPC fails (failsafe), or block if strictness is preferred. 
+                // Let's be semi-strict.
+            }
 
-            if (role !== 'admin') {
-                // If not admin, immediately sign out
-                await signOut();
-
+            if (roleData && roleData !== 'admin') {
+                setIsLoading(false);
                 setAlertConfig({
-                    title: 'Akses Ditolak',
-                    message: 'Maaf, pintu ini khusus untuk Admin. Silakan gunakan pintu masuk warga.',
+                    title: 'Ops! Salah Pintu Masuk',
+                    message: `Sepertinya akun Anda terdaftar sebagai **${roleData}**. Silakan masuk melalui halaman khusus Warga & Sekuriti agar fitur yang tersedia sesuai dengan peran Anda.`,
                     type: 'warning',
                     buttons: [
                         { text: 'Tutup', onPress: hideAlert, style: 'cancel' },
@@ -91,7 +92,7 @@ export default function LoginScreen() {
                             text: 'Ke Login Warga',
                             onPress: () => {
                                 hideAlert();
-                                router.replace('/register'); // Redirecting to register/login portal for warga with replace to prevent back nav
+                                router.replace('/login-warga');
                             }
                         }
                     ]
@@ -99,6 +100,9 @@ export default function LoginScreen() {
                 setAlertVisible(true);
                 return;
             }
+
+            // Perform Sign In
+            await signIn({ email: loginEmail, password });
 
             // If Admin, AuthGate in _layout.tsx will handle redirect to (tabs) automatically.
 

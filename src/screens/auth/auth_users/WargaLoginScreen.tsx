@@ -55,26 +55,42 @@ export default function WargaLoginScreen() {
         Keyboard.dismiss();
 
         try {
-            const { session } = await signIn({ email: email.trim(), password });
+            const loginIdentifier = email.trim();
+
+            // 1. PRE-CHECK ROLE (PREVENT WRONG DOOR ACCESS)
+            const { data: roleData, error: roleError } = await supabase
+                .rpc('get_user_role_by_identifier', { identifier: loginIdentifier });
+
+            if (roleData === 'admin') {
+                setIsLoading(false);
+                setAlertConfig({
+                    title: 'Akses Terbatas: Khusus Warga',
+                    message: 'Maaf Pak/Bu Admin, halaman ini dikhususkan untuk Warga dan Sekuriti. Untuk mengelola data perumahan, silakan masuk melalui **Portal Admin** ya.',
+                    type: 'warning',
+                    buttons: [
+                        { text: 'Tutup', onPress: hideAlert, style: 'cancel' },
+                        {
+                            text: 'Ke Portal Admin',
+                            onPress: () => {
+                                hideAlert();
+                                router.replace('/login');
+                            }
+                        }
+                    ]
+                });
+                setAlertVisible(true);
+                return;
+            }
+
+            const { session } = await signIn({ email: loginIdentifier, password });
 
             // STRICT CHECK: Ensure Email is Verified
-            // If Supabase settings allow login without verification, we block it here.
-
-            // DEBUG: Check what Supabase returns
-            console.log('Session Check:', {
-                email: session?.user?.email,
-                confirmed_at: session?.user?.confirmed_at,
-                email_confirmed_at: session?.user?.email_confirmed_at
-            });
-
             if (session?.user && !session.user.confirmed_at && !session.user.email_confirmed_at) {
-                // Logout immediately
                 await supabase.auth.signOut();
                 throw new Error('Email not confirmed');
             }
 
             // CRITICAL CHECK: Ensure Profile Exists in Public Table
-            // If trigger failed, user exists in Auth but not in Headers. We must block them.
             const profile = await getProfile(session.user.id);
             if (!profile) {
                 await supabase.auth.signOut();
