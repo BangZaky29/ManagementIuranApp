@@ -42,54 +42,56 @@ export default function HomeScreen() {
             <StatusBar barStyle={colors.statusBar} backgroundColor={colors.green1} />
 
             {/* Header */}
-            <View style={[styles.headerContainer, { backgroundColor: colors.green1 }]}>
-                <View style={[styles.headerTitleContainer, { marginLeft: 0 }]}>
-                    <Text style={[styles.headerGreeting, { color: colors.textSecondary }]}>Halo,</Text>
-                    <Text style={[styles.headerName, { color: colors.green5 }]}>{userName}!</Text>
-                </View>
+            <SafeAreaView edges={['top']} style={{ backgroundColor: colors.green1 }}>
+                <View style={[styles.headerContainer, { backgroundColor: colors.green1 }]}>
+                    <View style={[styles.headerTitleContainer, { marginLeft: 0 }]}>
+                        <Text style={[styles.headerGreeting, { color: colors.textSecondary }]}>Halo,</Text>
+                        <Text style={[styles.headerName, { color: colors.green5 }]}>{userName}!</Text>
+                    </View>
 
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <TouchableOpacity
-                        style={{ marginRight: 12, padding: 4, position: 'relative' }}
-                        onPress={() => handleNavigation('/warga/notifications')} // Routing to new Notification Screen
-                    >
-                        <Ionicons name="notifications-outline" size={24} color={colors.green5} />
-                        {unreadNotifCount > 0 && (
-                            <View style={{
-                                position: 'absolute',
-                                top: -2,
-                                right: -2,
-                                backgroundColor: '#E53935',
-                                minWidth: 16,
-                                height: 16,
-                                borderRadius: 8,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                paddingHorizontal: 4,
-                                borderWidth: 1.5,
-                                borderColor: colors.green1
-                            }}>
-                                <Text style={{
-                                    color: 'white',
-                                    fontSize: 9,
-                                    fontWeight: '800',
-                                    textAlign: 'center'
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <TouchableOpacity
+                            style={{ marginRight: 12, padding: 4, position: 'relative' }}
+                            onPress={() => handleNavigation('/warga/notifications')}
+                        >
+                            <Ionicons name="notifications-outline" size={24} color={colors.green5} />
+                            {unreadNotifCount > 0 && (
+                                <View style={{
+                                    position: 'absolute',
+                                    top: -2,
+                                    right: -2,
+                                    backgroundColor: '#E53935',
+                                    minWidth: 16,
+                                    height: 16,
+                                    borderRadius: 8,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    paddingHorizontal: 4,
+                                    borderWidth: 1.5,
+                                    borderColor: colors.green1
                                 }}>
-                                    {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
-                                </Text>
-                            </View>
-                        )}
-                    </TouchableOpacity>
+                                    <Text style={{
+                                        color: 'white',
+                                        fontSize: 9,
+                                        fontWeight: '800',
+                                        textAlign: 'center'
+                                    }}>
+                                        {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
+                                    </Text>
+                                </View>
+                            )}
+                        </TouchableOpacity>
 
-                    <TouchableOpacity style={[styles.profileImage, { backgroundColor: colors.green3, overflow: 'hidden' }]} onPress={() => handleNavigation('/(tabs)/profil')}>
-                        {avatarUrl ? (
-                            <Image source={{ uri: avatarUrl }} style={{ width: '100%', height: '100%' }} />
-                        ) : (
-                            <Ionicons name="person" size={24} color={colors.backgroundCard} />
-                        )}
-                    </TouchableOpacity>
+                        <TouchableOpacity style={[styles.profileImage, { backgroundColor: colors.green3, overflow: 'hidden' }]} onPress={() => handleNavigation('/(tabs)/profil')}>
+                            {avatarUrl ? (
+                                <Image source={{ uri: avatarUrl }} style={{ width: '100%', height: '100%' }} />
+                            ) : (
+                                <Ionicons name="person" size={24} color={colors.backgroundCard} />
+                            )}
+                        </TouchableOpacity>
+                    </View>
                 </View>
-            </View>
+            </SafeAreaView>
 
             <ScrollView
                 contentContainerStyle={styles.scrollContent}

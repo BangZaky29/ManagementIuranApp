@@ -27,7 +27,7 @@ export default function GuestBookScreen() {
     }
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
             <CustomHeader title="Buku Tamu" showBack={true} />
 
