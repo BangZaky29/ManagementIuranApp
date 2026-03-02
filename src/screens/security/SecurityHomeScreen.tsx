@@ -126,11 +126,18 @@ export default function SecurityHomeScreen() {
                     <TouchableOpacity style={styles.quickAction} onPress={vm.navigateToReports}>
                         <View style={[styles.quickIcon, { backgroundColor: '#E8EAF6' }]}>
                             <Ionicons name="document-text" size={24} color="#3F51B5" />
-                            {vm.pendingReportsCount > 0 && (
-                                <View style={styles.badge}>
-                                    <Text style={styles.badgeText}>{vm.pendingReportsCount}</Text>
-                                </View>
-                            )}
+                            <View style={{ position: 'absolute', top: -4, right: -4, flexDirection: 'row', gap: 2 }}>
+                                {vm.pendingReportsCount > 0 && (
+                                    <View style={[styles.badge, { backgroundColor: '#4CAF50' }]}>
+                                        <Text style={styles.badgeText}>{vm.pendingReportsCount}</Text>
+                                    </View>
+                                )}
+                                {vm.processingReportsCount > 0 && (
+                                    <View style={[styles.badge, { backgroundColor: '#FBC02D' }]}>
+                                        <Text style={[styles.badgeText, { color: '#000' }]}>{vm.processingReportsCount}</Text>
+                                    </View>
+                                )}
+                            </View>
                         </View>
                         <Text style={styles.quickLabel}>Laporan Warga</Text>
                     </TouchableOpacity>

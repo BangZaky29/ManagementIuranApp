@@ -21,6 +21,7 @@ export function useSecurityHomeViewModel() {
     const [recentPanics, setRecentPanics] = useState<PanicLog[]>([]);
     const [recentReports, setRecentReports] = useState<Report[]>([]);
     const [pendingReportsCount, setPendingReportsCount] = useState(0);
+    const [processingReportsCount, setProcessingReportsCount] = useState(0);
     const [pendingGuestsCount, setPendingGuestsCount] = useState(0);
     const [securityProfile, setSecurityProfile] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -34,14 +35,15 @@ export function useSecurityHomeViewModel() {
 
     const loadData = useCallback(async () => {
         try {
-            const [statsData, panicCount, guestCount, pendingGuestCount, panicLogs, logsData, reportCount] = await Promise.all([
+            const [statsData, panicCount, guestCount, pendingGuestCount, panicLogs, logsData, reportCount, procCount] = await Promise.all([
                 getDashboardStats(),
                 countActivePanics(),
                 countActiveVisitors(),
                 countPendingVisitors(),
                 fetchPanicLogs(0, 5, false), // Latest 5 active panics
                 fetchAllReports(0, 3), // Latest 3 reports
-                supabase.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'Menunggu')
+                supabase.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'Menunggu'),
+                supabase.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'Diproses')
             ]);
             let profileData = null;
             if (user?.id) {
@@ -56,6 +58,7 @@ export function useSecurityHomeViewModel() {
             setRecentPanics(panicLogs);
             setRecentReports(logsData as any);
             setPendingReportsCount(reportCount.count || 0);
+            setProcessingReportsCount(procCount.count || 0);
             setSecurityProfile(profileData);
         } catch (error) {
             console.error('Failed to load security dashboard:', error);
@@ -140,7 +143,7 @@ export function useSecurityHomeViewModel() {
 
     return {
         user, stats, activePanics, activeGuests, pendingGuestsCount, recentPanics, isLoading, securityProfile,
-        recentReports, pendingReportsCount,
+        recentReports, pendingReportsCount, processingReportsCount,
         handleLogout, navigateToPanicLogs, navigateToGuestBook, navigateToProfile, navigateToReports,
         openPanicLocation, handleResolvePanic, formatTime,
         alertVisible, alertConfig, hideAlert, refresh: loadData,

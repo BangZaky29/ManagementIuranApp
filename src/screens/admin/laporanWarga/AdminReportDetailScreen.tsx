@@ -68,7 +68,7 @@ export default function AdminReportDetailScreen() {
                     .from('reports')
                     .select(`
                         *,
-                        user:profiles(full_name, avatar_url)
+                        user:profiles!reports_user_id_fkey(full_name, avatar_url)
                     `)
                     .eq('id', id)
                     .single();
@@ -100,7 +100,8 @@ export default function AdminReportDetailScreen() {
         try {
             await updateReportStatus(data.id, newStatus, {
                 rejectionReason: options?.reason,
-                completionImageUri: options?.completionImageUri
+                completionImageUri: options?.completionImageUri,
+                actorId: (await supabase.auth.getUser()).data.user?.id
             });
 
             setData({
@@ -144,6 +145,32 @@ export default function AdminReportDetailScreen() {
         } catch (error) {
             console.error('Pick completion image error:', error);
         }
+    };
+
+    const handleRewindStatus = () => {
+        if (!data) return;
+        let prevStatus = '';
+        if (data.status === 'Selesai' || data.status === 'Ditolak') {
+            prevStatus = 'Diproses';
+        } else if (data.status === 'Diproses') {
+            prevStatus = 'Menunggu';
+        }
+
+        if (!prevStatus) return;
+
+        showAlert(
+            'Ulangi Progres?',
+            `Apakah Anda yakin ingin mengembalikan status laporan ini ke "${prevStatus}"?`,
+            'warning',
+            [
+                { text: 'Batal', style: 'cancel', onPress: hideAlert },
+                {
+                    text: 'Ya, Kembalikan',
+                    style: 'destructive',
+                    onPress: () => handleUpdateStatus(prevStatus)
+                }
+            ]
+        );
     };
 
     const handleOpenLocation = () => {
@@ -194,7 +221,17 @@ export default function AdminReportDetailScreen() {
     return (
         <View style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
             <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
-            <CustomHeader title="Detail Laporan" showBack={true} />
+            <CustomHeader
+                title="Detail Laporan"
+                showBack={true}
+                rightIcon={
+                    (data.status !== 'Menunggu') ? (
+                        <TouchableOpacity onPress={handleRewindStatus}>
+                            <Ionicons name="arrow-undo-outline" size={24} color={Colors.primary} />
+                        </TouchableOpacity>
+                    ) : undefined
+                }
+            />
 
             <SafeAreaView edges={['left', 'right', 'bottom']} style={{ flex: 1, backgroundColor: Colors.white }}>
                 <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
@@ -274,10 +311,57 @@ export default function AdminReportDetailScreen() {
 
                         {data.status === 'Ditolak' && data.rejection_reason && (
                             <View style={{ marginTop: 20, backgroundColor: Colors.danger + '10', padding: 16, borderRadius: 12, borderLeftWidth: 4, borderLeftColor: Colors.danger }}>
-                                <Text style={{ fontWeight: 'bold', color: Colors.danger, marginBottom: 4, fontSize: 13 }}>Alasan Penolakan:</Text>
                                 <Text style={{ color: Colors.textPrimary, lineHeight: 20, fontSize: 14 }}>{data.rejection_reason}</Text>
                             </View>
                         )}
+                    </View>
+
+                    {/* Progress Log UI */}
+                    <View style={{ marginBottom: 24, paddingHorizontal: 4 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+                            <Ionicons name="time-outline" size={20} color={Colors.primary} style={{ marginRight: 8 }} />
+                            <Text style={{ fontSize: 16, fontWeight: 'bold', color: Colors.textPrimary }}>Log Progres Pengerjaan</Text>
+                        </View>
+
+                        <View style={{ backgroundColor: 'white', borderRadius: 12, padding: 16, borderLeftWidth: 4, borderLeftColor: Colors.primary }}>
+                            {/* Simple Logic for Progress Log */}
+                            <View style={{ flexDirection: 'row', marginBottom: 12 }}>
+                                <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: Colors.success, marginTop: 4, marginRight: 12 }} />
+                                <View style={{ flex: 1 }}>
+                                    <Text style={{ fontWeight: 'bold', fontSize: 14 }}>Laporan Diterima</Text>
+                                    <Text style={{ fontSize: 12, color: Colors.textSecondary }}>{formattedDate}</Text>
+                                </View>
+                            </View>
+
+                            {data.status !== 'Menunggu' && (
+                                <View style={{ flexDirection: 'row', marginBottom: 12 }}>
+                                    <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: Colors.warning, marginTop: 4, marginRight: 12 }} />
+                                    <View style={{ flex: 1 }}>
+                                        <Text style={{ fontWeight: 'bold', fontSize: 14 }}>
+                                            Sedang Diproses oleh {data.processed_by?.role === 'admin' ? 'Admin' : 'Security'} {data.processed_by?.full_name || 'Petugas'}
+                                        </Text>
+                                        <Text style={{ fontSize: 12, color: Colors.textSecondary }}>Laporan sedang ditangani petugas.</Text>
+                                    </View>
+                                </View>
+                            )}
+
+                            {(data.status === 'Selesai' || data.status === 'Ditolak') && (
+                                <View style={{ flexDirection: 'row' }}>
+                                    <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: data.status === 'Selesai' ? Colors.success : Colors.danger, marginTop: 4, marginRight: 12 }} />
+                                    <View style={{ flex: 1 }}>
+                                        <Text style={{ fontWeight: 'bold', fontSize: 14 }}>
+                                            {data.status === 'Selesai'
+                                                ? `Laporan Selesai oleh ${data.completed_by?.role === 'admin' ? 'Admin' : 'Security'} ${data.completed_by?.full_name || 'Petugas'}`
+                                                : 'Laporan Ditolak'}
+                                        </Text>
+                                        <Text style={{ fontSize: 12, color: Colors.textSecondary }}>{data.status === 'Selesai' ? 'Kendala telah diatasi.' : 'Laporan belum dapat diproses.'}</Text>
+                                        {data.completion_image_url && (
+                                            <Image source={{ uri: data.completion_image_url }} style={{ width: 80, height: 80, borderRadius: 8, marginTop: 8 }} />
+                                        )}
+                                    </View>
+                                </View>
+                            )}
+                        </View>
                     </View>
 
                     {/* Admin Actions */}

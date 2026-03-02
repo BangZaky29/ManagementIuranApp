@@ -39,6 +39,10 @@ export default function LaporanListScreen() {
     const [showCategoryModal, setShowCategoryModal] = useState(false);
     const [showStatusModal, setShowStatusModal] = useState(false);
 
+    // Pagination
+    const [visibleCount, setVisibleCount] = useState(7);
+    const PAGE_SIZE = 7;
+
     useEffect(() => {
         fetchReports();
     }, []);
@@ -58,7 +62,7 @@ export default function LaporanListScreen() {
                 .from('reports')
                 .select(`
                     *,
-                    user:profiles(full_name, avatar_url)
+                    user:profiles!reports_user_id_fkey(full_name, avatar_url)
                 `)
                 .order('created_at', { ascending: false });
 
@@ -110,6 +114,16 @@ export default function LaporanListScreen() {
         });
     }, [reports, filterCategory, filterStatus]);
 
+    const paginatedReports = useMemo(() => {
+        return filteredReports.slice(0, visibleCount);
+    }, [filteredReports, visibleCount]);
+
+    const pendingCount = useMemo(() => reports.filter(r => r.status === 'Menunggu').length, [reports]);
+    const processingCount = useMemo(() => reports.filter(r => r.status === 'Diproses').length, [reports]);
+
+    const handleShowMore = () => setVisibleCount(prev => prev + PAGE_SIZE);
+    const handleShowLess = () => setVisibleCount(PAGE_SIZE);
+
     const openDetail = (reportId: string) => {
         router.push(`/admin/laporan/${reportId}` as any);
     };
@@ -152,7 +166,27 @@ export default function LaporanListScreen() {
     return (
         <View style={styles.container}>
             <StatusBar style="dark" />
-            <CustomHeader title="Laporan Warga" showBack={true} />
+            <CustomHeader
+                title=""
+                showBack={true}
+                rightIcon={
+                    <View style={{ flexDirection: 'row', alignItems: 'center', width: 250, justifyContent: 'flex-start' }}>
+                        <Text style={[styles.headerTitle]}>Laporan Warga</Text>
+                        <View style={{ flexDirection: 'row', marginLeft: 8, gap: 4 }}>
+                            {pendingCount > 0 && (
+                                <View style={[styles.headerBubble, { backgroundColor: Colors.success }]}>
+                                    <Text style={styles.bubbleText}>{pendingCount}</Text>
+                                </View>
+                            )}
+                            {processingCount > 0 && (
+                                <View style={[styles.headerBubble, { backgroundColor: Colors.warning }]}>
+                                    <Text style={styles.bubbleText}>{processingCount}</Text>
+                                </View>
+                            )}
+                        </View>
+                    </View>
+                }
+            />
 
             {/* Filters */}
             <View style={styles.filterContainer}>
@@ -271,10 +305,25 @@ export default function LaporanListScreen() {
                 </View>
             ) : (
                 <FlatList
-                    data={filteredReports}
+                    data={paginatedReports}
                     keyExtractor={(item) => item.id}
                     renderItem={renderItem}
                     contentContainerStyle={styles.listContent}
+                    ListFooterComponent={
+                        <View style={{ marginBottom: 20 }}>
+                            {filteredReports.length > visibleCount ? (
+                                <TouchableOpacity style={styles.paginationBtn} onPress={handleShowMore}>
+                                    <Text style={styles.paginationBtnText}>Lihat lebih banyak</Text>
+                                    <Ionicons name="chevron-down" size={16} color={Colors.primary} />
+                                </TouchableOpacity>
+                            ) : filteredReports.length > PAGE_SIZE && (
+                                <TouchableOpacity style={styles.paginationBtn} onPress={handleShowLess}>
+                                    <Text style={styles.paginationBtnText}>Lihat lebih sedikit</Text>
+                                    <Ionicons name="chevron-up" size={16} color={Colors.primary} />
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    }
                     ListEmptyComponent={
                         <View style={styles.emptyState}>
                             <Ionicons name="document-text-outline" size={48} color={Colors.textSecondary} />

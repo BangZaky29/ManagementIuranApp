@@ -43,6 +43,19 @@ export default function AdminHomeScreen() {
                         onPress={() => setSidebarVisible(true)}
                     >
                         <Ionicons name="menu" size={24} color="#1B5E20" />
+                        {(vm.pendingReports > 0 || vm.processingReports > 0 || vm.pendingPayments > 0) && (
+                            <View style={{
+                                position: 'absolute',
+                                top: 10,
+                                right: 10,
+                                width: 8,
+                                height: 8,
+                                borderRadius: 4,
+                                backgroundColor: '#F44336',
+                                borderWidth: 1.5,
+                                borderColor: '#FFF'
+                            }} />
+                        )}
                     </TouchableOpacity>
                 </View>
 
@@ -235,6 +248,8 @@ export default function AdminHomeScreen() {
                 visible={sidebarVisible}
                 onClose={() => setSidebarVisible(false)}
                 pendingPayments={vm.pendingPayments}
+                pendingReports={vm.pendingReports}
+                processingReports={vm.processingReports}
             />
 
             <CustomAlertModal

@@ -58,8 +58,8 @@ export const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#EEE',
         ...Platform.select({
-            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8 },
-            android: { elevation: 2 },
+            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4 },
+            android: { elevation: 1 },
         }),
     },
     cardHeader: {
@@ -109,12 +109,12 @@ export const styles = StyleSheet.create({
         fontSize: 15,
         fontWeight: 'bold',
         color: '#333',
-        marginBottom: 4,
+        marginBottom: 2,
     },
     reportDesc: {
-        fontSize: 13,
+        fontSize: 12,
         color: '#666',
-        lineHeight: 18,
+        lineHeight: 16,
     },
     imagePreview: {
         width: '100%',
@@ -200,9 +200,9 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,
-        borderColor: '#0D47A1',
-        marginTop: 8,
-        marginBottom: 20,
+        borderColor: '#E5E7EB',
+        marginTop: 10,
+        marginHorizontal: 16,
     },
     loadMoreText: {
         color: '#0D47A1',

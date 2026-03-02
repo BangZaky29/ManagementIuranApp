@@ -205,5 +205,39 @@ export const styles = StyleSheet.create({
         fontSize: 16,
         color: Colors.textSecondary,
     },
-
+    headerTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: Colors.textPrimary,
+    },
+    headerBubble: {
+        minWidth: 20,
+        height: 20,
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 6,
+    },
+    bubbleText: {
+        color: 'white',
+        fontSize: 10,
+        fontWeight: 'bold',
+    },
+    paginationBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 12,
+        backgroundColor: '#FFF',
+        borderRadius: 10,
+        marginTop: 10,
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
+    },
+    paginationBtnText: {
+        color: Colors.primary,
+        fontSize: 14,
+        fontWeight: '600',
+        marginRight: 4,
+    },
 });

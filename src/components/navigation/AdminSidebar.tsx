@@ -22,10 +22,13 @@ interface AdminSidebarProps {
     visible: boolean;
     onClose: () => void;
     pendingPayments?: number;
+    pendingReports?: number;
+    processingReports?: number;
 }
 
 export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     visible, onClose, pendingPayments = 0,
+    pendingReports = 0, processingReports = 0,
 }) => {
     const router = useRouter();
     const { user, profile, signOut } = useAuth();
@@ -133,6 +136,22 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                                 <Ionicons name={item.icon as any} size={22} color="#1B5E20" />
                             </View>
                             <Text style={styles.menuLabel}>{item.label}</Text>
+
+                            {item.key === 'laporan' && (
+                                <View style={{ flexDirection: 'row', gap: 4, marginLeft: 8 }}>
+                                    {pendingReports > 0 && (
+                                        <View style={[styles.menuBadge, { backgroundColor: '#4CAF50' }]}>
+                                            <Text style={styles.menuBadgeText}>{pendingReports}</Text>
+                                        </View>
+                                    )}
+                                    {processingReports > 0 && (
+                                        <View style={[styles.menuBadge, { backgroundColor: '#FFC107' }]}>
+                                            <Text style={[styles.menuBadgeText, { color: '#000' }]}>{processingReports}</Text>
+                                        </View>
+                                    )}
+                                </View>
+                            )}
+
                             {item.key === 'iuran' && pendingPayments > 0 && (
                                 <View style={styles.menuBadge}>
                                     <Text style={styles.menuBadgeText}>{pendingPayments}</Text>

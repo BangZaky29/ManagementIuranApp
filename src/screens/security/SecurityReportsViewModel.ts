@@ -14,7 +14,7 @@ export function useSecurityReportsViewModel() {
 
     const loadReports = useCallback(async (isRefresh = false, loadMore = false) => {
         try {
-            const limit = 3;
+            const limit = 7;
             const currentPage = isRefresh ? 0 : (loadMore ? page + 1 : 0);
 
             if (isRefresh) setRefreshing(true);
@@ -78,7 +78,8 @@ export function useSecurityReportsViewModel() {
         try {
             await updateReportStatus(reportId, status, {
                 rejectionReason: options?.reason,
-                completionImageUri: options?.completionImageUri
+                completionImageUri: options?.completionImageUri,
+                actorId: user?.id
             });
 
             // Refresh local state

@@ -168,7 +168,9 @@ export default function ReportDetailScreen() {
                             <View style={styles.timelineContent}>
                                 <View style={styles.timelineHeader}>
                                     <Text style={[styles.timelineTitle, !isProcessed && { color: '#9CA3AF' }]}>
-                                        {isProcessed ? 'Sedang Diproses' : 'Tahap Peninjauan'}
+                                        {isProcessed
+                                            ? `Sedang Diproses oleh ${data.processed_by?.role === 'admin' ? 'Admin' : 'Security'} ${data.processed_by?.full_name || 'Petugas'}`
+                                            : 'Tahap Peninjauan'}
                                     </Text>
                                     {isProcessed && updatedDate && (
                                         <Text style={styles.timelineDate}>{updatedDate}</Text>
@@ -193,7 +195,7 @@ export default function ReportDetailScreen() {
                                 <View style={styles.timelineHeader}>
                                     <Text style={[styles.timelineTitle, !isFinal && { color: '#9CA3AF' }]}>
                                         {data.status === 'Ditolak' ? 'Laporan Ditolak' :
-                                            data.status === 'Selesai' ? 'Laporan Selesai' : 'Laporan Ditutup'}
+                                            data.status === 'Selesai' ? `Laporan Selesai oleh ${data.completed_by?.role === 'admin' ? 'Admin' : 'Security'} ${data.completed_by?.full_name || 'Petugas'}` : 'Laporan Ditutup'}
                                     </Text>
                                     {isFinal && updatedDate && (
                                         <Text style={styles.timelineDate}>{updatedDate}</Text>

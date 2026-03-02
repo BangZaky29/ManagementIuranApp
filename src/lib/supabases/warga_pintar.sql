@@ -36,6 +36,17 @@ CREATE TABLE public.banners (
   CONSTRAINT banners_pkey PRIMARY KEY (id),
   CONSTRAINT banners_housing_complex_id_fkey FOREIGN KEY (housing_complex_id) REFERENCES public.housing_complexes(id)
 );
+CREATE TABLE public.complex_info (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  housing_complex_id bigint NOT NULL UNIQUE,
+  help_phone text,
+  help_whatsapp text,
+  help_note text,
+  terms_conditions text,
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT complex_info_pkey PRIMARY KEY (id),
+  CONSTRAINT complex_info_housing_complex_id_fkey FOREIGN KEY (housing_complex_id) REFERENCES public.housing_complexes(id)
+);
 CREATE TABLE public.ewallet_va_codes (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   ewallet_name text NOT NULL,
@@ -179,8 +190,14 @@ CREATE TABLE public.reports (
   location text,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
+  rejection_reason text,
+  completion_image_url text,
+  processed_by_id uuid,
+  completed_by_id uuid,
   CONSTRAINT reports_pkey PRIMARY KEY (id),
-  CONSTRAINT reports_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
+  CONSTRAINT reports_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id),
+  CONSTRAINT reports_processed_by_id_fkey FOREIGN KEY (processed_by_id) REFERENCES public.profiles(id),
+  CONSTRAINT reports_completed_by_id_fkey FOREIGN KEY (completed_by_id) REFERENCES public.profiles(id)
 );
 CREATE TABLE public.user_tokens (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -226,17 +243,4 @@ CREATE TABLE public.visitors (
   CONSTRAINT visitors_housing_complex_id_fkey FOREIGN KEY (housing_complex_id) REFERENCES public.housing_complexes(id),
   CONSTRAINT visitors_destination_user_id_fkey FOREIGN KEY (destination_user_id) REFERENCES public.profiles(id),
   CONSTRAINT visitors_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id)
-);
-
-CREATE TABLE public.complex_info (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  housing_complex_id bigint NOT NULL,
-  help_phone text,
-  help_whatsapp text,
-  help_note text,
-  terms_conditions text,
-  updated_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT complex_info_pkey PRIMARY KEY (id),
-  CONSTRAINT complex_info_housing_complex_id_key UNIQUE (housing_complex_id),
-  CONSTRAINT complex_info_housing_complex_id_fkey FOREIGN KEY (housing_complex_id) REFERENCES public.housing_complexes(id)
 );

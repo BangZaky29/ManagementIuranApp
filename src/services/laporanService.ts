@@ -20,6 +20,14 @@ export interface Report {
         avatar_url: string | null;
         address: string | null;
     };
+    processed_by?: {
+        full_name: string;
+        role: string;
+    } | null;
+    completed_by?: {
+        full_name: string;
+        role: string;
+    } | null;
 }
 
 export const fetchMyReports = async (page = 0, limit = 20): Promise<Report[]> => {
@@ -51,7 +59,9 @@ export const fetchAllReports = async (page = 0, limit = 20, status?: string): Pr
         .from('reports')
         .select(`
             *,
-            profiles:user_id (full_name, avatar_url, address)
+            profiles:user_id!reports_user_id_fkey (full_name, avatar_url, address),
+            processed_by:processed_by_id!reports_processed_by_id_fkey (full_name, role),
+            completed_by:completed_by_id!reports_completed_by_id_fkey (full_name, role)
         `)
         .order('created_at', { ascending: false })
         .range(from, to);
@@ -68,7 +78,12 @@ export const fetchAllReports = async (page = 0, limit = 20, status?: string): Pr
 export const fetchReportById = async (id: string): Promise<Report | null> => {
     const { data, error } = await supabase
         .from('reports')
-        .select('*')
+        .select(`
+            *,
+            profiles:user_id!reports_user_id_fkey (full_name, avatar_url, address),
+            processed_by:processed_by_id!reports_processed_by_id_fkey (full_name, role),
+            completed_by:completed_by_id!reports_completed_by_id_fkey (full_name, role)
+        `)
         .eq('id', id)
         .single();
 
@@ -229,6 +244,7 @@ export const updateReportStatus = async (
     options?: {
         rejectionReason?: string;
         completionImageUri?: string;
+        actorId?: string;
     }
 ): Promise<void> => {
     let completionImageUrl = undefined;
@@ -270,6 +286,15 @@ export const updateReportStatus = async (
 
     if (completionImageUrl) {
         updateData.completion_image_url = completionImageUrl;
+    }
+
+    // Assign actor ID based on status
+    if (options?.actorId) {
+        if (status === 'Diproses') {
+            updateData.processed_by_id = options.actorId;
+        } else if (status === 'Selesai') {
+            updateData.completed_by_id = options.actorId;
+        }
     }
 
     const { error } = await supabase

@@ -22,6 +22,7 @@ export function useAdminHomeViewModel() {
     const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
     const [pendingPayments, setPendingPayments] = useState(0);
     const [pendingReports, setPendingReports] = useState(0);
+    const [processingReports, setProcessingReports] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
 
     // Alert
@@ -35,17 +36,23 @@ export function useAdminHomeViewModel() {
         try {
             // Count pending reports inline (or can be moved to a service)
             const fetchPendingReports = async () => {
-                const { count } = await supabase.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'menunggu');
+                const { count } = await supabase.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'Menunggu');
                 return count || 0;
             };
 
-            const [statsData, panicCount, guestCount, panicLogs, paymentCount, reportCount, logsData] = await Promise.all([
+            const fetchProcessingReports = async () => {
+                const { count } = await supabase.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'Diproses');
+                return count || 0;
+            };
+
+            const [statsData, panicCount, guestCount, panicLogs, paymentCount, reportCount, processingCount, logsData] = await Promise.all([
                 getDashboardStats(),
                 countActivePanics(),
                 countActiveVisitors(),
                 fetchPanicLogs(0, 5, false), // Latest 5 active panics
                 countPendingPayments(),
                 fetchPendingReports(),
+                fetchProcessingReports(),
                 fetchRecentActivityLogs(5),
             ]);
 
@@ -55,6 +62,7 @@ export function useAdminHomeViewModel() {
             setRecentPanics(panicLogs);
             setPendingPayments(paymentCount);
             setPendingReports(reportCount);
+            setProcessingReports(processingCount);
             setActivityLogs(logsData);
         } catch (error) {
             console.error('Failed to load dashboard:', error);
@@ -121,7 +129,7 @@ export function useAdminHomeViewModel() {
 
     return {
         user, stats, activePanics, activeGuests, recentPanics, isLoading,
-        pendingPayments, pendingReports, activityLogs,
+        pendingPayments, pendingReports, processingReports, activityLogs,
         handleLogout, navigateToManageResidents, navigateToPanicLogs,
         navigateToPaymentMethods, navigateToPaymentConfirmation, navigateToReports,
         navigateToActivityLog,
