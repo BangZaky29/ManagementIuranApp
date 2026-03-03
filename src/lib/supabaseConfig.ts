@@ -15,8 +15,7 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: {
-        // Hanya gunakan AsyncStorage jika di lingkungan Client (Mobile/Browser)
-        storage: typeof window !== 'undefined' ? AsyncStorage : undefined,
+        storage: AsyncStorage,
         autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: Platform.OS === 'web',

@@ -11,6 +11,12 @@ export interface AppNotification {
 
 export const savePushToken = async (userId: string, token: string) => {
     try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            console.warn('Cannot save push token: No active session');
+            return;
+        }
+
         const { error } = await supabase
             .from('user_tokens')
             .upsert(
@@ -19,8 +25,9 @@ export const savePushToken = async (userId: string, token: string) => {
             );
 
         if (error) throw error;
-    } catch (error) {
-        console.error('Error saving push token:', error);
+        console.log('Push token saved successfully for user:', userId);
+    } catch (error: any) {
+        console.error('Error saving push token:', error.message || error);
     }
 };
 
