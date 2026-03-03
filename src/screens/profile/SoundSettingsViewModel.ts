@@ -33,7 +33,7 @@ export const useSoundSettingsViewModel = () => {
                 sound.unloadAsync();
             }
         };
-    }, [user, sound]);
+    }, [user?.id]); // Only re-load if user changes, not when sound plays
 
     const loadSettings = async () => {
         if (!user) return;
@@ -47,7 +47,8 @@ export const useSoundSettingsViewModel = () => {
                 user_id: user.id,
                 notif_sound: 'notification_alert.wav',
                 alert_sound: 'alarm-sound-effect.wav',
-                vibration_enabled: true
+                vibration_enabled: true,
+                alert_duration: 30
             });
         }
         setIsLoading(false);
@@ -56,34 +57,45 @@ export const useSoundSettingsViewModel = () => {
     const updateSound = async (type: 'notif' | 'alert', soundFile: string) => {
         if (!user || !settings) return;
 
-        setIsSaving(true);
+        // Visual feedback locally first
         const newSettings = type === 'notif'
             ? { ...settings, notif_sound: soundFile }
             : { ...settings, alert_sound: soundFile };
 
-        const result = await soundSettingsService.updateSettings(user.id, {
+        setSettings(newSettings);
+
+        // Auto-play preview
+        playSound(soundFile, type);
+
+        // Save in background without blocking UI
+        await soundSettingsService.updateSettings(user.id, {
             [type === 'notif' ? 'notif_sound' : 'alert_sound']: soundFile
         });
-
-        if (result.success) {
-            setSettings(newSettings);
-            // After updating, we should ideally trigger a re-registration of channels
-            // This will happen on next app start or we can expose a refresh method in usePushNotifications
-        }
-        setIsSaving(false);
     };
 
     const toggleVibration = async () => {
         if (!user || !settings) return;
-        setIsSaving(true);
         const newValue = !settings.vibration_enabled;
-        const result = await soundSettingsService.updateSettings(user.id, {
+        setSettings({ ...settings, vibration_enabled: newValue });
+
+        // Save in background
+        await soundSettingsService.updateSettings(user.id, {
             vibration_enabled: newValue
         });
-        if (result.success) {
-            setSettings({ ...settings, vibration_enabled: newValue });
-        }
-        setIsSaving(false);
+    };
+
+    const updateAlertDuration = async (duration: number) => {
+        if (!user || !settings) return;
+
+        // Ensure duration is between 5 and 60 seconds
+        const validatedDuration = Math.min(Math.max(5, duration), 60);
+
+        setSettings({ ...settings, alert_duration: validatedDuration });
+
+        // Save in background
+        await soundSettingsService.updateSettings(user.id, {
+            alert_duration: validatedDuration
+        });
     };
 
     const playSound = async (soundFile: string, type: 'notif' | 'alert') => {
@@ -144,6 +156,7 @@ export const useSoundSettingsViewModel = () => {
         availableAlertSounds,
         updateSound,
         toggleVibration,
+        updateAlertDuration,
         playSound,
         playingValue,
         isAdminOrSecurity: profile?.role === 'admin' || profile?.role === 'security'

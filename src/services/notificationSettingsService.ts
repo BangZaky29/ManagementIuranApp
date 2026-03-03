@@ -5,6 +5,7 @@ export interface UserSoundSettings {
     notif_sound: string;
     alert_sound: string;
     vibration_enabled: boolean;
+    alert_duration: number;
 }
 
 export const soundSettingsService = {
