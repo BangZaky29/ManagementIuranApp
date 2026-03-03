@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useProfilViewModel } from './ProfilViewModel';
 import { ProfilStyles as styles } from './ProfilStyles';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { FeatureFlags } from '../../../constants/FeatureFlags';
 
 /* ───── Custom Toggle ───── */
 const ThemeToggle = ({ isDark, onToggle, colors }: { isDark: boolean; onToggle: () => void; colors: any }) => {
@@ -92,10 +93,11 @@ export default function ProfilScreen() {
         </View>
     );
 
-    const renderMenuItem = (icon: string, label: string, onPress: () => void) => (
+    const renderMenuItem = (icon: string, label: string, onPress: () => void, isLocked = false) => (
         <TouchableOpacity style={styles.menuItem} onPress={onPress}>
             <Ionicons name={icon as any} size={22} color={colors.green5} />
-            <Text style={[styles.menuText, { color: colors.green5 }]}>{label}</Text>
+            <Text style={[styles.menuText, { flex: 1, color: colors.green5 }]}>{label}</Text>
+            {isLocked && <Ionicons name="lock-closed" size={16} color={colors.textSecondary} style={{ marginRight: 8 }} />}
             <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
         </TouchableOpacity>
     );
@@ -154,17 +156,24 @@ export default function ProfilScreen() {
                 <Animated.View entering={FadeInDown.delay(300).duration(500)} style={[styles.menuContainer, { backgroundColor: colors.backgroundCard, borderColor: colors.green5 }]}>
                     {renderMenuItem('create-outline', 'Edit Profil', handleEditProfile)}
                     {renderMenuItem('lock-closed-outline', 'Ganti Password', handleChangePassword)}
-                    {renderMenuItem('volume-high-outline', 'Pengaturan Suara', handleSoundSettings)}
+                    {renderMenuItem('volume-high-outline', 'Pengaturan Suara', handleSoundSettings, !FeatureFlags.IS_SOUND_SETTINGS_ENABLED)}
                     {renderMenuItem('help-circle-outline', 'Bantuan', handleHelp)}
 
                     {/* Dark Mode Toggle — using Pressable-based custom toggle */}
                     <Pressable
                         style={styles.menuItem}
-                        onPress={toggleTheme}
+                        onPress={() => {
+                            if (!FeatureFlags.IS_DARK_MODE_ENABLED) {
+                                handleSoundSettings(); // Reusing the same "Under Development" logic if possible, or direct alert
+                                return;
+                            }
+                            toggleTheme();
+                        }}
                     >
                         <Ionicons name={isDark ? 'moon' : 'moon-outline'} size={22} color={colors.green5} />
                         <Text style={[styles.menuText, { flex: 1, color: colors.green5 }]}>Mode Gelap</Text>
-                        <ThemeToggle isDark={isDark} onToggle={toggleTheme} colors={colors} />
+                        {!FeatureFlags.IS_DARK_MODE_ENABLED && <Ionicons name="lock-closed" size={16} color={colors.textSecondary} style={{ marginRight: 8 }} />}
+                        <ThemeToggle isDark={isDark} onToggle={FeatureFlags.IS_DARK_MODE_ENABLED ? toggleTheme : () => { }} colors={colors} />
                     </Pressable>
                 </Animated.View>
 

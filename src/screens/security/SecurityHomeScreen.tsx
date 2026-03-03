@@ -5,6 +5,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, {
+    useSharedValue, useAnimatedStyle, withRepeat,
+    withSequence, withTiming, FadeInDown
+} from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useSecurityHomeViewModel } from './SecurityHomeViewModel';
 import { styles } from './SecurityHomeStyles';
 import { CustomAlertModal } from '../../components/CustomAlertModal';
@@ -15,6 +20,27 @@ import { useTheme } from '../../contexts/ThemeContext';
 export default function SecurityHomeScreen() {
     const vm = useSecurityHomeViewModel();
     const { colors } = useTheme();
+
+    const scale = useSharedValue(1);
+
+    React.useEffect(() => {
+        if (vm.activePanics > 0) {
+            scale.value = withRepeat(
+                withSequence(
+                    withTiming(1.05, { duration: 800 }),
+                    withTiming(1, { duration: 800 })
+                ),
+                -1,
+                true
+            );
+        } else {
+            scale.value = 1;
+        }
+    }, [vm.activePanics]);
+
+    const animatedPanicStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: scale.value }]
+    }));
 
     if (vm.isLoading) {
         return (
@@ -84,18 +110,35 @@ export default function SecurityHomeScreen() {
 
                 {/* Panic Alert Banner (if active panics) */}
                 {vm.activePanics > 0 && (
-                    <TouchableOpacity style={styles.panicBanner} onPress={vm.navigateToPanicLogs}>
-                        <View style={styles.panicBannerLeft}>
-                            <Ionicons name="alert-circle" size={24} color="#FFF" />
-                            <View style={{ marginLeft: 12 }}>
-                                <Text style={styles.panicBannerTitle}>
-                                    🚨 {vm.activePanics} Darurat Aktif
-                                </Text>
-                                <Text style={styles.panicBannerSubtitle}>Segera cek lokasi kejadian</Text>
-                            </View>
-                        </View>
-                        <Ionicons name="chevron-forward" size={20} color="#FFF" />
-                    </TouchableOpacity>
+                    <Animated.View style={animatedPanicStyle}>
+                        <TouchableOpacity
+                            activeOpacity={0.9}
+                            onPress={vm.navigateToPanicLogs}
+                        >
+                            <LinearGradient
+                                colors={['#D32F2F', '#FF5252']}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={styles.panicBanner}
+                            >
+                                <View style={styles.panicBannerLeft}>
+                                    <View style={{
+                                        backgroundColor: 'rgba(255,255,255,0.2)',
+                                        padding: 8, borderRadius: 12
+                                    }}>
+                                        <Ionicons name="notifications" size={24} color="#FFF" />
+                                    </View>
+                                    <View style={{ marginLeft: 12 }}>
+                                        <Text style={styles.panicBannerTitle}>
+                                            {vm.activePanics} Laporan Darurat Aktif!
+                                        </Text>
+                                        <Text style={styles.panicBannerSubtitle}>Ketuk untuk melihat detail kejadian</Text>
+                                    </View>
+                                </View>
+                                <Ionicons name="chevron-forward" size={20} color="#FFF" />
+                            </LinearGradient>
+                        </TouchableOpacity>
+                    </Animated.View>
                 )}
 
                 {/* Quick Actions */}

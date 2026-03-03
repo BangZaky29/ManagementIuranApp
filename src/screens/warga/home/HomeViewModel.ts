@@ -10,6 +10,7 @@ import * as Linking from 'expo-linking';
 import { Platform } from 'react-native';
 import * as Location from 'expo-location';
 import { fetchActiveBanners, Banner } from '../../../services/bannerService';
+import { FeatureFlags } from '../../../constants/FeatureFlags';
 
 export interface QuickAction {
     id: string;
@@ -165,17 +166,21 @@ export const useHomeViewModel = () => {
 
     const hideAlert = () => setAlertVisible(false);
 
+    const showUnderDevelopmentAlert = () => {
+        setAlertConfig({
+            title: 'Informasi',
+            message: 'Fitur masih dalam tahap pengembangan',
+            type: 'info',
+            buttons: [{ text: 'OK', onPress: hideAlert }]
+        });
+        setAlertVisible(true);
+    };
+
     const handleNavigation = (route?: string) => {
         if (route) {
             router.push(route as any);
         } else {
-            setAlertConfig({
-                title: 'Segera Hadir',
-                message: 'Fitur ini dalam tahap pengembangan.',
-                type: 'info',
-                buttons: [{ text: 'OK', onPress: hideAlert }]
-            });
-            setAlertVisible(true);
+            showUnderDevelopmentAlert();
         }
     };
 

@@ -1,4 +1,6 @@
-import { StyleSheet, Platform } from 'react-native';
+import { StyleSheet, Platform, Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F0F4F8' }, // Light blue-gray for security
@@ -10,10 +12,10 @@ export const styles = StyleSheet.create({
         backgroundColor: '#FFF',
         borderBottomWidth: 1, borderBottomColor: '#F0F4F8',
     },
-    greeting: { fontSize: 14, color: '#666' },
-    userName: { fontSize: 22, fontWeight: 'bold', color: '#0D47A1' }, // Security Blue
-    profileBtn: { 
-        width: 44, height: 44, borderRadius: 22, 
+    greeting: { fontSize: 13, color: '#666' },
+    userName: { fontSize: 20, fontWeight: '700', color: '#0D47A1' }, // Security Blue
+    profileBtn: {
+        width: 44, height: 44, borderRadius: 22,
         overflow: 'hidden', backgroundColor: '#E3F2FD',
         justifyContent: 'center', alignItems: 'center',
         padding: 0,
@@ -25,12 +27,13 @@ export const styles = StyleSheet.create({
         flexDirection: 'row', gap: 10, paddingHorizontal: 16, paddingTop: 16,
     },
     statCard: {
-        flex: 1, backgroundColor: '#FFF', borderRadius: 14, padding: 14,
-        borderLeftWidth: 3, alignItems: 'center',
+        flex: 1, backgroundColor: '#FFF', borderRadius: 14, padding: 12,
+        alignItems: 'center',
         ...Platform.select({
-            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4 },
+            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 3 },
             android: { elevation: 2 },
         }),
+        borderWidth: 1, borderColor: '#F0F4F8',
     },
     statNumber: { fontSize: 24, fontWeight: 'bold', color: '#333' },
     statLabel: { fontSize: 11, color: '#888', marginTop: 2, fontWeight: '500' },
@@ -38,8 +41,12 @@ export const styles = StyleSheet.create({
     // Panic Banner
     panicBanner: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-        backgroundColor: '#F44336', marginHorizontal: 16, marginTop: 16,
-        padding: 16, borderRadius: 14,
+        backgroundColor: '#D32F2F', marginHorizontal: 16, marginTop: 16,
+        padding: 16, borderRadius: 20,
+        ...Platform.select({
+            ios: { shadowColor: '#D32F2F', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 12 },
+            android: { elevation: 8 },
+        }),
     },
     panicBannerLeft: { flexDirection: 'row', alignItems: 'center' },
     panicBannerTitle: { fontSize: 15, fontWeight: 'bold', color: '#FFF' },
@@ -58,12 +65,13 @@ export const styles = StyleSheet.create({
         flexDirection: 'row', gap: 12, paddingHorizontal: 16,
     },
     quickAction: {
-        flex: 1, backgroundColor: '#FFF', borderRadius: 14, padding: 16,
+        flex: 1, backgroundColor: '#FFF', borderRadius: 14, padding: 14,
         alignItems: 'center',
         ...Platform.select({
-            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4 },
+            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 3 },
             android: { elevation: 2 },
         }),
+        borderWidth: 1, borderColor: '#F0F4F8',
     },
     quickIcon: {
         width: 50, height: 50, borderRadius: 16,
@@ -88,10 +96,10 @@ export const styles = StyleSheet.create({
     activityCard: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
         backgroundColor: '#FFF', marginHorizontal: 16, marginBottom: 8,
-        padding: 14, borderRadius: 14, borderLeftWidth: 3, borderLeftColor: '#F44336',
+        padding: 12, borderRadius: 14, borderLeftWidth: 3, borderLeftColor: '#F44336',
         ...Platform.select({
             ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 3 },
-            android: { elevation: 1 },
+            android: { elevation: 2 },
         }),
     },
     activityLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },

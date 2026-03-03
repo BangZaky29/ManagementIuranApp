@@ -5,6 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import { supabase } from '../../../lib/supabaseConfig';
 import { decode } from 'base64-arraybuffer';
+import { FeatureFlags } from '../../../constants/FeatureFlags';
 
 export const useProfilViewModel = () => {
     const router = useRouter();
@@ -115,6 +116,16 @@ export const useProfilViewModel = () => {
     };
 
     const handleSoundSettings = () => {
+        if (!FeatureFlags.IS_SOUND_SETTINGS_ENABLED) {
+            setAlertConfig({
+                title: 'Informasi',
+                message: 'Fitur masih dalam tahap pengembangan',
+                type: 'info',
+                buttons: [{ text: 'OK', onPress: hideAlert }]
+            });
+            setAlertVisible(true);
+            return;
+        }
         router.push('/profile/sounds' as any);
     };
 

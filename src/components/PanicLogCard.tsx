@@ -2,7 +2,6 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
-import { formatDateTimeSafe } from '../utils/dateUtils';
 import { PanicLog } from '../services/panicService';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -25,9 +24,9 @@ export const PanicLogCard: React.FC<PanicLogCardProps> = ({ log, onResolve, show
         const hours = Math.floor(diff / 3600000);
 
         if (minutes < 1) return 'Baru saja';
-        if (minutes < 60) return `${minutes} menit lalu`;
-        if (hours < 24) return `${hours} jam lalu`;
-        return formatDateTimeSafe(d);
+        if (minutes < 60) return `${minutes}m lalu`;
+        if (hours < 24) return `${hours}j lalu`;
+        return d.toLocaleDateString();
     };
 
     const openMaps = () => {
@@ -36,190 +35,142 @@ export const PanicLogCard: React.FC<PanicLogCardProps> = ({ log, onResolve, show
         }
     };
 
+    const accentColor = isResolved ? colors.status.selesai.text : colors.status.ditolak.text;
+
     return (
-        <View style={[
-            styles.card,
-            { borderLeftColor: isResolved ? colors.status.selesai.text : colors.status.ditolak.text }
-        ]}>
-            {/* Header Area */}
-            <View style={styles.header}>
-                <View style={styles.userContainer}>
+        <TouchableOpacity
+            activeOpacity={0.7}
+            style={[styles.card, { borderLeftColor: accentColor }]}
+            onPress={openMaps}
+            disabled={!hasLocation}
+        >
+            <View style={styles.cardLeft}>
+                <View style={styles.avatarWrapper}>
                     {log.profiles?.avatar_url ? (
                         <Image source={{ uri: log.profiles.avatar_url }} style={styles.avatar} />
                     ) : (
-                        <View style={[styles.avatar, styles.avatarPlaceholder, { backgroundColor: colors.status.ditolak.bg }]}>
-                            <Ionicons name="person" size={20} color={colors.status.ditolak.text} />
+                        <View style={[styles.avatar, styles.avatarPlaceholder, { backgroundColor: isResolved ? colors.status.selesai.bg : colors.status.ditolak.bg }]}>
+                            <Ionicons name="person" size={16} color={accentColor} />
                         </View>
                     )}
-                    <View style={styles.nameContainer}>
-                        <Text style={styles.userName}>{log.profiles?.full_name || 'Warga Anonim'}</Text>
-                        <Text style={styles.userAddress}>
-                            RT/RW: {log.profiles?.rt_rw || '-'}
-                        </Text>
-                    </View>
                 </View>
-                <View style={styles.statusContainer}>
-                    <View style={[styles.badge, { backgroundColor: isResolved ? colors.status.selesai.bg : colors.status.ditolak.bg }]}>
-                        {!isResolved && <View style={[styles.pulseDot, { backgroundColor: colors.status.ditolak.text }]} />}
-                        <Text style={[styles.badgeText, { color: isResolved ? colors.status.selesai.text : colors.status.ditolak.text }]}>
-                            {isResolved ? 'SELESAI' : 'AKTIF'}
+
+                <View style={styles.contentContainer}>
+                    <View style={styles.headerRow}>
+                        <Text style={styles.userName} numberOfLines={1}>
+                            {log.profiles?.full_name || 'Warga Anonim'}
                         </Text>
+                        <View style={[styles.statusDot, { backgroundColor: accentColor }]} />
                     </View>
-                    <Text style={styles.timeText}>{formatTime(log.created_at)}</Text>
+
+                    <Text style={styles.description} numberOfLines={1}>
+                        {hasLocation ? '🚨 Darurat! Ketuk cek lokasi' : '🚨 Darurat! Lokasi tdk tersedia'}
+                    </Text>
+
+                    <View style={styles.footerRow}>
+                        <Text style={styles.timeText}>{formatTime(log.created_at)}</Text>
+                        {log.profiles?.rt_rw && (
+                            <Text style={styles.dotSeparator}> • </Text>
+                        )}
+                        <Text style={styles.addressText}>{log.profiles?.rt_rw || ''}</Text>
+                    </View>
                 </View>
             </View>
 
-            {/* Info Content */}
-            <View style={styles.content}>
+            {showResolveButton && !isResolved && (
                 <TouchableOpacity
-                    style={[styles.locationBox, hasLocation && styles.locationBoxActive]}
-                    onPress={openMaps}
-                    disabled={!hasLocation}
-                >
-                    <View style={styles.locationIconBox}>
-                        <Ionicons name="location" size={18} color={hasLocation ? '#1976D2' : '#999'} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                        <Text style={[styles.locationTitle, { color: hasLocation ? '#1976D2' : '#666' }]}>
-                            {hasLocation ? 'Lokasi GPS Terdeteksi' : 'Lokasi Tidak Tersedia'}
-                        </Text>
-                        <Text style={styles.locationSubtitle} numberOfLines={1}>
-                            {hasLocation ? 'Ketuk untuk buka di Google Maps' : 'Koordinat tidak dikirim oleh perangkat'}
-                        </Text>
-                    </View>
-                    {hasLocation && <Ionicons name="chevron-forward" size={16} color="#1976D2" />}
-                </TouchableOpacity>
-            </View>
-
-            {/* Actions */}
-            {!isResolved && showResolveButton && (
-                <TouchableOpacity
-                    style={[styles.resolveButton, { backgroundColor: colors.status.selesai.text }]}
+                    style={[styles.resolveBtnSmall, { backgroundColor: colors.status.selesai.bg }]}
                     onPress={() => onResolve?.(log)}
                 >
-                    <Ionicons name="checkmark-circle-outline" size={20} color="#FFF" />
-                    <Text style={styles.resolveButtonText}>Tandai Selesai ditangani</Text>
+                    <Ionicons name="checkmark" size={16} color={colors.status.selesai.text} />
                 </TouchableOpacity>
             )}
-        </View>
+        </TouchableOpacity>
     );
 };
 
 const styles = StyleSheet.create({
     card: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         backgroundColor: '#FFF',
-        borderRadius: 16,
-        padding: 16,
-        marginBottom: 16,
-        borderLeftWidth: 5,
+        marginHorizontal: 16,
+        marginBottom: 8,
+        padding: 12,
+        borderRadius: 14,
+        borderLeftWidth: 3,
         ...Platform.select({
-            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8 },
-            android: { elevation: 4 },
+            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 3 },
+            android: { elevation: 2 },
         }),
     },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-    },
-    userContainer: {
+    cardLeft: {
         flexDirection: 'row',
         alignItems: 'center',
         flex: 1,
     },
+    avatarWrapper: {
+        marginRight: 10,
+    },
     avatar: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
+        width: 38,
+        height: 38,
+        borderRadius: 19,
         backgroundColor: '#F5F5F5',
     },
     avatarPlaceholder: {
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#FFEBEE',
     },
-    nameContainer: {
-        marginLeft: 12,
+    contentContainer: {
         flex: 1,
     },
-    userName: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: '#333',
-    },
-    userAddress: {
-        fontSize: 12,
-        color: '#777',
-        marginTop: 2,
-    },
-    statusContainer: {
-        alignItems: 'flex-end',
-    },
-    badge: {
+    headerRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 10,
-        paddingVertical: 5,
-        borderRadius: 20,
-        marginBottom: 4,
+        justifyContent: 'space-between',
     },
-    badgeText: {
-        fontSize: 10,
-        fontWeight: '900',
-        letterSpacing: 0.5,
+    userName: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#333',
+        flex: 1,
     },
-    pulseDot: {
-        width: 6,
-        height: 6,
-        borderRadius: 3,
-        backgroundColor: '#F44336',
-        marginRight: 6,
+    statusDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        marginLeft: 8,
+    },
+    description: {
+        fontSize: 12,
+        color: '#666',
+        marginTop: 1,
+    },
+    footerRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 2,
     },
     timeText: {
         fontSize: 11,
         color: '#999',
     },
-    content: {
-        marginTop: 16,
-    },
-    locationBox: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#F9F9F9',
-        padding: 12,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#F0F0F0',
-    },
-    locationBoxActive: {
-        backgroundColor: '#E3F2FD',
-        borderColor: '#BBDEFB',
-    },
-    locationIconBox: {
-        marginRight: 12,
-    },
-    locationTitle: {
-        fontSize: 14,
-        fontWeight: '700',
-    },
-    locationSubtitle: {
+    dotSeparator: {
         fontSize: 11,
-        color: '#888',
-        marginTop: 2,
+        color: '#999',
     },
-    resolveButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
+    addressText: {
+        fontSize: 11,
+        color: '#999',
+    },
+    resolveBtnSmall: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
         justifyContent: 'center',
-        backgroundColor: '#2E7D32',
-        padding: 14,
-        borderRadius: 12,
-        marginTop: 16,
-        gap: 8,
-    },
-    resolveButtonText: {
-        color: '#FFF',
-        fontSize: 14,
-        fontWeight: '700',
+        alignItems: 'center',
+        marginLeft: 10,
     },
 });

@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../../../contexts/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '../../../lib/supabaseConfig';
+import { FeatureFlags } from '../../../constants/FeatureFlags';
 
 export const useAdminProfileViewModel = () => {
     const router = useRouter();
@@ -141,6 +142,16 @@ export const useAdminProfileViewModel = () => {
     };
 
     const handleSoundSettings = () => {
+        if (!FeatureFlags.IS_SOUND_SETTINGS_ENABLED) {
+            setAlertConfig({
+                title: 'Informasi',
+                message: 'Fitur masih dalam tahap pengembangan',
+                type: 'info',
+                buttons: [{ text: 'OK', onPress: hideAlert }]
+            });
+            setAlertVisible(true);
+            return;
+        }
         router.push('/profile/sounds' as any);
     };
 

@@ -166,6 +166,22 @@ export const HomeStyles = StyleSheet.create({
             }
         }),
     },
+    gatedIcon: {
+        position: 'absolute',
+        top: -5,
+        right: -5,
+        backgroundColor: Colors.white,
+        borderRadius: 10,
+        width: 20,
+        height: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 1,
+    },
     actionText: {
         fontSize: 12,
         color: Colors.textPrimary,

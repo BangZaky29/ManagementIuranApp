@@ -1,11 +1,59 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StatusBar, Image, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StatusBar, Image, ActivityIndicator, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Constants from 'expo-constants';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, { useAnimatedStyle, withTiming, useSharedValue } from 'react-native-reanimated';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { useSecurityProfileViewModel } from './SecurityProfileViewModel';
 import { styles } from './SecurityProfileStyles';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { FeatureFlags } from '../../../constants/FeatureFlags';
+
+/* ───── Custom Toggle ───── */
+const ThemeToggle = ({ isDark, onToggle, colors }: { isDark: boolean; onToggle: () => void; colors: any }) => {
+    const translateX = useSharedValue(isDark ? 22 : 2);
+
+    React.useEffect(() => {
+        translateX.value = withTiming(isDark ? 22 : 2, { duration: 200 });
+    }, [isDark]);
+
+    const thumbStyle = useAnimatedStyle(() => ({
+        transform: [{ translateX: translateX.value }],
+    }));
+
+    return (
+        <Pressable
+            onPress={onToggle}
+            style={{
+                width: 48,
+                height: 28,
+                borderRadius: 14,
+                backgroundColor: isDark ? colors.green3 : '#D1D5DB',
+                justifyContent: 'center',
+                padding: 2,
+            }}
+            hitSlop={10}
+        >
+            <Animated.View
+                style={[
+                    {
+                        width: 24,
+                        height: 24,
+                        borderRadius: 12,
+                        backgroundColor: isDark ? colors.accent : '#FFFFFF',
+                        elevation: 2,
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.2,
+                        shadowRadius: 2,
+                    },
+                    thumbStyle,
+                ]}
+            />
+        </Pressable>
+    );
+};
 
 export default function SecurityProfileScreen() {
     const {
@@ -21,6 +69,8 @@ export default function SecurityProfileScreen() {
         hideAlert
     } = useSecurityProfileViewModel();
 
+    const { isDark, toggleTheme, colors } = useTheme();
+
     const renderInfoItem = (icon: string, label: string, value: string) => (
         <View style={styles.infoRow}>
             <View style={styles.infoIconBox}>
@@ -33,10 +83,11 @@ export default function SecurityProfileScreen() {
         </View>
     );
 
-    const renderMenuItem = (icon: string, label: string, onPress: () => void) => (
+    const renderMenuItem = (icon: string, label: string, onPress: () => void, isLocked = false) => (
         <TouchableOpacity style={styles.menuItem} onPress={onPress}>
             <Ionicons name={icon as any} size={22} color="#0D47A1" />
-            <Text style={styles.menuText}>{label}</Text>
+            <Text style={[styles.menuText, { flex: 1 }]}>{label}</Text>
+            {isLocked && <Ionicons name="lock-closed" size={16} color="#999" style={{ marginRight: 8 }} />}
             <Ionicons name="chevron-forward" size={20} color="#999" />
         </TouchableOpacity>
     );
@@ -93,7 +144,24 @@ export default function SecurityProfileScreen() {
                 <View style={styles.menuContainer}>
                     {renderMenuItem('create-outline', 'Edit Profil', handleEditProfile)}
                     {renderMenuItem('lock-closed-outline', 'Ganti Password', handleChangePassword)}
-                    {renderMenuItem('volume-high-outline', 'Pengaturan Suara', handleSoundSettings)}
+                    {renderMenuItem('volume-high-outline', 'Pengaturan Suara', handleSoundSettings, !FeatureFlags.IS_SOUND_SETTINGS_ENABLED)}
+
+                    {/* Dark Mode Toggle */}
+                    <Pressable
+                        style={styles.menuItem}
+                        onPress={() => {
+                            if (!FeatureFlags.IS_DARK_MODE_ENABLED) {
+                                handleSoundSettings(); // Reusing the same "Under Development" logic
+                                return;
+                            }
+                            toggleTheme();
+                        }}
+                    >
+                        <Ionicons name={isDark ? 'moon' : 'moon-outline'} size={22} color="#0D47A1" />
+                        <Text style={[styles.menuText, { flex: 1 }]}>Mode Gelap</Text>
+                        {!FeatureFlags.IS_DARK_MODE_ENABLED && <Ionicons name="lock-closed" size={16} color="#999" style={{ marginRight: 8 }} />}
+                        <ThemeToggle isDark={isDark} onToggle={FeatureFlags.IS_DARK_MODE_ENABLED ? toggleTheme : () => { }} colors={colors} />
+                    </Pressable>
                 </View>
 
                 {/* Logout Button */}

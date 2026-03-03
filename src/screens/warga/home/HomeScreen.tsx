@@ -9,6 +9,7 @@ import { HomeStyles as styles } from './HomeStyles';
 import { BannerCarousel } from '../../../components/BannerCarousel';
 import { PanicCountdown } from '../../../components/PanicCountdown';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { FeatureFlags } from '../../../constants/FeatureFlags';
 
 export default function HomeScreen() {
     const {
@@ -146,24 +147,40 @@ export default function HomeScreen() {
                 <Animated.View entering={FadeInDown.delay(300).duration(500)}>
                     <Text style={[styles.sectionTitle, { color: colors.green5 }]}>Layanan Warga</Text>
                     <View style={styles.gridContainer}>
-                        {quickActions.map((action) => (
-                            <TouchableOpacity
-                                key={action.id}
-                                style={styles.actionButton}
-                                onPress={() => {
-                                    if (action.id === 'panic') {
-                                        handlePanicButton();
-                                    } else {
-                                        handleNavigation(action.route);
-                                    }
-                                }}
-                            >
-                                <View style={[styles.iconCircle, { backgroundColor: action.bgColor }]}>
-                                    <Ionicons name={action.icon as any} size={26} color={action.color} />
-                                </View>
-                                <Text style={[styles.actionText, { color: colors.textPrimary }]}>{action.title}</Text>
-                            </TouchableOpacity>
-                        ))}
+                        {quickActions.map((action) => {
+                            const isGated =
+                                (action.id === 'message' && !FeatureFlags.IS_MESSAGE_ENABLED) ||
+                                (action.id === 'more' && !FeatureFlags.IS_OTHERS_ENABLED);
+
+                            return (
+                                <TouchableOpacity
+                                    key={action.id}
+                                    style={styles.actionButton}
+                                    onPress={() => {
+                                        if (isGated) {
+                                            handleNavigation(); // Triggers "Under Development" popup
+                                            return;
+                                        }
+
+                                        if (action.id === 'panic') {
+                                            handlePanicButton();
+                                        } else {
+                                            handleNavigation(action.route);
+                                        }
+                                    }}
+                                >
+                                    <View style={[styles.iconCircle, { backgroundColor: action.bgColor }]}>
+                                        <Ionicons name={action.icon as any} size={26} color={action.color} />
+                                        {isGated && (
+                                            <View style={styles.gatedIcon}>
+                                                <Ionicons name="lock-closed" size={12} color={colors.textSecondary} />
+                                            </View>
+                                        )}
+                                    </View>
+                                    <Text style={[styles.actionText, { color: colors.textPrimary }]}>{action.title}</Text>
+                                </TouchableOpacity>
+                            );
+                        })}
                     </View>
                 </Animated.View>
 

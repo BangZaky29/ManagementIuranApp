@@ -1,13 +1,61 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StatusBar, Image, ActivityIndicator, Modal, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StatusBar, Image, ActivityIndicator, Modal, TextInput, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, { useAnimatedStyle, withTiming, useSharedValue } from 'react-native-reanimated';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { useAdminProfileViewModel } from './AdminProfileViewModel';
 import { AdminProfileStyles as styles } from './AdminProfileStyles';
 import { CustomHeader } from '../../../components/CustomHeader';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
 import { Colors } from '../../../constants/Colors';
 import Constants from 'expo-constants';
+import { FeatureFlags } from '../../../constants/FeatureFlags';
+
+/* ───── Custom Toggle ───── */
+const ThemeToggle = ({ isDark, onToggle, colors }: { isDark: boolean; onToggle: () => void; colors: any }) => {
+    const translateX = useSharedValue(isDark ? 22 : 2);
+
+    React.useEffect(() => {
+        translateX.value = withTiming(isDark ? 22 : 2, { duration: 200 });
+    }, [isDark]);
+
+    const thumbStyle = useAnimatedStyle(() => ({
+        transform: [{ translateX: translateX.value }],
+    }));
+
+    return (
+        <Pressable
+            onPress={onToggle}
+            style={{
+                width: 48,
+                height: 28,
+                borderRadius: 14,
+                backgroundColor: isDark ? colors.green3 : '#D1D5DB',
+                justifyContent: 'center',
+                padding: 2,
+            }}
+            hitSlop={10}
+        >
+            <Animated.View
+                style={[
+                    {
+                        width: 24,
+                        height: 24,
+                        borderRadius: 12,
+                        backgroundColor: isDark ? colors.accent : '#FFFFFF',
+                        elevation: 2,
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.2,
+                        shadowRadius: 2,
+                    },
+                    thumbStyle,
+                ]}
+            />
+        </Pressable>
+    );
+};
 
 export default function AdminProfileScreen() {
     const {
@@ -29,6 +77,8 @@ export default function AdminProfileScreen() {
         isSubmitting
     } = useAdminProfileViewModel();
 
+    const { isDark, toggleTheme, colors } = useTheme();
+
     const renderInfoItem = (icon: string, label: string, value: string, isVerified = false) => (
         <View style={styles.infoRow}>
             <View style={[styles.infoIconBox, { backgroundColor: '#E3F2FD' }]}>
@@ -49,10 +99,11 @@ export default function AdminProfileScreen() {
         </View>
     );
 
-    const renderMenuItem = (icon: string, label: string, onPress: () => void) => (
+    const renderMenuItem = (icon: string, label: string, onPress: () => void, isLocked = false) => (
         <TouchableOpacity style={styles.menuItem} onPress={onPress}>
             <Ionicons name={icon as any} size={22} color={Colors.textPrimary} />
-            <Text style={styles.menuText}>{label}</Text>
+            <Text style={[styles.menuText, { flex: 1 }]}>{label}</Text>
+            {isLocked && <Ionicons name="lock-closed" size={16} color={Colors.textSecondary} style={{ marginRight: 8 }} />}
             <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
         </TouchableOpacity>
     );
@@ -112,7 +163,25 @@ export default function AdminProfileScreen() {
                 <Text style={styles.sectionTitle}>Pengaturan</Text>
                 <View style={[styles.menuContainer, { backgroundColor: '#FFF', borderColor: '#EEE' }]}>
                     {renderMenuItem('create-outline', 'Edit Profil & Data', handleEditProfile)}
-                    {renderMenuItem('volume-high-outline', 'Pengaturan Suara', handleSoundSettings)}
+                    {renderMenuItem('volume-high-outline', 'Pengaturan Suara', handleSoundSettings, !FeatureFlags.IS_SOUND_SETTINGS_ENABLED)}
+
+                    {/* Dark Mode Toggle */}
+                    <Pressable
+                        style={styles.menuItem}
+                        onPress={() => {
+                            if (!FeatureFlags.IS_DARK_MODE_ENABLED) {
+                                handleSoundSettings(); // Reusing the same "Under Development" logic
+                                return;
+                            }
+                            toggleTheme();
+                        }}
+                    >
+                        <Ionicons name={isDark ? 'moon' : 'moon-outline'} size={22} color={Colors.textPrimary} />
+                        <Text style={[styles.menuText, { flex: 1 }]}>Mode Gelap</Text>
+                        {!FeatureFlags.IS_DARK_MODE_ENABLED && <Ionicons name="lock-closed" size={16} color={Colors.textSecondary} style={{ marginRight: 8 }} />}
+                        <ThemeToggle isDark={isDark} onToggle={FeatureFlags.IS_DARK_MODE_ENABLED ? toggleTheme : () => { }} colors={colors} />
+                    </Pressable>
+
                     {renderMenuItem('information-circle-outline', 'Edit Informasi Komplek', handleEditComplexInfo)}
                 </View>
 
