@@ -183,36 +183,60 @@ export const useHomeViewModel = () => {
         router.push(`/news/${id}` as any);
     };
 
-    // ─── 3-Click Panic Button Safety ───────────────
+    // ─── Refined 3-Click Panic Button Safety ───────────────
+    const [isPanicSessionActive, setIsPanicSessionActive] = useState(false);
     const panicClickCount = useRef(0);
     const panicTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+    const startPanicSession = () => {
+        setIsPanicSessionActive(true);
+        panicClickCount.current = 0;
+
+        // Reset if no activity for 10 seconds
+        if (panicTimeoutRef.current) clearTimeout(panicTimeoutRef.current);
+        panicTimeoutRef.current = setTimeout(() => {
+            setIsPanicSessionActive(false);
+            panicClickCount.current = 0;
+            console.log('Panic session expired');
+        }, 10000); // 10 second window
+    };
+
     const handlePanicButton = () => {
-        panicClickCount.current += 1;
-
-        // Reset timeout on each click
-        if (panicTimeoutRef.current) {
-            clearTimeout(panicTimeoutRef.current);
-        }
-
-        if (panicClickCount.current < 3) {
-            const remaining = 3 - panicClickCount.current;
+        if (!isPanicSessionActive) {
+            // Step 1: Show Instruction Alert
             setAlertConfig({
-                title: '⚠️ Tombol Darurat',
-                message: `Tekan ${remaining} kali lagi dalam 3 detik untuk mengaktifkan sinyal darurat SOS.`,
+                title: '⚠️ Panic Button',
+                message: 'Tekan sebanyak 3 kali berturut turut untuk aktifkan panic button.',
                 type: 'warning',
-                buttons: [{ text: 'Mengerti', onPress: hideAlert }]
+                buttons: [{
+                    text: 'Mengerti',
+                    onPress: () => {
+                        hideAlert();
+                        startPanicSession();
+                    }
+                }]
             });
             setAlertVisible(true);
-
-            // Reset after 3 seconds of inactivity
-            panicTimeoutRef.current = setTimeout(() => {
-                panicClickCount.current = 0;
-            }, 3000);
             return;
         }
 
-        // 3rd click — Send SOS!
+        // Step 2: Session is active, count clicks
+        panicClickCount.current += 1;
+
+        // Reset the 10s timer on each click to keep the window open while user is active
+        if (panicTimeoutRef.current) clearTimeout(panicTimeoutRef.current);
+        panicTimeoutRef.current = setTimeout(() => {
+            setIsPanicSessionActive(false);
+            panicClickCount.current = 0;
+        }, 10000);
+
+        if (panicClickCount.current < 3) {
+            // Just wait for more clicks
+            return;
+        }
+
+        // Step 3: 3rd click — Send SOS!
+        setIsPanicSessionActive(false);
         panicClickCount.current = 0;
         if (panicTimeoutRef.current) clearTimeout(panicTimeoutRef.current);
 
@@ -247,7 +271,6 @@ export const useHomeViewModel = () => {
                             style: 'destructive',
                             onPress: () => {
                                 hideAlert();
-                                // Example Phone Number (Ganti dengan nomor satpam sesungguhnya yg diset dinamis nantinya)
                                 const securityPhone = '081234567890';
                                 const smsBody = '🚨 DARURAT (SOS) - Tolong secepatnya datang ke rumah saya!';
                                 const separator = Platform.OS === 'ios' ? '&' : '?';

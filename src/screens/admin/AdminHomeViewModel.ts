@@ -88,7 +88,7 @@ export function useAdminHomeViewModel() {
     const navigateToPaymentMethods = () => router.push('/admin/payment-methods' as any);
     const navigateToPaymentConfirmation = () => router.push('/admin/payment-confirmation' as any);
 
-    const navigateToReports = () => router.push('/admin/reports' as any);
+    const navigateToReports = () => router.push('/admin/laporan' as any);
     const navigateToActivityLog = () => router.push('/admin/activity-log' as any);
 
     const openPanicLocation = (log: PanicLog) => {

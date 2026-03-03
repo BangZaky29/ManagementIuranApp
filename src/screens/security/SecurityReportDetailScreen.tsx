@@ -132,13 +132,53 @@ export default function SecurityReportDetailScreen() {
         );
     }
 
+    const handleRewindStatus = () => {
+        if (!data) return;
+        let prevStatus = '';
+        if (data.status === 'Selesai' || data.status === 'Ditolak') {
+            prevStatus = 'Diproses';
+        } else if (data.status === 'Diproses') {
+            prevStatus = 'Menunggu';
+        }
+
+        if (!prevStatus) return;
+
+        setAlertConfig({
+            visible: true,
+            title: 'Ulangi Progres?',
+            message: `Apakah Anda yakin ingin mengembalikan status laporan ini ke "${prevStatus}"?`,
+            type: 'warning',
+            buttons: [
+                { text: 'Batal', style: 'cancel', onPress: () => setAlertConfig({ ...alertConfig, visible: false }) },
+                {
+                    text: 'Ya, Kembalikan',
+                    style: 'destructive',
+                    onPress: () => {
+                        setAlertConfig({ ...alertConfig, visible: false });
+                        handleUpdateStatus(prevStatus);
+                    }
+                }
+            ]
+        });
+    };
+
     const isProcessed = data.status === 'Diproses' || data.status === 'Selesai' || data.status === 'Ditolak';
     const isFinished = data.status === 'Selesai' || data.status === 'Ditolak';
 
     return (
         <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
-            <CustomHeader title="Detail Laporan" showBack={true} />
+            <CustomHeader
+                title="Detail Laporan"
+                showBack={true}
+                rightIcon={
+                    (data.status !== 'Menunggu') ? (
+                        <TouchableOpacity onPress={handleRewindStatus}>
+                            <Ionicons name="arrow-undo-outline" size={24} color={Colors.primary} />
+                        </TouchableOpacity>
+                    ) : undefined
+                }
+            />
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 {/* Reporter Card */}

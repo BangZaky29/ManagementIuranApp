@@ -167,7 +167,7 @@ export default function GuestBookScreen() {
                                     {item.profiles?.full_name || 'Tidak diketahui'}
                                 </Text>
                                 <Text style={{ fontSize: 13, color: '#666', marginTop: 2 }} numberOfLines={1}>
-                                    {item.profiles ? `Blok ${item.profiles.rt_rw || '?'}` : ''}
+                                    {item.profiles ? `${item.profiles.rt_rw || '?'}` : ''}
                                 </Text>
                             </View>
                             <View style={styles.detailCol}>
