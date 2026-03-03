@@ -1,14 +1,17 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Switch, StyleSheet } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useSoundSettingsViewModel } from './SoundSettingsViewModel';
 import { CustomHeader } from '../../components/CustomHeader';
+import { createStyles } from './SoundSettingsStyles';
 
 export default function SoundSettingsScreen() {
     const { colors } = useTheme();
     const vm = useSoundSettingsViewModel();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
 
     if (vm.isLoading) {
         return (
@@ -26,26 +29,45 @@ export default function SoundSettingsScreen() {
         const isPlaying = vm.playingValue === value;
 
         return (
-            <View key={value} style={styles.optionContainer}>
+            <Animated.View
+                entering={FadeInRight.duration(400)}
+                key={value}
+                style={[
+                    styles.optionContainer,
+                    { backgroundColor: isSelected ? colors.primary + '10' : colors.backgroundCard }
+                ]}
+            >
                 <TouchableOpacity
                     style={[
                         styles.optionItem,
-                        { backgroundColor: colors.backgroundCard },
-                        isSelected && { borderColor: colors.primary, borderWidth: 1 }
+                        isSelected && { borderColor: colors.primary, borderWidth: 1.5 }
                     ]}
                     onPress={onSelect}
                 >
                     <View style={styles.optionInfo}>
-                        <Ionicons
-                            name={(value === 'vibrate.wav' ? "pulse" : "musical-note-outline") as any}
-                            size={20}
-                            color={isSelected ? colors.primary : colors.textSecondary}
-                        />
-                        <Text style={[styles.optionLabel, { color: colors.textPrimary }, isSelected && { fontWeight: 'bold' }]}>
+                        <View style={[
+                            styles.iconCircle,
+                            { backgroundColor: isSelected ? colors.primary : colors.background }
+                        ]}>
+                            <Ionicons
+                                name={(value === 'vibrate.wav' ? "pulse" : "musical-note-outline") as any}
+                                size={18}
+                                color={isSelected ? '#FFF' : colors.textSecondary}
+                            />
+                        </View>
+                        <Text style={[
+                            styles.optionLabel,
+                            { color: colors.textPrimary },
+                            isSelected && { fontWeight: '700' }
+                        ]}>
                             {label}
                         </Text>
                     </View>
-                    {isSelected && <Ionicons name="checkmark-circle" size={20} color={colors.primary} />}
+                    {isSelected && (
+                        <Animated.View entering={FadeInDown}>
+                            <Ionicons name="checkmark-circle" size={22} color={colors.primary} />
+                        </Animated.View>
+                    )}
                 </TouchableOpacity>
 
                 {value !== 'default' && (
@@ -54,13 +76,13 @@ export default function SoundSettingsScreen() {
                         onPress={() => vm.playSound(value, type)}
                     >
                         <Ionicons
-                            name={isPlaying ? "stop-circle" : "play-circle-outline"}
-                            size={28}
+                            name={isPlaying ? "stop-circle" : "play-circle"}
+                            size={32}
                             color={isPlaying ? colors.danger : colors.primary}
                         />
                     </TouchableOpacity>
                 )}
-            </View>
+            </Animated.View>
         );
     };
 
@@ -96,9 +118,9 @@ export default function SoundSettingsScreen() {
                 </View>
 
                 {vm.isAdminOrSecurity && (
-                    <>
+                    <View style={styles.section}>
                         <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: 20 }]}>Notifikasi Darurat (SOS)</Text>
-                        <View style={styles.section}>
+                        <View>
                             <Text style={[styles.subSectionTitle, { color: colors.textSecondary }]}>Suara Alert Darurat</Text>
                             {vm.availableAlertSounds.map(sound => (
                                 renderSoundOption(
@@ -110,80 +132,25 @@ export default function SoundSettingsScreen() {
                                 )
                             ))}
                         </View>
-                    </>
+                    </View>
                 )}
 
-                <View style={styles.infoBox}>
-                    <Ionicons name="information-circle-outline" size={20} color={colors.textSecondary} />
+                <Animated.View entering={FadeInDown.delay(400)} style={[styles.infoBox, { backgroundColor: colors.primary + '05' }]}>
+                    <Ionicons name="information-circle-outline" size={20} color={colors.primary} />
                     <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-                        Catatan: Perubahan suara mungkin baru akan terasa setelah aplikasi dijalankan ulang atau build ulang (EAS) untuk memastikan aset native terdaftar dengan benar.
+                        Catatan: Perubahan suara mungkin baru akan terasa setelah aplikasi dijalankan ulang atau build ulang (EAS) untuk memperbarui channel sistem.
                     </Text>
-                </View>
+                </Animated.View>
             </ScrollView>
 
-            {vm.isSaving && (
-                <View style={styles.overlay}>
-                    <ActivityIndicator size="small" color="#FFF" />
-                    <Text style={styles.overlayText}>Menyimpan...</Text>
-                </View>
-            )}
+            <View style={styles.overlayContainer}>
+                {vm.isSaving && (
+                    <View style={styles.loadingToast}>
+                        <ActivityIndicator size="small" color="#FFF" />
+                        <Text style={styles.overlayText}>Menyimpan...</Text>
+                    </View>
+                )}
+            </View>
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: { flex: 1 },
-    center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    scrollContent: { padding: 16 },
-    sectionTitle: { fontSize: 13, fontWeight: 'bold', textTransform: 'uppercase', marginBottom: 8, marginLeft: 4 },
-    subSectionTitle: { fontSize: 12, marginBottom: 8, marginTop: 8, marginLeft: 4 },
-    section: { marginBottom: 16 },
-    settingRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 16,
-        borderRadius: 12,
-        marginBottom: 12
-    },
-    settingLabel: { fontSize: 16, fontWeight: '600' },
-    settingSubLabel: { fontSize: 12, marginTop: 2 },
-    optionItem: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 16,
-        borderRadius: 12,
-        flex: 1
-    },
-    optionContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-    playButton: {
-        paddingHorizontal: 15,
-        height: '100%',
-        justifyContent: 'center',
-        borderLeftWidth: 1,
-    },
-    optionInfo: { flexDirection: 'row', alignItems: 'center' },
-    optionLabel: { fontSize: 15, marginLeft: 12 },
-    infoBox: {
-        flexDirection: 'row',
-        padding: 16,
-        backgroundColor: 'rgba(0,0,0,0.05)',
-        borderRadius: 12,
-        marginTop: 20,
-        alignItems: 'flex-start'
-    },
-    infoText: { fontSize: 12, flex: 1, marginLeft: 8, lineHeight: 18 },
-    overlay: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexDirection: 'row'
-    },
-    overlayText: { color: '#FFF', marginLeft: 10, fontWeight: 'bold' }
-});

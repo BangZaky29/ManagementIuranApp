@@ -14,15 +14,13 @@ export const useSoundSettingsViewModel = () => {
     const [playingValue, setPlayingValue] = useState<string | null>(null);
 
     const availableNotifSounds = [
-        { label: 'Standard Alert', value: 'notification_alert.wav' },
-        { label: 'Vibrate Only', value: 'vibrate.wav' },
-        { label: 'Default System', value: 'default' }
+        { label: 'Notification Alert', value: 'notification_alert.wav' },
+        { label: 'Vibrate', value: 'vibrate.wav' },
     ];
 
     const availableAlertSounds = [
-        { label: 'Alarm Effect', value: 'alarm-sound-effect.wav' },
-        { label: 'Red Siren SOS', value: 'red-siren-alert.wav' },
-        { label: 'Default System', value: 'default' }
+        { label: 'Alarm Sound Effect', value: 'alarm-sound-effect.wav' },
+        { label: 'Red Siren Alert', value: 'red-siren-alert.wav' },
     ];
 
     useEffect(() => {
