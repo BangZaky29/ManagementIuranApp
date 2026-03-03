@@ -20,7 +20,7 @@
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/logo_warlok/warlok_1024x1024_Transparant.png",
-        "backgroundImage": "./assets/logo_warlok/white.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/logo_warlok/warlok_1024x1024_Transparant.png"
       },
       "edgeToEdgeEnabled": true,

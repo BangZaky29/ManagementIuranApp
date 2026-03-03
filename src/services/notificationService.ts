@@ -21,7 +21,7 @@ export const savePushToken = async (userId: string, token: string) => {
             .from('user_tokens')
             .upsert(
                 { user_id: userId, expo_push_token: token, updated_at: new Date().toISOString() },
-                { onConflict: 'expo_push_token' }
+                { onConflict: 'user_id' }
             );
 
         if (error) throw error;
