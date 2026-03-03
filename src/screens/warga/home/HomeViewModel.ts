@@ -185,20 +185,43 @@ export const useHomeViewModel = () => {
 
     // ─── Refined 3-Click Panic Button Safety ───────────────
     const [isPanicSessionActive, setIsPanicSessionActive] = useState(false);
+    const [panicTimeLeft, setPanicTimeLeft] = useState(10);
     const panicClickCount = useRef(0);
     const panicTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const startPanicSession = () => {
         setIsPanicSessionActive(true);
         panicClickCount.current = 0;
+        setPanicTimeLeft(10);
 
-        // Reset if no activity for 10 seconds
+        // Clear existing timers
         if (panicTimeoutRef.current) clearTimeout(panicTimeoutRef.current);
+        if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+
+        // Start Countdown Timer
+        countdownIntervalRef.current = setInterval(() => {
+            setPanicTimeLeft(prev => {
+                if (prev <= 1) {
+                    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        // Auto-reset if no activity for 10 seconds
         panicTimeoutRef.current = setTimeout(() => {
-            setIsPanicSessionActive(false);
-            panicClickCount.current = 0;
-            console.log('Panic session expired');
-        }, 10000); // 10 second window
+            resetPanicSession();
+        }, 10000);
+    };
+
+    const resetPanicSession = () => {
+        setIsPanicSessionActive(false);
+        panicClickCount.current = 0;
+        setPanicTimeLeft(10);
+        if (panicTimeoutRef.current) clearTimeout(panicTimeoutRef.current);
+        if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
     };
 
     const handlePanicButton = () => {
@@ -225,20 +248,29 @@ export const useHomeViewModel = () => {
 
         // Reset the 10s timer on each click to keep the window open while user is active
         if (panicTimeoutRef.current) clearTimeout(panicTimeoutRef.current);
+        if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+
+        setPanicTimeLeft(10);
+        countdownIntervalRef.current = setInterval(() => {
+            setPanicTimeLeft(prev => {
+                if (prev <= 1) {
+                    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
         panicTimeoutRef.current = setTimeout(() => {
-            setIsPanicSessionActive(false);
-            panicClickCount.current = 0;
+            resetPanicSession();
         }, 10000);
 
         if (panicClickCount.current < 3) {
-            // Just wait for more clicks
             return;
         }
 
         // Step 3: 3rd click — Send SOS!
-        setIsPanicSessionActive(false);
-        panicClickCount.current = 0;
-        if (panicTimeoutRef.current) clearTimeout(panicTimeoutRef.current);
+        resetPanicSession();
 
         (async () => {
             try {
@@ -303,6 +335,10 @@ export const useHomeViewModel = () => {
         hideAlert,
         isLoading,
         refresh: loadData,
-        verifyLocation
+        verifyLocation,
+        // Added for visual feedback
+        isPanicSessionActive,
+        panicTimeLeft,
+        panicClickCount: panicClickCount.current // Pass as value for UI
     };
 };

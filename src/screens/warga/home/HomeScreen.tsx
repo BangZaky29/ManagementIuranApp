@@ -7,6 +7,7 @@ import { useTheme } from '../../../contexts/ThemeContext';
 import { useHomeViewModel } from './HomeViewModel';
 import { HomeStyles as styles } from './HomeStyles';
 import { BannerCarousel } from '../../../components/BannerCarousel';
+import { PanicCountdown } from '../../../components/PanicCountdown';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
 
 export default function HomeScreen() {
@@ -27,7 +28,11 @@ export default function HomeScreen() {
         hideAlert,
         isLoading,
         refresh: loadData,
-        verifyLocation
+        verifyLocation,
+        // Added for visual feedback
+        isPanicSessionActive,
+        panicTimeLeft,
+        panicClickCount
     } = useHomeViewModel();
     const { colors } = useTheme();
 
@@ -40,6 +45,13 @@ export default function HomeScreen() {
     return (
         <SafeAreaView edges={['left', 'right', 'bottom']} style={[styles.container, { backgroundColor: colors.background }]}>
             <StatusBar barStyle={colors.statusBar} backgroundColor={colors.green1} />
+
+            {/* Panic Countdown Overlay */}
+            <PanicCountdown
+                visible={isPanicSessionActive}
+                timeLeft={panicTimeLeft}
+                clicksRemaining={3 - panicClickCount}
+            />
 
             {/* Header */}
             <SafeAreaView edges={['top']} style={{ backgroundColor: colors.green1 }}>
