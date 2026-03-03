@@ -61,6 +61,7 @@ export default function ProfilScreen() {
         handleEditProfile,
         handleChangePassword,
         handleHelp,
+        handleSoundSettings,
         handleLogout,
         handleAvatarUpdate,
         isUploading,
@@ -153,6 +154,7 @@ export default function ProfilScreen() {
                 <Animated.View entering={FadeInDown.delay(300).duration(500)} style={[styles.menuContainer, { backgroundColor: colors.backgroundCard, borderColor: colors.green5 }]}>
                     {renderMenuItem('create-outline', 'Edit Profil', handleEditProfile)}
                     {renderMenuItem('lock-closed-outline', 'Ganti Password', handleChangePassword)}
+                    {renderMenuItem('volume-high-outline', 'Pengaturan Suara', handleSoundSettings)}
                     {renderMenuItem('help-circle-outline', 'Bantuan', handleHelp)}
 
                     {/* Dark Mode Toggle — using Pressable-based custom toggle */}

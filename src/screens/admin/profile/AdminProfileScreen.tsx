@@ -25,6 +25,7 @@ export default function AdminProfileScreen() {
         setEditName,
         handleSaveProfile,
         handleEditComplexInfo,
+        handleSoundSettings,
         isSubmitting
     } = useAdminProfileViewModel();
 
@@ -111,6 +112,7 @@ export default function AdminProfileScreen() {
                 <Text style={styles.sectionTitle}>Pengaturan</Text>
                 <View style={[styles.menuContainer, { backgroundColor: '#FFF', borderColor: '#EEE' }]}>
                     {renderMenuItem('create-outline', 'Edit Profil & Data', handleEditProfile)}
+                    {renderMenuItem('volume-high-outline', 'Pengaturan Suara', handleSoundSettings)}
                     {renderMenuItem('information-circle-outline', 'Edit Informasi Komplek', handleEditComplexInfo)}
                 </View>
 

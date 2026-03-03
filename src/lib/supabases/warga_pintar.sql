@@ -201,8 +201,8 @@ CREATE TABLE public.reports (
 );
 CREATE TABLE public.user_tokens (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
-  user_id uuid NOT NULL,
-  expo_push_token text NOT NULL UNIQUE,
+  user_id uuid NOT NULL UNIQUE,
+  expo_push_token text NOT NULL,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
   CONSTRAINT user_tokens_pkey PRIMARY KEY (id),

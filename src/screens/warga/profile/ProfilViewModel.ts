@@ -114,6 +114,10 @@ export const useProfilViewModel = () => {
         router.push('/profile/help');
     };
 
+    const handleSoundSettings = () => {
+        router.push('/profile/sounds' as any);
+    };
+
     const handleLogout = () => {
         setAlertConfig({
             title: 'Konfirmasi Keluar',
@@ -148,6 +152,7 @@ export const useProfilViewModel = () => {
         handleEditProfile,
         handleChangePassword,
         handleHelp,
+        handleSoundSettings,
         handleLogout,
         handleAvatarUpdate,
         isUploading,

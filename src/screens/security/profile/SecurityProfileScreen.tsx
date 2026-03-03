@@ -12,6 +12,7 @@ export default function SecurityProfileScreen() {
         user,
         handleEditProfile,
         handleChangePassword,
+        handleSoundSettings,
         handleLogout,
         handleAvatarUpdate,
         isUploading,
@@ -92,6 +93,7 @@ export default function SecurityProfileScreen() {
                 <View style={styles.menuContainer}>
                     {renderMenuItem('create-outline', 'Edit Profil', handleEditProfile)}
                     {renderMenuItem('lock-closed-outline', 'Ganti Password', handleChangePassword)}
+                    {renderMenuItem('volume-high-outline', 'Pengaturan Suara', handleSoundSettings)}
                 </View>
 
                 {/* Logout Button */}

@@ -140,10 +140,15 @@ export const useAdminProfileViewModel = () => {
         router.push('/admin/profile/edit-complex');
     };
 
+    const handleSoundSettings = () => {
+        router.push('/profile/sounds' as any);
+    };
+
     return {
         user,
         handleEditProfile,
         handleEditComplexInfo,
+        handleSoundSettings,
         handleLogout,
         handleAvatarUpdate,
         isUploading,

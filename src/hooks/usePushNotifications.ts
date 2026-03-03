@@ -6,15 +6,15 @@ import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../contexts/AuthContext';
 import { savePushToken, removePushToken } from '../services/notificationService';
+import { soundSettingsService } from '../services/notificationSettingsService';
 
 // Konfigurasi perilaku notifikasi saat aplikasi di foreground
 Notifications.setNotificationHandler({
     handleNotification: async (): Promise<Notifications.NotificationBehavior> => ({
-        // shouldShowAlert sudah dihapus karena deprecated
         shouldPlaySound: true,
         shouldSetBadge: true,
-        shouldShowBanner: true, // Muncul melayang di atas saat app terbuka
-        shouldShowList: true,   // Tersimpan di pusat notifikasi (tray)
+        shouldShowBanner: true,
+        shouldShowList: true,
     }),
 });
 
@@ -27,28 +27,23 @@ export const usePushNotifications = () => {
     const responseListener = useRef<Notifications.Subscription | null>(null);
 
     useEffect(() => {
-        // Hanya jalankan registrasi jika user sudah login
         if (!user) return;
 
-        registerForPushNotificationsAsync().then((token) => {
+        registerForPushNotificationsAsync(user).then((token) => {
             if (token && !token.startsWith('Error')) {
                 setExpoPushToken(token);
-                // Simpan token ke database dengan logika UPSERT (dari service)
                 savePushToken(user.id, token);
             }
         });
 
-        // Listener: Ketika notifikasi masuk saat aplikasi sedang terbuka
         notificationListener.current = Notifications.addNotificationReceivedListener((notification) => {
             setNotification(notification);
         });
 
-        // Listener: Ketika user MENGETUK/KLIK notifikasi
         responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
             const data = response.notification.request.content.data;
             console.log('User menekan notifikasi dengan data:', data);
 
-            // Navigasi otomatis berdasarkan payload data
             if (data?.url) {
                 router.push(data.url as any);
             } else if (data?.route) {
@@ -56,18 +51,16 @@ export const usePushNotifications = () => {
             }
         });
 
-        // Cleanup listener saat komponen di-unmount
         return () => {
             if (notificationListener.current) {
-                notificationListener.current.remove(); // Kembali ke cara ini
+                notificationListener.current.remove();
             }
             if (responseListener.current) {
-                responseListener.current.remove(); // Kembali ke cara ini
+                responseListener.current.remove();
             }
         };
     }, [user]);
 
-    // Fungsi untuk menghapus token saat logout (opsional tapi disarankan)
     const unregisterToken = async () => {
         if (user && expoPushToken) {
             await removePushToken(user.id, expoPushToken);
@@ -82,32 +75,45 @@ export const usePushNotifications = () => {
     };
 };
 
-async function registerForPushNotificationsAsync() {
+async function registerForPushNotificationsAsync(user: any) {
     let token;
 
-    // 1. Setup Channel khusus Android (Wajib untuk notifikasi muncul)
     if (Platform.OS === 'android') {
-        await Notifications.setNotificationChannelAsync('default', {
-            name: 'Warga Lokal',
+        const soundSettings = await soundSettingsService.getSettings(user?.id || '');
+
+        const notifSound = soundSettings?.notif_sound || 'notification_alert.wav';
+        const alertSound = soundSettings?.alert_sound || 'alarm-sound-effect.wav';
+        const vibrationEnabled = soundSettings?.vibration_enabled ?? true;
+
+        const notifChannelId = `default_${notifSound.split('.')[0]}`;
+        const sosChannelId = `sos_${alertSound.split('.')[0]}`;
+
+        await Notifications.setNotificationChannelAsync(notifChannelId, {
+            name: 'Warga Lokal (Pesan)',
             importance: Notifications.AndroidImportance.MAX,
-            vibrationPattern: [0, 250, 250, 250],
+            vibrationPattern: vibrationEnabled ? [0, 250, 250, 250] : undefined,
             lightColor: '#1B5E20',
+            sound: notifSound === 'default' ? undefined : notifSound,
         });
 
-        await Notifications.setNotificationChannelAsync('sos', {
-            name: 'Darurat / SOS',
+        await Notifications.setNotificationChannelAsync(sosChannelId, {
+            name: 'Warga Lokal (Darurat)',
             importance: Notifications.AndroidImportance.MAX,
-            vibrationPattern: [0, 500, 200, 500, 200, 500],
+            vibrationPattern: vibrationEnabled ? [0, 500, 200, 500, 200, 500] : undefined,
             lightColor: '#D32F2F',
+            sound: alertSound === 'default' ? undefined : alertSound,
+        });
+
+        await Notifications.setNotificationChannelAsync('default', {
+            name: 'Warga Lokal',
+            importance: Notifications.AndroidImportance.DEFAULT,
         });
     }
 
-    // 2. Cek apakah ini perangkat fisik
     if (Device.isDevice) {
         const { status: existingStatus } = await Notifications.getPermissionsAsync();
         let finalStatus = existingStatus;
 
-        // Minta izin jika belum diberikan
         if (existingStatus !== 'granted') {
             const { status } = await Notifications.requestPermissionsAsync();
             finalStatus = status;
@@ -118,7 +124,6 @@ async function registerForPushNotificationsAsync() {
             return;
         }
 
-        // 3. Ambil Token dari Expo
         try {
             const projectId =
                 Constants?.expoConfig?.extra?.eas?.projectId ??

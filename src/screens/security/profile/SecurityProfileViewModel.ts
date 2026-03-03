@@ -109,6 +109,10 @@ export const useSecurityProfileViewModel = () => {
         router.push('/security/change-password' as any);
     };
 
+    const handleSoundSettings = () => {
+        router.push('/profile/sounds' as any);
+    };
+
     const handleLogout = () => {
         setAlertConfig({
             title: 'Konfirmasi Keluar',
@@ -141,6 +145,7 @@ export const useSecurityProfileViewModel = () => {
         user,
         handleEditProfile,
         handleChangePassword,
+        handleSoundSettings,
         handleLogout,
         handleAvatarUpdate,
         isUploading,
