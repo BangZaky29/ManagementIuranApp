@@ -9,9 +9,11 @@ import { useAdminHomeViewModel } from './AdminHomeViewModel';
 import { styles } from './AdminHomeStyles';
 import { CustomAlertModal } from '../../components/CustomAlertModal';
 import { AdminSidebar } from '../../components/navigation/AdminSidebar';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function AdminHomeScreen() {
     const vm = useAdminHomeViewModel();
+    const { colors } = useTheme();
     const [sidebarVisible, setSidebarVisible] = useState(false);
 
     if (vm.isLoading) {
@@ -118,7 +120,7 @@ export default function AdminHomeScreen() {
                     {/* Pending Payments Banner */}
                     {vm.pendingPayments > 0 && (
                         <TouchableOpacity
-                            style={[styles.actionBanner, { backgroundColor: '#F57C00' }]}
+                            style={[styles.actionBanner, { backgroundColor: colors.status.pending.text }]}
                             onPress={vm.navigateToPaymentConfirmation}
                             activeOpacity={0.8}
                         >
@@ -140,7 +142,7 @@ export default function AdminHomeScreen() {
                     {/* Pending Reports Banner */}
                     {vm.pendingReports > 0 && (
                         <TouchableOpacity
-                            style={[styles.actionBanner, { backgroundColor: '#1976D2' }]}
+                            style={[styles.actionBanner, { backgroundColor: colors.status.diproses.text }]}
                             onPress={vm.navigateToReports}
                             activeOpacity={0.8}
                         >
@@ -181,13 +183,13 @@ export default function AdminHomeScreen() {
                         let bgColor = '#F5F5F5';
 
                         if (log.action_type === 'payment') {
-                            iconName = 'wallet'; iconColor = '#4CAF50'; bgColor = '#E8F5E9';
+                            iconName = 'wallet'; iconColor = colors.status.selesai.text; bgColor = colors.status.selesai.bg;
                         } else if (log.action_type === 'report') {
-                            iconName = 'chatbubble-ellipses'; iconColor = '#2196F3'; bgColor = '#E3F2FD';
+                            iconName = 'chatbubble-ellipses'; iconColor = colors.status.diproses.text; bgColor = colors.status.diproses.bg;
                         } else if (log.action_type === 'panic') {
-                            iconName = 'alert-circle'; iconColor = '#F44336'; bgColor = '#FFEBEE';
+                            iconName = 'alert-circle'; iconColor = colors.danger; bgColor = '#FFEBEE';
                         } else if (log.action_type === 'visitor') {
-                            iconName = 'id-card'; iconColor = '#FF9800'; bgColor = '#FFF3E0';
+                            iconName = 'id-card'; iconColor = colors.status.menunggu.text; bgColor = colors.status.menunggu.bg;
                         }
 
                         return (
@@ -221,15 +223,15 @@ export default function AdminHomeScreen() {
                                                     paddingVertical: 2,
                                                     borderRadius: 4,
                                                 },
-                                                log.profiles.role === 'admin' ? { backgroundColor: '#E3F2FD' } :
-                                                    log.profiles.role === 'security' ? { backgroundColor: '#FFF3E0' } :
-                                                        { backgroundColor: '#E8F5E9' } // warga
+                                                log.profiles.role === 'admin' ? { backgroundColor: colors.status.admin.bg } :
+                                                    log.profiles.role === 'security' ? { backgroundColor: colors.status.security.bg } :
+                                                        { backgroundColor: colors.status.warga.bg } // warga
                                             ]}>
                                                 <Text style={[
                                                     { fontSize: 9, fontWeight: 'bold' },
-                                                    log.profiles.role === 'admin' ? { color: '#1565C0' } :
-                                                        log.profiles.role === 'security' ? { color: '#E65100' } :
-                                                            { color: '#2E7D32' } // warga
+                                                    log.profiles.role === 'admin' ? { color: colors.status.admin.text } :
+                                                        log.profiles.role === 'security' ? { color: colors.status.security.text } :
+                                                            { color: colors.status.warga.text } // warga
                                                 ]}>
                                                     {log.profiles.role.toUpperCase()}
                                                 </Text>

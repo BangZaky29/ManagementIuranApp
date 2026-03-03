@@ -8,6 +8,7 @@ import { styles } from './LaporanListStyles';
 import { CustomHeader } from '../../../components/CustomHeader';
 import { Colors } from '../../../constants/Colors';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 // Type definition based on db schema
 type Report = {
@@ -29,6 +30,7 @@ const CATEGORIES = ['Semua', 'Fasilitas', 'Keamanan', 'Kebersihan', 'Lainnya'];
 const STATUSES = ['Semua', 'Menunggu', 'Diproses', 'Selesai', 'Ditolak'];
 
 export default function LaporanListScreen() {
+    const { colors } = useTheme();
     const router = useRouter();
     const [reports, setReports] = useState<Report[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -96,13 +98,13 @@ export default function LaporanListScreen() {
     }, []);
 
 
-    const getStatusColor = (status: string) => {
+    const getStatusStyle = (status: string) => {
         switch (status) {
-            case 'Menunggu': return Colors.warning;
-            case 'Diproses': return Colors.primary;
-            case 'Selesai': return Colors.success;
-            case 'Ditolak': return Colors.danger;
-            default: return Colors.textSecondary;
+            case 'Menunggu': return { bg: colors.status.menunggu.bg, text: colors.status.menunggu.text };
+            case 'Diproses': return { bg: colors.status.diproses.bg, text: colors.status.diproses.text };
+            case 'Selesai': return { bg: colors.status.selesai.bg, text: colors.status.selesai.text };
+            case 'Ditolak': return { bg: colors.status.ditolak.bg, text: colors.status.ditolak.text };
+            default: return { bg: '#F3F4F6', text: colors.textSecondary };
         }
     };
 
@@ -154,8 +156,8 @@ export default function LaporanListScreen() {
                         </Text>
                     </View>
                 </View>
-                <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
-                    <Text style={styles.statusText}>{item.status}</Text>
+                <View style={[styles.statusBadge, { backgroundColor: getStatusStyle(item.status).bg }]}>
+                    <Text style={[styles.statusText, { color: getStatusStyle(item.status).text }]}>{item.status}</Text>
                 </View>
             </View>
 
@@ -174,13 +176,13 @@ export default function LaporanListScreen() {
                         <Text style={[styles.headerTitle]}>Laporan Warga</Text>
                         <View style={{ flexDirection: 'row', marginLeft: 8, gap: 4 }}>
                             {pendingCount > 0 && (
-                                <View style={[styles.headerBubble, { backgroundColor: Colors.success }]}>
-                                    <Text style={styles.bubbleText}>{pendingCount}</Text>
+                                <View style={[styles.headerBubble, { backgroundColor: colors.status.menunggu.bg }]}>
+                                    <Text style={[styles.bubbleText, { color: colors.status.menunggu.text }]}>{pendingCount}</Text>
                                 </View>
                             )}
                             {processingCount > 0 && (
-                                <View style={[styles.headerBubble, { backgroundColor: Colors.warning }]}>
-                                    <Text style={styles.bubbleText}>{processingCount}</Text>
+                                <View style={[styles.headerBubble, { backgroundColor: colors.status.diproses.bg }]}>
+                                    <Text style={[styles.bubbleText, { color: colors.status.diproses.text }]}>{processingCount}</Text>
                                 </View>
                             )}
                         </View>

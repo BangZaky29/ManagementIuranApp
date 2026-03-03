@@ -6,6 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SIDEBAR_WIDTH = SCREEN_WIDTH * 0.75;
@@ -32,6 +33,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
 }) => {
     const router = useRouter();
     const { user, profile, signOut } = useAuth();
+    const { colors } = useTheme();
     const translateX = useRef(new Animated.Value(-SIDEBAR_WIDTH)).current;
     const backdropOpacity = useRef(new Animated.Value(0)).current;
 
@@ -140,21 +142,21 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                             {item.key === 'laporan' && (
                                 <View style={{ flexDirection: 'row', gap: 4, marginLeft: 8 }}>
                                     {pendingReports > 0 && (
-                                        <View style={[styles.menuBadge, { backgroundColor: '#4CAF50' }]}>
-                                            <Text style={styles.menuBadgeText}>{pendingReports}</Text>
+                                        <View style={[styles.menuBadge, { backgroundColor: colors.status.menunggu.bg }]}>
+                                            <Text style={[styles.menuBadgeText, { color: colors.status.menunggu.text }]}>{pendingReports}</Text>
                                         </View>
                                     )}
                                     {processingReports > 0 && (
-                                        <View style={[styles.menuBadge, { backgroundColor: '#FFC107' }]}>
-                                            <Text style={[styles.menuBadgeText, { color: '#000' }]}>{processingReports}</Text>
+                                        <View style={[styles.menuBadge, { backgroundColor: colors.status.diproses.bg }]}>
+                                            <Text style={[styles.menuBadgeText, { color: colors.status.diproses.text }]}>{processingReports}</Text>
                                         </View>
                                     )}
                                 </View>
                             )}
 
                             {item.key === 'iuran' && pendingPayments > 0 && (
-                                <View style={styles.menuBadge}>
-                                    <Text style={styles.menuBadgeText}>{pendingPayments}</Text>
+                                <View style={[styles.menuBadge, { backgroundColor: colors.status.pending.bg }]}>
+                                    <Text style={[styles.menuBadgeText, { color: colors.status.pending.text }]}>{pendingPayments}</Text>
                                 </View>
                             )}
                             <Ionicons name="chevron-forward" size={18} color="#999" style={{ marginLeft: 'auto' }} />

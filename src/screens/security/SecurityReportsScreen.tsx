@@ -27,10 +27,10 @@ export default function SecurityReportsScreen() {
 
     const getStatusStyle = (status: string) => {
         switch (status) {
-            case 'Selesai': return { bg: '#E8F5E9', text: colors.success };
-            case 'Diproses': return { bg: '#E3F2FD', text: colors.warning };
-            case 'Ditolak': return { bg: '#FFEBEE', text: colors.danger };
-            default: return { bg: '#FFF3E0', text: '#E65100' };
+            case 'Selesai': return { bg: colors.status.selesai.bg, text: colors.status.selesai.text };
+            case 'Diproses': return { bg: colors.status.diproses.bg, text: colors.status.diproses.text };
+            case 'Ditolak': return { bg: colors.status.ditolak.bg, text: colors.status.ditolak.text };
+            default: return { bg: colors.status.menunggu.bg, text: colors.status.menunggu.text };
         }
     };
 

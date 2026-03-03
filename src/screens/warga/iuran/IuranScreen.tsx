@@ -95,11 +95,11 @@ export default function IuranScreen() {
                             {/* Stats Row */}
                             <View style={s.statsRow}>
                                 <View style={s.statItem}>
-                                    <View style={[s.statDot, { backgroundColor: '#4CAF50' }]} />
+                                    <View style={[s.statDot, { backgroundColor: colors.status.selesai.text }]} />
                                     <Text style={s.statText}>Lunas {paidCount}</Text>
                                 </View>
                                 <View style={s.statItem}>
-                                    <View style={[s.statDot, { backgroundColor: '#FF9800' }]} />
+                                    <View style={[s.statDot, { backgroundColor: colors.status.pending.text }]} />
                                     <Text style={s.statText}>Pending {pendingCount}</Text>
                                 </View>
                                 <View style={s.statItem}>
@@ -108,7 +108,7 @@ export default function IuranScreen() {
                                 </View>
                                 {rejectedCount > 0 && (
                                     <View style={s.statItem}>
-                                        <View style={[s.statDot, { backgroundColor: '#F44336' }]} />
+                                        <View style={[s.statDot, { backgroundColor: colors.status.ditolak.text }]} />
                                         <Text style={s.statText}>Ditolak {rejectedCount}</Text>
                                     </View>
                                 )}
@@ -158,17 +158,17 @@ export default function IuranScreen() {
                                     let statusIcon = 'checkmark-circle';
 
                                     if (period.status === 'overdue') {
-                                        statusColor = '#D32F2F'; statusLabel = 'Tunggakan'; statusIcon = 'alert-circle';
+                                        statusColor = colors.status.terlambat.text; statusLabel = 'Tunggakan'; statusIcon = 'alert-circle';
                                     } else if (period.status === 'pending') {
-                                        statusColor = '#FF9800'; statusLabel = 'Menunggu Konfirmasi'; statusIcon = 'time';
+                                        statusColor = colors.status.pending.text; statusLabel = 'Menunggu Konfirmasi'; statusIcon = 'time';
                                     } else if (period.status === 'unpaid') {
-                                        statusColor = period.isCurrentMonth ? '#F57C00' : '#888';
+                                        statusColor = period.isCurrentMonth ? colors.status.pending.text : '#888';
                                         statusLabel = period.isCurrentMonth ? 'Bulan Ini' : 'Belum Dibayar';
                                         statusIcon = 'ellipse-outline';
                                     } else if (period.status === 'partial') {
-                                        statusColor = '#F57C00'; statusLabel = 'Dibayar Sebagian'; statusIcon = 'pie-chart';
+                                        statusColor = colors.status.pending.text; statusLabel = 'Dibayar Sebagian'; statusIcon = 'pie-chart';
                                     } else if (period.status === 'paid') {
-                                        statusColor = '#4CAF50'; statusLabel = 'Lunas'; statusIcon = 'checkmark-circle';
+                                        statusColor = colors.status.lunas.text; statusLabel = 'Lunas'; statusIcon = 'checkmark-circle';
                                     }
 
                                     const periodRejectedCount = period.items.filter(i => i.status === 'rejected').length;
@@ -248,7 +248,7 @@ export default function IuranScreen() {
                                                                             <Text style={[s.itemName, (!isItemPayable && item.status !== 'rejected') && { color: '#888' }]}>{item.fee.name}</Text>
                                                                             <Text style={[
                                                                                 s.itemStatusLabel,
-                                                                                { color: item.status === 'paid' ? '#4CAF50' : item.status === 'pending' ? '#FF9800' : item.status === 'rejected' ? '#F44336' : '#888' }
+                                                                                { color: item.status === 'paid' ? colors.status.lunas.text : item.status === 'pending' ? colors.status.pending.text : item.status === 'rejected' ? colors.status.ditolak.text : '#888' }
                                                                             ]}>
                                                                                 {item.status === 'paid' ? 'Lunas' : item.status === 'pending' ? 'Menunggu Konfirmasi' : item.status === 'rejected' ? 'Ditolak' : 'Belum Dibayar'}
                                                                             </Text>
@@ -300,7 +300,7 @@ export default function IuranScreen() {
                         {/* Empty state (Lunas atau Kosong) */}
                         {billSummary && unpaidPeriods.length === 0 && (
                             <View style={s.emptyBox}>
-                                <Ionicons name={isAllPaid ? "checkmark-circle" : "receipt-outline"} size={48} color={isAllPaid ? "#4CAF50" : "#CCC"} />
+                                <Ionicons name={isAllPaid ? "checkmark-circle" : "receipt-outline"} size={48} color={isAllPaid ? colors.status.lunas.text : "#CCC"} />
                                 <Text style={s.emptyTitle}>{isAllPaid ? "Semua Kewajiban Lunas!" : "Belum Ada Iuran"}</Text>
                                 <Text style={s.emptySubtext}>{paidMessage}</Text>
                                 <TouchableOpacity
@@ -370,7 +370,7 @@ export default function IuranScreen() {
                                                                     <Ionicons
                                                                         name={item.status === 'Lunas' ? "checkmark-circle" : item.status === 'Ditolak' ? "close-circle" : "time"}
                                                                         size={20}
-                                                                        color={item.status === 'Lunas' ? "#4CAF50" : item.status === 'Ditolak' ? "#F44336" : "#FF9800"}
+                                                                        color={item.status === 'Lunas' ? colors.status.lunas.text : item.status === 'Ditolak' ? colors.status.ditolak.text : colors.status.pending.text}
                                                                         style={{ marginRight: 10 }}
                                                                     />
                                                                     <View style={{ flex: 1 }}>

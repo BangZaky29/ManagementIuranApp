@@ -24,6 +24,26 @@ export const Colors = {
     danger: '#FF6B6B',
     success: '#78C51C', // Match primary green
     warning: '#FFCC00',
+    info: '#2196F3',
+
+    // Centralized Status Palette
+    status: {
+        // Reports
+        menunggu: { text: '#F57C00', bg: '#FFF3E0' }, // Orange
+        diproses: { text: '#1976D2', bg: '#E3F2FD' }, // Blue
+        selesai: { text: '#388E3C', bg: '#E8F5E9' },  // Green
+        ditolak: { text: '#D32F2F', bg: '#FFEBEE' },  // Red
+
+        // Payments
+        pending: { text: '#F57C00', bg: '#FFF3E0' },
+        lunas: { text: '#388E3C', bg: '#E8F5E9' },
+        terlambat: { text: '#D32F2F', bg: '#FFEBEE' },
+
+        // Roles
+        admin: { text: '#1565C0', bg: '#E3F2FD' },
+        security: { text: '#E65100', bg: '#FFF3E0' },
+        warga: { text: '#2E7D32', bg: '#E8F5E9' },
+    },
 
     // Navigation Themes
     light: {
@@ -64,6 +84,19 @@ export interface ThemeColors {
     danger: string;
     success: string;
     warning: string;
+    info: string;
+    status: {
+        menunggu: { text: string; bg: string };
+        diproses: { text: string; bg: string };
+        selesai: { text: string; bg: string };
+        ditolak: { text: string; bg: string };
+        pending: { text: string; bg: string };
+        lunas: { text: string; bg: string };
+        terlambat: { text: string; bg: string };
+        admin: { text: string; bg: string };
+        security: { text: string; bg: string };
+        warga: { text: string; bg: string };
+    };
     statusBar: 'dark-content' | 'light-content';
 }
 
@@ -86,6 +119,8 @@ export const getColors = (scheme: 'light' | 'dark'): ThemeColors => {
             danger: '#FF6B6B',
             success: '#78C51C',
             warning: '#FFCC00',
+            info: '#2196F3',
+            status: Colors.status,
             statusBar: 'light-content',
         };
     }
@@ -106,6 +141,8 @@ export const getColors = (scheme: 'light' | 'dark'): ThemeColors => {
         danger: '#FF6B6B',
         success: '#78C51C',
         warning: '#FFCC00',
+        info: '#2196F3',
+        status: Colors.status,
         statusBar: 'dark-content',
     };
 };

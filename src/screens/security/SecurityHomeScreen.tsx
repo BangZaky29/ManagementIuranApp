@@ -10,9 +10,11 @@ import { styles } from './SecurityHomeStyles';
 import { CustomAlertModal } from '../../components/CustomAlertModal';
 import { CustomHeader } from '../../components/CustomHeader';
 import { PanicLogCard } from '../../components/PanicLogCard';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function SecurityHomeScreen() {
     const vm = useSecurityHomeViewModel();
+    const { colors } = useTheme();
 
     if (vm.isLoading) {
         return (
@@ -56,12 +58,12 @@ export default function SecurityHomeScreen() {
                         {/* Bubbles at top right */}
                         <View style={{ position: 'absolute', top: 8, right: 8, flexDirection: 'row', gap: 4 }}>
                             {vm.stats.wargaActive > 0 && (
-                                <View style={{ backgroundColor: '#4CAF50', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
+                                <View style={{ backgroundColor: colors.status.warga.text, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
                                     <Text style={{ fontSize: 10, color: '#FFF', fontWeight: 'bold' }}>{vm.stats.wargaActive}</Text>
                                 </View>
                             )}
                             {vm.stats.wargaInactive > 0 && (
-                                <View style={{ backgroundColor: '#F44336', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
+                                <View style={{ backgroundColor: colors.danger, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
                                     <Text style={{ fontSize: 10, color: '#FFF', fontWeight: 'bold' }}>{vm.stats.wargaInactive}</Text>
                                 </View>
                             )}
@@ -128,13 +130,13 @@ export default function SecurityHomeScreen() {
                             <Ionicons name="document-text" size={24} color="#3F51B5" />
                             <View style={{ position: 'absolute', top: -4, right: -4, flexDirection: 'row', gap: 2 }}>
                                 {vm.pendingReportsCount > 0 && (
-                                    <View style={[styles.badge, { backgroundColor: '#4CAF50' }]}>
-                                        <Text style={styles.badgeText}>{vm.pendingReportsCount}</Text>
+                                    <View style={[styles.badge, { backgroundColor: colors.status.menunggu.bg }]}>
+                                        <Text style={[styles.badgeText, { color: colors.status.menunggu.text }]}>{vm.pendingReportsCount}</Text>
                                     </View>
                                 )}
                                 {vm.processingReportsCount > 0 && (
-                                    <View style={[styles.badge, { backgroundColor: '#FBC02D' }]}>
-                                        <Text style={[styles.badgeText, { color: '#000' }]}>{vm.processingReportsCount}</Text>
+                                    <View style={[styles.badge, { backgroundColor: colors.status.diproses.bg }]}>
+                                        <Text style={[styles.badgeText, { color: colors.status.diproses.text }]}>{vm.processingReportsCount}</Text>
                                     </View>
                                 )}
                             </View>
@@ -200,8 +202,8 @@ export default function SecurityHomeScreen() {
                                         <View style={[
                                             styles.statusDot,
                                             {
-                                                backgroundColor: report.status === 'Selesai' ? '#4CAF50' :
-                                                    report.status === 'Diproses' ? '#2196F3' : '#FF9800'
+                                                backgroundColor: report.status === 'Selesai' ? colors.status.selesai.text :
+                                                    report.status === 'Diproses' ? colors.status.diproses.text : colors.status.menunggu.text
                                             }
                                         ]} />
                                     </View>

@@ -130,18 +130,20 @@ export const useReportDetailViewModel = () => {
     // Helpers
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'Selesai': return Colors.success;
-            case 'Diproses': return Colors.warning;
-            case 'Ditolak': return Colors.danger;
+            case 'Selesai': return Colors.status.selesai.text;
+            case 'Diproses': return Colors.status.diproses.text;
+            case 'Menunggu': return Colors.status.menunggu.text;
+            case 'Ditolak': return Colors.status.ditolak.text;
             default: return Colors.textSecondary;
         }
     };
 
     const getStatusBg = (status: string) => {
         switch (status) {
-            case 'Selesai': return '#E8F5E9';
-            case 'Diproses': return '#FFF3E0';
-            case 'Ditolak': return '#FFEBEE';
+            case 'Selesai': return Colors.status.selesai.bg;
+            case 'Diproses': return Colors.status.diproses.bg;
+            case 'Menunggu': return Colors.status.menunggu.bg;
+            case 'Ditolak': return Colors.status.ditolak.bg;
             default: return '#F5F5F5';
         }
     };

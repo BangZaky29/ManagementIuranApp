@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
 import { formatDateTimeSafe } from '../utils/dateUtils';
 import { PanicLog } from '../services/panicService';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface PanicLogCardProps {
     log: PanicLog;
@@ -12,6 +13,7 @@ interface PanicLogCardProps {
 }
 
 export const PanicLogCard: React.FC<PanicLogCardProps> = ({ log, onResolve, showResolveButton = true }) => {
+    const { colors } = useTheme();
     const isResolved = !!log.resolved_at;
     const hasLocation = log.location && log.location.startsWith('http');
 
@@ -37,7 +39,7 @@ export const PanicLogCard: React.FC<PanicLogCardProps> = ({ log, onResolve, show
     return (
         <View style={[
             styles.card,
-            { borderLeftColor: isResolved ? '#4CAF50' : '#F44336' }
+            { borderLeftColor: isResolved ? colors.status.selesai.text : colors.status.ditolak.text }
         ]}>
             {/* Header Area */}
             <View style={styles.header}>
@@ -45,8 +47,8 @@ export const PanicLogCard: React.FC<PanicLogCardProps> = ({ log, onResolve, show
                     {log.profiles?.avatar_url ? (
                         <Image source={{ uri: log.profiles.avatar_url }} style={styles.avatar} />
                     ) : (
-                        <View style={[styles.avatar, styles.avatarPlaceholder]}>
-                            <Ionicons name="person" size={20} color="#F44336" />
+                        <View style={[styles.avatar, styles.avatarPlaceholder, { backgroundColor: colors.status.ditolak.bg }]}>
+                            <Ionicons name="person" size={20} color={colors.status.ditolak.text} />
                         </View>
                     )}
                     <View style={styles.nameContainer}>
@@ -57,9 +59,9 @@ export const PanicLogCard: React.FC<PanicLogCardProps> = ({ log, onResolve, show
                     </View>
                 </View>
                 <View style={styles.statusContainer}>
-                    <View style={[styles.badge, { backgroundColor: isResolved ? '#E8F5E9' : '#FFEBEE' }]}>
-                        {!isResolved && <View style={styles.pulseDot} />}
-                        <Text style={[styles.badgeText, { color: isResolved ? '#2E7D32' : '#C62828' }]}>
+                    <View style={[styles.badge, { backgroundColor: isResolved ? colors.status.selesai.bg : colors.status.ditolak.bg }]}>
+                        {!isResolved && <View style={[styles.pulseDot, { backgroundColor: colors.status.ditolak.text }]} />}
+                        <Text style={[styles.badgeText, { color: isResolved ? colors.status.selesai.text : colors.status.ditolak.text }]}>
                             {isResolved ? 'SELESAI' : 'AKTIF'}
                         </Text>
                     </View>
@@ -92,7 +94,7 @@ export const PanicLogCard: React.FC<PanicLogCardProps> = ({ log, onResolve, show
             {/* Actions */}
             {!isResolved && showResolveButton && (
                 <TouchableOpacity
-                    style={styles.resolveButton}
+                    style={[styles.resolveButton, { backgroundColor: colors.status.selesai.text }]}
                     onPress={() => onResolve?.(log)}
                 >
                     <Ionicons name="checkmark-circle-outline" size={20} color="#FFF" />

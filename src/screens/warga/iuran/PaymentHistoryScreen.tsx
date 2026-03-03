@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, StatusBa
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../../constants/Colors';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { useHistoryViewModel } from './HistoryViewModel';
 import { FilterCalendar } from '../../../components/FilterCalendar';
 import { formatDateSafe } from '../../../utils/dateUtils';
@@ -32,9 +32,9 @@ export default function PaymentHistoryScreen() {
         handleDownloadPeriodReceipt,
         handleDownloadAllReceipts,
         isDownloadingId,
-        isLoading,
         refresh
     } = useHistoryViewModel();
+    const { colors } = useTheme();
 
     const renderItem = ({ item: group }: { item: any }) => {
         const rejectedHistoryCount = group.items.filter((i: any) => i.status === 'Ditolak').length;
@@ -51,10 +51,10 @@ export default function PaymentHistoryScreen() {
                         <Text style={s.periodMonth}>{group.periodName}</Text>
                         <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginTop: 2 }}>
                             {nonRejectedHistoryCount > 0 && (
-                                <Text style={[s.periodStatus, { color: '#4CAF50', marginTop: 0 }]}>Terbayar {nonRejectedHistoryCount} iuran</Text>
+                                <Text style={[s.periodStatus, { color: colors.status.lunas.text, marginTop: 0 }]}>Terbayar {nonRejectedHistoryCount} iuran</Text>
                             )}
                             {rejectedHistoryCount > 0 && (
-                                <Text style={[s.periodStatus, { color: '#D32F2F', marginTop: 0, fontWeight: '500' }]}>
+                                <Text style={[s.periodStatus, { color: colors.status.ditolak.text, marginTop: 0, fontWeight: '500' }]}>
                                     {nonRejectedHistoryCount > 0 ? '• ' : ''}Pembayaran ditolak {rejectedHistoryCount}
                                 </Text>
                             )}
@@ -79,7 +79,7 @@ export default function PaymentHistoryScreen() {
                                         <Ionicons
                                             name={item.status === 'Lunas' ? "checkmark-circle" : item.status === 'Ditolak' ? "close-circle" : "time"}
                                             size={20}
-                                            color={item.status === 'Lunas' ? "#4CAF50" : item.status === 'Ditolak' ? "#F44336" : "#FF9800"}
+                                            color={item.status === 'Lunas' ? colors.status.lunas.text : item.status === 'Ditolak' ? colors.status.ditolak.text : colors.status.pending.text}
                                             style={{ marginRight: 10 }}
                                         />
                                         <View style={{ flex: 1 }}>
@@ -131,7 +131,7 @@ export default function PaymentHistoryScreen() {
                                             )}
                                         </View>
                                         <View style={{ alignItems: 'flex-end' }}>
-                                            <Text style={[s.itemAmountText, item.status !== 'Lunas' && { color: item.status === 'Ditolak' ? '#F44336' : '#FF9800' }]}>{item.amountFormatted}</Text>
+                                            <Text style={[s.itemAmountText, item.status !== 'Lunas' && { color: item.status === 'Ditolak' ? colors.status.ditolak.text : colors.status.pending.text }]}>{item.amountFormatted}</Text>
 
                                             {item.status === 'Lunas' && (
                                                 <TouchableOpacity

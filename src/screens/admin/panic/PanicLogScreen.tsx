@@ -133,7 +133,7 @@ export default function PanicLogScreen() {
         return (
             <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <ActivityIndicator size="large" color="#F44336" />
+                    <ActivityIndicator size="large" color={colors.status.ditolak.text} />
                 </View>
             </SafeAreaView>
         );
@@ -150,14 +150,14 @@ export default function PanicLogScreen() {
                 <View>
                     <Text style={styles.headerTitle}>🚨 Log Darurat</Text>
                     <View style={styles.headerSubtitleRow}>
-                        <View style={[styles.indicator, { backgroundColor: showResolved ? '#4CAF50' : '#F44336' }]} />
+                        <View style={[styles.indicator, { backgroundColor: showResolved ? colors.status.selesai.text : colors.status.ditolak.text }]} />
                         <Text style={styles.headerSubtitle}>
                             {logs.length} Sinyal {showResolved ? 'Selesai' : 'Aktif'}
                         </Text>
                     </View>
                 </View>
                 <TouchableOpacity
-                    style={[styles.filterButton, { backgroundColor: showResolved ? '#E8F5E9' : '#FFEBEE' }]}
+                    style={[styles.filterButton, { backgroundColor: showResolved ? colors.status.selesai.bg : colors.status.ditolak.bg }]}
                     onPress={() => {
                         setShowResolved(!showResolved);
                         setVisibleCount(5); // Reset count when filter changes
@@ -166,10 +166,10 @@ export default function PanicLogScreen() {
                     <Ionicons
                         name={showResolved ? "checkmark-circle" : "alert-circle"}
                         size={16}
-                        color={showResolved ? '#4CAF50' : '#F44336'}
+                        color={showResolved ? colors.status.selesai.text : colors.status.ditolak.text}
                         style={{ marginRight: 6 }}
                     />
-                    <Text style={{ fontSize: 13, fontWeight: '700', color: showResolved ? '#4CAF50' : '#F44336' }}>
+                    <Text style={{ fontSize: 13, fontWeight: '700', color: showResolved ? colors.status.selesai.text : colors.status.ditolak.text }}>
                         {showResolved ? 'Riwayat' : 'Aktif'}
                     </Text>
                 </TouchableOpacity>
@@ -181,12 +181,12 @@ export default function PanicLogScreen() {
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#F44336']} />}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.status.ditolak.text]} />}
                 ListFooterComponent={renderFooter}
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
-                        <View style={styles.emptyIconCircle}>
-                            <Ionicons name="shield-checkmark" size={64} color="#4CAF50" />
+                        <View style={[styles.emptyIconCircle, { backgroundColor: colors.status.selesai.bg }]}>
+                            <Ionicons name="shield-checkmark" size={64} color={colors.status.selesai.text} />
                         </View>
                         <Text style={styles.emptyTitle}>
                             {showResolved ? 'Belum Ada Riwayat' : 'Lingkungan Aman'}

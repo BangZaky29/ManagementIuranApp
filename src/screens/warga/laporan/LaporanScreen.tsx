@@ -20,18 +20,20 @@ export default function LaporanScreen() {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'Selesai': return colors.success;
-            case 'Diproses': return colors.warning;
-            case 'Ditolak': return colors.danger;
+            case 'Selesai': return colors.status.selesai.text;
+            case 'Diproses': return colors.status.diproses.text;
+            case 'Menunggu': return colors.status.menunggu.text;
+            case 'Ditolak': return colors.status.ditolak.text;
             default: return colors.textSecondary;
         }
     };
 
     const getStatusBg = (status: string) => {
         switch (status) {
-            case 'Selesai': return '#E8F5E9';
-            case 'Diproses': return '#FFF3E0';
-            case 'Ditolak': return '#FFEBEE';
+            case 'Selesai': return colors.status.selesai.bg;
+            case 'Diproses': return colors.status.diproses.bg;
+            case 'Menunggu': return colors.status.menunggu.bg;
+            case 'Ditolak': return colors.status.ditolak.bg;
             default: return '#F5F5F5';
         }
     };

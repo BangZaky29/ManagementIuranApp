@@ -16,10 +16,12 @@ import {
     confirmPayment,
     rejectPayment,
 } from '../../../services/paymentConfirmationService';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
 export default function PaymentConfirmationDetailScreen() {
+    const { colors } = useTheme();
     const router = useRouter();
     const { user } = useAuth();
     const { id } = useLocalSearchParams<{ id: string }>();
@@ -150,10 +152,10 @@ export default function PaymentConfirmationDetailScreen() {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'pending': return Colors.warning;
-            case 'paid': return '#2E7D32';
-            case 'rejected': return Colors.danger;
-            default: return Colors.textSecondary;
+            case 'pending': return colors.status.pending.text;
+            case 'paid': return colors.status.selesai.text;
+            case 'rejected': return colors.status.ditolak.text;
+            default: return colors.textSecondary;
         }
     };
 
@@ -168,9 +170,9 @@ export default function PaymentConfirmationDetailScreen() {
 
     const getStatusBg = (status: string) => {
         switch (status) {
-            case 'pending': return '#FFF8E1';
-            case 'paid': return '#E8F5E9';
-            case 'rejected': return '#FFEBEE';
+            case 'pending': return colors.status.pending.bg;
+            case 'paid': return colors.status.selesai.bg;
+            case 'rejected': return colors.status.ditolak.bg;
             default: return '#F5F5F5';
         }
     };
@@ -325,22 +327,22 @@ export default function PaymentConfirmationDetailScreen() {
 
                 {/* Rejection Reason (if rejected) */}
                 {payment.status === 'rejected' && payment.rejection_reason && (
-                    <View style={styles.rejectionBox}>
-                        <Ionicons name="alert-circle-outline" size={20} color={Colors.danger} />
+                    <View style={[styles.rejectionBox, { backgroundColor: colors.status.ditolak.bg }]}>
+                        <Ionicons name="alert-circle-outline" size={20} color={colors.status.ditolak.text} />
                         <View style={{ flex: 1 }}>
-                            <Text style={styles.rejectionTitle}>Alasan Penolakan</Text>
-                            <Text style={styles.rejectionText}>{payment.rejection_reason}</Text>
+                            <Text style={[styles.rejectionTitle, { color: colors.status.ditolak.text }]}>Alasan Penolakan</Text>
+                            <Text style={[styles.rejectionText, { color: colors.status.ditolak.text }]}>{payment.rejection_reason}</Text>
                         </View>
                     </View>
                 )}
 
                 {/* Admin Notes (if confirmed) */}
                 {payment.status === 'paid' && payment.admin_notes && (
-                    <View style={styles.notesBox}>
-                        <Ionicons name="chatbubble-outline" size={18} color={Colors.green4} />
+                    <View style={[styles.notesBox, { backgroundColor: colors.status.selesai.bg }]}>
+                        <Ionicons name="chatbubble-outline" size={18} color={colors.status.selesai.text} />
                         <View style={{ flex: 1 }}>
-                            <Text style={styles.notesTitle}>Catatan Admin</Text>
-                            <Text style={styles.notesText}>{payment.admin_notes}</Text>
+                            <Text style={[styles.notesTitle, { color: colors.status.selesai.text }]}>Catatan Admin</Text>
+                            <Text style={[styles.notesText, { color: colors.textPrimary }]}>{payment.admin_notes}</Text>
                         </View>
                     </View>
                 )}

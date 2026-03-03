@@ -100,19 +100,19 @@ export default function TimelineScreen() {
                                     let statusIcon = 'checkmark-circle';
 
                                     if (period.status === 'overdue') {
-                                        statusColor = '#D32F2F'; statusLabel = 'Tunggakan'; statusIcon = 'alert-circle';
+                                        statusColor = colors.status.terlambat.text; statusLabel = 'Tunggakan'; statusIcon = 'alert-circle';
                                     } else if (period.status === 'pending') {
-                                        statusColor = '#FF9800'; statusLabel = 'Menunggu Konfirmasi'; statusIcon = 'time';
+                                        statusColor = colors.status.pending.text; statusLabel = 'Menunggu Konfirmasi'; statusIcon = 'time';
                                     } else if (period.status === 'unpaid') {
-                                        statusColor = period.isCurrentMonth ? '#F57C00' : '#888';
+                                        statusColor = period.isCurrentMonth ? colors.status.pending.text : '#888';
                                         statusLabel = period.isCurrentMonth ? 'Bulan Ini' : 'Belum Dibayar';
                                         statusIcon = 'ellipse-outline';
                                     } else if (period.status === 'partial') {
-                                        statusColor = '#F57C00'; statusLabel = 'Dibayar Sebagian'; statusIcon = 'pie-chart';
+                                        statusColor = colors.status.pending.text; statusLabel = 'Dibayar Sebagian'; statusIcon = 'pie-chart';
                                     } else if (period.status === 'rejected') {
-                                        statusColor = '#F44336'; statusLabel = 'Ditolak'; statusIcon = 'close-circle';
+                                        statusColor = colors.status.ditolak.text; statusLabel = 'Ditolak'; statusIcon = 'close-circle';
                                     } else if (period.status === 'paid') {
-                                        statusColor = '#4CAF50'; statusLabel = 'Lunas'; statusIcon = 'checkmark-circle';
+                                        statusColor = colors.status.lunas.text; statusLabel = 'Lunas'; statusIcon = 'checkmark-circle';
                                     }
 
                                     const periodRejectedCount = period.items.filter(i => i.status === 'rejected').length;
@@ -192,7 +192,7 @@ export default function TimelineScreen() {
                                                                             <Text style={[s.itemName, (!isItemPayable && item.status !== 'rejected') && { color: '#888' }]}>{item.fee.name}</Text>
                                                                             <Text style={[
                                                                                 s.itemStatusLabel,
-                                                                                { color: item.status === 'paid' ? '#4CAF50' : item.status === 'pending' ? '#FF9800' : item.status === 'rejected' ? '#F44336' : '#888' }
+                                                                                { color: item.status === 'paid' ? colors.status.lunas.text : item.status === 'pending' ? colors.status.pending.text : item.status === 'rejected' ? colors.status.ditolak.text : '#888' }
                                                                             ]}>
                                                                                 {item.status === 'paid' ? 'Lunas' : item.status === 'pending' ? 'Menunggu Konfirmasi' : item.status === 'rejected' ? 'Ditolak' : 'Belum Dibayar'}
                                                                             </Text>

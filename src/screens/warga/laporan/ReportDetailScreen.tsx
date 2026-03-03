@@ -30,11 +30,11 @@ export default function ReportDetailScreen() {
     const [showProofModal, setShowProofModal] = useState(false);
 
     const getRoleColor = (role?: string) => {
-        return role === 'admin' ? '#2A6F2B' : '#0ea5e9'; // Green 4 for Admin, Blue for Security
+        return role === 'admin' ? Colors.status.admin.text : Colors.status.security.text;
     };
 
     const getRoleBg = (role?: string) => {
-        return role === 'admin' ? '#EEF2E3' : '#e0f2fe'; // Green 1 or Soft Blue
+        return role === 'admin' ? Colors.status.admin.bg : Colors.status.security.bg;
     };
 
     // Reload data when screen is focused (in case we return from Edit)

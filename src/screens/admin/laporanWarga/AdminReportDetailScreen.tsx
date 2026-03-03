@@ -151,11 +151,15 @@ export default function AdminReportDetailScreen() {
     };
 
     const getRoleColor = (role?: string) => {
-        return role === 'admin' ? '#2A6F2B' : '#0ea5e9'; // Green 4 for Admin, Blue for Security
+        if (role === 'admin') return colors.status.admin.text;
+        if (role === 'security') return colors.status.security.text;
+        return colors.status.warga.text;
     };
 
     const getRoleBg = (role?: string) => {
-        return role === 'admin' ? '#EEF2E3' : '#e0f2fe'; // Green 1 or Soft Blue
+        if (role === 'admin') return colors.status.admin.bg;
+        if (role === 'security') return colors.status.security.bg;
+        return colors.status.warga.bg;
     };
 
     const handleRewindStatus = () => {
@@ -195,13 +199,13 @@ export default function AdminReportDetailScreen() {
         }
     };
 
-    const getStatusColor = (status: string) => {
+    const getStatusStyle = (status: string) => {
         switch (status) {
-            case 'Menunggu': return Colors.warning;
-            case 'Diproses': return Colors.primary;
-            case 'Selesai': return Colors.success;
-            case 'Ditolak': return Colors.danger;
-            default: return Colors.textSecondary;
+            case 'Menunggu': return { bg: colors.status.menunggu.bg, text: colors.status.menunggu.text };
+            case 'Diproses': return { bg: colors.status.diproses.bg, text: colors.status.diproses.text };
+            case 'Selesai': return { bg: colors.status.selesai.bg, text: colors.status.selesai.text };
+            case 'Ditolak': return { bg: colors.status.ditolak.bg, text: colors.status.ditolak.text };
+            default: return { bg: '#F3F4F6', text: colors.textSecondary };
         }
     };
 
@@ -305,12 +309,12 @@ export default function AdminReportDetailScreen() {
                         {/* Status Badge */}
                         <View style={{ flexDirection: 'row', marginBottom: 16 }}>
                             <View style={{
-                                backgroundColor: getStatusColor(data.status) + '20',
+                                backgroundColor: getStatusStyle(data.status).bg,
                                 paddingHorizontal: 12,
                                 paddingVertical: 6,
                                 borderRadius: 6
                             }}>
-                                <Text style={{ color: getStatusColor(data.status), fontWeight: 'bold', fontSize: 13 }}>
+                                <Text style={{ color: getStatusStyle(data.status).text, fontWeight: 'bold', fontSize: 13 }}>
                                     {data.status}
                                 </Text>
                             </View>
@@ -341,10 +345,10 @@ export default function AdminReportDetailScreen() {
                             <Text style={{ fontSize: 16, fontWeight: 'bold', color: Colors.textPrimary }}>Log Progres Pengerjaan</Text>
                         </View>
 
-                        <View style={{ backgroundColor: 'white', borderRadius: 12, padding: 16, borderLeftWidth: 4, borderLeftColor: Colors.primary }}>
+                        <View style={{ backgroundColor: 'white', borderRadius: 12, padding: 16, borderLeftWidth: 4, borderLeftColor: colors.status.diproses.text }}>
                             {/* Simple Logic for Progress Log */}
                             <View style={{ flexDirection: 'row', marginBottom: 12 }}>
-                                <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: Colors.success, marginTop: 4, marginRight: 12 }} />
+                                <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: colors.status.selesai.text, marginTop: 4, marginRight: 12 }} />
                                 <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                     <View style={{ flex: 1 }}>
                                         <Text style={{ fontWeight: 'bold', fontSize: 14 }}>Laporan Diterima</Text>
@@ -355,7 +359,7 @@ export default function AdminReportDetailScreen() {
 
                             {data.status !== 'Menunggu' && (
                                 <View style={{ flexDirection: 'row', marginBottom: 12 }}>
-                                    <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: Colors.warning, marginTop: 4, marginRight: 12 }} />
+                                    <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: colors.status.menunggu.text, marginTop: 4, marginRight: 12 }} />
                                     <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                         <View style={{ flex: 1 }}>
                                             <Text style={{ fontWeight: 'bold', fontSize: 13, color: Colors.textPrimary, marginBottom: 4 }}>
@@ -381,7 +385,7 @@ export default function AdminReportDetailScreen() {
 
                             {(data.status === 'Selesai' || data.status === 'Ditolak') && (
                                 <View style={{ flexDirection: 'row' }}>
-                                    <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: data.status === 'Selesai' ? Colors.success : Colors.danger, marginTop: 4, marginRight: 12 }} />
+                                    <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: data.status === 'Selesai' ? colors.status.selesai.text : colors.status.ditolak.text, marginTop: 4, marginRight: 12 }} />
                                     <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                         <View style={{ flex: 1 }}>
                                             <Text style={{ fontWeight: 'bold', fontSize: 13, color: Colors.textPrimary, marginBottom: 4 }}>

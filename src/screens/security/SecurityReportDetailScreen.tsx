@@ -15,10 +15,12 @@ import { Colors } from '../../constants/Colors';
 import * as ImagePicker from 'expo-image-picker';
 import { styles } from './SecurityReportDetailStyles';
 import { supabase } from '../../lib/supabaseConfig';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function SecurityReportDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const router = useRouter();
+    const { colors } = useTheme();
     const [data, setData] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -56,11 +58,15 @@ export default function SecurityReportDetailScreen() {
     }, [id]);
 
     const getRoleColor = (role?: string) => {
-        return role === 'admin' ? '#2A6F2B' : '#0ea5e9'; // Green 4 for Admin, Blue for Security
+        if (role === 'admin') return colors.status.admin.text;
+        if (role === 'security') return colors.status.security.text;
+        return colors.status.warga.text;
     };
 
     const getRoleBg = (role?: string) => {
-        return role === 'admin' ? '#EEF2E3' : '#e0f2fe'; // Green 1 or Soft Blue
+        if (role === 'admin') return colors.status.admin.bg;
+        if (role === 'security') return colors.status.security.bg;
+        return colors.status.warga.bg;
     };
 
     const handleUpdateStatus = async (status: string, options?: { reason?: string; completionImageUri?: string }) => {
@@ -244,10 +250,10 @@ export default function SecurityReportDetailScreen() {
                         {/* Status 1: Menunggu */}
                         <View style={styles.timelineItem}>
                             <View style={styles.timelineIconBox}>
-                                <View style={[styles.timelineDot, styles.dotActive]}>
+                                <View style={[styles.timelineDot, { backgroundColor: colors.status.selesai.text }]}>
                                     <Ionicons name="checkmark" size={10} color="white" />
                                 </View>
-                                <View style={[styles.timelineLine, isProcessed && styles.lineActive]} />
+                                <View style={[styles.timelineLine, isProcessed && { backgroundColor: colors.status.diproses.text }]} />
                             </View>
                             <View style={styles.timelineContent}>
                                 <Text style={styles.timelineLabel}>Laporan Diterima</Text>
@@ -259,10 +265,10 @@ export default function SecurityReportDetailScreen() {
                         {/* Status 2: Diproses */}
                         <View style={styles.timelineItem}>
                             <View style={styles.timelineIconBox}>
-                                <View style={[styles.timelineDot, isProcessed ? styles.dotActive : styles.dotInactive]}>
+                                <View style={[styles.timelineDot, { backgroundColor: isProcessed ? colors.status.diproses.text : '#E5E7EB' }]}>
                                     {isProcessed && <Ionicons name="sync" size={10} color="white" />}
                                 </View>
-                                <View style={[styles.timelineLine, isFinished && styles.lineActive]} />
+                                <View style={[styles.timelineLine, isFinished && { backgroundColor: isFinished ? (data.status === 'Ditolak' ? colors.status.ditolak.text : colors.status.selesai.text) : '#E5E7EB' }]} />
                             </View>
                             <View style={styles.timelineContent}>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
@@ -295,7 +301,7 @@ export default function SecurityReportDetailScreen() {
                         {/* Status 3: Selesai/Ditolak */}
                         <View style={[styles.timelineItem, { marginBottom: 0 }]}>
                             <View style={styles.timelineIconBox}>
-                                <View style={[styles.timelineDot, isFinished ? (data.status === 'Ditolak' ? styles.dotDanger : styles.dotActive) : styles.dotInactive]}>
+                                <View style={[styles.timelineDot, { backgroundColor: isFinished ? (data.status === 'Ditolak' ? colors.status.ditolak.text : colors.status.selesai.text) : '#E5E7EB' }]}>
                                     {isFinished && <Ionicons name={data.status === 'Ditolak' ? 'close' : 'checkmark-done'} size={10} color="white" />}
                                 </View>
                             </View>

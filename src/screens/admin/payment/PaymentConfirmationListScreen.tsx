@@ -12,10 +12,12 @@ import {
     PendingPaymentItem,
     fetchPaymentsByStatus,
 } from '../../../services/paymentConfirmationService';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 type FilterStatus = 'pending' | 'paid' | 'rejected' | 'all';
 
 export default function PaymentConfirmationListScreen() {
+    const { colors } = useTheme();
     const router = useRouter();
     const [payments, setPayments] = useState<PendingPaymentItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -45,10 +47,10 @@ export default function PaymentConfirmationListScreen() {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'pending': return Colors.warning;
-            case 'paid': return '#2E7D32';
-            case 'rejected': return Colors.danger;
-            default: return Colors.textSecondary;
+            case 'pending': return colors.status.pending.text;
+            case 'paid': return colors.status.selesai.text;
+            case 'rejected': return colors.status.ditolak.text;
+            default: return colors.textSecondary;
         }
     };
 
@@ -63,9 +65,9 @@ export default function PaymentConfirmationListScreen() {
 
     const getStatusBg = (status: string) => {
         switch (status) {
-            case 'pending': return '#FFF8E1';
-            case 'paid': return '#E8F5E9';
-            case 'rejected': return '#FFEBEE';
+            case 'pending': return colors.status.pending.bg;
+            case 'paid': return colors.status.selesai.bg;
+            case 'rejected': return colors.status.ditolak.bg;
             default: return '#F5F5F5';
         }
     };
@@ -134,7 +136,7 @@ export default function PaymentConfirmationListScreen() {
             ) : (
                 <ScrollView
                     contentContainerStyle={styles.content}
-                    refreshControl={<RefreshControl refreshing={false} onRefresh={loadData} colors={[Colors.green3]} />}
+                    refreshControl={<RefreshControl refreshing={false} onRefresh={loadData} colors={[colors.primary]} />}
                 >
                     {payments.map((payment) => (
                         <TouchableOpacity

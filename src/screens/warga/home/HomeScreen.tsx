@@ -72,7 +72,7 @@ export default function HomeScreen() {
                                     position: 'absolute',
                                     top: -2,
                                     right: -2,
-                                    backgroundColor: '#E53935',
+                                    backgroundColor: colors.status.ditolak.text,
                                     minWidth: 16,
                                     height: 16,
                                     borderRadius: 8,

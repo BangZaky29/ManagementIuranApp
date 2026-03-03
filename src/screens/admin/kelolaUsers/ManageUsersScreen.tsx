@@ -7,6 +7,7 @@ import { fetchVerifiedResidents, createVerifiedResident, deleteVerifiedResident,
 import { useAuth } from '../../../contexts/AuthContext';
 import { CustomHeader } from '../../../components/CustomHeader';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { Colors } from '../../../constants/Colors';
 import { styles } from './ManageUsersStyles';
 import * as Clipboard from 'expo-clipboard';
@@ -14,6 +15,7 @@ import * as Clipboard from 'expo-clipboard';
 export default function ManageUsersScreen() {
     const router = useRouter();
     const { profile } = useAuth(); // Get logged in admin profile
+    const { colors } = useTheme();
     const [residents, setResidents] = useState<VerifiedResident[]>([]);
     const [housingComplexes, setHousingComplexes] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -328,14 +330,14 @@ export default function ManageUsersScreen() {
                             <Text style={styles.clusterName}>{item.housing_complexes.name}</Text>
                         )}
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
-                            <View style={[styles.roleBadge, { backgroundColor: item.role === 'security' ? '#2196F3' : Colors.green3 }]}>
-                                <Text style={styles.roleBadgeText}>{item.role === 'security' ? 'Security' : 'Warga'}</Text>
+                            <View style={[styles.roleBadge, { backgroundColor: item.role === 'security' ? colors.status.security.bg : colors.status.warga.bg }]}>
+                                <Text style={[styles.roleBadgeText, { color: item.role === 'security' ? colors.status.security.text : colors.status.warga.text }]}>{item.role === 'security' ? 'Security' : 'Warga'}</Text>
                             </View>
                             <Text style={[styles.cardSubtitle, { marginLeft: 8 }]}>NIK: {item.nik}</Text>
                         </View>
                     </View>
-                    <View style={[styles.statusBadge, { backgroundColor: item.is_claimed ? Colors.success : Colors.warning }]}>
-                        <Text style={styles.statusText}>{item.is_claimed ? 'Aktif' : 'Belum Daftar'}</Text>
+                    <View style={[styles.statusBadge, { backgroundColor: item.is_claimed ? colors.status.selesai.bg : colors.status.pending.bg }]}>
+                        <Text style={[styles.statusText, { color: item.is_claimed ? colors.status.selesai.text : colors.status.pending.text }]}>{item.is_claimed ? 'Aktif' : 'Belum Daftar'}</Text>
                     </View>
                 </View>
 

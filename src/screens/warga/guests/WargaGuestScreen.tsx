@@ -10,10 +10,12 @@ import { useWargaGuestViewModel } from './WargaGuestViewModel';
 import { formatDateSafe } from '../../../utils/dateUtils';
 import { styles } from './WargaGuestStyles';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 const VISITOR_TYPES = ['tamu', 'gojek', 'kurir', 'pekerja', 'lainnya'] as const;
 
 export default function WargaGuestScreen() {
+    const { colors } = useTheme();
     const vm = useWargaGuestViewModel();
     const router = useRouter();
 
@@ -67,8 +69,14 @@ export default function WargaGuestScreen() {
                         <View style={styles.cardHeader}>
                             <View style={{ flex: 1 }}>
                                 <Text style={styles.guestName}>{item.visitor_name}</Text>
-                                <View style={[styles.guestTypeBadge, { backgroundColor: item.status === 'pending' ? '#FF9800' : '#4CAF50' }]}>
-                                    <Text style={styles.guestTypeText}>
+                                <View style={[
+                                    styles.guestTypeBadge,
+                                    { backgroundColor: item.status === 'pending' ? colors.status.menunggu.bg : colors.status.selesai.bg }
+                                ]}>
+                                    <Text style={[
+                                        styles.guestTypeText,
+                                        { color: item.status === 'pending' ? colors.status.menunggu.text : colors.status.selesai.text }
+                                    ]}>
                                         {item.status === 'pending' ? 'Menunggu Kedatangan' : (item.status === 'active' ? 'Sudah Masuk' : 'Selesai')}
                                     </Text>
                                 </View>
@@ -104,7 +112,7 @@ export default function WargaGuestScreen() {
                             </View>
                             {item.check_in_time && (
                                 <View style={styles.timelineItem}>
-                                    <Ionicons name="log-in-outline" size={14} color="#4CAF50" />
+                                    <Ionicons name="log-in-outline" size={14} color={colors.status.selesai.text} />
                                     <Text style={styles.timelineText}>Masuk: {new Date(item.check_in_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</Text>
                                 </View>
                             )}

@@ -10,10 +10,12 @@ import { formatDateTimeSafe } from '../../../utils/dateUtils';
 import { styles } from './GuestBookStyles';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
 import { CustomHeader } from '../../../components/CustomHeader';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 const VISITOR_TYPES = ['tamu', 'gojek', 'kurir', 'pekerja', 'lainnya'] as const;
 
 export default function GuestBookScreen() {
+    const { colors } = useTheme();
     const vm = useGuestBookViewModel();
 
     if (vm.isLoading && vm.activeGuests.length === 0) {
@@ -55,12 +57,12 @@ export default function GuestBookScreen() {
                 return (
                     <View style={styles.summaryCard}>
                         <View style={styles.summaryItem}>
-                            <Text style={[styles.summaryValue, { color: '#0D47A1' }]}>{activeCount}</Text>
+                            <Text style={[styles.summaryValue, { color: colors.status.diproses.text }]}>{activeCount}</Text>
                             <Text style={styles.summaryLabel}>Aktif / Masuk</Text>
                         </View>
                         <View style={styles.summaryDivider} />
                         <View style={styles.summaryItem}>
-                            <Text style={[styles.summaryValue, { color: '#FF9800' }]}>{pendingCount}</Text>
+                            <Text style={[styles.summaryValue, { color: colors.status.menunggu.text }]}>{pendingCount}</Text>
                             <Text style={styles.summaryLabel}>Undangan</Text>
                         </View>
                         <View style={styles.summaryDivider} />
@@ -125,9 +127,10 @@ export default function GuestBookScreen() {
                 renderItem={({ item }) => (
                     <View style={[
                         styles.card,
-                        item.status === 'pending' && { borderLeftColor: '#FF9800' },
-                        item.status === 'completed' && { borderLeftColor: '#4CAF50' },
-                        item.status === 'rejected' && { borderLeftColor: '#F44336' }
+                        item.status === 'pending' && { borderLeftColor: colors.status.menunggu.text },
+                        item.status === 'completed' && { borderLeftColor: colors.status.selesai.text },
+                        item.status === 'rejected' && { borderLeftColor: colors.status.ditolak.text },
+                        item.status === 'active' && { borderLeftColor: colors.status.diproses.text }
                     ]}>
                         <View style={styles.cardHeader}>
                             <View style={{ flex: 1 }}>
@@ -136,11 +139,14 @@ export default function GuestBookScreen() {
                                     styles.guestTypeBadge,
                                     {
                                         backgroundColor:
-                                            item.status === 'pending' ? '#FF9800' :
-                                                (item.status === 'completed' ? '#4CAF50' : '#0D47A1')
+                                            item.status === 'pending' ? colors.status.menunggu.bg :
+                                                (item.status === 'completed' ? colors.status.selesai.bg : colors.status.diproses.bg)
                                     }
                                 ]}>
-                                    <Text style={styles.guestTypeText}>
+                                    <Text style={[styles.guestTypeText, {
+                                        color: item.status === 'pending' ? colors.status.menunggu.text :
+                                            (item.status === 'completed' ? colors.status.selesai.text : colors.status.diproses.text)
+                                    }]}>
                                         {item.status === 'pending' ? 'Undangan (Menunggu)' :
                                             (item.status === 'completed' ? 'Selesai / Keluar' : item.visitor_type)}
                                     </Text>
@@ -181,11 +187,11 @@ export default function GuestBookScreen() {
                         {vm.activeTab === 'Aktif' && (
                             item.status === 'pending' ? (
                                 <TouchableOpacity
-                                    style={[styles.checkoutBtn, { backgroundColor: '#E8F5E9' }]}
+                                    style={[styles.checkoutBtn, { backgroundColor: colors.status.selesai.bg }]}
                                     onPress={() => vm.handleCheckInWithPin(item)}
                                 >
-                                    <Ionicons name="checkmark-circle-outline" size={18} color="#2E7D32" />
-                                    <Text style={[styles.checkoutBtnText, { color: '#2E7D32' }]}>Verifikasi & Izinkan Masuk</Text>
+                                    <Ionicons name="checkmark-circle-outline" size={18} color={colors.status.selesai.text} />
+                                    <Text style={[styles.checkoutBtnText, { color: colors.status.selesai.text }]}>Verifikasi & Izinkan Masuk</Text>
                                 </TouchableOpacity>
                             ) : (
                                 <TouchableOpacity style={styles.checkoutBtn} onPress={() => vm.handleCheckOut(item)}>
