@@ -12,7 +12,7 @@
       "supportsTablet": true
     },
     "notification": {
-      "icon": "./assets/logo_warlok/warlok_48x48_noTransparant.png",
+      "icon": "./assets/logo_warlok/notifikasi_icon_48x48.png",
       "color": "#0D47A1"
     },
     "android": {
@@ -20,7 +20,7 @@
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/logo_warlok/warlok_1024x1024_Transparant.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
+        "backgroundImage": "./assets/logo_warlok/white.png",
         "monochromeImage": "./assets/logo_warlok/warlok_1024x1024_Transparant.png"
       },
       "edgeToEdgeEnabled": true,
