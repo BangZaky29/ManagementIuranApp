@@ -74,6 +74,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
         { key: 'banners', label: 'Kelola Iklan', icon: 'images-outline', route: '/admin/banners' },
         { key: 'laporan', label: 'Laporan Warga', icon: 'document-text-outline', route: '/admin/laporan' },
         { key: 'iuran', label: 'Management Iuran', icon: 'wallet-outline', route: '/admin/iuran-management' },
+        { key: 'backup', label: 'Kelola Data', icon: 'cloud-download-outline', route: '/admin/backup' },
     ];
 
     const handleNavigation = (route: string) => {

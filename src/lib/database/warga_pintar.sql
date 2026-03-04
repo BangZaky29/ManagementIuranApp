@@ -21,6 +21,22 @@ CREATE TABLE public.auth_debug_logs (
   details text,
   CONSTRAINT auth_debug_logs_pkey PRIMARY KEY (id)
 );
+CREATE TABLE public.backup_logs (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  admin_id uuid NOT NULL,
+  housing_complex_id bigint NOT NULL,
+  backup_type text NOT NULL,
+  file_name text,
+  drive_file_id text,
+  drive_link text,
+  status text DEFAULT 'pending'::text,
+  error_message text,
+  records_count integer,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT backup_logs_pkey PRIMARY KEY (id),
+  CONSTRAINT backup_logs_admin_id_fkey FOREIGN KEY (admin_id) REFERENCES public.profiles(id),
+  CONSTRAINT backup_logs_housing_complex_id_fkey FOREIGN KEY (housing_complex_id) REFERENCES public.housing_complexes(id)
+);
 CREATE TABLE public.banners (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
   housing_complex_id bigint,
