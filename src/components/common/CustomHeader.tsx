@@ -4,12 +4,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../../contexts/ThemeContext';
+import { ThemeColors } from '../../theme/AppTheme';
 
 interface CustomHeaderProps {
     title: string;
     showBack?: boolean;
     rightIcon?: React.ReactNode;
     onBack?: () => void;
+    colors?: ThemeColors;
 }
 
 export const CustomHeader: React.FC<CustomHeaderProps> = ({
@@ -17,9 +19,11 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({
     showBack = false,
     rightIcon,
     onBack,
+    colors: overrideColors,
 }) => {
     const router = useRouter();
-    const { colors } = useTheme();
+    const { colors: defaultColors } = useTheme();
+    const colors = overrideColors || defaultColors;
 
     const handleBack = () => {
         if (onBack) {

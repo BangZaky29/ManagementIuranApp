@@ -32,7 +32,7 @@ export default function GuestBookScreen() {
     return (
         <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
             <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
-            <CustomHeader title="Buku Tamu" showBack={true} />
+            <CustomHeader title="Buku Tamu" showBack={true} colors={colors} />
 
             {/* Filter Tabs */}
             <View style={styles.tabBar}>

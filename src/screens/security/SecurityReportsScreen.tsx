@@ -79,7 +79,7 @@ export default function SecurityReportsScreen() {
     return (
         <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
             <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
-            <CustomHeader title="Laporan Warga" showBack={true} />
+            <CustomHeader title="Laporan Warga" showBack={true} colors={colors} />
 
             {/* Filter Chips */}
             <View>

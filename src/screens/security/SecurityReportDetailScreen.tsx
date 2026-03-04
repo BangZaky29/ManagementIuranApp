@@ -119,7 +119,7 @@ export default function SecurityReportDetailScreen() {
     if (isLoading) {
         return (
             <SafeAreaView style={styles.container}>
-                <CustomHeader title="Detail Laporan" showBack={true} />
+                <CustomHeader title="Detail Laporan" showBack={true} colors={colors} />
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <ActivityIndicator size="large" color={colors.primary} />
                 </View>
@@ -130,7 +130,7 @@ export default function SecurityReportDetailScreen() {
     if (!data) {
         return (
             <SafeAreaView style={styles.container}>
-                <CustomHeader title="Detail Laporan" showBack={true} />
+                <CustomHeader title="Detail Laporan" showBack={true} colors={colors} />
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
                     <Ionicons name="alert-circle-outline" size={64} color={colors.textSecondary} />
                     <Text style={{ marginTop: 10, color: colors.textSecondary }}>Laporan tidak ditemukan.</Text>
@@ -178,6 +178,7 @@ export default function SecurityReportDetailScreen() {
             <CustomHeader
                 title="Detail Laporan"
                 showBack={true}
+                colors={colors}
                 rightIcon={
                     (data.status !== 'Menunggu') ? (
                         <TouchableOpacity onPress={handleRewindStatus}>

@@ -29,7 +29,7 @@ const ThemeToggle = ({ isDark, onToggle, colors }: { isDark: boolean; onToggle: 
                 width: 48,
                 height: 28,
                 borderRadius: 14,
-                backgroundColor: isDark ? colors.success : colors.border,
+                backgroundColor: isDark ? colors.primary : colors.border,
                 justifyContent: 'center',
                 padding: 2,
             }}

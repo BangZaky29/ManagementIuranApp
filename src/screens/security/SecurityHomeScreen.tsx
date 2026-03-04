@@ -56,7 +56,7 @@ export default function SecurityHomeScreen() {
     return (
         <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
             <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
-            <CustomHeader title="Dashboard Security" showBack={false} />
+            <CustomHeader title="Dashboard Security" showBack={false} colors={colors} />
 
             <ScrollView
                 contentContainerStyle={{ paddingBottom: 100 }}

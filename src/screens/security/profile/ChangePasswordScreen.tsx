@@ -121,7 +121,7 @@ export default function ChangePasswordScreen() {
     return (
         <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
             <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
-            <CustomHeader title="Ganti Password" showBack={true} />
+            <CustomHeader title="Ganti Password" showBack={true} colors={colors} />
 
             <ScrollView contentContainerStyle={styles.content}>
                 <View style={styles.formCard}>

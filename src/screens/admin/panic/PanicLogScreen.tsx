@@ -17,10 +17,10 @@ import { PanicLogCard } from '../../../components/panic/PanicLogCard';
 export default function PanicLogScreen() {
     const { colors: globalColors } = useTheme();
     const { colors: securityColors } = useSecurityTheme();
-    const { user } = useAuth();
+    const { profile } = useAuth();
 
     // Choose theme based on role
-    const colors = user?.role === 'security' ? securityColors : globalColors;
+    const colors = profile?.role === 'security' ? securityColors : globalColors;
 
     const styles = React.useMemo(() => createStyles(colors), [colors]);
     const [logs, setLogs] = useState<PanicLog[]>([]);

@@ -111,7 +111,7 @@ export default function EditSecurityProfileScreen() {
     return (
         <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
             <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
-            <CustomHeader title="Edit Profil" showBack={true} />
+            <CustomHeader title="Edit Profil" showBack={true} colors={colors} />
 
             <KeyboardAwareScrollView
                 contentContainerStyle={[styles.content, { paddingBottom: 100 }]}
