@@ -150,7 +150,7 @@ export default function ChangePasswordScreen() {
                     </View>
                 </View>
 
-                <CustomButton title="Simpan Password" onPress={handleSave} />
+                <CustomButton title="Simpan Password" onPress={handleSave} colors={colors} />
             </ScrollView>
 
             <CustomAlertModal

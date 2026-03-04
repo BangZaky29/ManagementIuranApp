@@ -200,7 +200,7 @@ export default function EditSecurityProfileScreen() {
                     </View>
                 </View>
 
-                <CustomButton title="Simpan Perubahan" onPress={handleSave} />
+                <CustomButton title="Simpan Perubahan" onPress={handleSave} colors={colors} />
             </KeyboardAwareScrollView>
 
             <CustomAlertModal

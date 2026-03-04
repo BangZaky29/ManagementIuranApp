@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, ViewStyle, TextStyle, ActivityIndicator, Alert, Platform, View } from 'react-native';
 import { Colors } from '../../constants/Colors';
+import { ThemeColors } from '../../theme/AppTheme';
 
 interface CustomButtonProps {
     title: string;
@@ -13,6 +14,7 @@ interface CustomButtonProps {
     icon?: React.ReactNode;
     iconPosition?: 'left' | 'right';
     disabled?: boolean;
+    colors?: ThemeColors;
 }
 
 export const CustomButton: React.FC<CustomButtonProps> = ({
@@ -25,8 +27,16 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
     isComingSoon = false,
     icon,
     iconPosition = 'left',
-    disabled = false
+    disabled = false,
+    colors
 }) => {
+    // Determine colors to use: provided prop OR global Colors fallback
+    const btnPrimary = colors?.primary || Colors.primary;
+    const btnSecondary = colors?.primarySubtle || Colors.green2;
+    const btnDanger = colors?.danger || Colors.danger;
+    const btnTextPrimary = colors?.textPrimary || Colors.textPrimary;
+    const btnWhite = colors?.textWhite || Colors.white;
+
 
     const handlePress = () => {
         if (isComingSoon) {
@@ -41,18 +51,18 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
     };
 
     const getBackgroundColor = () => {
-        if (variant === 'primary') return Colors.primary;
-        if (variant === 'danger') return Colors.danger;
+        if (variant === 'primary') return btnPrimary;
+        if (variant === 'danger') return btnDanger;
         if (variant === 'outline' || variant === 'ghost') return 'transparent';
-        if (variant === 'secondary') return Colors.green2;
-        return Colors.primary;
+        if (variant === 'secondary') return btnSecondary;
+        return btnPrimary;
     };
 
     const getTextColor = () => {
-        if (variant === 'outline') return Colors.primary;
-        if (variant === 'ghost') return Colors.textSecondary;
-        if (variant === 'secondary') return Colors.textPrimary;
-        return Colors.white;
+        if (variant === 'outline') return btnPrimary;
+        if (variant === 'ghost') return colors?.textSecondary || Colors.textSecondary;
+        if (variant === 'secondary') return btnTextPrimary;
+        return btnWhite;
     };
 
     const getSpinnerColor = () => {
@@ -67,6 +77,17 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
                 styles.button,
                 { backgroundColor: getBackgroundColor() },
                 variant === 'outline' && styles.outlineButton,
+                variant === 'outline' && { borderColor: btnPrimary },
+                // Soft Shadow
+                Platform.OS === 'ios' && {
+                    shadowColor: btnPrimary,
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.2,
+                    shadowRadius: 5,
+                },
+                Platform.OS === 'android' && {
+                    elevation: 4,
+                },
                 style,
             ]}
             onPress={handlePress}
@@ -102,25 +123,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         marginVertical: 8,
-        // Soft Shadow
-        ...Platform.select({
-            ios: {
-                shadowColor: Colors.primary,
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.2,
-                shadowRadius: 5,
-            },
-            android: {
-                elevation: 4,
-            },
-            web: {
-                boxShadow: '0px 4px 10px rgba(120, 197, 28, 0.3)',
-            }
-        }),
     },
     outlineButton: {
         borderWidth: 1.5,
-        borderColor: Colors.primary,
         shadowColor: 'transparent',
         elevation: 0,
     },

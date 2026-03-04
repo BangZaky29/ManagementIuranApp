@@ -3,21 +3,28 @@ import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Switch, Pl
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme, useSecurityTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { useSoundSettingsViewModel } from './SoundSettingsViewModel';
 import { CustomHeader } from '../../components/common/CustomHeader';
 import { createStyles } from './SoundSettingsStyles';
 import Constants from 'expo-constants';
 
 export default function SoundSettingsScreen() {
-    const { colors } = useTheme();
+    const { colors: globalColors } = useTheme();
+    const { colors: securityColors } = useSecurityTheme();
+    const { profile } = useAuth();
+
+    // Select theme based on role
+    const colors = profile?.role === 'security' ? securityColors : globalColors;
+
     const vm = useSoundSettingsViewModel();
     const styles = useMemo(() => createStyles(colors), [colors]);
 
     if (vm.isLoading) {
         return (
             <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-                <CustomHeader title="Pengaturan Suara" showBack={true} />
+                <CustomHeader title="Pengaturan Suara" showBack={true} colors={colors} />
                 <View style={styles.center}>
                     <ActivityIndicator size="large" color={colors.primary} />
                 </View>
@@ -90,7 +97,7 @@ export default function SoundSettingsScreen() {
 
     return (
         <SafeAreaView edges={['top', 'left', 'right']} style={[styles.container, { backgroundColor: colors.background }]}>
-            <CustomHeader title="Pengaturan Suara" showBack={true} />
+            <CustomHeader title="Pengaturan Suara" showBack={true} colors={colors} />
 
             <ScrollView
                 contentContainerStyle={styles.scrollContent}
