@@ -1,23 +1,23 @@
 import { StyleSheet, Platform } from 'react-native';
 
-export const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F8FAF8' }, // Softer modern background
+export const createStyles = (colors: any) => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background }, // Softer modern background
 
     // Header
     header: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start',
         paddingHorizontal: 20, paddingTop: Platform.OS === 'android' ? 12 : 24, paddingBottom: 20,
-        backgroundColor: '#FFF',
-        borderBottomWidth: 1, borderBottomColor: '#F0F0F0',
+        backgroundColor: colors.backgroundCard,
+        borderBottomWidth: 1, borderBottomColor: colors.border,
     },
-    greeting: { fontSize: 13, color: '#888', textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: '600' },
-    userName: { fontSize: 24, fontWeight: '800', color: '#1B5E20', marginTop: 2 },
+    greeting: { fontSize: 13, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: '600' },
+    userName: { fontSize: 24, fontWeight: '800', color: colors.primary, marginTop: 2 },
     menuBtn: {
         padding: 10,
-        backgroundColor: '#F1F8E9',
+        backgroundColor: colors.primary + '10',
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: '#E8F5E9',
+        borderColor: colors.primary + '20',
     },
 
     // Stats Grid
@@ -30,12 +30,12 @@ export const styles = StyleSheet.create({
     },
     statCard: {
         width: '48%',
-        backgroundColor: '#FFF',
+        backgroundColor: colors.backgroundCard,
         borderRadius: 16,
         padding: 16,
         alignItems: 'flex-start',
         borderWidth: 1,
-        borderColor: '#F0F0F0',
+        borderColor: colors.border,
         marginBottom: 15,
         ...Platform.select({
             ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8 },
@@ -46,8 +46,8 @@ export const styles = StyleSheet.create({
         width: 32, height: 32, borderRadius: 8,
         justifyContent: 'center', alignItems: 'center', marginBottom: 12,
     },
-    statNumber: { fontSize: 22, fontWeight: '800', color: '#333' },
-    statLabel: { fontSize: 12, color: '#666', marginTop: 4, fontWeight: '500' },
+    statNumber: { fontSize: 22, fontWeight: '800', color: colors.textPrimary },
+    statLabel: { fontSize: 12, color: colors.textSecondary, marginTop: 4, fontWeight: '500' },
 
     // Alert Banners (Action Needed)
     bannerContainer: {
@@ -74,15 +74,15 @@ export const styles = StyleSheet.create({
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
         paddingHorizontal: 20, paddingTop: 32, paddingBottom: 16,
     },
-    sectionTitle: { fontSize: 18, fontWeight: '800', color: '#1B5E20' },
-    seeAll: { fontSize: 13, fontWeight: '600', color: '#4CAF50' },
+    sectionTitle: { fontSize: 18, fontWeight: '800', color: colors.textPrimary },
+    seeAll: { fontSize: 13, fontWeight: '600', color: colors.primary },
 
     // Premium Activity Cards (Log Aktifitas)
     activityCard: {
         flexDirection: 'row', alignItems: 'center',
-        backgroundColor: '#FFF', marginHorizontal: 20, marginBottom: 12,
+        backgroundColor: colors.backgroundCard, marginHorizontal: 20, marginBottom: 12,
         padding: 16, borderRadius: 16,
-        borderWidth: 1, borderColor: '#F0F0F0',
+        borderWidth: 1, borderColor: colors.border,
     },
     activityIconBox: {
         width: 46, height: 46, borderRadius: 23,
@@ -90,19 +90,19 @@ export const styles = StyleSheet.create({
     },
     activityContent: { flex: 1 },
     activityHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 },
-    activityTitle: { fontSize: 14, fontWeight: '700', color: '#333', flex: 1, marginRight: 8 },
-    activityTime: { fontSize: 11, color: '#999', fontWeight: '500' },
-    activityDesc: { fontSize: 13, color: '#666', lineHeight: 18 },
+    activityTitle: { fontSize: 14, fontWeight: '700', color: colors.textPrimary, flex: 1, marginRight: 8 },
+    activityTime: { fontSize: 11, color: colors.textSecondary, fontWeight: '500' },
+    activityDesc: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
     activityUserRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8 },
-    activityAvatar: { width: 16, height: 16, borderRadius: 8, marginRight: 6, backgroundColor: '#EEE' },
-    activityUserName: { fontSize: 11, color: '#888', fontWeight: '600' },
+    activityAvatar: { width: 16, height: 16, borderRadius: 8, marginRight: 6, backgroundColor: colors.border },
+    activityUserName: { fontSize: 11, color: colors.textSecondary, fontWeight: '600' },
 
     // Empty State
     emptyActivity: {
         alignItems: 'center', paddingVertical: 40, marginHorizontal: 20,
-        backgroundColor: '#FFF', borderRadius: 16, borderWidth: 1, borderColor: '#F0F0F0',
+        backgroundColor: colors.backgroundCard, borderRadius: 16, borderWidth: 1, borderColor: colors.border,
         borderStyle: 'dashed',
     },
-    emptyText: { fontSize: 15, fontWeight: '700', color: '#333', marginTop: 16 },
-    emptySubtext: { fontSize: 13, color: '#888', marginTop: 6, textAlign: 'center', paddingHorizontal: 20 },
+    emptyText: { fontSize: 15, fontWeight: '700', color: colors.textPrimary, marginTop: 16 },
+    emptySubtext: { fontSize: 13, color: colors.textSecondary, marginTop: 6, textAlign: 'center', paddingHorizontal: 20 },
 });

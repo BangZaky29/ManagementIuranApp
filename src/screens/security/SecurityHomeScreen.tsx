@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
     View, Text, ScrollView, TouchableOpacity,
     StatusBar, Image, ActivityIndicator, RefreshControl, Platform
@@ -11,7 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSecurityHomeViewModel } from './SecurityHomeViewModel';
-import { styles } from './SecurityHomeStyles';
+import { createStyles } from './SecurityHomeStyles';
 import { CustomAlertModal } from '../../components/common/CustomAlertModal';
 import { CustomHeader } from '../../components/common/CustomHeader';
 import { PanicLogCard } from '../../components/panic/PanicLogCard';
@@ -20,6 +20,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 export default function SecurityHomeScreen() {
     const vm = useSecurityHomeViewModel();
     const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
 
     const scale = useSharedValue(1);
 
@@ -46,7 +47,7 @@ export default function SecurityHomeScreen() {
         return (
             <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <ActivityIndicator size="large" color="#0D47A1" />
+                    <ActivityIndicator size="large" color={colors.primary} />
                 </View>
             </SafeAreaView>
         );
@@ -54,12 +55,12 @@ export default function SecurityHomeScreen() {
 
     return (
         <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.backgroundCard} />
             <CustomHeader title="Dashboard Security" showBack={false} />
 
             <ScrollView
                 contentContainerStyle={{ paddingBottom: 100 }}
-                refreshControl={<RefreshControl refreshing={false} onRefresh={vm.refresh} colors={['#0D47A1']} />}
+                refreshControl={<RefreshControl refreshing={false} onRefresh={vm.refresh} colors={[colors.primary]} />}
             >
                 {/* Profile Header Card */}
                 <View style={styles.header}>
@@ -72,7 +73,7 @@ export default function SecurityHomeScreen() {
                             <Image source={{ uri: vm.securityProfile.avatar_url }} style={styles.profileAvatar} />
                         ) : (
                             <View style={[styles.profileAvatar, styles.avatarPlaceholder]}>
-                                <Ionicons name="person" size={20} color="#0D47A1" />
+                                <Ionicons name="person" size={20} color={colors.primary} />
                             </View>
                         )}
                     </TouchableOpacity>
@@ -80,7 +81,7 @@ export default function SecurityHomeScreen() {
 
                 {/* Stats Row */}
                 <View style={styles.statsRow}>
-                    <View style={[styles.statCard, { borderLeftColor: '#4CAF50', position: 'relative' }]}>
+                    <View style={[styles.statCard, { borderLeftColor: colors.status.warga.text, position: 'relative' }]}>
                         {/* Bubbles at top right */}
                         <View style={{ position: 'absolute', top: 8, right: 8, flexDirection: 'row', gap: 4 }}>
                             {vm.stats.wargaActive > 0 && (
@@ -90,7 +91,7 @@ export default function SecurityHomeScreen() {
                             )}
                             {vm.stats.wargaInactive > 0 && (
                                 <View style={{ backgroundColor: colors.danger, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
-                                    <Text style={{ fontSize: 10, color: '#FFF', fontWeight: 'bold' }}>{vm.stats.wargaInactive}</Text>
+                                    <Text style={{ fontSize: 10, color: colors.white, fontWeight: 'bold' }}>{vm.stats.wargaInactive}</Text>
                                 </View>
                             )}
                         </View>
@@ -98,11 +99,11 @@ export default function SecurityHomeScreen() {
                         <Text style={styles.statNumber}>{vm.stats.warga}</Text>
                         <Text style={styles.statLabel}>Total Warga</Text>
                     </View>
-                    <View style={[styles.statCard, { borderLeftColor: '#F44336' }]}>
+                    <View style={[styles.statCard, { borderLeftColor: colors.danger }]}>
                         <Text style={styles.statNumber}>{vm.activePanics}</Text>
                         <Text style={styles.statLabel}>Darurat Aktif</Text>
                     </View>
-                    <View style={[styles.statCard, { borderLeftColor: '#FF9800' }]}>
+                    <View style={[styles.statCard, { borderLeftColor: colors.warning }]}>
                         <Text style={styles.statNumber}>{vm.activeGuests}</Text>
                         <Text style={styles.statLabel}>Tamu Aktif</Text>
                     </View>
@@ -116,7 +117,7 @@ export default function SecurityHomeScreen() {
                             onPress={vm.navigateToPanicLogs}
                         >
                             <LinearGradient
-                                colors={['#D32F2F', '#FF5252']}
+                                colors={[colors.danger, colors.danger]}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 0 }}
                                 style={styles.panicBanner}
@@ -126,7 +127,7 @@ export default function SecurityHomeScreen() {
                                         backgroundColor: 'rgba(255,255,255,0.2)',
                                         padding: 8, borderRadius: 12
                                     }}>
-                                        <Ionicons name="notifications" size={24} color="#FFF" />
+                                        <Ionicons name="notifications" size={24} color={colors.white} />
                                     </View>
                                     <View style={{ marginLeft: 12 }}>
                                         <Text style={styles.panicBannerTitle}>
@@ -135,7 +136,7 @@ export default function SecurityHomeScreen() {
                                         <Text style={styles.panicBannerSubtitle}>Ketuk untuk melihat detail kejadian</Text>
                                     </View>
                                 </View>
-                                <Ionicons name="chevron-forward" size={20} color="#FFF" />
+                                <Ionicons name="chevron-forward" size={20} color={colors.white} />
                             </LinearGradient>
                         </TouchableOpacity>
                     </Animated.View>
@@ -147,8 +148,8 @@ export default function SecurityHomeScreen() {
                 </View>
                 <View style={styles.quickActionsRow}>
                     <TouchableOpacity style={styles.quickAction} onPress={vm.navigateToPanicLogs}>
-                        <View style={[styles.quickIcon, { backgroundColor: '#FFEBEE' }]}>
-                            <Ionicons name="warning" size={24} color="#F44336" />
+                        <View style={[styles.quickIcon, { backgroundColor: colors.danger + '20' }]}>
+                            <Ionicons name="warning" size={24} color={colors.danger} />
                             {vm.activePanics > 0 && (
                                 <View style={styles.badge}>
                                     <Text style={styles.badgeText}>{vm.activePanics}</Text>
@@ -158,8 +159,8 @@ export default function SecurityHomeScreen() {
                         <Text style={styles.quickLabel}>Log Darurat</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.quickAction} onPress={vm.navigateToGuestBook}>
-                        <View style={[styles.quickIcon, { backgroundColor: '#E3F2FD' }]}>
-                            <Ionicons name="id-card" size={24} color="#0D47A1" />
+                        <View style={[styles.quickIcon, { backgroundColor: colors.primary + '20' }]}>
+                            <Ionicons name="id-card" size={24} color={colors.primary} />
                             {vm.pendingGuestsCount > 0 && (
                                 <View style={[styles.badge, styles.badgeYellow]}>
                                     <Text style={styles.badgeTextBlack}>{vm.pendingGuestsCount}</Text>
@@ -169,8 +170,8 @@ export default function SecurityHomeScreen() {
                         <Text style={styles.quickLabel}>Buku Tamu</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.quickAction} onPress={vm.navigateToReports}>
-                        <View style={[styles.quickIcon, { backgroundColor: '#E8EAF6' }]}>
-                            <Ionicons name="document-text" size={24} color="#3F51B5" />
+                        <View style={[styles.quickIcon, { backgroundColor: colors.primary + '20' }]}>
+                            <Ionicons name="document-text" size={24} color={colors.primary} />
                             <View style={{ position: 'absolute', top: -4, right: -4, flexDirection: 'row', gap: 2 }}>
                                 {vm.pendingReportsCount > 0 && (
                                     <View style={[styles.badge, { backgroundColor: colors.status.menunggu.bg }]}>
@@ -200,7 +201,7 @@ export default function SecurityHomeScreen() {
 
                 {vm.recentPanics.length === 0 ? (
                     <View style={styles.emptyActivity}>
-                        <Ionicons name="shield-checkmark" size={40} color="#4CAF50" />
+                        <Ionicons name="shield-checkmark" size={40} color={colors.success} />
                         <Text style={styles.emptyText}>Tidak ada darurat aktif</Text>
                         <Text style={styles.emptySubtext}>Lingkungan aman terkendali 👍</Text>
                     </View>
@@ -224,7 +225,7 @@ export default function SecurityHomeScreen() {
 
                 {vm.recentReports.length === 0 ? (
                     <View style={styles.emptyActivity}>
-                        <Ionicons name="document-text-outline" size={40} color="#3F51B5" />
+                        <Ionicons name="document-text-outline" size={40} color={colors.primary} />
                         <Text style={styles.emptyText}>Tidak ada laporan baru</Text>
                         <Text style={styles.emptySubtext}>Semua laporan warga sudah tertangani.</Text>
                     </View>
@@ -232,12 +233,12 @@ export default function SecurityHomeScreen() {
                     vm.recentReports.map((report) => (
                         <TouchableOpacity
                             key={report.id}
-                            style={[styles.activityCard, { borderLeftColor: '#3F51B5' }]}
+                            style={[styles.activityCard, { borderLeftColor: colors.primary }]}
                             onPress={vm.navigateToReports}
                         >
                             <View style={styles.activityLeft}>
-                                <View style={[styles.activityIconBox, { backgroundColor: '#E8EAF6' }]}>
-                                    <Ionicons name="document-text" size={20} color="#3F51B5" />
+                                <View style={[styles.activityIconBox, { backgroundColor: colors.primary + '20' }]}>
+                                    <Ionicons name="document-text" size={20} color={colors.primary} />
                                 </View>
                                 <View style={{ marginLeft: 12, flex: 1 }}>
                                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>

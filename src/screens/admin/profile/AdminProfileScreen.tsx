@@ -101,10 +101,10 @@ export default function AdminProfileScreen() {
 
     const renderMenuItem = (icon: string, label: string, onPress: () => void, isLocked = false) => (
         <TouchableOpacity style={styles.menuItem} onPress={onPress}>
-            <Ionicons name={icon as any} size={22} color={Colors.textPrimary} />
-            <Text style={[styles.menuText, { flex: 1 }]}>{label}</Text>
-            {isLocked && <Ionicons name="lock-closed" size={16} color={Colors.textSecondary} style={{ marginRight: 8 }} />}
-            <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
+            <Ionicons name={icon as any} size={22} color={colors.primary} />
+            <Text style={[styles.menuText, { flex: 1, color: colors.textPrimary }]}>{label}</Text>
+            {isLocked && <Ionicons name="lock-closed" size={16} color={colors.textSecondary} style={{ marginRight: 8 }} />}
+            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
         </TouchableOpacity>
     );
 
@@ -176,9 +176,9 @@ export default function AdminProfileScreen() {
                             toggleTheme();
                         }}
                     >
-                        <Ionicons name={isDark ? 'moon' : 'moon-outline'} size={22} color={Colors.textPrimary} />
-                        <Text style={[styles.menuText, { flex: 1 }]}>Mode Gelap</Text>
-                        {!FeatureFlags.IS_DARK_MODE_ENABLED && <Ionicons name="lock-closed" size={16} color={Colors.textSecondary} style={{ marginRight: 8 }} />}
+                        <Ionicons name={isDark ? 'moon' : 'moon-outline'} size={22} color={colors.primary} />
+                        <Text style={[styles.menuText, { flex: 1, color: colors.textPrimary }]}>Mode Gelap</Text>
+                        {!FeatureFlags.IS_DARK_MODE_ENABLED && <Ionicons name="lock-closed" size={16} color={colors.textSecondary} style={{ marginRight: 8 }} />}
                         <ThemeToggle isDark={isDark} onToggle={FeatureFlags.IS_DARK_MODE_ENABLED ? toggleTheme : () => { }} colors={colors} />
                     </Pressable>
 
