@@ -10,12 +10,12 @@ import { formatDateTimeSafe } from '../../../utils/dateUtils';
 import { createStyles } from './GuestBookStyles';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { CustomHeader } from '../../../components/common/CustomHeader';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useSecurityTheme } from '../../../contexts/ThemeContext';
 
 const VISITOR_TYPES = ['tamu', 'gojek', 'kurir', 'pekerja', 'lainnya'] as const;
 
 export default function GuestBookScreen() {
-    const { colors } = useTheme();
+    const { colors } = useSecurityTheme();
     const vm = useGuestBookViewModel();
     const styles = useMemo(() => createStyles(colors), [colors]);
 

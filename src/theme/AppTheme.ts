@@ -167,3 +167,108 @@ export const getThemeColors = (scheme: 'light' | 'dark'): ThemeColors => {
         white: '#FFFFFF',
     };
 };
+
+export const getSecurityThemeColors = (scheme: 'light' | 'dark'): ThemeColors => {
+    // 1 CENTER COLOR FOR SECURITY
+    const SecurityBlue = '#2196F3';
+    const SecurityBlueSoft = '#E3F2FD';
+
+    if (scheme === 'dark') {
+        return {
+            primary: SecurityBlue,
+            primarySubtle: 'rgba(33, 150, 243, 0.15)', // Dark mode subtle glow
+            accent: '#64B5F6',
+
+            background: '#0D1117',       // Dark blue-ish base
+            surface: '#161B22',          // Slightly elevated card
+            surfaceSubtle: '#21262D',    // Higher elevation / input backgrounds
+
+            border: '#30363D',           // Subtle dark border
+
+            textPrimary: '#C9D1D9',      // Clear read light gray
+            textSecondary: '#8B949E',    // Muted text
+            textWhite: '#FFFFFF',
+
+            danger: '#EF5350',
+            dangerBg: 'rgba(239, 83, 80, 0.15)',
+            success: '#66BB6A',
+            successBg: 'rgba(102, 187, 106, 0.15)',
+            warning: '#FFA726',
+            warningBg: 'rgba(255, 167, 38, 0.15)',
+            info: '#42A5F5',
+            infoBg: 'rgba(66, 165, 245, 0.15)',
+
+            status: {
+                menunggu: { text: '#FFA726', bg: 'rgba(255, 167, 38, 0.15)' },
+                diproses: { text: SecurityBlue, bg: 'rgba(33, 150, 243, 0.15)' },
+                selesai: { text: '#64B5F6', bg: 'rgba(100, 181, 246, 0.15)' },
+                ditolak: { text: '#EF5350', bg: 'rgba(239, 83, 80, 0.15)' },
+                pending: { text: '#FFA726', bg: 'rgba(255, 167, 38, 0.15)' },
+                lunas: { text: '#64B5F6', bg: 'rgba(100, 181, 246, 0.15)' },
+                terlambat: { text: '#EF5350', bg: 'rgba(239, 83, 80, 0.15)' },
+                admin: { text: SecurityBlue, bg: 'rgba(33, 150, 243, 0.15)' },
+                security: { text: SecurityBlue, bg: 'rgba(33, 150, 243, 0.15)' },
+                warga: { text: '#64B5F6', bg: 'rgba(100, 181, 246, 0.15)' },
+            },
+
+            statusBar: 'light-content',
+
+            // Legacy map
+            green1: '#0D1117',
+            green2: '#161B22',
+            green3: SecurityBlue,
+            green4: '#8B949E',
+            green5: '#C9D1D9',
+            white: '#FFFFFF',
+        };
+    }
+
+    // Default LIGHT MODE for SECURITY
+    return {
+        primary: SecurityBlue,
+        primarySubtle: SecurityBlueSoft,
+        accent: '#90CAF9',
+
+        background: SecurityBlueSoft, // Soft blue base
+        surface: '#FFFFFF',          // Clean white cards
+        surfaceSubtle: '#F0F7FF',    // Light bluish for inputs or headers
+
+        border: '#E3F2FD',           // Light divider
+
+        textPrimary: '#014361',      // Deep blue text
+        textSecondary: '#546E7A',    // Standard neutral grey for secondary
+        textWhite: '#FFFFFF',
+
+        danger: '#F44336',
+        dangerBg: '#FFEBEE',
+        success: '#4CAF50',
+        successBg: '#E8F5E9',
+        warning: '#FF9800',
+        warningBg: '#FFF3E0',
+        info: '#2196F3',
+        infoBg: '#E3F2FD',
+
+        status: {
+            menunggu: { text: '#F57C00', bg: '#FFF3E0' },
+            diproses: { text: SecurityBlue, bg: SecurityBlueSoft },
+            selesai: { text: SecurityBlue, bg: '#E3F2FD' },
+            ditolak: { text: '#D32F2F', bg: '#FFEBEE' },
+            pending: { text: '#F57C00', bg: '#FFF3E0' },
+            lunas: { text: SecurityBlue, bg: '#E3F2FD' },
+            terlambat: { text: '#D32F2F', bg: '#FFEBEE' },
+            admin: { text: '#1565C0', bg: SecurityBlueSoft },
+            security: { text: SecurityBlue, bg: SecurityBlueSoft },
+            warga: { text: SecurityBlue, bg: SecurityBlueSoft },
+        },
+
+        statusBar: 'dark-content',
+
+        // Legacy map
+        green1: SecurityBlueSoft,
+        green2: '#90CAF9',
+        green3: SecurityBlue,
+        green4: '#1565C0',
+        green5: '#014361',
+        white: '#FFFFFF',
+    };
+};

@@ -15,11 +15,11 @@ import { createStyles } from './SecurityHomeStyles';
 import { CustomAlertModal } from '../../components/common/CustomAlertModal';
 import { CustomHeader } from '../../components/common/CustomHeader';
 import { PanicLogCard } from '../../components/panic/PanicLogCard';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useSecurityTheme } from '../../contexts/ThemeContext';
 
 export default function SecurityHomeScreen() {
     const vm = useSecurityHomeViewModel();
-    const { colors } = useTheme();
+    const { colors } = useSecurityTheme();
     const styles = useMemo(() => createStyles(colors), [colors]);
 
     const scale = useSharedValue(1);
@@ -86,7 +86,7 @@ export default function SecurityHomeScreen() {
                         <View style={{ position: 'absolute', top: 8, right: 8, flexDirection: 'row', gap: 4 }}>
                             {vm.stats.wargaActive > 0 && (
                                 <View style={{ backgroundColor: colors.status.warga.text, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
-                                    <Text style={{ fontSize: 10, color: '#FFF', fontWeight: 'bold' }}>{vm.stats.wargaActive}</Text>
+                                    <Text style={{ fontSize: 10, color: colors.textWhite, fontWeight: 'bold' }}>{vm.stats.wargaActive}</Text>
                                 </View>
                             )}
                             {vm.stats.wargaInactive > 0 && (

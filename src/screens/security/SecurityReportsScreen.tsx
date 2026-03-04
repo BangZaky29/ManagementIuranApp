@@ -10,7 +10,7 @@ import { createStyles } from './SecurityReportsStyles';
 import { formatDateSafe } from '../../utils/dateUtils';
 import { CustomHeader } from '../../components/common/CustomHeader';
 import { CustomAlertModal } from '../../components/common/CustomAlertModal';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useSecurityTheme } from '../../contexts/ThemeContext';
 import { useRouter } from 'expo-router';
 
 const STATUS_FILTERS = ['Semua', 'Menunggu', 'Diproses', 'Selesai', 'Ditolak'];
@@ -18,7 +18,7 @@ const STATUS_FILTERS = ['Semua', 'Menunggu', 'Diproses', 'Selesai', 'Ditolak'];
 export default function SecurityReportsScreen() {
     const vm = useSecurityReportsViewModel();
     const router = useRouter();
-    const { colors } = useTheme();
+    const { colors } = useSecurityTheme();
     const styles = useMemo(() => createStyles(colors), [colors]);
 
     useEffect(() => {

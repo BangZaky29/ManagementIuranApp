@@ -134,10 +134,11 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         padding: 16,
-        backgroundColor: colors.danger + '1A',
+        backgroundColor: colors.dangerBg,
         borderRadius: 16,
-        zIndex: 10,
-        elevation: 5,
+        borderWidth: 1,
+        borderColor: colors.danger + '40', // transparent danger border
+        marginTop: 10,
     },
     logoutText: {
         fontSize: 16,

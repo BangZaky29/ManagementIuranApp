@@ -2,10 +2,10 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { MaterialTopTabBarProps } from '@react-navigation/material-top-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useSecurityTheme } from '../../contexts/ThemeContext';
 
 export const SecurityTabBar = ({ state, descriptors, navigation }: MaterialTopTabBarProps) => {
-    const { colors } = useTheme();
+    const { colors } = useSecurityTheme();
 
     return (
         <View style={[styles.tabBarContainer, { backgroundColor: colors.surface }]}>

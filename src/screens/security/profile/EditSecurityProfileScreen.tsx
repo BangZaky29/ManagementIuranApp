@@ -7,7 +7,7 @@ import { CustomHeader } from '../../../components/common/CustomHeader';
 import { CustomButton } from '../../../components/common/CustomButton';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { useAuth } from '../../../contexts/AuthContext';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useSecurityTheme } from '../../../contexts/ThemeContext';
 import { ThemeColors } from '../../../theme/AppTheme';
 
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
@@ -50,7 +50,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
 export default function EditSecurityProfileScreen() {
     const router = useRouter();
     const { profile, updateUserProfile } = useAuth();
-    const { colors } = useTheme();
+    const { colors } = useSecurityTheme();
     const styles = useMemo(() => createStyles(colors), [colors]);
 
     const [name, setName] = useState(profile?.full_name || '');

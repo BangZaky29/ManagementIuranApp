@@ -6,7 +6,7 @@ import { CustomHeader } from '../../../components/common/CustomHeader';
 import { CustomButton } from '../../../components/common/CustomButton';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { supabase } from '../../../lib/supabaseConfig';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useSecurityTheme } from '../../../contexts/ThemeContext';
 import { ThemeColors } from '../../../theme/AppTheme';
 
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
@@ -48,7 +48,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
 
 export default function ChangePasswordScreen() {
     const router = useRouter();
-    const { colors } = useTheme();
+    const { colors } = useSecurityTheme();
     const styles = useMemo(() => createStyles(colors), [colors]);
 
     const [newPassword, setNewPassword] = useState('');

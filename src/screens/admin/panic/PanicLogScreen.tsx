@@ -10,11 +10,18 @@ import { Colors } from '../../../constants/Colors';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
 import { fetchPanicLogs, PanicLog, resolvePanicLog } from '../../../services/panic';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme, useSecurityTheme } from '../../../contexts/ThemeContext';
+import { useAuth } from '../../../contexts/AuthContext';
 import { PanicLogCard } from '../../../components/panic/PanicLogCard';
 
 export default function PanicLogScreen() {
-    const { colors } = useTheme();
+    const { colors: globalColors } = useTheme();
+    const { colors: securityColors } = useSecurityTheme();
+    const { user } = useAuth();
+
+    // Choose theme based on role
+    const colors = user?.role === 'security' ? securityColors : globalColors;
+
     const styles = React.useMemo(() => createStyles(colors), [colors]);
     const [logs, setLogs] = useState<PanicLog[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -115,7 +122,7 @@ export default function PanicLogScreen() {
                         activeOpacity={0.7}
                     >
                         <Text style={styles.seeMoreText}>Lihat lebih banyak ({logs.length - visibleCount} lagi)</Text>
-                        <Ionicons name="chevron-down" size={18} color={Colors.primary} />
+                        <Ionicons name="chevron-down" size={18} color={colors.primary} />
                     </TouchableOpacity>
                 ) : (
                     <TouchableOpacity
@@ -124,7 +131,7 @@ export default function PanicLogScreen() {
                         activeOpacity={0.7}
                     >
                         <Text style={styles.seeLessText}>Lihat lebih sedikit</Text>
-                        <Ionicons name="chevron-up" size={18} color={Colors.textSecondary} />
+                        <Ionicons name="chevron-up" size={18} color={colors.textSecondary} />
                     </TouchableOpacity>
                 )}
             </View>
@@ -144,8 +151,8 @@ export default function PanicLogScreen() {
     const displayedLogs = logs.slice(0, visibleCount);
 
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: '#F8F9FA' }]}>
-            <StatusBar barStyle="dark-content" />
+        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+            <StatusBar barStyle={colors.statusBar} />
 
             {/* Header */}
             <View style={styles.header}>
@@ -228,7 +235,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
         paddingTop: Platform.OS === 'android' ? 48 : 20,
         backgroundColor: colors.surface,
         borderBottomWidth: 1,
-        borderBottomColor: '#F0F0F0',
+        borderBottomColor: colors.border,
         elevation: 2,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
@@ -238,7 +245,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     headerTitle: {
         fontSize: 24,
         fontWeight: '900',
-        color: '#1A1A1A',
+        color: colors.textPrimary,
         letterSpacing: -0.5,
     },
     headerSubtitleRow: {
@@ -254,7 +261,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     },
     headerSubtitle: {
         fontSize: 13,
-        color: '#666',
+        color: colors.textSecondary,
         fontWeight: '500',
     },
     filterButton: {
@@ -311,7 +318,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
         width: 120,
         height: 120,
         borderRadius: 60,
-        backgroundColor: '#E8F5E9',
+        backgroundColor: colors.status.selesai.bg,
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 24,
@@ -319,12 +326,12 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     emptyTitle: {
         fontSize: 20,
         fontWeight: '800',
-        color: '#1A1A1A',
+        color: colors.textPrimary,
         textAlign: 'center',
     },
     emptyDesc: {
         fontSize: 14,
-        color: '#666',
+        color: colors.textSecondary,
         marginTop: 8,
         textAlign: 'center',
         lineHeight: 20,
@@ -336,10 +343,10 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
         borderRadius: 25,
         backgroundColor: colors.surface,
         borderWidth: 1,
-        borderColor: '#DDD',
+        borderColor: colors.border,
     },
     refreshButtonText: {
-        color: '#666',
+        color: colors.textSecondary,
         fontWeight: '700',
         fontSize: 14,
     },

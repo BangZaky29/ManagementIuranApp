@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/Colors';
 import { PanicLog } from '../../services/panic';
 import { useTheme } from '../../contexts/ThemeContext';
+import { ThemeColors } from '../../theme/AppTheme';
 
 interface PanicLogCardProps {
     log: PanicLog;
@@ -13,6 +14,7 @@ interface PanicLogCardProps {
 
 export const PanicLogCard: React.FC<PanicLogCardProps> = ({ log, onResolve, showResolveButton = true }) => {
     const { colors } = useTheme();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
     const isResolved = !!log.resolved_at;
     const hasLocation = log.location && log.location.startsWith('http');
 
@@ -89,12 +91,12 @@ export const PanicLogCard: React.FC<PanicLogCardProps> = ({ log, onResolve, show
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     card: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surfaceSubtle,
         marginHorizontal: 16,
         marginBottom: 8,
         padding: 12,
@@ -117,7 +119,7 @@ const styles = StyleSheet.create({
         width: 38,
         height: 38,
         borderRadius: 19,
-        backgroundColor: '#F5F5F5',
+        backgroundColor: colors.surfaceSubtle,
     },
     avatarPlaceholder: {
         justifyContent: 'center',
@@ -134,7 +136,7 @@ const styles = StyleSheet.create({
     userName: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#333',
+        color: colors.textPrimary,
         flex: 1,
     },
     statusDot: {
@@ -145,7 +147,7 @@ const styles = StyleSheet.create({
     },
     description: {
         fontSize: 12,
-        color: '#666',
+        color: colors.textSecondary,
         marginTop: 1,
     },
     footerRow: {
@@ -155,15 +157,15 @@ const styles = StyleSheet.create({
     },
     timeText: {
         fontSize: 11,
-        color: '#999',
+        color: colors.textSecondary,
     },
     dotSeparator: {
         fontSize: 11,
-        color: '#999',
+        color: colors.textSecondary,
     },
     addressText: {
         fontSize: 11,
-        color: '#999',
+        color: colors.textSecondary,
     },
     resolveBtnSmall: {
         width: 32,

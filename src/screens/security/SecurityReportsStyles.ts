@@ -190,7 +190,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     },
     emptySubtext: {
         fontSize: 13,
-        color: '#AAA',
+        color: colors.textSecondary,
         marginTop: 6,
     },
     loadMoreBtn: {

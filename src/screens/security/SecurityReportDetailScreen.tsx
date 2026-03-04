@@ -14,12 +14,12 @@ import { CustomAlertModal } from '../../components/common/CustomAlertModal';
 import * as ImagePicker from 'expo-image-picker';
 import { createStyles } from './SecurityReportDetailStyles';
 import { supabase } from '../../lib/supabaseConfig';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useSecurityTheme } from '../../contexts/ThemeContext';
 
 export default function SecurityReportDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const router = useRouter();
-    const { colors } = useTheme();
+    const { colors } = useSecurityTheme();
     const styles = useMemo(() => createStyles(colors), [colors]);
 
     const [data, setData] = useState<any>(null);

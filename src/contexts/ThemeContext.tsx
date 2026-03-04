@@ -88,6 +88,25 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 };
 
 /**
- * Hook to access current theme colors and toggle function
+ * Hook to access current theme colors and toggle function for Warga and Admin
  */
 export const useTheme = () => useContext(ThemeContext);
+
+/**
+ * Hook to access Security specific theme colors and toggle function
+ */
+export const useSecurityTheme = () => {
+    const context = useContext(ThemeContext);
+    const effectiveScheme: 'light' | 'dark' =
+        context.themeMode === 'system'
+            ? (useColorScheme() ?? 'light')
+            : context.themeMode;
+
+    // Override returned colors with the Security color palette
+    // This allows it to sync theme configs from user but paint blue
+    const { getSecurityThemeColors } = require('../theme/AppTheme');
+    return {
+        ...context,
+        colors: getSecurityThemeColors(effectiveScheme)
+    };
+};

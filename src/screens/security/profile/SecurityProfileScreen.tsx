@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Constants from 'expo-constants';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { useAnimatedStyle, withTiming, useSharedValue } from 'react-native-reanimated';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useSecurityTheme } from '../../../contexts/ThemeContext';
 import { useSecurityProfileViewModel } from './SecurityProfileViewModel';
 import { createStyles } from './SecurityProfileStyles';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
@@ -69,7 +69,7 @@ export default function SecurityProfileScreen() {
         hideAlert
     } = useSecurityProfileViewModel();
 
-    const { isDark, toggleTheme, colors } = useTheme();
+    const { isDark, toggleTheme, colors } = useSecurityTheme();
     const styles = useMemo(() => createStyles(colors), [colors]);
 
     const renderInfoItem = (icon: string, label: string, value: string) => (
