@@ -18,6 +18,46 @@ Notifications.setNotificationHandler({
     }),
 });
 
+export async function refreshNotificationChannels(user: any) {
+    if (Platform.OS !== 'android') return;
+
+    try {
+        const soundSettings = await soundSettingsService.getSettings(user?.id || '');
+
+        const notifSound = soundSettings?.notif_sound || 'notification_alert.wav';
+        const alertSound = soundSettings?.alert_sound || 'alarm-sound-effect.wav';
+        const vibrationEnabled = soundSettings?.vibration_enabled ?? true;
+
+        const notifChannelId = `default_${notifSound.split('.')[0]}`;
+        const sosChannelId = `sos_${alertSound.split('.')[0]}`;
+
+        await Notifications.setNotificationChannelAsync(notifChannelId, {
+            name: 'Warga Lokal (Pesan)',
+            importance: Notifications.AndroidImportance.MAX,
+            vibrationPattern: vibrationEnabled ? [0, 250, 250, 250] : undefined,
+            lightColor: '#1B5E20',
+            sound: notifSound === 'default' ? undefined : notifSound,
+        });
+
+        await Notifications.setNotificationChannelAsync(sosChannelId, {
+            name: 'Warga Lokal (Darurat)',
+            importance: Notifications.AndroidImportance.MAX,
+            vibrationPattern: vibrationEnabled ? [0, 500, 200, 500, 200, 500] : undefined,
+            lightColor: '#D32F2F',
+            sound: alertSound === 'default' ? undefined : alertSound,
+        });
+
+        await Notifications.setNotificationChannelAsync('default', {
+            name: 'Warga Lokal',
+            importance: Notifications.AndroidImportance.DEFAULT,
+        });
+
+        console.log('Notification channels refreshed successfully');
+    } catch (error) {
+        console.error('Error refreshing notification channels:', error);
+    }
+}
+
 export const usePushNotifications = () => {
     const { user } = useAuth();
     const router = useRouter();
@@ -78,37 +118,8 @@ export const usePushNotifications = () => {
 async function registerForPushNotificationsAsync(user: any) {
     let token;
 
-    if (Platform.OS === 'android') {
-        const soundSettings = await soundSettingsService.getSettings(user?.id || '');
-
-        const notifSound = soundSettings?.notif_sound || 'notification_alert.wav';
-        const alertSound = soundSettings?.alert_sound || 'alarm-sound-effect.wav';
-        const vibrationEnabled = soundSettings?.vibration_enabled ?? true;
-
-        const notifChannelId = `default_${notifSound.split('.')[0]}`;
-        const sosChannelId = `sos_${alertSound.split('.')[0]}`;
-
-        await Notifications.setNotificationChannelAsync(notifChannelId, {
-            name: 'Warga Lokal (Pesan)',
-            importance: Notifications.AndroidImportance.MAX,
-            vibrationPattern: vibrationEnabled ? [0, 250, 250, 250] : undefined,
-            lightColor: '#1B5E20',
-            sound: notifSound === 'default' ? undefined : notifSound,
-        });
-
-        await Notifications.setNotificationChannelAsync(sosChannelId, {
-            name: 'Warga Lokal (Darurat)',
-            importance: Notifications.AndroidImportance.MAX,
-            vibrationPattern: vibrationEnabled ? [0, 500, 200, 500, 200, 500] : undefined,
-            lightColor: '#D32F2F',
-            sound: alertSound === 'default' ? undefined : alertSound,
-        });
-
-        await Notifications.setNotificationChannelAsync('default', {
-            name: 'Warga Lokal',
-            importance: Notifications.AndroidImportance.DEFAULT,
-        });
-    }
+    // Call the separate logic to create/refresh channels
+    await refreshNotificationChannels(user);
 
     if (Device.isDevice) {
         const { status: existingStatus } = await Notifications.getPermissionsAsync();

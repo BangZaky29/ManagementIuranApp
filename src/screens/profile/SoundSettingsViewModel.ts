@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { soundSettingsService, UserSoundSettings } from '../../services/notification';
 import * as Notifications from 'expo-notifications';
+import { refreshNotificationChannels } from '../../hooks/usePushNotifications';
 import { Platform } from 'react-native';
 import { Audio } from 'expo-av';
 
@@ -71,6 +72,9 @@ export const useSoundSettingsViewModel = () => {
         await soundSettingsService.updateSettings(user.id, {
             [type === 'notif' ? 'notif_sound' : 'alert_sound']: soundFile
         });
+
+        // Optimasi: Refresh Android channels sehingga efeknya langsung terasa di push notif ke depannya
+        await refreshNotificationChannels(user);
     };
 
     const toggleVibration = async () => {
@@ -82,6 +86,9 @@ export const useSoundSettingsViewModel = () => {
         await soundSettingsService.updateSettings(user.id, {
             vibration_enabled: newValue
         });
+
+        // Optimasi: Refresh Android channels
+        await refreshNotificationChannels(user);
     };
 
     const updateAlertDuration = async (duration: number) => {

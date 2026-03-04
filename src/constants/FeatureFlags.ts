@@ -5,7 +5,7 @@
  */
 export const FeatureFlags = {
     // Set to false as requested for "Under Development" state
-    IS_SOUND_SETTINGS_ENABLED: false,
+    IS_SOUND_SETTINGS_ENABLED: true,
     IS_MESSAGE_ENABLED: false,
     IS_OTHERS_ENABLED: false,
     IS_DARK_MODE_ENABLED: false,
