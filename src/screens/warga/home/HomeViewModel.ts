@@ -28,7 +28,13 @@ export const useHomeViewModel = () => {
     // State
     const [userName, setUserName] = useState(profile?.full_name || 'Warga');
     const [avatarUrl, setAvatarUrl] = useState<string | null>(profile?.avatar_url || null);
-    const [weather, setWeather] = useState({ temp: '...', condition: 'Memuat...', location: 'Mencari lokasi...' });
+    const [weather, setWeather] = useState({
+        temp: '...',
+        condition: 'Memuat...',
+        location: 'Mencari lokasi...',
+        icon: 'partly-sunny' as any,
+        color: '#FFCA28'
+    });
     const [billSummary, setBillSummary] = useState({ total: 'Rp 0', label: 'Iuran Keamanan & Sampah', dueDate: '-' });
     const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
     const [unreadNotifCount, setUnreadNotifCount] = useState(0);
@@ -108,7 +114,13 @@ export const useHomeViewModel = () => {
             setWeather(prev => ({ ...prev, location: 'Mencari...' }));
             const { status } = await Location.requestForegroundPermissionsAsync();
             if (status !== 'granted') {
-                setWeather({ temp: '--', condition: 'Akses Ditolak', location: 'Izinkan Lokasi' });
+                setWeather({
+                    temp: '--',
+                    condition: 'Akses Ditolak',
+                    location: 'Izinkan Lokasi',
+                    icon: 'location-outline',
+                    color: '#90A4AE'
+                });
                 return;
             }
 
@@ -127,22 +139,43 @@ export const useHomeViewModel = () => {
                 const temp = Math.round(weatherData.current_weather.temperature);
                 const code = weatherData.current_weather.weathercode;
 
-                // Map weather code to simple condition
-                let condition = 'Cerah';
-                if (code >= 1 && code <= 3) condition = 'Berawan';
-                if (code >= 51 && code <= 67) condition = 'Gerimis/Hujan';
-                if (code >= 71 && code <= 86) condition = 'Salju';
-                if (code >= 95) condition = 'Badai';
+                // 🌎 Comprehensive WMO Weather Code Mapping (0-99)
+                const getWeatherData = (code: number) => {
+                    if (code === 0) return { label: 'Cerah', icon: 'sunny', color: '#FFCA28' };
+                    if (code >= 1 && code <= 3) return { label: 'Berawan', icon: 'partly-sunny', color: '#FFCA28' };
+                    if (code === 45 || code === 48) return { label: 'Kabut', icon: 'cloud', color: '#90A4AE' };
+                    if (code >= 51 && code <= 55) return { label: 'Gerimis', icon: 'rainy', color: '#42A5F5' };
+                    if (code >= 56 && code <= 57) return { label: 'Gerimis Beku', icon: 'snow', color: '#E1F5FE' };
+                    if (code >= 61 && code <= 65) return { label: 'Hujan', icon: 'rainy', color: '#1E88E5' };
+                    if (code >= 66 && code <= 67) return { label: 'Hujan Beku', icon: 'snow', color: '#E1F5FE' };
+                    if (code >= 71 && code <= 75) return { label: 'Salju', icon: 'snow', color: '#FFFFFF' };
+                    if (code === 77) return { label: 'Butiran Salju', icon: 'snow', color: '#FFFFFF' };
+                    if (code >= 80 && code <= 82) return { label: 'Hujan Lebat', icon: 'thunderstorm', color: '#1565C0' };
+                    if (code >= 85 && code <= 86) return { label: 'Salju Lebat', icon: 'snow', color: '#FFFFFF' };
+                    if (code === 95) return { label: 'Badai Petir', icon: 'thunderstorm', color: '#F4511E' };
+                    if (code >= 96 && code <= 99) return { label: 'Badai & Es', icon: 'thunderstorm', color: '#F4511E' };
+                    return { label: 'Berawan', icon: 'cloud', color: '#90A4AE' };
+                };
+
+                const weatherInfo = getWeatherData(code);
 
                 setWeather({
                     temp: `${temp}°C`,
-                    condition,
-                    location: city
+                    condition: weatherInfo.label,
+                    location: city,
+                    icon: weatherInfo.icon,
+                    color: weatherInfo.color
                 });
             }
         } catch (error) {
             console.error('Location/Weather Error:', error);
-            setWeather({ temp: '--', condition: 'Error', location: 'Gagal memuat' });
+            setWeather({
+                temp: '--',
+                condition: 'Error',
+                location: 'Gagal memuat',
+                icon: 'alert-circle-outline',
+                color: '#EF5350'
+            });
         }
     };
 

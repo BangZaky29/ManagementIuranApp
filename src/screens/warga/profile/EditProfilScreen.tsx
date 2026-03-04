@@ -6,11 +6,13 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { ThemeColors } from '../../../theme/AppTheme';
 
 export default function EditProfilScreen() {
     const router = useRouter();
     const { profile, updateUserProfile } = useAuth();
     const { colors } = useTheme();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
 
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -50,15 +52,15 @@ export default function EditProfilScreen() {
     };
 
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <SafeAreaView style={styles.container}>
             <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
 
             {/* Header */}
-            <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border, paddingTop: Platform.OS === 'android' ? 40 : 0 }]}>
+            <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
                 </TouchableOpacity>
-                <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Edit Profil</Text>
+                <Text style={styles.headerTitle}>Edit Profil</Text>
                 <View style={{ width: 24 }} />
             </View>
 
@@ -70,9 +72,9 @@ export default function EditProfilScreen() {
                 keyboardShouldPersistTaps="handled"
             >
                 <View style={styles.inputGroup}>
-                    <Text style={[styles.label, { color: colors.textSecondary }]}>Nama Lengkap</Text>
+                    <Text style={styles.label}>Nama Lengkap</Text>
                     <TextInput
-                        style={[styles.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]}
+                        style={styles.input}
                         value={formData.full_name}
                         onChangeText={(text) => setFormData({ ...formData, full_name: text })}
                         placeholder="Nama Lengkap"
@@ -81,9 +83,9 @@ export default function EditProfilScreen() {
                 </View>
 
                 <View style={styles.inputGroup}>
-                    <Text style={[styles.label, { color: colors.textSecondary }]}>Username</Text>
+                    <Text style={styles.label}>Username</Text>
                     <TextInput
-                        style={[styles.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]}
+                        style={styles.input}
                         value={formData.username}
                         onChangeText={(text) => setFormData({ ...formData, username: text })}
                         placeholder="Username"
@@ -93,9 +95,9 @@ export default function EditProfilScreen() {
                 </View>
 
                 <View style={styles.inputGroup}>
-                    <Text style={[styles.label, { color: colors.textSecondary }]}>Nomor WhatsApp</Text>
+                    <Text style={styles.label}>Nomor WhatsApp</Text>
                     <TextInput
-                        style={[styles.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]}
+                        style={styles.input}
                         value={formData.wa_phone}
                         onChangeText={(text) => setFormData({ ...formData, wa_phone: text })}
                         placeholder="08xx-xxxx-xxxx"
@@ -105,17 +107,11 @@ export default function EditProfilScreen() {
                 </View>
 
                 <View style={styles.inputGroup}>
-                    <Text style={[styles.label, { color: colors.textSecondary }]}>Alamat</Text>
+                    <Text style={styles.label}>Alamat</Text>
                     <TextInput
                         style={[
                             styles.input,
-                            {
-                                backgroundColor: colors.background,
-                                color: colors.textPrimary,
-                                borderColor: colors.border,
-                                height: 100, // Make it taller
-                                textAlignVertical: 'top' // Align text to top
-                            }
+                            { height: 100, textAlignVertical: 'top' }
                         ]}
                         value={formData.address}
                         onChangeText={(text) => setFormData({ ...formData, address: text })}
@@ -127,9 +123,9 @@ export default function EditProfilScreen() {
                 </View>
 
                 <View style={styles.inputGroup}>
-                    <Text style={[styles.label, { color: colors.textSecondary }]}>RT / RW</Text>
+                    <Text style={styles.label}>RT / RW</Text>
                     <TextInput
-                        style={[styles.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]}
+                        style={styles.input}
                         value={formData.rt_rw}
                         onChangeText={(text) => setFormData({ ...formData, rt_rw: text })}
                         placeholder="001/002"
@@ -138,26 +134,30 @@ export default function EditProfilScreen() {
                 </View>
 
                 <TouchableOpacity
-                    style={[styles.saveButton, { backgroundColor: colors.primary, opacity: isLoading ? 0.7 : 1 }]}
+                    style={[styles.saveButton, { opacity: isLoading ? 0.7 : 1 }]}
                     onPress={handleSave}
                     disabled={isLoading}
                 >
-                    {isLoading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.saveButtonText}>Simpan Perubahan</Text>}
+                    {isLoading ? <ActivityIndicator color={colors.textWhite} /> : <Text style={styles.saveButtonText}>Simpan Perubahan</Text>}
                 </TouchableOpacity>
             </KeyboardAwareScrollView>
         </SafeAreaView>
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: colors.background,
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         padding: 16,
+        paddingTop: Platform.OS === 'android' ? 40 : 16,
+        backgroundColor: colors.surface,
         borderBottomWidth: 1,
+        borderBottomColor: colors.border,
         justifyContent: 'space-between',
     },
     backButton: {
@@ -166,6 +166,7 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 18,
         fontWeight: 'bold',
+        color: colors.textPrimary,
     },
     form: {
         padding: 20,
@@ -175,22 +176,27 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 14,
+        color: colors.textSecondary,
         marginBottom: 8,
     },
     input: {
         borderWidth: 1,
+        borderColor: colors.border,
+        backgroundColor: colors.surface,
+        color: colors.textPrimary,
         borderRadius: 8,
         padding: 12,
         fontSize: 16,
     },
     saveButton: {
+        backgroundColor: colors.primary,
         padding: 16,
         borderRadius: 12,
         alignItems: 'center',
         marginTop: 20,
     },
     saveButtonText: {
-        color: '#FFFFFF',
+        color: colors.textWhite,
         fontSize: 16,
         fontWeight: 'bold',
     },

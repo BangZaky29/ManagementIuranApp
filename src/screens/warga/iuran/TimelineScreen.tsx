@@ -120,11 +120,10 @@ export default function TimelineScreen() {
                                     const periodRejectedCount = period.items.filter(i => i.status === 'rejected').length;
 
                                     return (
-                                        <View key={period.id} style={{ marginBottom: 8 }}>
+                                        <View key={period.id} style={s.feeCardContainer}>
                                             <TouchableOpacity
                                                 style={[
                                                     s.feeCard,
-                                                    { marginBottom: 0 },
                                                     (allSelectedInPeriod || someSelectedInPeriod) && s.feeCardSelected,
                                                     period.status === 'paid' && s.feeCardPaid,
                                                 ]}
@@ -256,12 +255,19 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
 
     feeCard: {
         flexDirection: 'row', alignItems: 'center',
-        paddingVertical: 14, paddingHorizontal: 16, borderRadius: 12, marginBottom: 8,
+        paddingVertical: 14, paddingHorizontal: 16,
+        backgroundColor: colors.surface,
+        minHeight: 64,
+    },
+    // Added for container wrapping
+    feeCardContainer: {
+        borderRadius: 12, marginBottom: 8,
         borderWidth: 1, borderColor: colors.border,
-        backgroundColor: colors.surface
+        backgroundColor: colors.surface,
+        overflow: 'hidden',
     },
     feeCardSelected: { borderColor: colors.primary, backgroundColor: colors.primarySubtle },
-    feeCardPaid: { borderColor: colors.border, opacity: 0.8 },
+    feeCardPaid: { opacity: 0.65 },
 
     checkbox: {
         width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: colors.primary,
@@ -269,13 +275,24 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     },
     checkboxChecked: { backgroundColor: colors.primary },
 
-    feeInfo: { flex: 1, marginLeft: 12 },
+    feeInfo: { flex: 1, marginLeft: 12, justifyContent: 'center' },
     feeName: { fontSize: 14, fontWeight: '600', color: colors.textPrimary },
     feeMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 },
     feeStatus: { fontSize: 11, fontWeight: '500' },
     feeAmount: { fontSize: 15, fontWeight: 'bold', color: colors.primary },
 
-    expandedBox: { marginTop: 12, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 8, paddingHorizontal: 16, paddingBottom: 12, backgroundColor: colors.surface, borderBottomLeftRadius: 12, borderBottomRightRadius: 12 },
+    expandedBox: {
+        paddingHorizontal: 0, // Make children control the padding for full width feel
+        paddingBottom: 4,
+        backgroundColor: colors.surface,
+        borderTopWidth: 1,
+        borderTopColor: colors.border,
+    },
+    expandedContent: {
+        paddingHorizontal: 16,
+        paddingBottom: 12,
+        paddingTop: 8,
+    },
     itemRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 8 },
     itemCheckbox: { width: 18, height: 18, marginRight: 10, borderRadius: 4 },
     itemName: { flex: 1, fontSize: 13, color: colors.textPrimary },

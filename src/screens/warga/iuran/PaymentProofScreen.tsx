@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import {
     View, Text, ScrollView, TouchableOpacity,
-    StatusBar, Image, ActivityIndicator, StyleSheet
+    StatusBar, Image, ActivityIndicator, StyleSheet, Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../../constants/Colors';
 import { CustomButton } from '../../../components/common/CustomButton';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -15,12 +14,15 @@ import {
     uploadPaymentProof,
 } from '../../../services/payment';
 import { submitBulkPayments, updateRejectedPayment, BillingPeriod } from '../../../services/iuran';
-
-
+import { useTheme } from '../../../contexts/ThemeContext';
+import { ThemeColors } from '../../../theme/AppTheme';
 
 export default function PaymentProofScreen() {
     const router = useRouter();
     const { user } = useAuth();
+    const { colors } = useTheme();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
+
     const params = useLocalSearchParams<{
         totalAmount: string;
         methodName: string;
@@ -150,12 +152,12 @@ export default function PaymentProofScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <Stack.Screen options={{ headerShown: false }} />
-            <StatusBar barStyle="dark-content" backgroundColor={Colors.green1} />
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
 
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color={Colors.green5} />
+                    <Ionicons name="arrow-back" size={24} color={colors.primary} />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Upload Bukti Pembayaran</Text>
             </View>
@@ -163,9 +165,9 @@ export default function PaymentProofScreen() {
             <ScrollView contentContainerStyle={styles.content}>
 
                 {params.isRepayment === 'true' && (
-                    <View style={{ backgroundColor: '#FFEBEE', padding: 12, borderRadius: 12, marginBottom: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                        <Ionicons name="refresh-circle" size={20} color="#D32F2F" />
-                        <Text style={{ flex: 1, color: '#D32F2F', fontSize: 13, fontWeight: '500' }}>
+                    <View style={{ backgroundColor: colors.danger + '20', padding: 12, borderRadius: 12, marginBottom: 16, flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, borderColor: colors.danger + '40' }}>
+                        <Ionicons name="refresh-circle" size={20} color={colors.danger} />
+                        <Text style={{ flex: 1, color: colors.danger, fontSize: 13, fontWeight: '500' }}>
                             Bukti pembayaran baru untuk iuran yang ditolak.
                         </Text>
                     </View>
@@ -193,7 +195,7 @@ export default function PaymentProofScreen() {
 
                 {/* Info Box */}
                 <View style={styles.infoBox}>
-                    <Ionicons name="information-circle-outline" size={20} color={Colors.green4} />
+                    <Ionicons name="information-circle-outline" size={20} color={colors.primary} />
                     <Text style={styles.infoText}>
                         Upload screenshot bukti pembayaran yang sudah berhasil. Admin akan memverifikasi pembayaran Anda.
                     </Text>
@@ -209,36 +211,36 @@ export default function PaymentProofScreen() {
                             style={styles.removeImageBtn}
                             onPress={() => setProofImage(null)}
                         >
-                            <Ionicons name="close-circle" size={28} color={Colors.danger} />
+                            <Ionicons name="close-circle" size={28} color={colors.danger} />
                         </TouchableOpacity>
                     </View>
                 ) : (
                     <View style={styles.uploadArea}>
-                        <Ionicons name="cloud-upload-outline" size={48} color={Colors.green3} />
+                        <Ionicons name="cloud-upload-outline" size={48} color={colors.primary} />
                         <Text style={styles.uploadTitle}>Upload Bukti Pembayaran</Text>
                         <Text style={styles.uploadSubtitle}>Pilih dari galeri atau ambil foto baru</Text>
 
-                        <View style={styles.uploadActions}>
+                        <div style={styles.uploadActions as any}>
                             <TouchableOpacity style={styles.uploadBtn} onPress={pickImage}>
-                                <Ionicons name="images-outline" size={22} color={Colors.green5} />
+                                <Ionicons name="images-outline" size={18} color={colors.primary} />
                                 <Text style={styles.uploadBtnText}>Galeri</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.uploadBtn} onPress={takePhoto}>
-                                <Ionicons name="camera-outline" size={22} color={Colors.green5} />
+                                <Ionicons name="camera-outline" size={18} color={colors.primary} />
                                 <Text style={styles.uploadBtnText}>Kamera</Text>
                             </TouchableOpacity>
-                        </View>
+                        </div>
                     </View>
                 )}
 
                 {proofImage && (
                     <View style={styles.changeImageRow}>
                         <TouchableOpacity style={styles.changeBtn} onPress={pickImage}>
-                            <Ionicons name="images-outline" size={16} color={Colors.green5} />
+                            <Ionicons name="images-outline" size={16} color={colors.primary} />
                             <Text style={styles.changeBtnText}>Ganti dari Galeri</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.changeBtn} onPress={takePhoto}>
-                            <Ionicons name="camera-outline" size={16} color={Colors.green5} />
+                            <Ionicons name="camera-outline" size={16} color={colors.primary} />
                             <Text style={styles.changeBtnText}>Ambil Foto Baru</Text>
                         </TouchableOpacity>
                     </View>
@@ -253,7 +255,7 @@ export default function PaymentProofScreen() {
                     onPress={handleSubmit}
                     loading={isSubmitting}
                     disabled={!proofImage || isSubmitting}
-                    icon={<Ionicons name="send-outline" size={18} color={Colors.white} />}
+                    icon={<Ionicons name="send-outline" size={18} color={colors.textWhite} />}
                     iconPosition="right"
                 />
             </View>
@@ -270,39 +272,41 @@ export default function PaymentProofScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.green1,
+        backgroundColor: colors.background,
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 20,
-        paddingTop: 50,
+        paddingTop: Platform.OS === 'android' ? 50 : 16,
         paddingBottom: 15,
-        backgroundColor: Colors.green1,
+        backgroundColor: colors.surface,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border,
     },
     backButton: {
         padding: 5,
         marginRight: 10,
     },
     headerTitle: {
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: 'bold',
-        color: Colors.green5,
+        color: colors.primary,
     },
     content: {
         padding: 20,
         paddingBottom: 120,
     },
     summaryCard: {
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         borderRadius: 16,
         padding: 16,
         marginBottom: 16,
         borderWidth: 1,
-        borderColor: 'rgba(0,0,0,0.05)',
+        borderColor: colors.border,
     },
     summaryRow: {
         flexDirection: 'row',
@@ -312,71 +316,73 @@ const styles = StyleSheet.create({
     },
     summaryLabel: {
         fontSize: 14,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
     },
     summaryValue: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: Colors.green3,
+        color: colors.primary,
     },
     summaryMethodValue: {
         fontSize: 14,
         fontWeight: '600',
-        color: Colors.green5,
+        color: colors.textPrimary,
     },
     divider: {
         height: 1,
-        backgroundColor: '#F0F0F0',
+        backgroundColor: colors.border,
         marginVertical: 8,
     },
     feeLabel: {
         fontSize: 13,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
     },
     feeValue: {
         fontSize: 13,
         fontWeight: '500',
-        color: Colors.green5,
+        color: colors.textPrimary,
     },
     infoBox: {
         flexDirection: 'row',
         alignItems: 'flex-start',
-        backgroundColor: '#F1F8E9',
+        backgroundColor: colors.primarySubtle,
         padding: 14,
         borderRadius: 12,
         marginBottom: 20,
         gap: 10,
+        borderWidth: 1,
+        borderColor: colors.primary + '20',
     },
     infoText: {
         flex: 1,
         fontSize: 13,
-        color: Colors.green4,
+        color: colors.primary,
         lineHeight: 18,
     },
     sectionTitle: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: Colors.green5,
+        color: colors.textPrimary,
         marginBottom: 12,
     },
     uploadArea: {
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         borderRadius: 16,
         padding: 32,
         alignItems: 'center',
         borderWidth: 2,
         borderStyle: 'dashed',
-        borderColor: Colors.green2,
+        borderColor: colors.primary + '40',
     },
     uploadTitle: {
         fontSize: 16,
         fontWeight: '600',
-        color: Colors.green5,
+        color: colors.textPrimary,
         marginTop: 12,
     },
     uploadSubtitle: {
         fontSize: 13,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
         marginTop: 4,
         marginBottom: 20,
     },
@@ -388,25 +394,25 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,
-        backgroundColor: Colors.green1,
+        backgroundColor: colors.primarySubtle,
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 24,
         borderWidth: 1,
-        borderColor: Colors.green2,
+        borderColor: colors.primary + '40',
     },
     uploadBtnText: {
         fontSize: 14,
         fontWeight: '600',
-        color: Colors.green5,
+        color: colors.primary,
     },
     imagePreviewContainer: {
         position: 'relative',
         borderRadius: 16,
         overflow: 'hidden',
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         borderWidth: 1,
-        borderColor: Colors.green2,
+        borderColor: colors.border,
     },
     imagePreview: {
         width: '100%',
@@ -416,7 +422,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 10,
         right: 10,
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         borderRadius: 14,
     },
     changeImageRow: {
@@ -430,23 +436,23 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 6,
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         paddingVertical: 10,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: Colors.green2,
+        borderColor: colors.border,
     },
     changeBtnText: {
         fontSize: 12,
         fontWeight: '600',
-        color: Colors.green5,
+        color: colors.textPrimary,
     },
     footer: {
         position: 'absolute',
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         padding: 20,
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
@@ -455,5 +461,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.05,
         shadowRadius: 12,
         elevation: 10,
+        borderTopWidth: 1,
+        borderTopColor: colors.border,
     },
 });

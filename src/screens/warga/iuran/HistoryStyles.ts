@@ -1,27 +1,29 @@
 import { StyleSheet, Platform } from 'react-native';
-import { Colors } from '../../../constants/Colors';
+import { ThemeColors } from '../../../theme/AppTheme';
 
-export const HistoryStyles = StyleSheet.create({
+export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.green1,
+        backgroundColor: colors.background,
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 20,
-        paddingTop: 50, // Increased top padding
+        paddingTop: Platform.OS === 'android' ? 50 : 16,
         paddingBottom: 15,
-        backgroundColor: Colors.green1,
+        backgroundColor: colors.surface,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border,
     },
     backButton: {
         padding: 5,
         marginRight: 10,
     },
     headerTitle: {
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: 'bold',
-        color: Colors.green5,
+        color: colors.primary,
     },
     filterContainer: {
         paddingHorizontal: 20,
@@ -30,19 +32,19 @@ export const HistoryStyles = StyleSheet.create({
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         borderRadius: 12,
         paddingHorizontal: 12,
         paddingVertical: 8,
         marginBottom: 12,
         borderWidth: 1,
-        borderColor: Colors.green2,
+        borderColor: colors.border,
     },
     searchInput: {
         flex: 1,
         marginLeft: 8,
         fontSize: 14,
-        color: Colors.green5,
+        color: colors.textPrimary,
         ...Platform.select({
             web: {
                 outlineWidth: 0,
@@ -58,20 +60,20 @@ export const HistoryStyles = StyleSheet.create({
         paddingVertical: 8,
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: Colors.green2,
-        backgroundColor: Colors.white,
+        borderColor: colors.border,
+        backgroundColor: colors.surface,
     },
     filterButtonActive: {
-        backgroundColor: Colors.green5,
-        borderColor: Colors.green5,
+        backgroundColor: colors.primary,
+        borderColor: colors.primary,
     },
     filterText: {
         fontSize: 12,
-        color: Colors.green5,
+        color: colors.textSecondary,
         fontWeight: '600',
     },
     filterTextActive: {
-        color: Colors.white,
+        color: colors.textWhite,
     },
     listContainer: {
         padding: 20,
@@ -83,18 +85,18 @@ export const HistoryStyles = StyleSheet.create({
         marginTop: 50,
     },
     emptyText: {
-        color: Colors.green4,
+        color: colors.textSecondary,
         marginTop: 10,
     },
 
     // Item Styles (Refined for Card Look)
     itemContainer: {
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         borderRadius: 16,
         marginBottom: 16,
         padding: 20,
         borderWidth: 1,
-        borderColor: 'rgba(0,0,0,0.05)',
+        borderColor: colors.border,
         ...Platform.select({
             ios: {
                 shadowColor: '#000',
@@ -113,17 +115,17 @@ export const HistoryStyles = StyleSheet.create({
     itemPeriod: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: Colors.green5,
+        color: colors.textPrimary,
         marginBottom: 2,
     },
     itemDate: {
         fontSize: 12,
-        color: Colors.green4,
+        color: colors.textSecondary,
     },
     itemAmount: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: Colors.green5,
+        color: colors.primary,
         textAlign: 'right',
         marginBottom: 2,
     },
@@ -138,7 +140,7 @@ export const HistoryStyles = StyleSheet.create({
         marginTop: 16,
         paddingTop: 16,
         borderTopWidth: 1,
-        borderTopColor: '#F0F0F0',
+        borderTopColor: colors.border,
     },
     detailRow: {
         flexDirection: 'row',
@@ -147,12 +149,12 @@ export const HistoryStyles = StyleSheet.create({
     },
     detailLabel: {
         fontSize: 14,
-        color: Colors.green4, // Secondary text
+        color: colors.textSecondary,
     },
     detailValue: {
         fontSize: 14,
         fontWeight: '500',
-        color: Colors.green5,
+        color: colors.textPrimary,
     },
     downloadButton: {
         flexDirection: 'row',
@@ -160,13 +162,15 @@ export const HistoryStyles = StyleSheet.create({
         justifyContent: 'center',
         marginTop: 8,
         paddingVertical: 12,
-        backgroundColor: '#F1F8E9', // Light green background
+        backgroundColor: colors.primarySubtle,
         borderRadius: 12,
         width: '100%',
+        borderWidth: 1,
+        borderColor: colors.primary + '20',
     },
     downloadText: {
         fontSize: 14,
-        color: Colors.green5,
+        color: colors.primary,
         fontWeight: 'bold',
         marginLeft: 8,
     },

@@ -42,7 +42,7 @@ const ThemeToggle = ({ isDark, onToggle, colors }: { isDark: boolean; onToggle: 
                         width: 24,
                         height: 24,
                         borderRadius: 12,
-                        backgroundColor: isDark ? colors.accent : '#FFFFFF',
+                        backgroundColor: isDark ? colors.accent : colors.surface,
                         elevation: 2,
                         shadowColor: '#000',
                         shadowOffset: { width: 0, height: 1 },

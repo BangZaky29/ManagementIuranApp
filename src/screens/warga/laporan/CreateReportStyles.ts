@@ -130,7 +130,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         position: 'absolute',
         top: 10,
         right: 10,
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        backgroundColor: colors.surface,
         width: 32,
         height: 32,
         borderRadius: 16,

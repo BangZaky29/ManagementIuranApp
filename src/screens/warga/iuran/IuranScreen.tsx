@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useIuranViewModel, GroupedHistory, HistoryItem } from './IuranViewModel';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
+import { createStyles } from './IuranStyles';
 
 const formatCurrency = (value: number) =>
     new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
@@ -41,6 +42,7 @@ export default function IuranScreen() {
         refresh,
     } = useIuranViewModel();
     const { colors } = useTheme();
+    const s = React.useMemo(() => createStyles(colors), [colors]);
 
     const unpaidPeriodCount = billSummary?.periods.filter(p => p.status === 'unpaid' || p.status === 'partial' || p.status === 'overdue').length || 0;
     const paidCount = billSummary?.periods.flatMap(p => p.items.filter(i => i.status === 'paid')).length || 0;
@@ -68,7 +70,7 @@ export default function IuranScreen() {
 
             {isLoading ? (
                 <View style={s.center}>
-                    <ActivityIndicator size="large" color="#1B5E20" />
+                    <ActivityIndicator size="large" color={colors.primary} />
                     <Text style={s.loadingText}>Memuat data iuran...</Text>
                 </View>
             ) : (
@@ -76,48 +78,47 @@ export default function IuranScreen() {
                     <ScrollView
                         contentContainerStyle={s.content}
                         showsVerticalScrollIndicator={false}
-                        refreshControl={<RefreshControl refreshing={false} onRefresh={refresh} colors={['#1B5E20']} />}
+                        refreshControl={<RefreshControl refreshing={false} onRefresh={refresh} colors={[colors.primary]} />}
                     >
                         {/* Summary Card */}
                         <Animated.View entering={FadeInDown.delay(100).duration(400)} style={s.summaryCard}>
-                            <Text style={s.summaryMonth}>Status Keuangan Anda</Text>
-                            <Text style={s.summaryTotal}>
-                                {allPaid ? '✅ Lunas' : formatCurrency(billSummary?.totalUnpaid || 0)}
-                            </Text>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <View>
+                                    <Text style={s.summaryMonth}>Status Keuangan</Text>
+                                    <Text style={s.summaryTotal}>
+                                        {allPaid ? 'Lunas' : formatCurrency(billSummary?.totalUnpaid || 0)}
+                                    </Text>
+                                </View>
+                                <Ionicons name={allPaid ? "checkmark-done-circle" : "receipt"} size={44} color="rgba(255,255,255,0.3)" />
+                            </View>
+
                             {!allPaid && (
                                 <Text style={s.summaryLabel}>
-                                    {unpaidItemCount > 0 && `${unpaidItemCount} iuran belum dibayar`}
-                                    {unpaidItemCount > 0 && pendingCount > 0 && ' • '}
-                                    {pendingCount > 0 && `${pendingCount} menunggu konfirmasi`}
+                                    {unpaidItemCount > 0 && `${unpaidItemCount} tagihan perlu diselesaikan`}
                                 </Text>
                             )}
 
-                            {/* Stats Row */}
                             <View style={s.statsRow}>
                                 <View style={s.statItem}>
-                                    <View style={[s.statDot, { backgroundColor: colors.status.selesai.text }]} />
-                                    <Text style={s.statText}>Lunas {paidCount}</Text>
+                                    <View style={[s.statDot, { backgroundColor: '#4CAF50' }]} />
+                                    <Text style={s.statText}>{paidCount} Lunas</Text>
                                 </View>
                                 <View style={s.statItem}>
-                                    <View style={[s.statDot, { backgroundColor: colors.status.pending.text }]} />
-                                    <Text style={s.statText}>Pending {pendingCount}</Text>
-                                </View>
-                                <View style={s.statItem}>
-                                    <View style={[s.statDot, { backgroundColor: '#E0E0E0' }]} />
-                                    <Text style={s.statText}>Belum {unpaidItemCount - rejectedCount}</Text>
+                                    <View style={[s.statDot, { backgroundColor: '#FFCA28' }]} />
+                                    <Text style={s.statText}>{pendingCount} Pending</Text>
                                 </View>
                                 {rejectedCount > 0 && (
                                     <View style={s.statItem}>
-                                        <View style={[s.statDot, { backgroundColor: colors.status.ditolak.text }]} />
-                                        <Text style={s.statText}>Ditolak {rejectedCount}</Text>
+                                        <View style={[s.statDot, { backgroundColor: '#FF5252' }]} />
+                                        <Text style={s.statText}>{rejectedCount} Ditolak</Text>
                                     </View>
                                 )}
                             </View>
 
                             {billSummary && billSummary.totalOverdue > 0 && (
                                 <View style={s.dueDateRow}>
-                                    <Ionicons name="warning" size={14} color="#FF5252" />
-                                    <Text style={[s.dueDateText, { color: '#FF5252' }]}>
+                                    <Ionicons name="alert-circle" size={14} color="#FFEB3B" />
+                                    <Text style={[s.dueDateText, { color: '#FFEB3B' }]}>
                                         Tunggakan: {formatCurrency(billSummary.totalOverdue)}
                                     </Text>
                                 </View>
@@ -137,7 +138,7 @@ export default function IuranScreen() {
                                             <TouchableOpacity
                                                 onPress={selectedCount === unpaidItemCount ? deselectAll : selectAllUnpaid}
                                             >
-                                                <Text style={[s.selectAllText, { color: '#FF9800' }]}>
+                                                <Text style={[s.selectAllText, { color: colors.warning }]}>
                                                     {selectedCount === unpaidItemCount ? 'Hapus Semua' : 'Pilih Semua'}
                                                 </Text>
                                             </TouchableOpacity>
@@ -162,7 +163,7 @@ export default function IuranScreen() {
                                     } else if (period.status === 'pending') {
                                         statusColor = colors.status.pending.text; statusLabel = 'Menunggu Konfirmasi'; statusIcon = 'time';
                                     } else if (period.status === 'unpaid') {
-                                        statusColor = period.isCurrentMonth ? colors.status.pending.text : '#888';
+                                        statusColor = period.isCurrentMonth ? colors.status.pending.text : colors.textSecondary;
                                         statusLabel = period.isCurrentMonth ? 'Bulan Ini' : 'Belum Dibayar';
                                         statusIcon = 'ellipse-outline';
                                     } else if (period.status === 'partial') {
@@ -174,14 +175,12 @@ export default function IuranScreen() {
                                     const periodRejectedCount = period.items.filter(i => i.status === 'rejected').length;
 
                                     return (
-                                        <View key={period.id} style={{ marginBottom: 8 }}>
+                                        <View key={period.id} style={s.feeCardContainer}>
                                             <TouchableOpacity
                                                 style={[
                                                     s.feeCard,
-                                                    { marginBottom: 0 },
                                                     (allSelectedInPeriod || someSelectedInPeriod) && s.feeCardSelected,
                                                     period.status === 'paid' && s.feeCardPaid,
-                                                    { backgroundColor: colors.surface },
                                                 ]}
                                                 onPress={() => toggleExpandPeriod(period.id)}
                                                 activeOpacity={0.7}
@@ -194,7 +193,7 @@ export default function IuranScreen() {
                                                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                                                     >
                                                         {allSelectedInPeriod && <Ionicons name="checkmark" size={14} color="#FFF" />}
-                                                        {!allSelectedInPeriod && someSelectedInPeriod && <Ionicons name="remove" size={14} color="#1B5E20" />}
+                                                        {!allSelectedInPeriod && someSelectedInPeriod && <Ionicons name="remove" size={14} color={colors.primary} />}
                                                     </TouchableOpacity>
                                                 ) : (
                                                     <Ionicons name={statusIcon as any} size={22} color={statusColor} />
@@ -202,25 +201,27 @@ export default function IuranScreen() {
 
                                                 <View style={s.feeInfo}>
                                                     <Text style={s.feeName}>{period.monthName}</Text>
-                                                    <View style={[s.feeMetaRow, { flexWrap: 'wrap' }]}>
+                                                    <View style={s.feeMetaRow}>
                                                         {period.status !== 'rejected' && (
                                                             <>
                                                                 <Ionicons name={statusIcon as any} size={12} color={statusColor} />
-                                                                <Text style={[s.feeStatus, { color: statusColor, marginRight: 6 }]}>{statusLabel}</Text>
+                                                                <Text style={[s.feeStatus, { color: statusColor }]}>{statusLabel}</Text>
                                                             </>
                                                         )}
                                                         {periodRejectedCount > 0 && (
-                                                            <Text style={[s.feeStatus, { color: '#D32F2F', fontWeight: '500' }]}>
-                                                                {period.status !== 'rejected' ? '• ' : ''}Pembayaran ditolak {periodRejectedCount}
+                                                            <Text style={[s.feeStatus, { color: colors.danger, fontWeight: '700' }]}>
+                                                                {period.status !== 'rejected' ? ' • ' : ''}Ditolak {periodRejectedCount}
                                                             </Text>
                                                         )}
                                                     </View>
                                                 </View>
 
-                                                <Text style={[s.feeAmount, period.status === 'paid' && { color: '#999' }]}>
-                                                    {formatCurrency(period.totalAmount)}
-                                                </Text>
-                                                <Ionicons name={isExpanded ? "chevron-up" : "chevron-down"} size={20} color="#888" style={{ marginLeft: 8 }} />
+                                                <View style={{ alignItems: 'flex-end', gap: 4 }}>
+                                                    <Text style={[s.feeAmount, period.status === 'paid' && { color: colors.textSecondary }]}>
+                                                        {formatCurrency(period.totalAmount)}
+                                                    </Text>
+                                                    <Ionicons name={isExpanded ? "chevron-up" : "chevron-down"} size={16} color={colors.textSecondary} />
+                                                </View>
                                             </TouchableOpacity>
 
                                             {/* EXPANDED ITEMS LIST */}
@@ -244,22 +245,16 @@ export default function IuranScreen() {
                                                                         ) : (
                                                                             <Ionicons name="checkmark-circle" size={20} color={item.status === 'paid' ? '#4CAF50' : '#FF9800'} style={{ marginRight: 10 }} />
                                                                         )}
-                                                                        <View style={{ flex: 1 }}>
-                                                                            <Text style={[s.itemName, (!isItemPayable && item.status !== 'rejected') && { color: '#888' }]}>{item.fee.name}</Text>
+                                                                        <View style={{ flex: 1, marginLeft: isItemPayable ? 14 : 0 }}>
+                                                                            <Text style={[s.itemName, (!isItemPayable && item.status !== 'rejected') && { color: colors.textSecondary, fontWeight: '400' }]}>{item.fee.name}</Text>
                                                                             <Text style={[
                                                                                 s.itemStatusLabel,
-                                                                                { color: item.status === 'paid' ? colors.status.lunas.text : item.status === 'pending' ? colors.status.pending.text : item.status === 'rejected' ? colors.status.ditolak.text : '#888' }
+                                                                                { color: item.status === 'paid' ? colors.status.lunas.text : item.status === 'pending' ? colors.status.pending.text : item.status === 'rejected' ? colors.status.ditolak.text : colors.textSecondary }
                                                                             ]}>
-                                                                                {item.status === 'paid' ? 'Lunas' : item.status === 'pending' ? 'Menunggu Konfirmasi' : item.status === 'rejected' ? 'Ditolak' : 'Belum Dibayar'}
+                                                                                {item.status === 'paid' ? 'Terbayar' : item.status === 'pending' ? 'Diproses' : item.status === 'rejected' ? 'Ditolak' : 'Belum Bayar'}
                                                                             </Text>
-
-                                                                            {item.status === 'rejected' && item.rejectionReason && (
-                                                                                <Text style={{ fontSize: 11, color: '#D32F2F', marginTop: 4, fontStyle: 'italic' }}>
-                                                                                    "{item.rejectionReason}"
-                                                                                </Text>
-                                                                            )}
                                                                         </View>
-                                                                        <Text style={[s.itemAmountText, (!isItemPayable && item.status !== 'rejected') && { color: '#888' }]}>{formatCurrency(item.amount)}</Text>
+                                                                        <Text style={[s.itemAmountText, (!isItemPayable && item.status !== 'rejected') && { color: colors.textSecondary }]}>{formatCurrency(item.amount)}</Text>
                                                                     </View>
                                                                     {idx < period.items.length - 1 && <View style={s.divider} />}
                                                                 </View>
@@ -274,46 +269,23 @@ export default function IuranScreen() {
                             </Animated.View>
                         )}
 
-                        {/* Inline Pay Button — below fee cards */}
-                        {unpaidPeriodCount > 0 && (
-                            <View style={s.payContainer}>
-                                <View style={s.payInfo}>
-                                    <Text style={s.payInfoLabel}>
-                                        {selectedCount > 0 ? `${selectedCount} iuran dipilih` : 'Pilih iuran di atas'}
-                                    </Text>
-                                    <Text style={s.payInfoAmount}>
-                                        {selectedCount > 0 ? formatCurrency(selectedTotal) : '-'}
-                                    </Text>
-                                </View>
-                                <TouchableOpacity
-                                    style={[s.payBtn, selectedCount === 0 && s.payBtnDisabled]}
-                                    onPress={handlePay}
-                                    disabled={selectedCount === 0}
-                                    activeOpacity={0.8}
-                                >
-                                    <Ionicons name="wallet-outline" size={18} color="#FFF" />
-                                    <Text style={s.payBtnText}>Bayar Sekarang</Text>
-                                </TouchableOpacity>
-                            </View>
-                        )}
-
                         {/* Empty state (Lunas atau Kosong) */}
                         {billSummary && unpaidPeriods.length === 0 && (
                             <View style={s.emptyBox}>
-                                <Ionicons name={isAllPaid ? "checkmark-circle" : "receipt-outline"} size={48} color={isAllPaid ? colors.status.lunas.text : "#CCC"} />
-                                <Text style={s.emptyTitle}>{isAllPaid ? "Semua Kewajiban Lunas!" : "Belum Ada Iuran"}</Text>
-                                <Text style={s.emptySubtext}>{paidMessage}</Text>
-                                <TouchableOpacity
-                                    style={{ marginTop: 12, paddingVertical: 8, paddingHorizontal: 16, backgroundColor: '#E8F5E9', borderRadius: 8 }}
-                                    onPress={() => router.push('/iuran/timeline')}
-                                >
-                                    <Text style={{ color: '#1B5E20', fontWeight: 'bold', fontSize: 13 }}>Lihat Semua Timeline Lengkap</Text>
-                                </TouchableOpacity>
+                                <Ionicons name={isAllPaid ? "checkmark-done-circle" : "receipt"} size={64} color={isAllPaid ? '#4CAF50' : colors.border} />
+                                <View style={{ alignItems: 'center', marginTop: 12 }}>
+                                    <Text style={s.emptyTitle}>{isAllPaid ? "Kewajiban Selesai!" : "Belum Ada Tagihan"}</Text>
+                                    <Text style={s.emptySubtext}>
+                                        {isAllPaid
+                                            ? "Terima kasih! Semua tagihan iuran Anda untuk periode ini telah diselesaikan dengan baik."
+                                            : "Saat ini Anda tidak memiliki tagihan aktif. Tetap pantau informasi terbaru di sini."}
+                                    </Text>
+                                </View>
                             </View>
                         )}
 
-                        {/* History */}
-                        <View style={s.sectionHeader}>
+                        {/* History Section */}
+                        <View style={[s.sectionHeader, { marginTop: 8 }]}>
                             <Text style={s.sectionTitle}>Riwayat Pembayaran</Text>
                             <TouchableOpacity onPress={() => router.push('/iuran/history')}>
                                 <Text style={s.selectAllText}>Lihat Semua</Text>
@@ -321,13 +293,13 @@ export default function IuranScreen() {
                         </View>
 
                         {history.length === 0 ? (
-                            <View style={s.emptyBox}>
-                                <Ionicons name="document-text-outline" size={36} color="#CCC" />
-                                <Text style={s.emptySubtext}>Belum ada riwayat pembayaran</Text>
+                            <View style={[s.emptyBox, { paddingVertical: 24 }]}>
+                                <Ionicons name="document-text-outline" size={32} color={colors.border} />
+                                <Text style={[s.emptySubtext, { marginTop: 4 }]}>Belum ada riwayat transaksi</Text>
                             </View>
                         ) : (
                             <Animated.View entering={FadeInDown.delay(300).duration(400)}>
-                                {history.map((group: GroupedHistory) => {
+                                {history.slice(0, 3).map((group: GroupedHistory) => {
                                     const rejectedHistoryCount = group.items.filter((i: HistoryItem) => i.status === 'Ditolak').length;
                                     const nonRejectedHistoryCount = group.items.length - rejectedHistoryCount;
 
@@ -340,25 +312,26 @@ export default function IuranScreen() {
                                             >
                                                 <View style={{ flex: 1 }}>
                                                     <Text style={s.periodMonth}>{group.periodName}</Text>
-                                                    <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginTop: 2 }}>
+                                                    <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
                                                         {nonRejectedHistoryCount > 0 && (
-                                                            <Text style={[s.periodStatus, { color: '#4CAF50', marginTop: 0 }]}>Terbayar {nonRejectedHistoryCount} iuran</Text>
+                                                            <Text style={[s.periodStatus, { color: colors.success }]}>Terbayar {nonRejectedHistoryCount} iuran</Text>
                                                         )}
                                                         {rejectedHistoryCount > 0 && (
-                                                            <Text style={[s.periodStatus, { color: '#D32F2F', marginTop: 0, fontWeight: '500' }]}>
-                                                                {nonRejectedHistoryCount > 0 ? '• ' : ''}Pembayaran ditolak {rejectedHistoryCount}
+                                                            <Text style={[s.periodStatus, { color: colors.danger, fontWeight: '700' }]}>
+                                                                {nonRejectedHistoryCount > 0 ? ' • ' : ''}Ditolak {rejectedHistoryCount}
                                                             </Text>
                                                         )}
                                                     </View>
                                                 </View>
-                                                <View style={{ alignItems: 'flex-end', marginRight: 12 }}>
+                                                <View style={{ alignItems: 'flex-end', marginLeft: 12 }}>
                                                     <Text style={s.periodAmount}>{formatCurrency(group.totalAmount)}</Text>
+                                                    <Ionicons
+                                                        name={group.isExpanded ? "chevron-up" : "chevron-down"}
+                                                        size={14}
+                                                        color={colors.textSecondary}
+                                                        style={{ marginTop: 4 }}
+                                                    />
                                                 </View>
-                                                <Ionicons
-                                                    name={group.isExpanded ? "chevron-up" : "chevron-down"}
-                                                    size={20}
-                                                    color="#666"
-                                                />
                                             </TouchableOpacity>
 
                                             {group.isExpanded && (
@@ -369,72 +342,22 @@ export default function IuranScreen() {
                                                                 <View style={s.historyItemRow}>
                                                                     <Ionicons
                                                                         name={item.status === 'Lunas' ? "checkmark-circle" : item.status === 'Ditolak' ? "close-circle" : "time"}
-                                                                        size={20}
-                                                                        color={item.status === 'Lunas' ? colors.status.lunas.text : item.status === 'Ditolak' ? colors.status.ditolak.text : colors.status.pending.text}
-                                                                        style={{ marginRight: 10 }}
+                                                                        size={22}
+                                                                        color={item.status === 'Lunas' ? '#4CAF50' : item.status === 'Ditolak' ? '#EF5350' : '#FFB74D'}
+                                                                        style={{ marginRight: 12 }}
                                                                     />
                                                                     <View style={{ flex: 1 }}>
                                                                         <Text style={s.itemName}>{item.feeName}</Text>
-                                                                        <Text style={s.historyItemSub}>{item.status === 'Lunas' ? `${item.date} • ${item.methodName}` : item.status === 'Ditolak' ? 'Pembayaran Ditolak Admin' : 'Menunggu konfirmasi'}</Text>
-
-                                                                        {item.status === 'Ditolak' && item.rejectionReason && (
-                                                                            <View>
-                                                                                <Text style={{ fontSize: 11, color: '#D32F2F', marginTop: 4, fontStyle: 'italic' }}>
-                                                                                    "{item.rejectionReason}"
-                                                                                </Text>
-                                                                                <TouchableOpacity
-                                                                                    style={{ alignSelf: 'flex-start', backgroundColor: '#F44336', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6, marginTop: 6 }}
-                                                                                    onPress={() => {
-                                                                                        const mockedPeriod = {
-                                                                                            id: group.id,
-                                                                                            periodDate: group.periodName,
-                                                                                            monthName: group.periodName,
-                                                                                            status: 'rejected',
-                                                                                            totalAmount: item.amount,
-                                                                                            unpaidAmount: item.amount,
-                                                                                            isCurrentMonth: false,
-                                                                                            isOverdue: false,
-                                                                                            items: [{
-                                                                                                fee: { id: item.feeId, name: item.feeName, amount: item.amount },
-                                                                                                isPaid: false,
-                                                                                                status: 'rejected',
-                                                                                                amount: item.amount,
-                                                                                                rawPaymentId: item.rawPaymentId
-                                                                                            }]
-                                                                                        };
-                                                                                        router.push({
-                                                                                            pathname: '/iuran/payment-detail',
-                                                                                            params: {
-                                                                                                selectedPeriods: JSON.stringify([mockedPeriod]),
-                                                                                                totalAmount: item.amount.toString(),
-                                                                                                isRepayment: 'true',
-                                                                                                paymentIdToUpdate: item.rawPaymentId
-                                                                                            }
-                                                                                        });
-                                                                                    }}
-                                                                                >
-                                                                                    <Text style={{ fontSize: 10, color: '#FFF', fontWeight: 'bold' }}>Bayar Ulang</Text>
-                                                                                </TouchableOpacity>
-                                                                            </View>
-                                                                        )}
+                                                                        <Text style={s.historyItemSub}>{item.status === 'Lunas' ? `${item.date} • ${item.methodName}` : item.status === 'Ditolak' ? 'Ditolak Admin' : 'Sedang Diproses'}</Text>
                                                                     </View>
                                                                     <View style={{ alignItems: 'flex-end' }}>
-                                                                        <Text style={[s.itemAmountText, item.status !== 'Lunas' && { color: item.status === 'Ditolak' ? '#F44336' : '#FF9800' }]}>{item.amountFormatted}</Text>
-
+                                                                        <Text style={[s.itemAmountText, item.status !== 'Lunas' && { color: item.status === 'Ditolak' ? colors.danger : colors.warning }]}>{item.amountFormatted}</Text>
                                                                         {item.status === 'Lunas' && (
                                                                             <TouchableOpacity
                                                                                 onPress={() => handleDownloadReceipt(item, group.periodName)}
-                                                                                disabled={isDownloadingReceiptId === item.id}
                                                                                 style={{ marginTop: 4 }}
                                                                             >
-                                                                                {isDownloadingReceiptId === item.id ? (
-                                                                                    <ActivityIndicator size="small" color="#1B5E20" />
-                                                                                ) : (
-                                                                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                                                                                        <Text style={{ color: '#1B5E20', fontSize: 11, fontWeight: 'bold' }}>Kuitansi</Text>
-                                                                                        <Ionicons name="download-outline" size={12} color="#1B5E20" />
-                                                                                    </View>
-                                                                                )}
+                                                                                <Text style={{ color: colors.primary, fontSize: 11, fontWeight: '700' }}>Kuitansi</Text>
                                                                             </TouchableOpacity>
                                                                         )}
                                                                     </View>
@@ -451,8 +374,26 @@ export default function IuranScreen() {
                             </Animated.View>
                         )}
 
-                        <View style={{ height: 40 }} />
+                        <View style={{ height: 120 }} />
                     </ScrollView>
+
+                    {/* Floating Pay Button — bottom fixed */}
+                    {unpaidPeriodCount > 0 && selectedCount > 0 && (
+                        <Animated.View entering={FadeInDown.springify()} style={s.payContainer}>
+                            <View style={s.payInfo}>
+                                <Text style={s.payInfoLabel}>{selectedCount} Iuran dipilih</Text>
+                                <Text style={s.payInfoAmount}>{formatCurrency(selectedTotal)}</Text>
+                            </View>
+                            <TouchableOpacity
+                                style={s.payBtn}
+                                onPress={handlePay}
+                                activeOpacity={0.8}
+                            >
+                                <Ionicons name="wallet-outline" size={20} color="#FFF" />
+                                <Text style={s.payBtnText}>Bayar</Text>
+                            </TouchableOpacity>
+                        </Animated.View>
+                    )}
                 </>
             )}
 
@@ -460,133 +401,3 @@ export default function IuranScreen() {
         </SafeAreaView>
     );
 }
-
-const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F5F7F5' },
-    center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    loadingText: { fontSize: 14, color: '#888', marginTop: 12 },
-    content: { padding: 16 },
-
-    // Summary
-    summaryCard: {
-        backgroundColor: '#1B5E20', borderRadius: 20, padding: 20, marginBottom: 20,
-    },
-    summaryMonth: { fontSize: 13, color: 'rgba(255,255,255,0.7)' },
-    summaryTotal: { fontSize: 28, fontWeight: 'bold', color: '#FFF', marginTop: 4 },
-    summaryLabel: { fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 2 },
-    statsRow: { flexDirection: 'row', marginTop: 16, gap: 16 },
-    statItem: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-    statDot: { width: 8, height: 8, borderRadius: 4 },
-    statText: { fontSize: 12, color: 'rgba(255,255,255,0.8)' },
-    dueDateRow: {
-        flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 12,
-        paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.15)',
-    },
-    dueDateText: { fontSize: 12, color: '#FFB74D', fontWeight: '500' },
-
-    // Section
-    sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, marginTop: 4 },
-    sectionTitle: { fontSize: 16, fontWeight: '700', color: '#333' },
-    selectAllText: { fontSize: 13, fontWeight: '600', color: '#1B5E20' },
-
-    // Fee Card
-    feeCard: {
-        flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 14,
-        marginBottom: 8, borderWidth: 1.5, borderColor: 'transparent',
-        ...Platform.select({
-            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 3 },
-            android: { elevation: 1 },
-        }),
-    },
-    feeCardSelected: { borderColor: '#1B5E20', backgroundColor: '#F1F8E9' },
-    feeCardPaid: { opacity: 0.65 },
-    checkbox: {
-        width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: '#CCC',
-        alignItems: 'center', justifyContent: 'center',
-    },
-    checkboxChecked: { backgroundColor: '#1B5E20', borderColor: '#1B5E20' },
-    feeInfo: { flex: 1, marginLeft: 12 },
-    feeName: { fontSize: 14, fontWeight: '600', color: '#333' },
-    feeDetailList: { fontSize: 11, color: '#888', marginTop: 2, fontStyle: 'italic' },
-    feeMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 },
-    feeStatus: { fontSize: 11, fontWeight: '500' },
-    feeAmount: { fontSize: 15, fontWeight: 'bold', color: '#1B5E20' },
-
-    expandedBox: { marginTop: 12, borderTopWidth: 1, borderTopColor: '#EEE', paddingTop: 8 },
-    itemRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 8 },
-    itemCheckbox: { width: 18, height: 18, marginRight: 10, borderRadius: 4 },
-    itemName: { flex: 1, fontSize: 13, color: '#333' },
-    itemAmountText: { fontSize: 13, fontWeight: 'bold', color: '#1B5E20' },
-    itemsContainer: {
-        backgroundColor: '#F9F9F9', borderRadius: 12, paddingVertical: 4, paddingHorizontal: 12,
-        marginTop: 4, borderWidth: 1, borderColor: '#EEE'
-    },
-    itemStatusLabel: { fontSize: 11, marginTop: 2, fontWeight: '500' },
-    divider: { height: 1, backgroundColor: '#EEE', marginVertical: 8 },
-
-    // Pay Container (inline)
-    payContainer: {
-        flexDirection: 'row', alignItems: 'center', padding: 16, marginTop: 4, marginBottom: 16,
-        backgroundColor: '#FFF', borderRadius: 16,
-        ...Platform.select({
-            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6 },
-            android: { elevation: 3 },
-        }),
-    },
-    payInfo: { flex: 1 },
-    payInfoLabel: { fontSize: 12, color: '#888' },
-    payInfoAmount: { fontSize: 18, fontWeight: 'bold', color: '#1B5E20' },
-
-    // Empty
-    emptyBox: { alignItems: 'center', paddingVertical: 30, backgroundColor: '#FFF', borderRadius: 16, padding: 20, marginBottom: 16 },
-    emptyTitle: { fontSize: 16, fontWeight: 'bold', color: '#333', marginTop: 12 },
-    emptySubtext: { fontSize: 13, color: '#888', marginTop: 6, textAlign: 'center' },
-
-    // Period / Monthly Group
-    periodCard: {
-        backgroundColor: '#FFF', borderRadius: 16, marginBottom: 16,
-        borderWidth: 1, borderColor: '#E0E0E0', overflow: 'hidden',
-        ...Platform.select({
-            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8 },
-            android: { elevation: 2 }
-        })
-    },
-    periodHeader: { flexDirection: 'row', alignItems: 'center', padding: 16 },
-    periodMonth: { fontSize: 16, fontWeight: 'bold', color: '#333' },
-    periodStatus: { fontSize: 12, marginTop: 2 },
-    periodAmount: { fontSize: 16, fontWeight: 'bold', color: '#1B5E20' },
-
-    // History
-    historyCard: {
-        borderRadius: 14, padding: 14, marginBottom: 8,
-        ...Platform.select({
-            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 3 },
-            android: { elevation: 1 },
-        }),
-    },
-    historyRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    historyPeriod: { fontSize: 15, fontWeight: 'bold', color: '#333' },
-    historyItemRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10 },
-    historyItemSub: { fontSize: 11, color: '#666', marginTop: 2 },
-    historyStatus: { fontSize: 13, fontWeight: '700' },
-    expandedRow: {
-        marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#EEE',
-    },
-    detailLine: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-    detailLabel: { fontSize: 13, color: '#888' },
-    detailValue: { fontSize: 13, fontWeight: '500', color: '#333' },
-
-    // Receipt Download Button
-    downloadBtn: {
-        flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-        backgroundColor: '#1B5E20', paddingVertical: 10, borderRadius: 10, marginTop: 12,
-    },
-    downloadBtnText: { color: '#FFF', fontSize: 13, fontWeight: '600' },
-    // Pay Button
-    payBtn: {
-        flexDirection: 'row', alignItems: 'center', gap: 6,
-        backgroundColor: '#1B5E20', paddingHorizontal: 24, paddingVertical: 14, borderRadius: 14,
-    },
-    payBtnDisabled: { backgroundColor: '#CCC' },
-    payBtnText: { fontSize: 15, fontWeight: 'bold', color: '#FFF' },
-});

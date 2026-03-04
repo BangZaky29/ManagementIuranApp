@@ -11,6 +11,8 @@ import { PaymentInstructionModal } from '../../../components/payment/PaymentInst
 import { useAuth } from '../../../contexts/AuthContext';
 import { fetchPaymentMethodsForUser, PaymentMethod } from '../../../services/payment';
 import { BillingPeriod } from '../../../services/iuran';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { createStyles } from './PaymentDetailStyles';
 
 export default function PaymentDetailScreen() {
     const router = useRouter();
@@ -21,6 +23,9 @@ export default function PaymentDetailScreen() {
     const selectedPeriods: BillingPeriod[] = params.selectedPeriods ? JSON.parse(params.selectedPeriods) : [];
     const totalAmount = Number(params.totalAmount) || selectedPeriods.reduce((s, p) => s + p.totalAmount, 0);
     const isRepayment = params.isRepayment === 'true';
+
+    const { colors } = useTheme();
+    const st = React.useMemo(() => createStyles(colors), [colors]);
 
     const [selectedMethodId, setSelectedMethodId] = useState<number | null>(null);
     const [isModalVisible, setModalVisible] = useState(false);
@@ -73,35 +78,35 @@ export default function PaymentDetailScreen() {
 
     if (isLoading) {
         return (
-            <SafeAreaView style={st.container}>
-                <StatusBar barStyle="dark-content" backgroundColor="#F5F7F5" />
-                <View style={st.header}>
+            <SafeAreaView style={[st.container, { backgroundColor: colors.background }]}>
+                <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
+                <View style={[st.header, { backgroundColor: colors.surface }]}>
                     <TouchableOpacity onPress={() => router.back()} style={st.backBtn}>
-                        <Ionicons name="arrow-back" size={24} color="#1B5E20" />
+                        <Ionicons name="arrow-back" size={24} color={colors.primary} />
                     </TouchableOpacity>
-                    <Text style={st.headerTitle}>Rincian Pembayaran</Text>
+                    <Text style={[st.headerTitle, { color: colors.primary }]}>Rincian Pembayaran</Text>
                 </View>
-                <View style={st.center}><ActivityIndicator size="large" color="#1B5E20" /></View>
+                <View style={st.center}><ActivityIndicator size="large" color={colors.primary} /></View>
             </SafeAreaView>
         );
     }
 
     return (
-        <SafeAreaView style={st.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#F5F7F5" />
+        <SafeAreaView style={[st.container, { backgroundColor: colors.background }]}>
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
 
-            <View style={st.header}>
+            <View style={[st.header, { backgroundColor: colors.surface }]}>
                 <TouchableOpacity onPress={() => router.back()} style={st.backBtn}>
-                    <Ionicons name="arrow-back" size={24} color="#1B5E20" />
+                    <Ionicons name="arrow-back" size={24} color={colors.primary} />
                 </TouchableOpacity>
-                <Text style={st.headerTitle}>Rincian Pembayaran</Text>
+                <Text style={[st.headerTitle, { color: colors.primary }]}>Rincian Pembayaran</Text>
             </View>
 
             <ScrollView contentContainerStyle={st.content}>
                 {isRepayment && (
-                    <View style={{ backgroundColor: '#FFEBEE', padding: 12, borderRadius: 12, marginBottom: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                        <Ionicons name="alert-circle" size={20} color="#D32F2F" />
-                        <Text style={{ flex: 1, color: '#D32F2F', fontSize: 13, fontWeight: '500' }}>
+                    <View style={{ backgroundColor: colors.danger + '20', padding: 12, borderRadius: 12, marginBottom: 16, flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, borderColor: colors.danger + '40' }}>
+                        <Ionicons name="alert-circle" size={20} color={colors.danger} />
+                        <Text style={{ flex: 1, color: colors.danger, fontSize: 13, fontWeight: '500' }}>
                             Anda sedang melakukan pembayaran ulang untuk iuran yang sebelumnya ditolak.
                         </Text>
                     </View>
@@ -110,7 +115,7 @@ export default function PaymentDetailScreen() {
                 {/* Bill Summary */}
                 <View style={st.section}>
                     <Text style={st.sectionTitle}>Rincian Tagihan</Text>
-                    <Text style={st.period}>{currentMonth}</Text>
+                    <Text style={st.billPeriod}>{currentMonth}</Text>
 
                     <View style={st.card}>
                         {selectedPeriods.map((period, idx) => {
@@ -118,20 +123,20 @@ export default function PaymentDetailScreen() {
                             return (
                                 <View key={idx} style={{ marginBottom: 12 }}>
                                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                                        <Ionicons name="calendar-outline" size={14} color="#1B5E20" />
-                                        <Text style={[st.rowLabel, { fontWeight: '700', color: '#1B5E20' }]}>{period.monthName}</Text>
+                                        <Ionicons name="calendar-outline" size={14} color={colors.primary} />
+                                        <Text style={[st.rowLabel, { fontWeight: '700', color: colors.primary }]}>{period.monthName}</Text>
                                     </View>
                                     {unpaidItems.map((item, itemIdx) => (
                                         <View key={`${idx}-${itemIdx}`} style={[st.row, { paddingLeft: 22, marginTop: 4 }]}>
                                             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-                                                <Text style={[st.rowLabel, { color: '#555', fontSize: 13 }]}>- {item.fee.name}</Text>
+                                                <Text style={[st.rowLabel, { color: colors.textSecondary, fontSize: 13 }]}>- {item.fee.name}</Text>
                                                 {item.status === 'rejected' && (
-                                                    <View style={{ backgroundColor: '#FFEBEE', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginLeft: 6 }}>
-                                                        <Text style={{ color: '#D32F2F', fontSize: 9, fontWeight: 'bold' }}>Pembayaran ulang</Text>
+                                                    <View style={{ backgroundColor: colors.danger + '20', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginLeft: 6 }}>
+                                                        <Text style={{ color: colors.danger, fontSize: 9, fontWeight: 'bold' }}>Pembayaran ulang</Text>
                                                     </View>
                                                 )}
                                             </View>
-                                            <Text style={[st.rowValue, { fontSize: 13 }]}>{formatCurrency(item.amount)}</Text>
+                                            <Text style={[st.rowValue, { fontSize: 13, color: colors.textPrimary }]}>{formatCurrency(item.amount)}</Text>
                                         </View>
                                     ))}
                                 </View>
@@ -147,7 +152,7 @@ export default function PaymentDetailScreen() {
 
                 {/* Info */}
                 <View style={st.infoBox}>
-                    <Ionicons name="information-circle-outline" size={18} color="#1B5E20" />
+                    <Ionicons name="information-circle-outline" size={18} color={colors.primary} />
                     <Text style={st.infoText}>Pilih metode pembayaran, lalu lakukan transfer sesuai instruksi.</Text>
                 </View>
 
@@ -157,7 +162,7 @@ export default function PaymentDetailScreen() {
 
                     {paymentMethods.length === 0 ? (
                         <View style={st.emptyMethod}>
-                            <Ionicons name="card-outline" size={40} color="#CCC" />
+                            <Ionicons name="card-outline" size={40} color={colors.border} />
                             <Text style={st.emptyMethodTitle}>Belum Ada Metode</Text>
                             <Text style={st.emptyMethodSub}>Admin belum menambahkan metode pembayaran.</Text>
                         </View>
@@ -174,7 +179,7 @@ export default function PaymentDetailScreen() {
                                     </View>
                                     <View style={st.methodInfo}>
                                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                                            <Ionicons name={getMethodIcon(method.method_type) as any} size={16} color="#1B5E20" />
+                                            <Ionicons name={getMethodIcon(method.method_type) as any} size={16} color={colors.primary} />
                                             <Text style={st.methodName}>{method.method_name}</Text>
                                         </View>
                                         <Text style={st.methodDesc}>
@@ -208,7 +213,7 @@ export default function PaymentDetailScreen() {
                         title="Konfirmasi"
                         onPress={handleConfirmPayment}
                         style={{ flex: 1, marginLeft: 16 }}
-                        icon={<Ionicons name="lock-closed-outline" size={16} color="#FFF" />}
+                        icon={<Ionicons name="lock-closed-outline" size={16} color={colors.textWhite} />}
                         iconPosition="right"
                         disabled={!selectedMethodId}
                     />

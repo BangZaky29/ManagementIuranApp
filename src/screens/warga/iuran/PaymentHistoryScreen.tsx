@@ -6,6 +6,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { useHistoryViewModel } from './HistoryViewModel';
 import { FilterCalendar } from '../../../components/payment/FilterCalendar';
+import { CustomHeader } from '../../../components/common/CustomHeader';
+import { ThemeColors } from '../../../theme/AppTheme';
 import { formatDateSafe } from '../../../utils/dateUtils';
 
 const formatCurrency = (value: number) =>
@@ -35,6 +37,7 @@ export default function PaymentHistoryScreen() {
         refresh
     } = useHistoryViewModel();
     const { colors } = useTheme();
+    const s = React.useMemo(() => createStyles(colors), [colors]);
 
     const renderItem = ({ item: group }: { item: any }) => {
         const rejectedHistoryCount = group.items.filter((i: any) => i.status === 'Ditolak').length;
@@ -66,7 +69,7 @@ export default function PaymentHistoryScreen() {
                     <Ionicons
                         name={group.isExpanded ? "chevron-up" : "chevron-down"}
                         size={20}
-                        color="#666"
+                        color={colors.textSecondary}
                     />
                 </TouchableOpacity>
 
@@ -90,11 +93,11 @@ export default function PaymentHistoryScreen() {
 
                                             {item.status === 'Ditolak' && item.rejectionReason && (
                                                 <View>
-                                                    <Text style={{ fontSize: 11, color: '#D32F2F', marginTop: 4, fontStyle: 'italic' }}>
+                                                    <Text style={{ fontSize: 11, color: colors.danger, marginTop: 4, fontStyle: 'italic' }}>
                                                         "{item.rejectionReason}"
                                                     </Text>
                                                     <TouchableOpacity
-                                                        style={{ alignSelf: 'flex-start', backgroundColor: '#F44336', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6, marginTop: 6 }}
+                                                        style={{ alignSelf: 'flex-start', backgroundColor: colors.danger, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6, marginTop: 6 }}
                                                         onPress={() => {
                                                             const mockedPeriod = {
                                                                 id: group.id,
@@ -125,7 +128,7 @@ export default function PaymentHistoryScreen() {
                                                             });
                                                         }}
                                                     >
-                                                        <Text style={{ fontSize: 10, color: '#FFF', fontWeight: 'bold' }}>Bayar Ulang</Text>
+                                                        <Text style={{ fontSize: 10, color: colors.textWhite, fontWeight: 'bold' }}>Bayar Ulang</Text>
                                                     </TouchableOpacity>
                                                 </View>
                                             )}
@@ -140,13 +143,13 @@ export default function PaymentHistoryScreen() {
                                                     style={{ marginTop: 4 }}
                                                 >
                                                     {isDownloadingId === item.id ? (
-                                                        <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#E8F5E9', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, gap: 4 }}>
-                                                            <ActivityIndicator size="small" color="#1B5E20" />
+                                                        <View style={[s.kuitansiBadge, { backgroundColor: colors.successBg }]}>
+                                                            <ActivityIndicator size="small" color={colors.success} />
                                                         </View>
                                                     ) : (
-                                                        <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#E8F5E9', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, gap: 4 }}>
-                                                            <Text style={{ color: '#1B5E20', fontSize: 11, fontWeight: 'bold' }}>Kuitansi</Text>
-                                                            <Ionicons name="download-outline" size={14} color="#1B5E20" />
+                                                        <View style={[s.kuitansiBadge, { backgroundColor: colors.successBg }]}>
+                                                            <Text style={[s.kuitansiText, { color: colors.success }]}>Kuitansi</Text>
+                                                            <Ionicons name="download-outline" size={14} color={colors.success} />
                                                         </View>
                                                     )}
                                                 </TouchableOpacity>
@@ -162,17 +165,17 @@ export default function PaymentHistoryScreen() {
                                 <TouchableOpacity
                                     style={{
                                         flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-                                        backgroundColor: '#E8F5E9', paddingVertical: 10, borderRadius: 12, marginTop: 12, borderWidth: 1, borderColor: '#C8E6C9'
+                                        backgroundColor: colors.primarySubtle, paddingVertical: 10, borderRadius: 12, marginTop: 12, borderWidth: 1, borderColor: colors.primary + '20'
                                     }}
                                     onPress={() => handleDownloadPeriodReceipt(group)}
                                     disabled={isDownloadingId === group.id}
                                 >
                                     {isDownloadingId === group.id ? (
-                                        <ActivityIndicator size="small" color="#1B5E20" />
+                                        <ActivityIndicator size="small" color={colors.success} />
                                     ) : (
                                         <>
-                                            <Ionicons name="download-outline" size={16} color="#1B5E20" style={{ marginRight: 6 }} />
-                                            <Text style={{ color: '#1B5E20', fontSize: 13, fontWeight: 'bold' }}>Unduh Kuitansi Bulan Ini</Text>
+                                            <Ionicons name="download-outline" size={16} color={colors.success} style={{ marginRight: 6 }} />
+                                            <Text style={{ color: colors.success, fontSize: 13, fontWeight: 'bold' }}>Unduh Kuitansi Bulan Ini</Text>
                                         </>
                                     )}
                                 </TouchableOpacity>
@@ -186,33 +189,30 @@ export default function PaymentHistoryScreen() {
     };
 
     return (
-        <SafeAreaView style={s.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#E8F5E9" />
+        <SafeAreaView edges={['top', 'left', 'right']} style={s.container}>
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
 
-            {/* Header */}
-            <View style={s.header}>
-                <TouchableOpacity onPress={() => router.back()} style={s.backButton}>
-                    <Ionicons name="arrow-back" size={24} color="#1B5E20" />
-                </TouchableOpacity>
-                <Text style={s.headerTitle}>Riwayat Pembayaran</Text>
-            </View>
+            <CustomHeader
+                title="Riwayat Pembayaran"
+                showBack={true}
+            />
 
             {/* Filters */}
             <View style={s.filterContainer}>
                 {/* Search and Reset */}
                 <View style={{ flexDirection: 'row', gap: 10 }}>
                     <View style={[s.searchContainer, { flex: 1 }]}>
-                        <Ionicons name="search" size={20} color="#666" />
+                        <Ionicons name="search" size={20} color={colors.textSecondary} />
                         <TextInput
                             style={s.searchInput}
                             placeholder="Cari bulan..."
                             value={searchQuery}
                             onChangeText={setSearchQuery}
-                            placeholderTextColor="#888"
+                            placeholderTextColor={colors.textSecondary}
                         />
                         {searchQuery.length > 0 && (
                             <TouchableOpacity onPress={() => setSearchQuery('')}>
-                                <Ionicons name="close-circle" size={18} color="#888" />
+                                <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
                             </TouchableOpacity>
                         )}
                     </View>
@@ -220,16 +220,16 @@ export default function PaymentHistoryScreen() {
                         style={{
                             justifyContent: 'center',
                             alignItems: 'center',
-                            backgroundColor: '#FFF',
+                            backgroundColor: colors.surface,
                             borderRadius: 12,
                             width: 44,
                             height: 44,
                             borderWidth: 1,
-                            borderColor: '#A5D6A7'
+                            borderColor: colors.border
                         }}
                         onPress={resetFilters}
                     >
-                        <Ionicons name="refresh" size={20} color="#1B5E20" />
+                        <Ionicons name="refresh" size={20} color={colors.primary} />
                     </TouchableOpacity>
                 </View>
 
@@ -243,7 +243,7 @@ export default function PaymentHistoryScreen() {
                         ]}
                         onPress={handleDateSelect}
                     >
-                        <Ionicons name="calendar-outline" size={16} color={selectedDate ? "#FFF" : "#1B5E20"} style={{ marginRight: 6 }} />
+                        <Ionicons name="calendar-outline" size={16} color={selectedDate ? colors.textWhite : colors.primary} style={{ marginRight: 6 }} />
                         <Text style={[s.filterText, selectedDate && s.filterTextActive]}>
                             {selectedDate ? formatDateSafe(selectedDate) : 'Pilih Periode'}
                         </Text>
@@ -276,17 +276,17 @@ export default function PaymentHistoryScreen() {
                         <TouchableOpacity
                             style={{
                                 flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-                                backgroundColor: '#1B5E20', paddingVertical: 14, borderRadius: 12, marginBottom: 16, marginHorizontal: 20
+                                backgroundColor: colors.primary, paddingVertical: 14, borderRadius: 12, marginBottom: 16, marginHorizontal: 20
                             }}
                             onPress={handleDownloadAllReceipts}
                             disabled={isDownloadingId === 'all'}
                         >
                             {isDownloadingId === 'all' ? (
-                                <ActivityIndicator size="small" color="#FFF" />
+                                <ActivityIndicator size="small" color={colors.textWhite} />
                             ) : (
                                 <>
-                                    <Ionicons name="download" size={18} color="#FFF" style={{ marginRight: 8 }} />
-                                    <Text style={{ color: '#FFF', fontSize: 14, fontWeight: 'bold' }}>Unduh Semua Kuitansi Riwayat</Text>
+                                    <Ionicons name="download" size={18} color={colors.textWhite} style={{ marginRight: 8 }} />
+                                    <Text style={{ color: colors.textWhite, fontSize: 14, fontWeight: 'bold' }}>Unduh Semua Kuitansi Riwayat</Text>
                                 </>
                             )}
                         </TouchableOpacity>
@@ -297,7 +297,7 @@ export default function PaymentHistoryScreen() {
                 contentContainerStyle={s.listContainer}
                 ListEmptyComponent={
                     <View style={s.emptyState}>
-                        <Ionicons name="document-text-outline" size={48} color="#CCC" />
+                        <Ionicons name="document-text-outline" size={48} color={colors.border} />
                         <Text style={s.emptyText}>Tidak ada riwayat ditemukan</Text>
                     </View>
                 }
@@ -319,54 +319,71 @@ export default function PaymentHistoryScreen() {
     );
 }
 
-const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F5F7F5' },
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
     header: {
         flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20,
-        paddingTop: 50, paddingBottom: 15, backgroundColor: '#E8F5E9'
+        paddingTop: Platform.OS === 'android' ? 40 : 10, paddingBottom: 15, backgroundColor: colors.surface
     },
     backButton: { padding: 5, marginRight: 10 },
-    headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#1B5E20' },
-    filterContainer: { paddingHorizontal: 20, paddingBottom: 10, backgroundColor: '#E8F5E9' },
+    headerTitle: { fontSize: 20, fontWeight: 'bold', color: colors.textPrimary },
+    filterContainer: { paddingHorizontal: 20, paddingBottom: 15, backgroundColor: colors.background },
     searchContainer: {
-        flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF',
+        flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface,
         borderRadius: 12, paddingHorizontal: 12, height: 44,
-        borderWidth: 1, borderColor: '#A5D6A7'
+        borderWidth: 1, borderColor: colors.border
     },
-    searchInput: { flex: 1, marginLeft: 8, fontSize: 14, color: '#1B5E20', height: '100%' },
+    searchInput: { flex: 1, marginLeft: 8, fontSize: 14, color: colors.textPrimary, height: '100%' },
     filterRow: { flexDirection: 'row', gap: 10, marginTop: 12 },
     filterButton: {
         paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
-        borderWidth: 1, borderColor: '#A5D6A7', backgroundColor: '#FFF'
+        borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface
     },
-    filterButtonActive: { backgroundColor: '#1B5E20', borderColor: '#1B5E20' },
-    filterText: { fontSize: 12, color: '#1B5E20', fontWeight: '600' },
-    filterTextActive: { color: '#FFF' },
+    filterButtonActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+    filterText: { fontSize: 12, color: colors.primary, fontWeight: '600' },
+    filterTextActive: { color: colors.textWhite },
     listContainer: { padding: 16, paddingBottom: 100 },
     emptyState: { alignItems: 'center', marginTop: 50 },
-    emptyText: { color: '#888', marginTop: 10 },
+    emptyText: { color: colors.textSecondary, marginTop: 10 },
 
     periodCard: {
-        backgroundColor: '#FFF', borderRadius: 16, marginBottom: 16,
-        borderWidth: 1, borderColor: '#E0E0E0', overflow: 'hidden',
+        backgroundColor: colors.surface, borderRadius: 16, marginBottom: 16,
+        borderWidth: 1, borderColor: colors.border, overflow: 'hidden',
         ...Platform.select({
             ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8 },
             android: { elevation: 2 }
         })
     },
-    periodHeader: { flexDirection: 'row', alignItems: 'center', padding: 16 },
-    periodMonth: { fontSize: 16, fontWeight: 'bold', color: '#333' },
+    periodHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 16,
+        minHeight: 70, // Ensure enough space for two lines of text to be centered
+    },
+    periodMonth: { fontSize: 16, fontWeight: 'bold', color: colors.textPrimary },
     periodStatus: { fontSize: 12, marginTop: 2 },
-    periodAmount: { fontSize: 16, fontWeight: 'bold', color: '#1B5E20' },
+    periodAmount: { fontSize: 16, fontWeight: 'bold', color: colors.primary, textAlign: 'right' },
     expandedBox: { padding: 12, paddingTop: 0 },
     itemsContainer: {
-        backgroundColor: '#F9F9F9', borderRadius: 12, paddingVertical: 4, paddingHorizontal: 12,
-        marginTop: 4, borderWidth: 1, borderColor: '#EEE'
+        backgroundColor: colors.background, borderRadius: 12, paddingVertical: 4, paddingHorizontal: 12,
+        marginTop: 4, borderWidth: 1, borderColor: colors.border
     },
     itemRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12 },
     historyItemRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10 },
-    historyItemSub: { fontSize: 11, color: '#666', marginTop: 2 },
-    itemName: { flex: 1, fontSize: 13, color: '#333' },
-    itemAmountText: { fontSize: 13, fontWeight: 'bold', color: '#1B5E20' },
-    divider: { height: 1, backgroundColor: '#EEE', marginVertical: 4 },
+    historyItemSub: { fontSize: 11, color: colors.textSecondary, marginTop: 2 },
+    itemName: { flex: 1, fontSize: 13, color: colors.textPrimary },
+    itemAmountText: { fontSize: 13, fontWeight: 'bold', color: colors.primary },
+    divider: { height: 1, backgroundColor: colors.border, marginVertical: 4 },
+    kuitansiBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 12,
+        gap: 4
+    },
+    kuitansiText: {
+        fontSize: 11,
+        fontWeight: 'bold'
+    }
 });
