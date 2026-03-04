@@ -6,8 +6,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { CustomButton } from '../../../components/CustomButton';
-import { PaymentInstructionModal } from '../../../components/PaymentInstructionModal';
+import { CustomButton } from '../../../components/common/CustomButton';
+import { PaymentInstructionModal } from '../../../components/payment/PaymentInstructionModal';
 import { useAuth } from '../../../contexts/AuthContext';
 import { fetchPaymentMethodsForUser, PaymentMethod } from '../../../services/payment';
 import { BillingPeriod } from '../../../services/iuran';

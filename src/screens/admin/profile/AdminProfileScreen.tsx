@@ -6,8 +6,8 @@ import Animated, { useAnimatedStyle, withTiming, useSharedValue } from 'react-na
 import { useTheme } from '../../../contexts/ThemeContext';
 import { useAdminProfileViewModel } from './AdminProfileViewModel';
 import { AdminProfileStyles as styles } from './AdminProfileStyles';
-import { CustomHeader } from '../../../components/CustomHeader';
-import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { CustomHeader } from '../../../components/common/CustomHeader';
+import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { Colors } from '../../../constants/Colors';
 import Constants from 'expo-constants';
 import { FeatureFlags } from '../../../constants/FeatureFlags';

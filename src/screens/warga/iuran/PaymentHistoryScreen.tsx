@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { useHistoryViewModel } from './HistoryViewModel';
-import { FilterCalendar } from '../../../components/FilterCalendar';
+import { FilterCalendar } from '../../../components/payment/FilterCalendar';
 import { formatDateSafe } from '../../../utils/dateUtils';
 
 const formatCurrency = (value: number) =>

@@ -7,9 +7,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAdminHomeViewModel } from './AdminHomeViewModel';
 import { styles } from './AdminHomeStyles';
-import { CustomAlertModal } from '../../components/CustomAlertModal';
-import { AdminSidebar } from '../../components/navigation/AdminSidebar';
-import { useTheme } from '../../contexts/ThemeContext';
+import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
+import { AdminSidebar } from '../../../components/navigation/AdminSidebar';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 export default function AdminHomeScreen() {
     const vm = useAdminHomeViewModel();

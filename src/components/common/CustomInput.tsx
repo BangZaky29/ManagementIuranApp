@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, View, ViewStyle, TextStyle, TouchableOpacity, Platform, TextInputProps, StyleProp } from 'react-native';
-import { Colors } from '../constants/Colors';
+import { Colors } from '../../constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 
 interface CustomInputProps extends Omit<TextInputProps, 'style'> {

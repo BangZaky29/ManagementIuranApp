@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Text, StyleSheet, Animated, Platform } from 'react-native';
-import { Colors } from '../constants/Colors';
+import { Colors } from '../../constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 
 interface ToastProps {

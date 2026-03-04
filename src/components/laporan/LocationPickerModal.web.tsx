@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, Text, Modal, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../constants/Colors';
+import { Colors } from '../../constants/Colors';
 
 interface LocationPickerModalProps {
     visible: boolean;

@@ -3,11 +3,11 @@ import { StyleSheet, View, Text, Image, TouchableOpacity, Platform, Dimensions, 
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useRouter } from 'expo-router';
 import { Colors } from '../../../constants/Colors';
-import { CustomButton } from '../../../components/CustomButton';
-import { CustomInput } from '../../../components/CustomInput';
+import { CustomButton } from '../../../components/common/CustomButton';
+import { CustomInput } from '../../../components/common/CustomInput';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { useAuth } from '../../../contexts/AuthContext';
 
 const { width } = Dimensions.get('window');

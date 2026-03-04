@@ -12,9 +12,9 @@ import Animated, {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSecurityHomeViewModel } from './SecurityHomeViewModel';
 import { styles } from './SecurityHomeStyles';
-import { CustomAlertModal } from '../../components/CustomAlertModal';
-import { CustomHeader } from '../../components/CustomHeader';
-import { PanicLogCard } from '../../components/PanicLogCard';
+import { CustomAlertModal } from '../../components/common/CustomAlertModal';
+import { CustomHeader } from '../../components/common/CustomHeader';
+import { PanicLogCard } from '../../components/panic/PanicLogCard';
 import { useTheme } from '../../contexts/ThemeContext';
 
 export default function SecurityHomeScreen() {

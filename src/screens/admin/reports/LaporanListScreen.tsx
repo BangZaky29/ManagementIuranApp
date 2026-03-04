@@ -5,7 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../../lib/supabaseConfig';
 import { styles } from './LaporanListStyles';
-import { CustomHeader } from '../../../components/CustomHeader';
+import { CustomHeader } from '../../../components/common/CustomHeader';
 import { Colors } from '../../../constants/Colors';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
 import { useTheme } from '../../../contexts/ThemeContext';

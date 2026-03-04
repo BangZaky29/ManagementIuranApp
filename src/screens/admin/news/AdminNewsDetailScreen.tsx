@@ -9,7 +9,7 @@ import { deleteNews } from '../../../services/news';
 import { NewsDetailStyles as styles } from '../../warga/news/NewsDetailStyles'; // Reuse styles
 import { useTheme } from '../../../contexts/ThemeContext';
 import { useNewsDetailViewModel } from '../../warga/news/NewsDetailViewModel';
-import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 
 export default function AdminNewsDetailScreen() {
     const { id } = useLocalSearchParams();

@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useSoundSettingsViewModel } from './SoundSettingsViewModel';
-import { CustomHeader } from '../../components/CustomHeader';
+import { CustomHeader } from '../../components/common/CustomHeader';
 import { createStyles } from './SoundSettingsStyles';
 import Constants from 'expo-constants';
 

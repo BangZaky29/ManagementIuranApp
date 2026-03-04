@@ -4,8 +4,8 @@ import {
     FlatList, TouchableOpacity, Linking, Platform
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Banner } from '../services/banner';
-import { Colors } from '../constants/Colors';
+import { Banner } from '../../services/banner';
+import { Colors } from '../../constants/Colors';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CAROUSEL_WIDTH = SCREEN_WIDTH - 40; // Account for 20 margin on both sides

@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { getDashboardStats } from '../../../services/admin';
 import { countPendingPayments } from '../../../services/payment';
 import { supabase } from '../../../lib/supabaseConfig';
-import { CustomHeader } from '../../../components/CustomHeader';
+import { CustomHeader } from '../../../components/common/CustomHeader';
 import { AdminSidebar } from '../../../components/navigation/AdminSidebar';
 import { styles } from './AdminDashboardStyles';
 import { formatFullDateSafe, formatDateTimeSafe } from '../../../utils/dateUtils';

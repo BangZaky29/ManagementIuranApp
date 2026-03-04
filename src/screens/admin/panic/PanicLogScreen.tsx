@@ -8,9 +8,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
 import { fetchPanicLogs, PanicLog, resolvePanicLog } from '../../../services/panic';
-import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { useTheme } from '../../../contexts/ThemeContext';
-import { PanicLogCard } from '../../../components/PanicLogCard';
+import { PanicLogCard } from '../../../components/panic/PanicLogCard';
 
 export default function PanicLogScreen() {
     const { colors } = useTheme();

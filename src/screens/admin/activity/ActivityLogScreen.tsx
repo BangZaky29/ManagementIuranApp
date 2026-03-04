@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
 import { fetchRecentActivityLogs, ActivityLog } from '../../../services/activityLog';
-import { CustomHeader } from '../../../components/CustomHeader';
+import { CustomHeader } from '../../../components/common/CustomHeader';
 import { useRouter, useFocusEffect } from 'expo-router';
 
 export default function ActivityLogScreen() {

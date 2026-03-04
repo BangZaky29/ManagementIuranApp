@@ -9,8 +9,8 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useAdminBannerViewModel } from './AdminBannerViewModel';
 import { styles } from './AdminBannerStyles';
-import { CustomAlertModal } from '../../../components/CustomAlertModal';
-import { CustomHeader } from '../../../components/CustomHeader';
+import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
+import { CustomHeader } from '../../../components/common/CustomHeader';
 
 export default function AdminBannerScreen() {
     const vm = useAdminBannerViewModel();

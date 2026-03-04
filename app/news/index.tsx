@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { fetchNews, NewsItem } from '../../src/services/news';
 import { useTheme } from '../../src/contexts/ThemeContext';
-import { CustomHeader } from '../../src/components/CustomHeader';
+import { CustomHeader } from '../../src/components/common/CustomHeader';
 
 export default function AllNewsScreen() {
     const router = useRouter();

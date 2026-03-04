@@ -4,12 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ReportDetailStyles as styles } from './ReportDetailStyles';
 import { useFocusEffect } from 'expo-router';
 import { Colors } from '../../../constants/Colors';
-import { CustomHeader } from '../../../components/CustomHeader';
+import { CustomHeader } from '../../../components/common/CustomHeader';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useReportDetailViewModel } from './ReportDetailViewModel';
-import { CustomAlertModal } from '../../../components/CustomAlertModal';
-import { ReportLocationViewer } from '../../../components/ReportLocationViewer';
+import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
+import { ReportLocationViewer } from '../../../components/laporan/ReportLocationViewer';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
 
 export default function ReportDetailScreen() {

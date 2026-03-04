@@ -6,11 +6,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '../../../contexts/ThemeContext';
-import { CustomHeader } from '../../../components/CustomHeader';
+import { CustomHeader } from '../../../components/common/CustomHeader';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useIuranViewModel, GroupedHistory, HistoryItem } from './IuranViewModel';
-import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 
 const formatCurrency = (value: number) =>
     new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);

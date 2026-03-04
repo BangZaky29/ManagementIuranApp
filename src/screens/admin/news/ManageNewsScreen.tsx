@@ -8,11 +8,11 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { styles } from './ManageNewsStyles';
 import { Colors } from '../../../constants/Colors';
-import { CustomHeader } from '../../../components/CustomHeader';
+import { CustomHeader } from '../../../components/common/CustomHeader';
 import { formatDateSafe } from '../../../utils/dateUtils';
 import { fetchNews, createNews, updateNews, deleteNews, NewsItem, uploadNewsImage } from '../../../services/news';
 import { useAuth } from '../../../contexts/AuthContext';
-import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 
 export default function ManageNewsScreen() {
     const router = useRouter();

@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { CustomHeader } from '../../../components/CustomHeader';
+import { CustomHeader } from '../../../components/common/CustomHeader';
 import { useNotificationViewModel } from './NotificationViewModel';
 import { styles } from './NotificationStyles';
 import { Colors } from '../../../constants/Colors';

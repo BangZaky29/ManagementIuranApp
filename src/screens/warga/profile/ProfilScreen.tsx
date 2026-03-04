@@ -4,11 +4,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, useAnimatedStyle, withTiming, useSharedValue } from 'react-native-reanimated';
 import { useTheme } from '../../../contexts/ThemeContext';
 import Constants from 'expo-constants';
-import { CustomHeader } from '../../../components/CustomHeader';
+import { CustomHeader } from '../../../components/common/CustomHeader';
 import { Ionicons } from '@expo/vector-icons';
 import { useProfilViewModel } from './ProfilViewModel';
 import { ProfilStyles as styles } from './ProfilStyles';
-import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { FeatureFlags } from '../../../constants/FeatureFlags';
 
 /* ───── Custom Toggle ───── */

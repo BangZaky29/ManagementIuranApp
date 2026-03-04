@@ -7,7 +7,7 @@ import Animated, { useAnimatedStyle, withTiming, useSharedValue } from 'react-na
 import { useTheme } from '../../../contexts/ThemeContext';
 import { useSecurityProfileViewModel } from './SecurityProfileViewModel';
 import { styles } from './SecurityProfileStyles';
-import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { FeatureFlags } from '../../../constants/FeatureFlags';
 
 /* ───── Custom Toggle ───── */

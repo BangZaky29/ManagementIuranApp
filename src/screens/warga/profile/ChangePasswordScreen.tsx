@@ -3,11 +3,11 @@ import { View, Text, TextInput, ScrollView, StatusBar, StyleSheet, Alert } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Colors } from '../../../constants/Colors';
-import { CustomHeader } from '../../../components/CustomHeader';
-import { CustomButton } from '../../../components/CustomButton';
+import { CustomHeader } from '../../../components/common/CustomHeader';
+import { CustomButton } from '../../../components/common/CustomButton';
 import { Ionicons } from '@expo/vector-icons';
 
-import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 
 export default function ChangePasswordScreen() {
     const router = useRouter();

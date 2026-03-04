@@ -6,9 +6,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { useHomeViewModel } from './HomeViewModel';
 import { HomeStyles as styles } from './HomeStyles';
-import { BannerCarousel } from '../../../components/BannerCarousel';
-import { PanicCountdown } from '../../../components/PanicCountdown';
-import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { BannerCarousel } from '../../../components/banner/BannerCarousel';
+import { PanicCountdown } from '../../../components/panic/PanicCountdown';
+import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { FeatureFlags } from '../../../constants/FeatureFlags';
 
 export default function HomeScreen() {

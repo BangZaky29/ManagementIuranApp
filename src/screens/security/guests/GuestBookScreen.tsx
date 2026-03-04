@@ -8,8 +8,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useGuestBookViewModel } from './GuestBookViewModel';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
 import { styles } from './GuestBookStyles';
-import { CustomAlertModal } from '../../../components/CustomAlertModal';
-import { CustomHeader } from '../../../components/CustomHeader';
+import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
+import { CustomHeader } from '../../../components/common/CustomHeader';
 import { useTheme } from '../../../contexts/ThemeContext';
 
 const VISITOR_TYPES = ['tamu', 'gojek', 'kurir', 'pekerja', 'lainnya'] as const;

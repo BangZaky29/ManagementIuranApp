@@ -1,13 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, StatusBar, Image, TouchableOpacity, ActivityIndicator, TextInput, Modal } from 'react-native';
-import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
-import { CustomHeader } from '../../../components/CustomHeader';
-import { ReportLocationViewer } from '../../../components/ReportLocationViewer';
+import { CustomHeader } from '../../../components/common/CustomHeader';
+import { ReportLocationViewer } from '../../../components/laporan/ReportLocationViewer';
 import { Report, updateReportStatus } from '../../../services/laporan';
 import { supabase } from '../../../lib/supabaseConfig';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';

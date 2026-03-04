@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../constants/Colors';
-import { PanicLog } from '../services/panic';
-import { useTheme } from '../contexts/ThemeContext';
+import { Colors } from '../../constants/Colors';
+import { PanicLog } from '../../services/panic';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface PanicLogCardProps {
     log: PanicLog;

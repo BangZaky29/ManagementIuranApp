@@ -8,8 +8,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Colors } from '../../../constants/Colors';
-import { CustomButton } from '../../../components/CustomButton';
-import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { CustomButton } from '../../../components/common/CustomButton';
+import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { useAuth } from '../../../contexts/AuthContext';
 import {
     AdminFee,

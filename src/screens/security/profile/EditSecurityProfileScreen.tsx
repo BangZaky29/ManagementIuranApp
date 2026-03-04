@@ -3,9 +3,9 @@ import { View, Text, TextInput, StatusBar, StyleSheet, Platform } from 'react-na
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useRouter } from 'expo-router';
-import { CustomHeader } from '../../../components/CustomHeader';
-import { CustomButton } from '../../../components/CustomButton';
-import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { CustomHeader } from '../../../components/common/CustomHeader';
+import { CustomButton } from '../../../components/common/CustomButton';
+import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { useAuth } from '../../../contexts/AuthContext';
 
 export default function EditSecurityProfileScreen() {

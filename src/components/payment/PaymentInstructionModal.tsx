@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, StyleSheet, TouchableOpacity, Image, ScrollView, Platform, Animated, PanResponder, ActivityIndicator, Alert } from 'react-native';
-import { Colors } from '../constants/Colors';
+import { Colors } from '../../constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
-import { CustomButton } from './CustomButton';
-import { ToastNotification } from './ToastNotification';
+import { CustomButton } from '../common/CustomButton';
+import { ToastNotification } from '../common/ToastNotification';
 import * as Clipboard from 'expo-clipboard';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as MediaLibrary from 'expo-media-library';
-import { PaymentMethod, fetchEwalletVaCodes, EwalletVaCode } from '../services/payment';
+import { PaymentMethod, fetchEwalletVaCodes, EwalletVaCode } from '../../services/payment';
 
 interface PaymentInstructionModalProps {
     visible: boolean;

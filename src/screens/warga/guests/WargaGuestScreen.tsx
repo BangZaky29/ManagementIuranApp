@@ -9,7 +9,7 @@ import { useRouter } from 'expo-router';
 import { useWargaGuestViewModel } from './WargaGuestViewModel';
 import { formatDateSafe } from '../../../utils/dateUtils';
 import { styles } from './WargaGuestStyles';
-import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { useTheme } from '../../../contexts/ThemeContext';
 
 const VISITOR_TYPES = ['tamu', 'gojek', 'kurir', 'pekerja', 'lainnya'] as const;

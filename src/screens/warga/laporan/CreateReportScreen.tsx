@@ -4,12 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { CreateReportStyles as styles } from './CreateReportStyles';
 import { Colors } from '../../../constants/Colors';
-import { CustomHeader } from '../../../components/CustomHeader';
-import { CustomButton } from '../../../components/CustomButton';
+import { CustomHeader } from '../../../components/common/CustomHeader';
+import { CustomButton } from '../../../components/common/CustomButton';
 import { Ionicons } from '@expo/vector-icons';
 
-import { CustomAlertModal } from '../../../components/CustomAlertModal';
-import { LocationPickerModal } from '../../../components/LocationPickerModal';
+import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
+import { LocationPickerModal } from '../../../components/laporan/LocationPickerModal';
 import { useCreateReportViewModel } from './CreateReportViewModel';
 
 export default function CreateReportScreen() {

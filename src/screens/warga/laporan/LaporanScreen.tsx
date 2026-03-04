@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StatusBar, Platform } from 'r
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '../../../contexts/ThemeContext';
-import { CustomHeader } from '../../../components/CustomHeader';
+import { CustomHeader } from '../../../components/common/CustomHeader';
 import { Ionicons } from '@expo/vector-icons';
 import { useLaporanViewModel } from './LaporanViewModel';
 import { LaporanStyles as styles } from './LaporanStyles';

@@ -3,7 +3,7 @@ import { View, Text, Modal, StyleSheet, TouchableOpacity, Dimensions, ActivityIn
 import MapView, { Marker, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../constants/Colors';
+import { Colors } from '../../constants/Colors';
 import { CustomButton } from './CustomButton';
 
 interface LocationPickerModalProps {

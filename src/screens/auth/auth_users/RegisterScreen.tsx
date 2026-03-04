@@ -4,9 +4,9 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { CustomInput } from '../../../components/CustomInput';
-import { CustomButton } from '../../../components/CustomButton';
-import { CustomAlertModal } from '../../../components/CustomAlertModal';
+import { CustomInput } from '../../../components/common/CustomInput';
+import { CustomButton } from '../../../components/common/CustomButton';
+import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { Colors } from '../../../constants/Colors';
 import { useRegisterViewModel } from './RegisterViewModel';
 import { styles } from './RegisterStyles';

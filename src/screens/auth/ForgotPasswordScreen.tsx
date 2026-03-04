@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Colors } from '../../constants/Colors';
-import { CustomInput } from '../../components/CustomInput';
-import { CustomButton } from '../../components/CustomButton';
+import { CustomInput } from '../../components/common/CustomInput';
+import { CustomButton } from '../../components/common/CustomButton';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { CustomAlertModal } from '../../components/CustomAlertModal';
+import { CustomAlertModal } from '../../components/common/CustomAlertModal';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function ForgotPasswordScreen() {

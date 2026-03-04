@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Alert } from 'react-native';
-import { fetchVerifiedResidents, createVerifiedResident, deleteVerifiedResident, VerifiedResident } from '../../services/admin';
+import { fetchVerifiedResidents, createVerifiedResident, deleteVerifiedResident, VerifiedResident } from '../../../services/admin';
 
 export function useManageResidentsViewModel() {
     const [residents, setResidents] = useState<VerifiedResident[]>([]);
