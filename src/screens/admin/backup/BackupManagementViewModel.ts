@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Alert, Linking } from 'react-native';
+import { Linking } from 'react-native';
 import { useAuth } from '../../../contexts/AuthContext';
 import {
     fetchIuranReport, generateIuranPdf, generateIuranExcel,
@@ -18,6 +18,9 @@ export const BACKUP_SCHEDULE_OPTIONS: { key: BackupSchedule; label: string; desc
     { key: 'yearly', label: '1 Tahun Sekali', desc: 'Backup otomatis setiap 1 Januari' },
 ];
 
+type AlertType = 'success' | 'info' | 'warning' | 'error';
+interface AlertButton { text: string; onPress?: () => void; style?: 'default' | 'cancel' | 'destructive'; }
+
 export function useBackupManagementViewModel() {
     const { profile, googleAccessToken, user, linkGoogle } = useAuth();
 
@@ -29,6 +32,21 @@ export function useBackupManagementViewModel() {
     const [isGenerating, setIsGenerating] = useState(false);
     const [isBackingUp, setIsBackingUp] = useState(false);
     const [isLinkingGoogle, setIsLinkingGoogle] = useState(false);
+
+    // Custom alert state (replaces Alert.alert)
+    const [alertVisible, setAlertVisible] = useState(false);
+    const [alertConfig, setAlertConfig] = useState<{
+        title: string; message: string; type: AlertType; buttons: AlertButton[];
+    }>({ title: '', message: '', type: 'info', buttons: [] });
+
+    const hideAlert = () => setAlertVisible(false);
+    const showAlert = (title: string, message: string, type: AlertType, buttons?: AlertButton[]) => {
+        setAlertConfig({
+            title, message, type,
+            buttons: buttons ?? [{ text: 'OK', onPress: hideAlert }],
+        });
+        setAlertVisible(true);
+    };
 
     // Auto backup schedule state
     const [selectedSchedule, setSelectedSchedule] = useState<BackupSchedule>('weekly');
@@ -53,12 +71,11 @@ export function useBackupManagementViewModel() {
             const filter: BackupFilter = {};
             if (selectedPeriod) filter.period = selectedPeriod;
             if (selectedStatus !== 'all') filter.status = selectedStatus;
-
             const result = await fetchIuranReport(complexId, filter);
             setRows(result.rows);
             setSummary(result.summary);
-        } catch (error: any) {
-            Alert.alert('Error', 'Gagal memuat data iuran');
+        } catch {
+            showAlert('Error', 'Gagal memuat data iuran', 'error');
         } finally {
             setIsLoading(false);
         }
@@ -78,11 +95,9 @@ export function useBackupManagementViewModel() {
     const loadBackupHistory = useCallback(async () => {
         if (!complexId) return;
         const { data } = await supabase
-            .from('backup_logs')
-            .select('*')
+            .from('backup_logs').select('*')
             .eq('housing_complex_id', complexId)
-            .order('created_at', { ascending: false })
-            .limit(10);
+            .order('created_at', { ascending: false }).limit(10);
         if (data) setBackupHistory(data as BackupLog[]);
     }, [complexId]);
 
@@ -106,71 +121,87 @@ export function useBackupManagementViewModel() {
     };
 
     const handleDownloadPdf = async () => {
-        if (rows.length === 0) { Alert.alert('Info', 'Tidak ada data'); return; }
+        if (rows.length === 0) { showAlert('Info', 'Tidak ada data untuk diunduh', 'info'); return; }
         setIsGenerating(true);
         try { await generateIuranPdf(rows, summary, complexName, getFilterLabel()); }
-        catch (e: any) { Alert.alert('Gagal', 'Gagal membuat laporan PDF'); }
+        catch { showAlert('Gagal', 'Gagal membuat laporan PDF', 'error'); }
         finally { setIsGenerating(false); }
     };
 
     const handleDownloadExcel = async () => {
-        if (rows.length === 0) { Alert.alert('Info', 'Tidak ada data'); return; }
+        if (rows.length === 0) { showAlert('Info', 'Tidak ada data untuk diunduh', 'info'); return; }
         setIsGenerating(true);
         try { await generateIuranExcel(rows, summary, complexName, getFilterLabel()); }
-        catch (e: any) { Alert.alert('Gagal', 'Gagal membuat laporan Excel'); }
+        catch { showAlert('Gagal', 'Gagal membuat laporan Excel', 'error'); }
         finally { setIsGenerating(false); }
     };
 
     const handleBackupToDrive = async () => {
         if (!googleAccessToken) {
-            Alert.alert(
-                '🔗 Hubungkan Akun Google',
+            showAlert(
+                'Hubungkan Akun Google',
                 'Akun Google belum terhubung. Hubungkan sekarang untuk mengaktifkan backup ke Google Drive?',
+                'warning',
                 [
-                    { text: 'Batal', style: 'cancel' },
-                    { text: 'Hubungkan Google', onPress: handleLinkGoogle },
+                    { text: 'Batal', style: 'cancel', onPress: hideAlert },
+                    { text: 'Hubungkan Google', onPress: () => { hideAlert(); handleLinkGoogle(); } },
                 ]
             );
             return;
         }
-        if (rows.length === 0) { Alert.alert('Info', 'Tidak ada data untuk di-backup'); return; }
+        if (rows.length === 0) { showAlert('Info', 'Tidak ada data untuk di-backup', 'info'); return; }
 
         setIsBackingUp(true);
         try {
-            const result = await backupToGoogleDrive(
-                rows, user!.id, complexId, complexName, googleAccessToken
-            );
+            const result = await backupToGoogleDrive(rows, user!.id, complexId, complexName, googleAccessToken);
             await loadBackupHistory();
-            Alert.alert(
-                '✅ Backup Berhasil',
-                `${rows.length} data berhasil di-backup ke Google Drive.\n\nBuka file di Drive?`,
+            showAlert(
+                'Backup Berhasil',
+                `${rows.length} data berhasil di-backup ke Google Drive.`,
+                'success',
                 [
-                    { text: 'Nanti', style: 'cancel' },
-                    { text: 'Buka Drive', onPress: () => result.driveLink && Linking.openURL(result.driveLink) },
+                    { text: 'Nanti', style: 'cancel', onPress: hideAlert },
+                    {
+                        text: 'Buka Drive',
+                        onPress: () => {
+                            hideAlert();
+                            if (result.driveLink) Linking.openURL(result.driveLink);
+                        }
+                    },
                 ]
             );
         } catch (e: any) {
-            Alert.alert('Gagal', `Backup gagal: ${e.message}`);
+            showAlert('Backup Gagal', e.message || 'Terjadi kesalahan saat backup', 'error');
         } finally {
             setIsBackingUp(false);
         }
     };
 
-    /**
-     * Link Google account to existing session using linkIdentity.
-     * After linking, the session will have provider_token for Drive access.
-     */
     const handleLinkGoogle = async () => {
         setIsLinkingGoogle(true);
         try {
             await linkGoogle();
-            Alert.alert(
-                '✅ Google Terhubung',
+            showAlert(
+                'Google Terhubung',
                 'Akun Google berhasil dihubungkan! Sekarang Anda bisa backup data ke Google Drive.',
-                [{ text: 'OK' }]
+                'success',
+                [{ text: 'OK', onPress: hideAlert }]
             );
         } catch (e: any) {
-            Alert.alert('Gagal', `Gagal menghubungkan Google: ${e.message}`);
+            const msg: string = e.message || '';
+            if (msg.includes('token Drive')) {
+                showAlert(
+                    'Satu Langkah Lagi',
+                    'Akun Google sudah terhubung, tapi token Drive belum tersedia.\n\nKeluar lalu login kembali menggunakan tombol "Masuk dengan Google" agar token Drive aktif.',
+                    'warning',
+                    [
+                        { text: 'Nanti', style: 'cancel', onPress: hideAlert },
+                        { text: 'Keluar Sekarang', style: 'destructive', onPress: () => { hideAlert(); supabase.auth.signOut(); } },
+                    ]
+                );
+            } else {
+                showAlert('Gagal', `Gagal menghubungkan Google: ${msg}`, 'error');
+            }
         } finally {
             setIsLinkingGoogle(false);
         }
@@ -179,10 +210,11 @@ export function useBackupManagementViewModel() {
     const handleScheduleSelect = (schedule: BackupSchedule) => {
         setSelectedSchedule(schedule);
         setShowSchedulePicker(false);
-        Alert.alert(
-            '✅ Jadwal Tersimpan',
+        showAlert(
+            'Jadwal Tersimpan',
             `Backup otomatis diatur: ${BACKUP_SCHEDULE_OPTIONS.find(o => o.key === schedule)?.label}`,
-            [{ text: 'OK' }]
+            'success',
+            [{ text: 'OK', onPress: hideAlert }]
         );
     };
 
@@ -205,8 +237,8 @@ export function useBackupManagementViewModel() {
         availablePeriods, backupHistory, complexName,
         isDriveConnected, isAutoBackupEnabled, isRestoreEnabled,
         googleEmail: user?.email || null,
-        selectedSchedule, showSchedulePicker,
-        setShowSchedulePicker,
+        selectedSchedule, showSchedulePicker, setShowSchedulePicker,
+        alertVisible, alertConfig, hideAlert,
         handleDownloadPdf, handleDownloadExcel,
         handleBackupToDrive, handleLinkGoogle,
         handleScheduleSelect,

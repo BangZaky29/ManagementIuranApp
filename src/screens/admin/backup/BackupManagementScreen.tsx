@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router';
 import { useBackupManagementViewModel, BACKUP_SCHEDULE_OPTIONS } from './BackupManagementViewModel';
 import { styles } from './BackupManagementStyles';
 import { CustomHeader } from '../../../components/common/CustomHeader';
+import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
     'Lunas': { bg: '#E8F5E9', text: '#2E7D32' },
@@ -359,6 +360,16 @@ export default function BackupManagementScreen() {
                     </Pressable>
                 </Pressable>
             </Modal>
+
+            {/* ── Custom Alert Modal ── */}
+            <CustomAlertModal
+                visible={vm.alertVisible}
+                title={vm.alertConfig.title}
+                message={vm.alertConfig.message}
+                type={vm.alertConfig.type}
+                buttons={vm.alertConfig.buttons}
+                onClose={vm.hideAlert}
+            />
         </View>
     );
 }

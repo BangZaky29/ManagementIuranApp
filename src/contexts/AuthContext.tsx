@@ -125,8 +125,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     const linkGoogle = useCallback(async () => {
-        // Link Google identity to existing session (does NOT create a new session)
-        const { data, error } = await supabase.auth.linkIdentity({
+        // Link Google identity to existing session
+        const { error } = await supabase.auth.linkIdentity({
             provider: 'google',
             options: {
                 scopes: 'https://www.googleapis.com/auth/drive.file',
@@ -137,6 +137,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             },
         });
         if (error) throw error;
+
+        // linkIdentity does NOT auto-update provider_token in local state.
+        // Manually pull the refreshed session to get the new provider_token.
+        const { data: refreshed } = await supabase.auth.refreshSession();
+        if (refreshed?.session?.provider_token) {
+            setGoogleAccessToken(refreshed.session.provider_token);
+        } else {
+            // Fallback: re-read current session
+            const { data: current } = await supabase.auth.getSession();
+            if (current?.session?.provider_token) {
+                setGoogleAccessToken(current.session.provider_token);
+            } else {
+                // provider_token not available after linking alone.
+                // Throw so the ViewModel can show an informative message.
+                throw new Error('Google terhubung, tapi token Drive belum tersedia. Coba login ulang dengan tombol "Masuk dengan Google".');
+            }
+        }
     }, []);
 
     const refreshProfile = useCallback(async () => {
