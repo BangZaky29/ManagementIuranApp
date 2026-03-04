@@ -11,7 +11,7 @@ import {
     UserProfile,
     SignInData,
     SignUpData,
-} from '../lib/authService';
+} from '../services/auth';
 import { Session, User } from '@supabase/supabase-js';
 
 interface AuthContextType {

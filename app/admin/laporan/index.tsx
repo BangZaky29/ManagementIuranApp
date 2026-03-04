@@ -1,3 +1,3 @@
 
-import LaporanListScreen from '../../../src/screens/admin/laporanWarga/LaporanListScreen';
+import LaporanListScreen from '../../../src/screens/admin/reports/LaporanListScreen';
 export default LaporanListScreen;

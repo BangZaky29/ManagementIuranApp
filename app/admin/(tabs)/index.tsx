@@ -1,2 +1,2 @@
-import AdminHomeScreen from '../../../src/screens/admin/AdminHomeScreen';
+import AdminHomeScreen from '../../../src/screens/admin/home/AdminHomeScreen';
 export default AdminHomeScreen;

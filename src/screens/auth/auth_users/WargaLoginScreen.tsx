@@ -10,7 +10,7 @@ import { StatusBar } from 'expo-status-bar';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
 import { useAuth } from '../../../contexts/AuthContext';
 import { supabase } from '../../../lib/supabaseConfig';
-import { getProfile } from '../../../lib/authService';
+import { getProfile } from '../../../services/auth';
 
 export default function WargaLoginScreen() {
     const router = useRouter();

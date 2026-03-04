@@ -199,6 +199,16 @@ CREATE TABLE public.reports (
   CONSTRAINT reports_processed_by_id_fkey FOREIGN KEY (processed_by_id) REFERENCES public.profiles(id),
   CONSTRAINT reports_completed_by_id_fkey FOREIGN KEY (completed_by_id) REFERENCES public.profiles(id)
 );
+CREATE TABLE public.user_notification_settings (
+  user_id uuid NOT NULL,
+  notif_sound text DEFAULT 'notification_alert.wav'::text,
+  alert_sound text DEFAULT 'alarm-sound-effect.wav'::text,
+  vibration_enabled boolean DEFAULT true,
+  updated_at timestamp with time zone DEFAULT now(),
+  alert_duration integer DEFAULT 30,
+  CONSTRAINT user_notification_settings_pkey PRIMARY KEY (user_id),
+  CONSTRAINT user_notification_settings_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
+);
 CREATE TABLE public.user_tokens (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL UNIQUE,

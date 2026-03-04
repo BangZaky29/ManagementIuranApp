@@ -1,4 +1,4 @@
-import { supabase } from './supabaseConfig';
+import { supabase } from '../../lib/supabaseConfig';
 import * as WebBrowser from 'expo-web-browser';
 import { makeRedirectUri } from 'expo-auth-session';
 import { Platform } from 'react-native';

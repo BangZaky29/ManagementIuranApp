@@ -2,7 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { MaterialTopTabBarProps } from '@react-navigation/material-top-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { handleCameraCapture } from '../../features/camera/CameraUtils';
+import { handleCameraCapture } from '../../utils/CameraUtils';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../../contexts/ThemeContext';
 
