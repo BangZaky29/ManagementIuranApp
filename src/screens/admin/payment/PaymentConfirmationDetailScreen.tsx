@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ThemeColors } from '../../../theme/AppTheme';
-import { Colors } from '../../../constants/Colors';
+import { CustomHeader } from '../../../components/common/CustomHeader';
 import { CustomButton } from '../../../components/common/CustomButton';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -175,24 +175,17 @@ export default function PaymentConfirmationDetailScreen() {
             case 'pending': return colors.status.pending.bg;
             case 'paid': return colors.status.selesai.bg;
             case 'rejected': return colors.status.ditolak.bg;
-            default: return '#F5F5F5';
+            default: return colors.surfaceSubtle;
         }
     };
 
     if (isLoading) {
         return (
             <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
-                <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
-                <SafeAreaView edges={['top']} style={{ backgroundColor: '#FFF' }}>
-                    <View style={styles.header}>
-                        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                            <Ionicons name="arrow-back" size={24} color={Colors.green5} />
-                        </TouchableOpacity>
-                        <Text style={styles.headerTitle}>Detail Pembayaran</Text>
-                    </View>
-                </SafeAreaView>
+                <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
+                <CustomHeader title="Detail Pembayaran" showBack={true} />
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <ActivityIndicator size="large" color={Colors.green3} />
+                    <ActivityIndicator size="large" color={colors.primary} />
                 </View>
             </SafeAreaView>
         );
@@ -201,17 +194,10 @@ export default function PaymentConfirmationDetailScreen() {
     if (!payment) {
         return (
             <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
-                <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
-                <SafeAreaView edges={['top']} style={{ backgroundColor: '#FFF' }}>
-                    <View style={styles.header}>
-                        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                            <Ionicons name="arrow-back" size={24} color={Colors.green5} />
-                        </TouchableOpacity>
-                        <Text style={styles.headerTitle}>Detail Pembayaran</Text>
-                    </View>
-                </SafeAreaView>
+                <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
+                <CustomHeader title="Detail Pembayaran" showBack={true} />
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <Text style={{ color: Colors.textSecondary }}>Pembayaran tidak ditemukan.</Text>
+                    <Text style={{ color: colors.textSecondary }}>Pembayaran tidak ditemukan.</Text>
                 </View>
             </SafeAreaView>
         );
@@ -219,17 +205,8 @@ export default function PaymentConfirmationDetailScreen() {
 
     return (
         <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
-            <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
-
-            {/* Header */}
-            <SafeAreaView edges={['top']} style={{ backgroundColor: '#FFF' }}>
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={24} color={Colors.green5} />
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Detail Pembayaran</Text>
-                </View>
-            </SafeAreaView>
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
+            <CustomHeader title="Detail Pembayaran" showBack={true} />
 
             <ScrollView contentContainerStyle={styles.content}>
 
@@ -254,7 +231,7 @@ export default function PaymentConfirmationDetailScreen() {
                                 <Image source={{ uri: payment.profiles.avatar_url }} style={styles.avatar} />
                             ) : (
                                 <View style={[styles.avatar, styles.avatarPlaceholder]}>
-                                    <Ionicons name="person" size={24} color={Colors.green4} />
+                                    <Ionicons name="person" size={24} color={colors.primary} />
                                 </View>
                             )}
                             <View style={{ flex: 1 }}>
@@ -278,7 +255,7 @@ export default function PaymentConfirmationDetailScreen() {
                         </View>
                         <View style={styles.detailRow}>
                             <Text style={styles.detailLabel}>Jumlah</Text>
-                            <Text style={[styles.detailValue, { color: Colors.green3, fontWeight: 'bold' }]}>
+                            <Text style={[styles.detailValue, { color: colors.primary, fontWeight: 'bold' }]}>
                                 {formatCurrency(payment.amount)}
                             </Text>
                         </View>
@@ -317,7 +294,7 @@ export default function PaymentConfirmationDetailScreen() {
                                 <Ionicons
                                     name={imageZoomed ? 'contract-outline' : 'expand-outline'}
                                     size={16}
-                                    color={Colors.green5}
+                                    color={colors.primary}
                                 />
                                 <Text style={styles.zoomText}>
                                     {imageZoomed ? 'Kecilkan' : 'Perbesar'}
@@ -361,22 +338,22 @@ export default function PaymentConfirmationDetailScreen() {
                             value={adminNotes}
                             onChangeText={setAdminNotes}
                             placeholder="Tambahkan catatan..."
-                            placeholderTextColor="#999"
+                            placeholderTextColor={colors.textSecondary}
                             multiline
                         />
 
                         {/* Reject Form */}
                         {showRejectForm && (
                             <View style={styles.rejectForm}>
-                                <Text style={[styles.inputLabel, { color: Colors.danger }]}>
+                                <Text style={[styles.inputLabel, { color: colors.danger }]}>
                                     Alasan Penolakan *
                                 </Text>
                                 <TextInput
-                                    style={[styles.input, { borderColor: Colors.danger }]}
+                                    style={[styles.input, { borderColor: colors.danger }]}
                                     value={rejectReason}
                                     onChangeText={setRejectReason}
                                     placeholder="Jelaskan alasan penolakan..."
-                                    placeholderTextColor="#999"
+                                    placeholderTextColor={colors.textSecondary}
                                     multiline
                                 />
                                 <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
@@ -390,7 +367,7 @@ export default function PaymentConfirmationDetailScreen() {
                                         title="Tolak Pembayaran"
                                         onPress={handleReject}
                                         loading={isProcessing}
-                                        style={{ flex: 1, backgroundColor: Colors.danger }}
+                                        style={{ flex: 1, backgroundColor: colors.danger }}
                                     />
                                 </View>
                             </View>
@@ -406,9 +383,9 @@ export default function PaymentConfirmationDetailScreen() {
                     <CustomButton
                         title="Tolak"
                         onPress={() => setShowRejectForm(true)}
-                        style={{ flex: 1, backgroundColor: Colors.white, borderWidth: 1, borderColor: Colors.danger }}
-                        textStyle={{ color: Colors.danger }}
-                        icon={<Ionicons name="close-circle-outline" size={18} color={Colors.danger} />}
+                        style={{ flex: 1, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.danger }}
+                        textStyle={{ color: colors.danger }}
+                        icon={<Ionicons name="close-circle-outline" size={18} color={colors.danger} />}
                         iconPosition="left"
                     />
                     <CustomButton
@@ -416,7 +393,7 @@ export default function PaymentConfirmationDetailScreen() {
                         onPress={handleApprove}
                         loading={isProcessing}
                         style={{ flex: 1, marginLeft: 10 }}
-                        icon={<Ionicons name="checkmark-circle-outline" size={18} color={Colors.white} />}
+                        icon={<Ionicons name="checkmark-circle-outline" size={18} color="#FFF" />}
                         iconPosition="left"
                     />
                 </View>
@@ -435,14 +412,14 @@ export default function PaymentConfirmationDetailScreen() {
 }
 
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.green1 },
+    container: { flex: 1, backgroundColor: colors.background },
     header: {
         flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: 20, paddingBottom: 15,
         backgroundColor: colors.surface,
     },
     backButton: { padding: 5, marginRight: 10 },
-    headerTitle: { fontSize: 20, fontWeight: 'bold', color: colors.green5 },
+    headerTitle: { fontSize: 20, fontWeight: 'bold', color: colors.primary },
     content: { padding: 20, paddingBottom: 120 },
     statusCard: {
         flexDirection: 'row', alignItems: 'center', gap: 10,
@@ -451,68 +428,68 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     statusLabel: { fontSize: 16, fontWeight: 'bold' },
     section: { marginBottom: 20 },
     sectionTitle: {
-        fontSize: 16, fontWeight: 'bold', color: colors.green5, marginBottom: 12,
+        fontSize: 16, fontWeight: 'bold', color: colors.primary, marginBottom: 12,
     },
     card: {
-        backgroundColor: colors.white, borderRadius: 16, padding: 16,
-        borderWidth: 1, borderColor: 'rgba(0,0,0,0.05)',
+        backgroundColor: colors.surface, borderRadius: 16, padding: 16,
+        borderWidth: 1, borderColor: colors.border,
     },
     userRow: { flexDirection: 'row', alignItems: 'center' },
     avatar: { width: 50, height: 50, borderRadius: 25, marginRight: 14 },
     avatarPlaceholder: {
-        backgroundColor: '#E8F5E9', alignItems: 'center', justifyContent: 'center',
+        backgroundColor: colors.successBg, alignItems: 'center', justifyContent: 'center',
     },
-    userName: { fontSize: 16, fontWeight: 'bold', color: colors.green5 },
+    userName: { fontSize: 16, fontWeight: 'bold', color: colors.primary },
     userAddress: { fontSize: 13, color: colors.textSecondary, marginTop: 3 },
-    userPhone: { fontSize: 13, color: colors.green4, marginTop: 3 },
+    userPhone: { fontSize: 13, color: colors.primary, marginTop: 3 },
     detailRow: {
         flexDirection: 'row', justifyContent: 'space-between',
         paddingVertical: 6,
     },
     detailLabel: { fontSize: 14, color: colors.textSecondary },
-    detailValue: { fontSize: 14, fontWeight: '500', color: colors.green5 },
+    detailValue: { fontSize: 14, fontWeight: '500', color: colors.primary },
     proofContainer: {
-        backgroundColor: colors.white, borderRadius: 16,
-        overflow: 'hidden', borderWidth: 1, borderColor: colors.green2,
+        backgroundColor: colors.surface, borderRadius: 16,
+        overflow: 'hidden', borderWidth: 1, borderColor: colors.border,
     },
     proofImage: { width: '100%', height: 280 },
     proofImageZoomed: { height: 500 },
     zoomIndicator: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
         gap: 6, paddingVertical: 10,
-        borderTopWidth: 1, borderTopColor: '#F0F0F0',
+        borderTopWidth: 1, borderTopColor: colors.border,
     },
-    zoomText: { fontSize: 12, fontWeight: '600', color: colors.green5 },
+    zoomText: { fontSize: 12, fontWeight: '600', color: colors.primary },
     rejectionBox: {
-        flexDirection: 'row', gap: 10, backgroundColor: '#FFEBEE',
+        flexDirection: 'row', gap: 10, backgroundColor: colors.dangerBg,
         padding: 14, borderRadius: 12, marginBottom: 20,
     },
     rejectionTitle: { fontSize: 13, fontWeight: 'bold', color: colors.danger },
-    rejectionText: { fontSize: 13, color: '#B71C1C', marginTop: 4, lineHeight: 18 },
+    rejectionText: { fontSize: 13, color: colors.danger, marginTop: 4, lineHeight: 18 },
     notesBox: {
-        flexDirection: 'row', gap: 10, backgroundColor: '#F1F8E9',
+        flexDirection: 'row', gap: 10, backgroundColor: colors.primarySubtle,
         padding: 14, borderRadius: 12, marginBottom: 20,
     },
-    notesTitle: { fontSize: 13, fontWeight: 'bold', color: colors.green4 },
-    notesText: { fontSize: 13, color: colors.green5, marginTop: 4 },
+    notesTitle: { fontSize: 13, fontWeight: 'bold', color: colors.primary },
+    notesText: { fontSize: 13, color: colors.textPrimary, marginTop: 4 },
     inputLabel: {
-        fontSize: 14, fontWeight: '600', color: colors.green5,
+        fontSize: 14, fontWeight: '600', color: colors.primary,
         marginBottom: 8, marginTop: 8,
     },
     input: {
-        backgroundColor: colors.white, borderRadius: 12,
+        backgroundColor: colors.surface, borderRadius: 12,
         paddingHorizontal: 16, paddingVertical: 12,
-        fontSize: 14, color: colors.green5,
-        borderWidth: 1, borderColor: colors.green2,
+        fontSize: 14, color: colors.textPrimary,
+        borderWidth: 1, borderColor: colors.border,
         minHeight: 60, textAlignVertical: 'top',
     },
     rejectForm: {
-        marginTop: 16, padding: 16, backgroundColor: '#FFF5F5',
-        borderRadius: 12, borderWidth: 1, borderColor: '#FFCDD2',
+        marginTop: 16, padding: 16, backgroundColor: colors.dangerBg,
+        borderRadius: 12, borderWidth: 1, borderColor: colors.danger,
     },
     footer: {
         position: 'absolute', bottom: 0, left: 0, right: 0,
-        backgroundColor: colors.white, padding: 20,
+        backgroundColor: colors.surface, padding: 20,
         borderTopLeftRadius: 24, borderTopRightRadius: 24,
         flexDirection: 'row',
         shadowColor: '#000', shadowOffset: { width: 0, height: -4 },

@@ -10,7 +10,6 @@ import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { ThemeColors } from '../../../theme/AppTheme';
-import { Colors } from '../../../constants/Colors';
 import { CustomButton } from '../../../components/common/CustomButton';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -223,31 +222,31 @@ export default function ManagePaymentMethodsScreen() {
 
     return (
         <SafeAreaView style={st.container} edges={['left', 'right', 'bottom']}>
-            <StatusBar barStyle="dark-content" backgroundColor="#F5F7F5" />
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
 
             {/* Header */}
-            <SafeAreaView edges={['top']} style={{ backgroundColor: '#FFF' }}>
+            <SafeAreaView edges={['top']} style={{ backgroundColor: colors.surface }}>
                 <View style={st.header}>
                     <TouchableOpacity onPress={() => router.back()} style={st.backBtn}>
-                        <Ionicons name="arrow-back" size={24} color="#1B5E20" />
+                        <Ionicons name="arrow-back" size={24} color={colors.primary} />
                     </TouchableOpacity>
                     <Text style={st.headerTitle}>Metode Pembayaran</Text>
                     <TouchableOpacity onPress={openAddForm} style={st.addBtn}>
-                        <Ionicons name="add-circle" size={28} color="#1B5E20" />
+                        <Ionicons name="add-circle" size={28} color={colors.primary} />
                     </TouchableOpacity>
                 </View>
             </SafeAreaView>
 
             {isLoading ? (
-                <View style={st.center}><ActivityIndicator size="large" color="#1B5E20" /></View>
+                <View style={st.center}><ActivityIndicator size="large" color={colors.primary} /></View>
             ) : (
                 <ScrollView
                     contentContainerStyle={st.content}
-                    refreshControl={<RefreshControl refreshing={false} onRefresh={loadData} colors={['#1B5E20']} />}
+                    refreshControl={<RefreshControl refreshing={false} onRefresh={loadData} colors={[colors.primary]} />}
                 >
                     {methods.length === 0 ? (
                         <View style={st.emptyBox}>
-                            <Ionicons name="card-outline" size={64} color="#CCC" />
+                            <Ionicons name="card-outline" size={64} color={colors.border} />
                             <Text style={st.emptyTitle}>Belum Ada Metode</Text>
                             <Text style={st.emptySubtext}>Tambahkan metode pembayaran untuk warga.</Text>
                             <CustomButton title="Tambah Metode" onPress={openAddForm} style={{ marginTop: 16 }} />
@@ -278,14 +277,14 @@ export default function ManagePaymentMethodsScreen() {
             <View key={method.id} style={[st.card, !method.is_active && { opacity: 0.55 }]}>
                 <View style={st.cardHeader}>
                     <View style={st.cardIconBox}>
-                        <Ionicons name={getMethodIcon(method.method_type) as any} size={22} color="#1B5E20" />
+                        <Ionicons name={getMethodIcon(method.method_type) as any} size={22} color={colors.primary} />
                     </View>
                     <View style={{ flex: 1 }}>
                         <Text style={st.cardName}>{method.method_name}</Text>
                         <Text style={st.cardType}>{getMethodLabel(method.method_type)}</Text>
                     </View>
-                    <View style={[st.badge, { backgroundColor: method.is_active ? '#E8F5E9' : '#FFEBEE' }]}>
-                        <Text style={{ fontSize: 11, fontWeight: '600', color: method.is_active ? '#2E7D32' : '#C62828' }}>
+                    <View style={[st.badge, { backgroundColor: method.is_active ? colors.successBg : colors.dangerBg }]}>
+                        <Text style={{ fontSize: 11, fontWeight: '600', color: method.is_active ? colors.success : colors.danger }}>
                             {method.is_active ? 'Aktif' : 'Nonaktif'}
                         </Text>
                     </View>
@@ -294,14 +293,14 @@ export default function ManagePaymentMethodsScreen() {
                 {/* Info rows */}
                 {method.account_number && (
                     <View style={st.infoRow}>
-                        <Ionicons name="call-outline" size={14} color="#888" />
+                        <Ionicons name="call-outline" size={14} color={colors.textSecondary} />
                         <Text style={st.infoLabel}>Nomor:</Text>
                         <Text style={st.infoValue}>{method.account_number}</Text>
                     </View>
                 )}
                 {method.account_holder && (
                     <View style={st.infoRow}>
-                        <Ionicons name="person-outline" size={14} color="#888" />
+                        <Ionicons name="person-outline" size={14} color={colors.textSecondary} />
                         <Text style={st.infoLabel}>A/N:</Text>
                         <Text style={st.infoValue}>{method.account_holder}</Text>
                     </View>
@@ -322,16 +321,16 @@ export default function ManagePaymentMethodsScreen() {
                 {/* Actions */}
                 <View style={st.cardActions}>
                     <TouchableOpacity style={st.actionBtn} onPress={() => handleToggle(method)}>
-                        <Ionicons name={method.is_active ? 'eye-off-outline' : 'eye-outline'} size={17} color="#1B5E20" />
+                        <Ionicons name={method.is_active ? 'eye-off-outline' : 'eye-outline'} size={17} color={colors.primary} />
                         <Text style={st.actionText}>{method.is_active ? 'Nonaktifkan' : 'Aktifkan'}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={st.actionBtn} onPress={() => openEditForm(method)}>
-                        <Ionicons name="create-outline" size={17} color="#1B5E20" />
+                        <Ionicons name="create-outline" size={17} color={colors.primary} />
                         <Text style={st.actionText}>Edit</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={st.actionBtn} onPress={() => handleDelete(method)}>
-                        <Ionicons name="trash-outline" size={17} color="#C62828" />
-                        <Text style={[st.actionText, { color: '#C62828' }]}>Hapus</Text>
+                        <Ionicons name="trash-outline" size={17} color={colors.danger} />
+                        <Text style={[st.actionText, { color: colors.danger }]}>Hapus</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -348,7 +347,7 @@ export default function ManagePaymentMethodsScreen() {
                         <View style={st.modalHeader}>
                             <Text style={st.modalTitle}>{editingMethod ? 'Edit Metode' : 'Tambah Metode Baru'}</Text>
                             <TouchableOpacity onPress={() => setFormVisible(false)}>
-                                <Ionicons name="close" size={24} color="#1B5E20" />
+                                <Ionicons name="close" size={24} color={colors.primary} />
                             </TouchableOpacity>
                         </View>
 
@@ -362,8 +361,8 @@ export default function ManagePaymentMethodsScreen() {
                                         style={[st.typeChip, form.method_type === t.value && st.typeChipActive]}
                                         onPress={() => setForm({ ...form, method_type: t.value, method_name: '', account_number: '', qris_image_uri: null })}
                                     >
-                                        <Ionicons name={t.icon as any} size={18} color={form.method_type === t.value ? '#FFF' : '#1B5E20'} />
-                                        <Text style={[st.typeChipText, form.method_type === t.value && { color: '#FFF' }]}>{t.label}</Text>
+                                        <Ionicons name={t.icon as any} size={18} color={form.method_type === t.value ? colors.textWhite : colors.primary} />
+                                        <Text style={[st.typeChipText, form.method_type === t.value && { color: colors.textWhite }]}>{t.label}</Text>
                                     </TouchableOpacity>
                                 ))}
                             </View>
@@ -390,7 +389,7 @@ export default function ManagePaymentMethodsScreen() {
                                             />
                                         ) : (
                                             <View style={st.qrUploadPlaceholder}>
-                                                <Ionicons name="cloud-upload-outline" size={40} color="#1B5E20" />
+                                                <Ionicons name="cloud-upload-outline" size={40} color={colors.primary} />
                                                 <Text style={st.qrUploadText}>Tap untuk upload QR Code</Text>
                                                 <Text style={st.qrUploadHint}>Format: JPG, PNG</Text>
                                             </View>
@@ -398,7 +397,7 @@ export default function ManagePaymentMethodsScreen() {
                                     </TouchableOpacity>
                                     {(form.qris_image_uri || form.qris_image_url) && (
                                         <TouchableOpacity style={st.qrChangeBtn} onPress={pickQrisImage}>
-                                            <Ionicons name="camera-outline" size={16} color="#1B5E20" />
+                                            <Ionicons name="camera-outline" size={16} color={colors.primary} />
                                             <Text style={st.qrChangeBtnText}>Ganti Gambar</Text>
                                         </TouchableOpacity>
                                     )}
@@ -427,7 +426,7 @@ export default function ManagePaymentMethodsScreen() {
                                         ) : (
                                             <Text style={st.pickerBtnPlaceholder}>Pilih E-Wallet...</Text>
                                         )}
-                                        <Ionicons name="chevron-down" size={18} color="#888" />
+                                        <Ionicons name="chevron-down" size={18} color={colors.textSecondary} />
                                     </TouchableOpacity>
 
                                     <Text style={st.formLabel}>Nomor HP Tujuan *</Text>
@@ -466,7 +465,7 @@ export default function ManagePaymentMethodsScreen() {
                                         ) : (
                                             <Text style={st.pickerBtnPlaceholder}>Pilih Bank...</Text>
                                         )}
-                                        <Ionicons name="chevron-down" size={18} color="#888" />
+                                        <Ionicons name="chevron-down" size={18} color={colors.textSecondary} />
                                     </TouchableOpacity>
 
                                     <Text style={st.formLabel}>Nomor Rekening *</Text>
@@ -532,8 +531,8 @@ export default function ManagePaymentMethodsScreen() {
                                 }}
                             >
                                 <View style={[st.ewalletDot, { backgroundColor: ew.color }]} />
-                                <Text style={[st.pickerOptionText, form.method_name === ew.name && { color: '#1B5E20', fontWeight: '700' }]}>{ew.name}</Text>
-                                {form.method_name === ew.name && <Ionicons name="checkmark" size={20} color="#1B5E20" />}
+                                <Text style={[st.pickerOptionText, form.method_name === ew.name && { color: colors.primary, fontWeight: '700' }]}>{ew.name}</Text>
+                                {form.method_name === ew.name && <Ionicons name="checkmark" size={20} color={colors.primary} />}
                             </TouchableOpacity>
                         ))}
                     </View>
@@ -559,9 +558,9 @@ export default function ManagePaymentMethodsScreen() {
                                     setShowBankPicker(false);
                                 }}
                             >
-                                <Ionicons name="business" size={18} color={form.method_name === bank ? '#1B5E20' : '#888'} />
-                                <Text style={[st.pickerOptionText, form.method_name === bank && { color: '#1B5E20', fontWeight: '700' }]}>{bank}</Text>
-                                {form.method_name === bank && <Ionicons name="checkmark" size={20} color="#1B5E20" />}
+                                <Ionicons name="business" size={18} color={form.method_name === bank ? colors.primary : colors.textSecondary} />
+                                <Text style={[st.pickerOptionText, form.method_name === bank && { color: colors.primary, fontWeight: '700' }]}>{bank}</Text>
+                                {form.method_name === bank && <Ionicons name="checkmark" size={20} color={colors.primary} />}
                             </TouchableOpacity>
                         ))}
                     </View>
@@ -575,93 +574,94 @@ export default function ManagePaymentMethodsScreen() {
 
 function createStyles(colors: ThemeColors) {
     return StyleSheet.create({
-        container: { flex: 1, backgroundColor: '#F5F7F5' },
+        container: { flex: 1, backgroundColor: colors.background },
         header: {
             flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-            paddingHorizontal: 20, paddingBottom: 12, backgroundColor: '#FFF',
+            paddingHorizontal: 20, paddingBottom: 12, backgroundColor: colors.surface,
         },
         backBtn: { padding: 5 },
-        headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#1B5E20', flex: 1, marginLeft: 10 },
+        headerTitle: { fontSize: 20, fontWeight: 'bold', color: colors.primary, flex: 1, marginLeft: 10 },
         addBtn: { padding: 5 },
         center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
         content: { padding: 16, paddingBottom: 40 },
-        emptyBox: { alignItems: 'center', paddingVertical: 60, backgroundColor: '#FFF', borderRadius: 20, padding: 30 },
-        emptyTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginTop: 16 },
-        emptySubtext: { fontSize: 14, color: '#888', textAlign: 'center', marginTop: 8 },
+        emptyBox: { alignItems: 'center', paddingVertical: 60, backgroundColor: colors.surface, borderRadius: 20, padding: 30 },
+        emptyTitle: { fontSize: 18, fontWeight: 'bold', color: colors.textPrimary, marginTop: 16 },
+        emptySubtext: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', marginTop: 8 },
 
         // Method card
         card: {
-            backgroundColor: '#FFF', borderRadius: 16, padding: 16, marginBottom: 12,
+            backgroundColor: colors.surface, borderRadius: 16, padding: 16, marginBottom: 12,
+            borderWidth: 1, borderColor: colors.border,
             ...Platform.select({
                 ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4 },
                 android: { elevation: 2 },
             }),
         },
         cardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-        cardIconBox: { width: 44, height: 44, borderRadius: 12, backgroundColor: '#F1F8E9', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
-        cardName: { fontSize: 16, fontWeight: 'bold', color: '#333' },
-        cardType: { fontSize: 12, color: '#888', marginTop: 2 },
+        cardIconBox: { width: 44, height: 44, borderRadius: 12, backgroundColor: colors.primarySubtle, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+        cardName: { fontSize: 16, fontWeight: 'bold', color: colors.textPrimary },
+        cardType: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
         badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
         infoRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 3 },
-        infoLabel: { fontSize: 12, color: '#888' },
-        infoValue: { fontSize: 13, fontWeight: '600', color: '#333' },
-        qrPreviewRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 6, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#F0F0F0' },
-        qrPreviewThumb: { width: 48, height: 48, borderRadius: 8, backgroundColor: '#F5F5F5' },
-        qrPreviewLabel: { fontSize: 12, color: '#1B5E20', fontWeight: '500' },
-        cardDesc: { fontSize: 12, color: '#888', fontStyle: 'italic', marginTop: 6, lineHeight: 18 },
-        cardActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 14, marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#F0F0F0' },
+        infoLabel: { fontSize: 12, color: colors.textSecondary },
+        infoValue: { fontSize: 13, fontWeight: '600', color: colors.textPrimary },
+        qrPreviewRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 6, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.border },
+        qrPreviewThumb: { width: 48, height: 48, borderRadius: 8, backgroundColor: colors.surfaceSubtle },
+        qrPreviewLabel: { fontSize: 12, color: colors.primary, fontWeight: '500' },
+        cardDesc: { fontSize: 12, color: colors.textSecondary, fontStyle: 'italic', marginTop: 6, lineHeight: 18 },
+        cardActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 14, marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: colors.border },
         actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-        actionText: { fontSize: 12, fontWeight: '600', color: '#1B5E20' },
+        actionText: { fontSize: 12, fontWeight: '600', color: colors.primary },
 
         // Modal
         modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-        modalSheet: { backgroundColor: '#F5F7F5', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '90%' },
-        modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: '#E0E0E0' },
-        modalTitle: { fontSize: 18, fontWeight: 'bold', color: '#1B5E20' },
+        modalSheet: { backgroundColor: colors.background, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '90%' },
+        modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: colors.border },
+        modalTitle: { fontSize: 18, fontWeight: 'bold', color: colors.primary },
         modalFooter: { flexDirection: 'row', padding: 20, gap: 10 },
 
         // Form
-        formLabel: { fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8, marginTop: 16 },
-        input: { backgroundColor: '#FFF', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 14, color: '#333', borderWidth: 1, borderColor: '#E0E0E0' },
-        helperPreview: { fontSize: 12, color: '#1B5E20', marginTop: 6, fontWeight: '500' },
+        formLabel: { fontSize: 14, fontWeight: '600', color: colors.textPrimary, marginBottom: 8, marginTop: 16 },
+        input: { backgroundColor: colors.surface, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 14, color: colors.textPrimary, borderWidth: 1, borderColor: colors.border },
+        helperPreview: { fontSize: 12, color: colors.primary, marginTop: 6, fontWeight: '500' },
 
         // Type selector
         typeRow: { flexDirection: 'row', gap: 8 },
         typeChip: {
             flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5,
-            paddingVertical: 10, borderRadius: 12, backgroundColor: '#FFF', borderWidth: 1, borderColor: '#E0E0E0',
+            paddingVertical: 10, borderRadius: 12, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
         },
-        typeChipActive: { backgroundColor: '#1B5E20', borderColor: '#1B5E20' },
-        typeChipText: { fontSize: 11, fontWeight: '600', color: '#555' },
+        typeChipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+        typeChipText: { fontSize: 11, fontWeight: '600', color: colors.textSecondary },
 
         // QR Upload
         qrUploadBox: {
-            borderWidth: 2, borderColor: '#1B5E20', borderStyle: 'dashed', borderRadius: 16,
-            overflow: 'hidden', backgroundColor: '#FAFFF5', minHeight: 200, alignItems: 'center', justifyContent: 'center',
+            borderWidth: 2, borderColor: colors.primary, borderStyle: 'dashed', borderRadius: 16,
+            overflow: 'hidden', backgroundColor: colors.primarySubtle, minHeight: 200, alignItems: 'center', justifyContent: 'center',
         },
         qrUploadImage: { width: '100%', height: 250 },
         qrUploadPlaceholder: { alignItems: 'center', padding: 30 },
-        qrUploadText: { fontSize: 14, fontWeight: '600', color: '#1B5E20', marginTop: 10 },
-        qrUploadHint: { fontSize: 12, color: '#888', marginTop: 4 },
-        qrChangeBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 10, paddingVertical: 8, borderRadius: 10, backgroundColor: '#F1F8E9' },
-        qrChangeBtnText: { fontSize: 13, fontWeight: '600', color: '#1B5E20' },
+        qrUploadText: { fontSize: 14, fontWeight: '600', color: colors.primary, marginTop: 10 },
+        qrUploadHint: { fontSize: 12, color: colors.textSecondary, marginTop: 4 },
+        qrChangeBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 10, paddingVertical: 8, borderRadius: 10, backgroundColor: colors.primarySubtle },
+        qrChangeBtnText: { fontSize: 13, fontWeight: '600', color: colors.primary },
 
         // Picker button
         pickerBtn: {
             flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-            backgroundColor: '#FFF', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14,
-            borderWidth: 1, borderColor: '#E0E0E0',
+            backgroundColor: colors.surface, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14,
+            borderWidth: 1, borderColor: colors.border,
         },
-        pickerBtnText: { fontSize: 14, color: '#333', fontWeight: '500' },
-        pickerBtnPlaceholder: { fontSize: 14, color: '#999' },
+        pickerBtnText: { fontSize: 14, color: colors.textPrimary, fontWeight: '500' },
+        pickerBtnPlaceholder: { fontSize: 14, color: colors.textSecondary },
         ewalletDot: { width: 12, height: 12, borderRadius: 6 },
 
         // Picker overlay
         pickerOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', paddingHorizontal: 30 },
-        pickerSheet: { backgroundColor: '#FFF', borderRadius: 20, padding: 20, maxHeight: '60%' },
-        pickerSheetTitle: { fontSize: 18, fontWeight: 'bold', color: '#1B5E20', marginBottom: 16, textAlign: 'center' },
+        pickerSheet: { backgroundColor: colors.surface, borderRadius: 20, padding: 20, maxHeight: '60%' },
+        pickerSheetTitle: { fontSize: 18, fontWeight: 'bold', color: colors.primary, marginBottom: 16, textAlign: 'center' },
         pickerOption: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14, paddingHorizontal: 12, borderRadius: 12 },
-        pickerOptionActive: { backgroundColor: '#F1F8E9' },
-        pickerOptionText: { fontSize: 15, color: '#333', flex: 1 },
+        pickerOptionActive: { backgroundColor: colors.primarySubtle },
+        pickerOptionText: { fontSize: 15, color: colors.textPrimary, flex: 1 },
     });
 }

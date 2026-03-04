@@ -1,7 +1,6 @@
 
 import { StyleSheet, Platform } from 'react-native';
 import { ThemeColors } from '../../../theme/AppTheme';
-import { Colors } from '../../../constants/Colors';
 
 export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
@@ -36,7 +35,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         marginBottom: 8,
     },
     categoryBadge: {
-        backgroundColor: '#E3F2FD',
+        backgroundColor: colors.primarySubtle,
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 4,
@@ -69,14 +68,14 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         height: 150,
         borderRadius: 8,
         marginBottom: 12,
-        backgroundColor: '#F0F0F0',
+        backgroundColor: colors.surfaceSubtle,
     },
     cardFooter: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         borderTopWidth: 1,
-        borderTopColor: '#F0F0F0',
+        borderTopColor: colors.border,
         paddingTop: 12,
     },
     statusContainer: {
@@ -152,13 +151,13 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         marginTop: 16,
     },
     input: {
-        backgroundColor: '#F8FAFC',
+        backgroundColor: colors.surfaceSubtle,
         borderRadius: 12,
         padding: 14,
         fontSize: 15,
         color: colors.textPrimary,
         borderWidth: 1,
-        borderColor: '#E2E8F0',
+        borderColor: colors.border,
     },
     textArea: {
         height: 150,
@@ -167,10 +166,10 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     imagePickerContainer: {
         position: 'relative',
         height: 180,
-        backgroundColor: '#F8FAFC',
+        backgroundColor: colors.surfaceSubtle,
         borderRadius: 16,
         borderWidth: 1.5,
-        borderColor: '#E2E8F0',
+        borderColor: colors.border,
         borderStyle: 'dashed',
         overflow: 'hidden',
         marginBottom: 8,

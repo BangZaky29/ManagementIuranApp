@@ -1,6 +1,5 @@
 import { StyleSheet, Platform } from 'react-native';
 import { ThemeColors } from '../../../theme/AppTheme';
-import { Colors } from '../../../constants/Colors';
 
 export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
@@ -34,7 +33,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         paddingVertical: 10,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: '#E0E0E0',
+        borderColor: colors.border,
     },
     dropdownText: {
         fontSize: 13,
@@ -66,7 +65,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         justifyContent: 'space-between',
         padding: 16,
         borderBottomWidth: 1,
-        borderBottomColor: '#F0F0F0',
+        borderBottomColor: colors.border,
     },
     modalTitle: {
         fontSize: 16,
@@ -80,7 +79,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         paddingVertical: 14,
         paddingHorizontal: 16,
         borderBottomWidth: 1,
-        borderBottomColor: '#F5F5F5',
+        borderBottomColor: colors.border,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -90,7 +89,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         color: colors.textPrimary,
     },
     modalItemActive: {
-        backgroundColor: '#F0F7FF',
+        backgroundColor: colors.primarySubtle,
     },
     modalItemTextActive: {
         color: colors.primary,
@@ -164,7 +163,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         height: 200,
         borderRadius: 8,
         marginTop: 12,
-        backgroundColor: '#F0F0F0',
+        backgroundColor: colors.surfaceSubtle,
     },
     reportLocation: {
         flexDirection: 'row',
@@ -178,7 +177,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     },
     cardFooter: {
         borderTopWidth: 1,
-        borderTopColor: '#F0F0F0',
+        borderTopColor: colors.border,
         paddingTop: 12,
         flexDirection: 'row',
         justifyContent: 'flex-end',
@@ -233,7 +232,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         borderRadius: 10,
         marginTop: 10,
         borderWidth: 1,
-        borderColor: '#E0E0E0',
+        borderColor: colors.border,
     },
     paginationBtnText: {
         color: colors.primary,

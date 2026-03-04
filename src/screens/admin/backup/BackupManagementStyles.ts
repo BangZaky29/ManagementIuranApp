@@ -2,7 +2,7 @@ import { ThemeColors } from '../../../theme/AppTheme';
 import { StyleSheet, Platform } from 'react-native';
 
 export const createStyles = (colors: ThemeColors) => StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F8FAF8' },
+    container: { flex: 1, backgroundColor: colors.background },
 
     // Summary
     summaryContainer: {
@@ -13,20 +13,20 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
             android: { elevation: 2 },
         }),
     },
-    summaryTitle: { fontSize: 16, fontWeight: '800', color: '#1B5E20', marginBottom: 12 },
+    summaryTitle: { fontSize: 16, fontWeight: '800', color: colors.primary, marginBottom: 12 },
     summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 },
     summaryCard: {
         flex: 1, alignItems: 'center', padding: 10,
         backgroundColor: '#F8FAF8', borderRadius: 10, marginHorizontal: 4,
     },
-    summaryValue: { fontSize: 20, fontWeight: '800', color: '#1B5E20' },
+    summaryValue: { fontSize: 20, fontWeight: '800', color: colors.primary },
     summaryLabel: { fontSize: 10, color: '#888', marginTop: 2, fontWeight: '500' },
     summaryTotal: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
         paddingTop: 12, borderTopWidth: 1, borderTopColor: '#F0F0F0',
     },
     summaryTotalLabel: { fontSize: 14, color: '#666' },
-    summaryTotalValue: { fontSize: 18, fontWeight: '800', color: '#1B5E20' },
+    summaryTotalValue: { fontSize: 18, fontWeight: '800', color: colors.primary },
 
     // Filter
     filterContainer: {
@@ -40,7 +40,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         borderWidth: 1, borderColor: '#E0E0E0',
     },
     filterChipActive: {
-        backgroundColor: '#1B5E20', borderColor: '#1B5E20',
+        backgroundColor: colors.primary, borderColor: colors.primary,
     },
     filterChipText: { fontSize: 12, fontWeight: '600', color: '#666' },
     filterChipTextActive: { color: colors.textWhite },
@@ -60,7 +60,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         }),
     },
     pdfBtn: { backgroundColor: '#C62828' },
-    excelBtn: { backgroundColor: '#1B5E20' },
+    excelBtn: { backgroundColor: colors.primary },
     downloadBtnText: { fontSize: 14, fontWeight: '700', color: colors.textWhite },
 
     // Backup Section (future)
@@ -109,7 +109,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     previewName: { fontSize: 14, fontWeight: '700', color: '#333' },
     previewDetail: { fontSize: 12, color: '#888', marginTop: 2 },
     previewRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 },
-    previewAmount: { fontSize: 14, fontWeight: '700', color: '#1B5E20' },
+    previewAmount: { fontSize: 14, fontWeight: '700', color: colors.primary },
     statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
     statusText: { fontSize: 10, fontWeight: '700' },
 

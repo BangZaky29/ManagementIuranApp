@@ -5,7 +5,6 @@ import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../../constants/Colors';
 import { CustomHeader } from '../../../components/common/CustomHeader';
 import { ReportLocationViewer } from '../../../components/laporan/ReportLocationViewer';
 import { Report, updateReportStatus } from '../../../services/laporan';
@@ -211,10 +210,10 @@ export default function AdminReportDetailScreen() {
 
     if (loading) {
         return (
-            <View style={{ flex: 1, backgroundColor: '#fff' }}>
+            <View style={{ flex: 1, backgroundColor: colors.background }}>
                 <CustomHeader title="Detail Laporan" showBack={true} />
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <ActivityIndicator size="large" color={Colors.primary} />
+                    <ActivityIndicator size="large" color={colors.primary} />
                 </View>
             </View>
         );
@@ -222,7 +221,7 @@ export default function AdminReportDetailScreen() {
 
     if (!data) {
         return (
-            <View style={{ flex: 1, backgroundColor: '#fff' }}>
+            <View style={{ flex: 1, backgroundColor: colors.background }}>
                 <CustomHeader title="Detail Laporan" showBack={true} />
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <Text>Laporan tidak ditemukan</Text>
@@ -234,21 +233,21 @@ export default function AdminReportDetailScreen() {
     const formattedDate = formatDateTimeSafe(data.created_at);
 
     return (
-        <View style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
-            <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+        <View style={{ flex: 1, backgroundColor: colors.background }}>
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
             <CustomHeader
                 title="Detail Laporan"
                 showBack={true}
                 rightIcon={
                     (data.status !== 'Menunggu') ? (
                         <TouchableOpacity onPress={handleRewindStatus}>
-                            <Ionicons name="arrow-undo-outline" size={24} color={Colors.primary} />
+                            <Ionicons name="arrow-undo-outline" size={24} color={colors.primary} />
                         </TouchableOpacity>
                     ) : undefined
                 }
             />
 
-            <SafeAreaView edges={['left', 'right', 'bottom']} style={{ flex: 1, backgroundColor: Colors.white }}>
+            <SafeAreaView edges={['left', 'right', 'bottom']} style={{ flex: 1, backgroundColor: colors.surface }}>
                 <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
 
                     {/* Image Section */}
@@ -261,7 +260,7 @@ export default function AdminReportDetailScreen() {
                                 borderRadius: 16,
                                 backgroundColor: '#F3F4F6',
                                 borderWidth: 4,
-                                borderColor: 'white',
+                                borderColor: colors.surface,
                                 marginBottom: 20,
                                 shadowColor: '#000',
                                 shadowOffset: { width: 0, height: 4 },
@@ -283,7 +282,7 @@ export default function AdminReportDetailScreen() {
                     )}
 
                     {/* Main Content */}
-                    <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 12, marginBottom: 16, elevation: 2 }}>
+                    <View style={{ backgroundColor: colors.surface, padding: 20, borderRadius: 12, marginBottom: 16, elevation: 2 }}>
 
                         {/* User Info */}
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
@@ -294,15 +293,15 @@ export default function AdminReportDetailScreen() {
                                     resizeMode="cover"
                                 />
                             ) : (
-                                <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.green1, justifyContent: 'center', alignItems: 'center', marginRight: 12 }}>
-                                    <Ionicons name="person" size={20} color={Colors.primary} />
+                                <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primarySubtle, justifyContent: 'center', alignItems: 'center', marginRight: 12 }}>
+                                    <Ionicons name="person" size={20} color={colors.primary} />
                                 </View>
                             )}
                             <View>
-                                <Text style={{ fontWeight: 'bold', fontSize: 16, color: Colors.textPrimary }}>
+                                <Text style={{ fontWeight: 'bold', fontSize: 16, color: colors.textPrimary }}>
                                     {(data as any).user?.full_name || 'Warga'}
                                 </Text>
-                                <Text style={{ color: Colors.textSecondary, fontSize: 13 }}>{formattedDate}</Text>
+                                <Text style={{ color: colors.textSecondary, fontSize: 13 }}>{formattedDate}</Text>
                             </View>
                         </View>
 
@@ -318,13 +317,13 @@ export default function AdminReportDetailScreen() {
                                     {data.status}
                                 </Text>
                             </View>
-                            <View style={{ marginLeft: 8, backgroundColor: '#F3F4F6', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6 }}>
-                                <Text style={{ color: Colors.textSecondary, fontWeight: '500', fontSize: 13 }}>{data.category}</Text>
+                            <View style={{ marginLeft: 8, backgroundColor: colors.surfaceSubtle, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6 }}>
+                                <Text style={{ color: colors.textSecondary, fontWeight: '500', fontSize: 13 }}>{data.category}</Text>
                             </View>
                         </View>
 
-                        <Text style={{ fontSize: 20, fontWeight: 'bold', color: Colors.textPrimary, marginBottom: 8 }}>{data.title}</Text>
-                        <Text style={{ fontSize: 15, color: Colors.textSecondary, lineHeight: 24, marginBottom: 20 }}>{data.description}</Text>
+                        <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.textPrimary, marginBottom: 8 }}>{data.title}</Text>
+                        <Text style={{ fontSize: 15, color: colors.textSecondary, lineHeight: 24, marginBottom: 20 }}>{data.description}</Text>
 
                         <ReportLocationViewer
                             locationUrl={data.location}
@@ -332,8 +331,8 @@ export default function AdminReportDetailScreen() {
                         />
 
                         {data.status === 'Ditolak' && data.rejection_reason && (
-                            <View style={{ marginTop: 20, backgroundColor: Colors.danger + '10', padding: 16, borderRadius: 12, borderLeftWidth: 4, borderLeftColor: Colors.danger }}>
-                                <Text style={{ color: Colors.textPrimary, lineHeight: 20, fontSize: 14 }}>{data.rejection_reason}</Text>
+                            <View style={{ marginTop: 20, backgroundColor: colors.dangerBg, padding: 16, borderRadius: 12, borderLeftWidth: 4, borderLeftColor: colors.danger }}>
+                                <Text style={{ color: colors.textPrimary, lineHeight: 20, fontSize: 14 }}>{data.rejection_reason}</Text>
                             </View>
                         )}
                     </View>
@@ -341,11 +340,11 @@ export default function AdminReportDetailScreen() {
                     {/* Progress Log UI */}
                     <View style={{ marginBottom: 24, paddingHorizontal: 4 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
-                            <Ionicons name="time-outline" size={20} color={Colors.primary} style={{ marginRight: 8 }} />
-                            <Text style={{ fontSize: 16, fontWeight: 'bold', color: Colors.textPrimary }}>Log Progres Pengerjaan</Text>
+                            <Ionicons name="time-outline" size={20} color={colors.primary} style={{ marginRight: 8 }} />
+                            <Text style={{ fontSize: 16, fontWeight: 'bold', color: colors.textPrimary }}>Log Progres Pengerjaan</Text>
                         </View>
 
-                        <View style={{ backgroundColor: 'white', borderRadius: 12, padding: 16, borderLeftWidth: 4, borderLeftColor: colors.status.diproses.text }}>
+                        <View style={{ backgroundColor: colors.surface, borderRadius: 12, padding: 16, borderLeftWidth: 4, borderLeftColor: colors.status.diproses.text }}>
                             {/* Simple Logic for Progress Log */}
                             <View style={{ flexDirection: 'row', marginBottom: 12 }}>
                                 <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: colors.status.selesai.text, marginTop: 4, marginRight: 12 }} />
@@ -362,7 +361,7 @@ export default function AdminReportDetailScreen() {
                                     <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: colors.status.menunggu.text, marginTop: 4, marginRight: 12 }} />
                                     <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                         <View style={{ flex: 1 }}>
-                                            <Text style={{ fontWeight: 'bold', fontSize: 13, color: Colors.textPrimary, marginBottom: 4 }}>
+                                            <Text style={{ fontWeight: 'bold', fontSize: 13, color: colors.textPrimary, marginBottom: 4 }}>
                                                 Sedang Diproses oleh{' '}
                                                 <Text style={{
                                                     color: getRoleColor(data.processed_by?.role),
@@ -377,7 +376,7 @@ export default function AdminReportDetailScreen() {
                                                 </Text>
                                             </Text>
                                             <Text style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>{formatDateTimeSafe(data.updated_at || data.created_at)}</Text>
-                                            <Text style={{ fontSize: 12, color: Colors.textSecondary }}>Laporan sedang ditangani petugas.</Text>
+                                            <Text style={{ fontSize: 12, color: colors.textSecondary }}>Laporan sedang ditangani petugas.</Text>
                                         </View>
                                     </View>
                                 </View>
@@ -388,7 +387,7 @@ export default function AdminReportDetailScreen() {
                                     <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: data.status === 'Selesai' ? colors.status.selesai.text : colors.status.ditolak.text, marginTop: 4, marginRight: 12 }} />
                                     <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                         <View style={{ flex: 1 }}>
-                                            <Text style={{ fontWeight: 'bold', fontSize: 13, color: Colors.textPrimary, marginBottom: 4 }}>
+                                            <Text style={{ fontWeight: 'bold', fontSize: 13, color: colors.textPrimary, marginBottom: 4 }}>
                                                 {data.status === 'Selesai' ? (
                                                     <>
                                                         Laporan Selesai oleh{' '}
@@ -407,7 +406,7 @@ export default function AdminReportDetailScreen() {
                                                 ) : 'Laporan Ditolak'}
                                             </Text>
                                             <Text style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>{formatDateTimeSafe(data.updated_at || data.created_at)}</Text>
-                                            <Text style={{ fontSize: 12, color: Colors.textSecondary, marginBottom: 10 }}>{data.status === 'Selesai' ? 'Kendala telah diatasi.' : 'Laporan belum dapat diproses.'}</Text>
+                                            <Text style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 10 }}>{data.status === 'Selesai' ? 'Kendala telah diatasi.' : 'Laporan belum dapat diproses.'}</Text>
 
                                             {data.status === 'Selesai' && data.completion_image_url && (
                                                 <TouchableOpacity
@@ -425,8 +424,8 @@ export default function AdminReportDetailScreen() {
                                                     }}
                                                     onPress={() => setSelectedImage(data.completion_image_url ?? null)}
                                                 >
-                                                    <Ionicons name="image-outline" size={16} color={Colors.success} />
-                                                    <Text style={{ marginLeft: 8, fontSize: 13, fontWeight: 'bold', color: Colors.success }}>Lihat Bukti Penanganan</Text>
+                                                    <Ionicons name="image-outline" size={16} color={colors.success} />
+                                                    <Text style={{ marginLeft: 8, fontSize: 13, fontWeight: 'bold', color: colors.success }}>Lihat Bukti Penanganan</Text>
                                                 </TouchableOpacity>
                                             )}
                                         </View>
@@ -441,7 +440,7 @@ export default function AdminReportDetailScreen() {
                     <View style={{ flexDirection: 'row', gap: 10, marginBottom: 40 }}>
                         {data.status !== 'Diproses' && data.status !== 'Selesai' && (
                             <TouchableOpacity
-                                style={{ flex: 1, backgroundColor: Colors.primary, padding: 14, borderRadius: 10, alignItems: 'center' }}
+                                style={{ flex: 1, backgroundColor: colors.primary, padding: 14, borderRadius: 10, alignItems: 'center' }}
                                 onPress={() => handleUpdateStatus('Diproses')}
                                 disabled={!!processingId}
                             >
@@ -455,7 +454,7 @@ export default function AdminReportDetailScreen() {
 
                         {data.status === 'Diproses' && (
                             <TouchableOpacity
-                                style={{ flex: 1, backgroundColor: Colors.success, padding: 14, borderRadius: 10, alignItems: 'center' }}
+                                style={{ flex: 1, backgroundColor: colors.success, padding: 14, borderRadius: 10, alignItems: 'center' }}
                                 onPress={() => setShowCompletionModal(true)}
                                 disabled={!!processingId}
                             >
@@ -469,7 +468,7 @@ export default function AdminReportDetailScreen() {
 
                         {data.status !== 'Selesai' && data.status !== 'Ditolak' && (
                             <TouchableOpacity
-                                style={{ flex: 1, backgroundColor: Colors.danger, padding: 14, borderRadius: 10, alignItems: 'center' }}
+                                style={{ flex: 1, backgroundColor: colors.danger, padding: 14, borderRadius: 10, alignItems: 'center' }}
                                 onPress={() => setShowRejectionModal(true)}
                                 disabled={!!processingId}
                             >
@@ -499,10 +498,10 @@ export default function AdminReportDetailScreen() {
                 >
                     <TouchableOpacity
                         activeOpacity={1}
-                        style={{ backgroundColor: 'white', borderRadius: 16, padding: 24, elevation: 5 }}
+                        style={{ backgroundColor: colors.surface, borderRadius: 16, padding: 24, elevation: 5 }}
                     >
-                        <Text style={{ fontSize: 18, fontWeight: 'bold', color: Colors.textPrimary, marginBottom: 6 }}>Alasan Penolakan</Text>
-                        <Text style={{ fontSize: 13, color: Colors.textSecondary, marginBottom: 16 }}>Mohon berikan alasan mengapa laporan ini ditolak.</Text>
+                        <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.textPrimary, marginBottom: 6 }}>Alasan Penolakan</Text>
+                        <Text style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 16 }}>Mohon berikan alasan mengapa laporan ini ditolak.</Text>
 
                         <TextInput
                             style={{
@@ -513,11 +512,11 @@ export default function AdminReportDetailScreen() {
                                 height: 120,
                                 textAlignVertical: 'top',
                                 color: colors.textPrimary,
-                                backgroundColor: colors.green1 + '40',
+                                backgroundColor: colors.primarySubtle,
                                 marginBottom: 20
                             }}
                             placeholder="Contoh: Laporan kurang jelas atau data tidak lengkap..."
-                            placeholderTextColor={Colors.textSecondary + '80'}
+                            placeholderTextColor={colors.textSecondary}
                             multiline={true}
                             value={rejectionReason}
                             onChangeText={setRejectionReason}
@@ -525,15 +524,15 @@ export default function AdminReportDetailScreen() {
 
                         <View style={{ flexDirection: 'row', gap: 12 }}>
                             <TouchableOpacity
-                                style={{ flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center', backgroundColor: '#F3F4F6' }}
+                                style={{ flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center', backgroundColor: colors.surfaceSubtle }}
                                 onPress={() => setShowRejectionModal(false)}
                             >
-                                <Text style={{ color: Colors.textSecondary, fontWeight: 'bold' }}>Batal</Text>
+                                <Text style={{ color: colors.textSecondary, fontWeight: 'bold' }}>Batal</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={{
                                     flex: 2,
-                                    backgroundColor: Colors.danger,
+                                    backgroundColor: colors.danger,
                                     paddingVertical: 12,
                                     borderRadius: 10,
                                     alignItems: 'center',
@@ -567,19 +566,19 @@ export default function AdminReportDetailScreen() {
                 >
                     <TouchableOpacity
                         activeOpacity={1}
-                        style={{ backgroundColor: 'white', borderRadius: 16, padding: 24, elevation: 5 }}
+                        style={{ backgroundColor: colors.surface, borderRadius: 16, padding: 24, elevation: 5 }}
                     >
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
                             <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#ECFDF5', justifyContent: 'center', alignItems: 'center', marginRight: 12 }}>
                                 <Ionicons name="checkmark-circle" size={24} color="#10B981" />
                             </View>
                             <View>
-                                <Text style={{ fontSize: 18, fontWeight: 'bold', color: Colors.textPrimary }}>Selesaikan Laporan</Text>
-                                <Text style={{ fontSize: 12, color: '#666' }}>Konfirmasi penanganan selesai</Text>
+                                <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.textPrimary }}>Selesaikan Laporan</Text>
+                                <Text style={{ fontSize: 12, color: colors.textSecondary }}>Konfirmasi penanganan selesai</Text>
                             </View>
                         </View>
 
-                        <Text style={{ fontSize: 14, color: Colors.textSecondary, lineHeight: 20, marginBottom: 20 }}>
+                        <Text style={{ fontSize: 14, color: colors.textSecondary, lineHeight: 20, marginBottom: 20 }}>
                             Anda dapat melampirkan foto bukti pengerjaan atau hasil akhir laporan ini (opsional).
                         </Text>
 
@@ -595,39 +594,39 @@ export default function AdminReportDetailScreen() {
                                     }}
                                     onPress={() => setCompletionImage(null)}
                                 >
-                                    <Ionicons name="close" size={20} color={Colors.danger} />
+                                    <Ionicons name="close" size={20} color={colors.danger} />
                                 </TouchableOpacity>
                             </View>
                         ) : (
                             <TouchableOpacity
                                 style={{
                                     borderWidth: 1.5,
-                                    borderColor: Colors.green4,
+                                    borderColor: colors.primary,
                                     borderStyle: 'dashed',
                                     borderRadius: 12,
                                     paddingVertical: 30,
                                     alignItems: 'center',
                                     marginBottom: 20,
-                                    backgroundColor: '#F0FDF4'
+                                    backgroundColor: colors.successBg
                                 }}
                                 onPress={handlePickCompletionImage}
                             >
-                                <Ionicons name="camera" size={32} color={Colors.green4} />
-                                <Text style={{ marginTop: 8, color: Colors.green5, fontWeight: '600', fontSize: 13 }}>Ambil Foto Bukti (Opsional)</Text>
+                                <Ionicons name="camera" size={32} color={colors.primary} />
+                                <Text style={{ marginTop: 8, color: colors.primary, fontWeight: '600', fontSize: 13 }}>Ambil Foto Bukti (Opsional)</Text>
                             </TouchableOpacity>
                         )}
 
                         <View style={{ flexDirection: 'row', gap: 12 }}>
                             <TouchableOpacity
-                                style={{ flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center', backgroundColor: '#F3F4F6' }}
+                                style={{ flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center', backgroundColor: colors.surfaceSubtle }}
                                 onPress={() => setShowCompletionModal(false)}
                             >
-                                <Text style={{ color: Colors.textSecondary, fontWeight: 'bold' }}>Batal</Text>
+                                <Text style={{ color: colors.textSecondary, fontWeight: 'bold' }}>Batal</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={{
                                     flex: 2,
-                                    backgroundColor: Colors.green5,
+                                    backgroundColor: colors.primary,
                                     paddingVertical: 12,
                                     borderRadius: 10,
                                     alignItems: 'center'

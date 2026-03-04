@@ -7,11 +7,10 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../../../contexts/AuthContext';
 import { CustomHeader } from '../../../components/common/CustomHeader';
 import { createStyles } from './AdminProfileStyles';
-import { Colors } from '../../../constants/Colors';
 import { StatusBar } from 'expo-status-bar';
 
 export default function EditAdminProfileScreen() {
-    const { colors } = useTheme();
+    const { colors, isDark } = useTheme();
     const styles = React.useMemo(() => createStyles(colors), [colors]);
     const router = useRouter();
     const { profile, updateUserProfile } = useAuth();
@@ -50,8 +49,8 @@ export default function EditAdminProfileScreen() {
     };
 
     return (
-        <SafeAreaView edges={['left', 'right', 'bottom']} style={[styles.container, { backgroundColor: '#F5F7FA' }]}>
-            <StatusBar style="dark" />
+        <SafeAreaView edges={['left', 'right', 'bottom']} style={[styles.container, { backgroundColor: colors.background }]}>
+            <StatusBar style={isDark ? 'light' : 'dark'} />
             <CustomHeader title="Edit Profil Admin" showBack={true} />
 
             <KeyboardAwareScrollView
@@ -86,7 +85,7 @@ export default function EditAdminProfileScreen() {
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Email (Read Only)</Text>
                     <TextInput
-                        style={[styles.input, { backgroundColor: '#F0F0F0', color: Colors.textSecondary }]}
+                        style={[styles.input, { backgroundColor: colors.surfaceSubtle, color: colors.textSecondary }]}
                         value={profile?.email || ''}
                         editable={false}
                     />

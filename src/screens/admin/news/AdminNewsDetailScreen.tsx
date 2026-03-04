@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { formatDateSafe } from '../../../utils/dateUtils';
-import { Colors } from '../../../constants/Colors';
 import { deleteNews } from '../../../services/news';
 import { createStyles } from '../../warga/news/NewsDetailStyles'; // Reuse styles
 import { useTheme } from '../../../contexts/ThemeContext';
@@ -88,7 +87,7 @@ export default function AdminNewsDetailScreen() {
     if (isLoading) {
         return (
             <View style={{ flex: 1, backgroundColor: colors.background }}>
-                <SafeAreaView edges={['top']} style={{ backgroundColor: colors.white }}>
+                <SafeAreaView edges={['top']} style={{ backgroundColor: colors.surface }}>
                     <View style={[styles.header, { borderBottomColor: colors.border }]}>
                         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                             <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
@@ -126,7 +125,7 @@ export default function AdminNewsDetailScreen() {
     return (
         <View style={{ flex: 1, backgroundColor: colors.background }}>
             <SafeAreaView edges={['top']} style={{ backgroundColor: colors.white }}>
-                <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+                <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
                 {/* Header */}
                 <View style={[styles.header, { borderBottomColor: colors.border }]}>
                     <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -135,10 +134,10 @@ export default function AdminNewsDetailScreen() {
                     <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Detail Berita</Text>
                     <View style={{ flexDirection: 'row' }}>
                         <TouchableOpacity onPress={handleEdit} style={{ marginRight: 16 }}>
-                            <Ionicons name="pencil" size={24} color={Colors.primary} />
+                            <Ionicons name="pencil" size={24} color={colors.primary} />
                         </TouchableOpacity>
                         <TouchableOpacity onPress={handleDelete}>
-                            <Ionicons name="trash-outline" size={24} color={Colors.danger} />
+                            <Ionicons name="trash-outline" size={24} color={colors.danger} />
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -155,7 +154,7 @@ export default function AdminNewsDetailScreen() {
                     )}
 
                     <View style={[styles.badge, { backgroundColor: colors.accent, alignSelf: 'flex-start' }]}>
-                        <Text style={[styles.badgeText, { color: colors.green5 }]}>{newsItem.category}</Text>
+                        <Text style={[styles.badgeText, { color: colors.primary }]}>{newsItem.category}</Text>
                     </View>
 
                     <Text style={[styles.title, { color: colors.textPrimary, marginTop: 8 }]}>{newsItem.title}</Text>
@@ -165,8 +164,8 @@ export default function AdminNewsDetailScreen() {
                         <Text style={[styles.date, { color: colors.textSecondary }]}>
                             {formatDateSafe(newsItem.created_at)}
                         </Text>
-                        <View style={[styles.statusDot, { backgroundColor: newsItem.is_published ? Colors.success : Colors.textSecondary, marginLeft: 16, width: 8, height: 8, borderRadius: 4 }]} />
-                        <Text style={{ marginLeft: 6, fontSize: 12, color: newsItem.is_published ? Colors.success : Colors.textSecondary }}>
+                        <View style={[styles.statusDot, { backgroundColor: newsItem.is_published ? colors.success : colors.textSecondary, marginLeft: 16, width: 8, height: 8, borderRadius: 4 }]} />
+                        <Text style={{ marginLeft: 6, fontSize: 12, color: newsItem.is_published ? colors.success : colors.textSecondary }}>
                             {newsItem.is_published ? 'Published' : 'Draft'}
                         </Text>
                     </View>

@@ -105,11 +105,11 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
             {/* Sidebar */}
             {/* Sidebar */}
-            <Animated.View style={[styles.sidebar, { transform: [{ translateX }] }]}>
+            <Animated.View style={[styles.sidebar, { transform: [{ translateX }], backgroundColor: colors.surface }]}>
                 {/* Profile Section */}
-                <View style={styles.profileSection}>
-                    <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                        <Ionicons name="close" size={24} color="#666" />
+                <View style={[styles.profileSection, { borderBottomColor: colors.border }]}>
+                    <TouchableOpacity onPress={onClose} style={[styles.closeButton, { backgroundColor: colors.border }]}>
+                        <Ionicons name="close" size={24} color={colors.textSecondary} />
                     </TouchableOpacity>
                     <View style={styles.avatarContainer}>
                         {profile?.avatar_url ? (
@@ -120,10 +120,10 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                             </View>
                         )}
                     </View>
-                    <Text style={styles.profileName} numberOfLines={1}>
-                        {user?.user_metadata?.full_name || profile?.full_name || 'Admin'}
+                    <Text style={[styles.profileName, { color: colors.primary }]} numberOfLines={1}>
+                        {profile?.full_name || user?.user_metadata?.full_name || 'Admin'}
                     </Text>
-                    <Text style={styles.profileRole}>Administrator</Text>
+                    <Text style={[styles.profileRole, { color: colors.textSecondary }]}>Administrator</Text>
                 </View>
 
                 {/* Menu Items */}
@@ -135,10 +135,10 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                             onPress={() => handleNavigation(item.route)}
                             activeOpacity={0.6}
                         >
-                            <View style={styles.menuIconContainer}>
-                                <Ionicons name={item.icon as any} size={22} color="#1B5E20" />
+                            <View style={[styles.menuIconContainer, { backgroundColor: colors.primary + '1A' }]}>
+                                <Ionicons name={item.icon as any} size={22} color={colors.primary} />
                             </View>
-                            <Text style={styles.menuLabel}>{item.label}</Text>
+                            <Text style={[styles.menuLabel, { color: colors.textPrimary }]}>{item.label}</Text>
 
                             {item.key === 'laporan' && (
                                 <View style={{ flexDirection: 'row', gap: 4, marginLeft: 8 }}>
@@ -160,17 +160,17 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                                     <Text style={[styles.menuBadgeText, { color: colors.status.pending.text }]}>{pendingPayments}</Text>
                                 </View>
                             )}
-                            <Ionicons name="chevron-forward" size={18} color="#999" style={{ marginLeft: 'auto' }} />
+                            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} style={{ marginLeft: 'auto' }} />
                         </TouchableOpacity>
                     ))}
                 </View>
 
                 {/* Bottom: Logout */}
                 <View style={styles.bottomSection}>
-                    <View style={styles.divider} />
+                    <View style={[styles.divider, { backgroundColor: colors.border }]} />
                     <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-                        <Ionicons name="log-out-outline" size={22} color="#C62828" />
-                        <Text style={styles.logoutText}>Keluar</Text>
+                        <Ionicons name="log-out-outline" size={22} color={colors.danger} />
+                        <Text style={[styles.logoutText, { color: colors.danger }]}>Keluar</Text>
                     </TouchableOpacity>
                 </View>
             </Animated.View>

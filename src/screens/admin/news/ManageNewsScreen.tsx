@@ -7,7 +7,6 @@ import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { createStyles } from './ManageNewsStyles';
-import { Colors } from '../../../constants/Colors';
 import { CustomHeader } from '../../../components/common/CustomHeader';
 import { formatDateSafe } from '../../../utils/dateUtils';
 import { fetchNews, createNews, updateNews, deleteNews, NewsItem, uploadNewsImage } from '../../../services/news';
@@ -16,7 +15,7 @@ import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { useTheme } from '../../../contexts/ThemeContext';
 
 export default function ManageNewsScreen() {
-    const { colors } = useTheme();
+    const { colors, isDark } = useTheme();
     const styles = React.useMemo(() => createStyles(colors), [colors]);
     const router = useRouter();
     const { session, profile } = useAuth();
@@ -212,14 +211,14 @@ export default function ManageNewsScreen() {
                     />
                 ) : (
                     <View style={{ width: 80, height: 80, borderRadius: 8, marginRight: 12, backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center' }}>
-                        <Ionicons name="newspaper-outline" size={32} color={Colors.textSecondary} />
+                        <Ionicons name="newspaper-outline" size={32} color={colors.textSecondary} />
                     </View>
                 )}
 
                 <View style={{ flex: 1, justifyContent: 'space-between' }}>
                     <View>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                            <Text style={[styles.categoryText, { fontSize: 10, color: Colors.primary }]}>{item.category}</Text>
+                            <Text style={[styles.categoryText, { fontSize: 10, color: colors.primary }]}>{item.category}</Text>
                             <Text style={[styles.dateText, { fontSize: 10 }]}>
                                 {formatDateSafe(item.created_at)}
                             </Text>
@@ -228,8 +227,8 @@ export default function ManageNewsScreen() {
                     </View>
 
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <View style={[styles.statusDot, { backgroundColor: item.is_published ? Colors.success : Colors.textSecondary, width: 6, height: 6 }]} />
-                        <Text style={{ fontSize: 10, color: Colors.textSecondary, marginLeft: 4 }}>
+                        <View style={[styles.statusDot, { backgroundColor: item.is_published ? colors.success : colors.textSecondary, width: 6, height: 6 }]} />
+                        <Text style={{ fontSize: 10, color: colors.textSecondary, marginLeft: 4 }}>
                             {item.is_published ? 'Published' : 'Draft'}
                         </Text>
                     </View>
@@ -240,7 +239,7 @@ export default function ManageNewsScreen() {
 
     return (
         <View style={styles.container}>
-            <StatusBar style="dark" />
+            <StatusBar style={isDark ? 'light' : 'dark'} />
             <CustomHeader
                 title="Kelola Berita"
                 showBack={true}
@@ -250,7 +249,7 @@ export default function ManageNewsScreen() {
             <SafeAreaView edges={['left', 'right', 'bottom']} style={{ flex: 1 }}>
                 {isLoading ? (
                     <View style={styles.centered}>
-                        <ActivityIndicator size="large" color={Colors.primary} />
+                        <ActivityIndicator size="large" color={colors.primary} />
                     </View>
                 ) : (
                     <FlatList
@@ -260,7 +259,7 @@ export default function ManageNewsScreen() {
                         contentContainerStyle={styles.listContent}
                         ListEmptyComponent={
                             <View style={styles.emptyState}>
-                                <Ionicons name="newspaper-outline" size={48} color={Colors.textSecondary} />
+                                <Ionicons name="newspaper-outline" size={48} color={colors.textSecondary} />
                                 <Text style={styles.emptyText}>Belum ada berita.</Text>
                             </View>
                         }
@@ -292,7 +291,7 @@ export default function ManageNewsScreen() {
                                 <View style={styles.formHeader}>
                                     <Text style={styles.formTitle}>{isEditing ? 'Edit Berita' : 'Buat Berita Baru'}</Text>
                                     <TouchableOpacity onPress={() => { setShowModal(false); resetForm(); }}>
-                                        <Ionicons name="close" size={24} color={Colors.textSecondary} />
+                                        <Ionicons name="close" size={24} color={colors.textSecondary} />
                                     </TouchableOpacity>
                                 </View>
 
@@ -307,8 +306,8 @@ export default function ManageNewsScreen() {
                                                         style={[styles.imageActionButton, styles.replaceImageButton]}
                                                         onPress={pickImage}
                                                     >
-                                                        <Ionicons name="camera" size={16} color={Colors.primary} />
-                                                        <Text style={[styles.imageActionText, { color: Colors.primary }]}>Ganti</Text>
+                                                        <Ionicons name="camera" size={16} color={colors.primary} />
+                                                        <Text style={[styles.imageActionText, { color: colors.primary }]}>Ganti</Text>
                                                     </TouchableOpacity>
                                                     <TouchableOpacity
                                                         style={[styles.imageActionButton, styles.removeImageButton]}
@@ -321,11 +320,11 @@ export default function ManageNewsScreen() {
                                             </>
                                         ) : (
                                             <TouchableOpacity onPress={pickImage} style={styles.imagePickerContent}>
-                                                <View style={{ backgroundColor: '#E3F2FD', padding: 15, borderRadius: 30, marginBottom: 10 }}>
-                                                    <Ionicons name="image" size={32} color={Colors.primary} />
+                                                <View style={{ backgroundColor: colors.primarySubtle, padding: 15, borderRadius: 30, marginBottom: 10 }}>
+                                                    <Ionicons name="image" size={32} color={colors.primary} />
                                                 </View>
-                                                <Text style={{ fontSize: 13, color: Colors.textSecondary, fontWeight: '500' }}>Ketuk untuk pilih gambar</Text>
-                                                <Text style={{ fontSize: 11, color: '#94A3B8', marginTop: 4 }}>Rekomendasi 16:9 atau Square</Text>
+                                                <Text style={{ fontSize: 13, color: colors.textSecondary, fontWeight: '500' }}>Ketuk untuk pilih gambar</Text>
+                                                <Text style={{ fontSize: 11, color: colors.textSecondary, marginTop: 4 }}>Rekomendasi 16:9 atau Square</Text>
                                             </TouchableOpacity>
                                         )}
                                     </View>
@@ -360,10 +359,10 @@ export default function ManageNewsScreen() {
                                         <Switch
                                             value={isPublished}
                                             onValueChange={setIsPublished}
-                                            trackColor={{ false: '#CBD5E1', true: Colors.primary }}
+                                            trackColor={{ false: '#CBD5E1', true: colors.primary }}
                                             thumbColor="#FFF"
                                         />
-                                        <Text style={[styles.checkboxLabel, { fontSize: 14, color: '#475569' }]}>Publikasikan sekarang</Text>
+                                        <Text style={[styles.checkboxLabel, { fontSize: 14, color: colors.textSecondary }]}>Publikasikan sekarang</Text>
                                     </View>
 
                                     <TouchableOpacity
@@ -379,11 +378,11 @@ export default function ManageNewsScreen() {
                                     </TouchableOpacity>
 
                                     <TouchableOpacity
-                                        style={[styles.saveButton, { backgroundColor: '#F1F5F9', marginTop: 12 }]}
+                                        style={[styles.saveButton, { backgroundColor: colors.surfaceSubtle, marginTop: 12 }]}
                                         onPress={() => { setShowModal(false); resetForm(); }}
                                         disabled={isSubmitting}
                                     >
-                                        <Text style={[styles.saveButtonText, { color: '#64748B' }]}>Batal</Text>
+                                        <Text style={[styles.saveButtonText, { color: colors.textSecondary }]}>Batal</Text>
                                     </TouchableOpacity>
 
                                     <View style={{ height: 30 }} />

@@ -64,7 +64,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         borderRadius: 20,
         backgroundColor: colors.surface,
         borderWidth: 1,
-        borderColor: '#E0E0E0',
+        borderColor: colors.border,
     },
     filterChipActive: {
         backgroundColor: colors.primary,
@@ -91,7 +91,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         shadowRadius: 8,
         elevation: 3,
         borderWidth: 1,
-        borderColor: '#F0F0F0',
+        borderColor: colors.border,
     },
     cardHeader: {
         flexDirection: 'row',
@@ -137,12 +137,12 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         textTransform: 'uppercase',
     },
     cardBody: {
-        backgroundColor: '#F9FAFB',
+        backgroundColor: colors.surfaceSubtle,
         borderBottomLeftRadius: 16,
         borderBottomRightRadius: 16,
         padding: 16,
         borderTopWidth: 1,
-        borderTopColor: '#F0F0F0',
+        borderTopColor: colors.border,
     },
     cardText: {
         fontSize: 13,
@@ -155,7 +155,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         marginTop: 8,
         paddingTop: 8,
         borderTopWidth: 1,
-        borderTopColor: '#EBEBEB',
+        borderTopColor: colors.border,
     },
     tokenLabel: {
         fontSize: 12,
@@ -171,7 +171,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     copyTokenButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#F1F8E9',
+        backgroundColor: colors.successBg,
         paddingHorizontal: 12,
         paddingVertical: 8,
         borderRadius: 8,
@@ -199,13 +199,13 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         marginLeft: 8,
     },
     editButton: {
-        backgroundColor: '#E3F2FD',
+        backgroundColor: colors.primarySubtle,
     },
     deleteButton: {
-        backgroundColor: '#FEE2E2',
+        backgroundColor: colors.dangerBg,
     },
     editText: {
-        color: '#1565C0',
+        color: colors.primary,
         fontSize: 12,
         fontWeight: '600',
         marginLeft: 4,
@@ -224,7 +224,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#E0E0E0',
+        borderColor: colors.border,
     },
 
     // FAB
@@ -274,7 +274,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         color: colors.textPrimary,
         marginBottom: 16,
         borderWidth: 1,
-        borderColor: '#E0E0E0',
+        borderColor: colors.border,
     },
     roleContainer: {
         marginBottom: 24,
@@ -297,7 +297,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         padding: 12,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: '#E0E0E0',
+        borderColor: colors.border,
         backgroundColor: colors.surface,
     },
     roleOptionActive: {
@@ -354,13 +354,13 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         paddingHorizontal: 10,
         paddingVertical: 5,
         borderRadius: 12,
-        backgroundColor: '#E3F2FD',
+        backgroundColor: colors.primarySubtle,
         borderWidth: 1,
-        borderColor: '#BBDEFB',
+        borderColor: colors.primary,
     },
     totalUserText: {
         fontSize: 12,
-        color: '#1565C0', // Stronger blue
+        color: colors.primary,
         fontWeight: 'bold',
     },
 });

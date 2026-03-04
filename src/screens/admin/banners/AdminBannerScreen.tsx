@@ -83,7 +83,7 @@ export default function AdminBannerScreen() {
 
     return (
         <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
-            <StatusBar barStyle="dark-content" />
+            <StatusBar barStyle={colors.statusBar} />
             <CustomHeader title="Kelola Iklan Banner" showBack />
 
             <FlatList
@@ -92,7 +92,7 @@ export default function AdminBannerScreen() {
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.listContent}
                 refreshControl={
-                    <RefreshControl refreshing={vm.isLoading} onRefresh={vm.refresh} colors={['#1B5E20']} />
+                    <RefreshControl refreshing={vm.isLoading} onRefresh={vm.refresh} colors={[colors.primary]} />
                 }
                 ListEmptyComponent={
                     !vm.isLoading ? (
@@ -159,7 +159,7 @@ export default function AdminBannerScreen() {
                                         style={styles.pickerBtn}
                                         onPress={() => vm.pickImage(false)}
                                     >
-                                        <Ionicons name="image" size={20} color="#1B5E20" />
+                                        <Ionicons name="image" size={20} color={colors.primary} />
                                         <Text style={styles.pickerBtnText}>Galeri</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity
@@ -201,7 +201,7 @@ export default function AdminBannerScreen() {
                                         style={styles.dateInputBtn}
                                         onPress={() => vm.setShowStartPicker(true)}
                                     >
-                                        <Ionicons name="calendar" size={18} color="#1B5E20" />
+                                        <Ionicons name="calendar" size={18} color={colors.primary} />
                                         <View>
                                             <Text style={styles.dateInputText}>Mulai</Text>
                                             <Text style={styles.dateValueText}>{vm.startDate.toLocaleDateString('id-ID')}</Text>
@@ -212,7 +212,7 @@ export default function AdminBannerScreen() {
                                         style={styles.dateInputBtn}
                                         onPress={() => vm.setShowEndPicker(true)}
                                     >
-                                        <Ionicons name="calendar" size={18} color="#1B5E20" />
+                                        <Ionicons name="calendar" size={18} color={colors.primary} />
                                         <View>
                                             <Text style={styles.dateInputText}>Berakhir</Text>
                                             <Text style={styles.dateValueText}>

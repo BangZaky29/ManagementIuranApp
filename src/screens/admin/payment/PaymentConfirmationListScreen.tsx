@@ -7,13 +7,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { ThemeColors } from '../../../theme/AppTheme';
-import { Colors } from '../../../constants/Colors';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
 import {
     PendingPaymentItem,
     fetchPaymentsByStatus,
 } from '../../../services/payment';
 import { useTheme } from '../../../contexts/ThemeContext';
+import { CustomHeader } from '../../../components/common/CustomHeader';
 
 type FilterStatus = 'pending' | 'paid' | 'rejected' | 'all';
 
@@ -70,7 +70,7 @@ export default function PaymentConfirmationListScreen() {
             case 'pending': return colors.status.pending.bg;
             case 'paid': return colors.status.selesai.bg;
             case 'rejected': return colors.status.ditolak.bg;
-            default: return '#F5F5F5';
+            default: return colors.surfaceSubtle;
         }
     };
 
@@ -83,17 +83,8 @@ export default function PaymentConfirmationListScreen() {
 
     return (
         <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
-            <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
-
-            {/* Header */}
-            <SafeAreaView edges={['top']} style={{ backgroundColor: '#FFF' }}>
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={24} color={Colors.green5} />
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Konfirmasi Pembayaran</Text>
-                </View>
-            </SafeAreaView>
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
+            <CustomHeader title="Konfirmasi Pembayaran" showBack={true} />
 
             {/* Filter Tabs */}
             <View style={{ flexGrow: 0, marginTop: 12, marginBottom: 12 }}>
@@ -111,7 +102,7 @@ export default function PaymentConfirmationListScreen() {
                             <Ionicons
                                 name={f.icon as any}
                                 size={16}
-                                color={activeFilter === f.key ? Colors.green5 : Colors.textSecondary}
+                                color={activeFilter === f.key ? colors.primary : colors.textSecondary}
                             />
                             <Text style={[styles.filterLabel, activeFilter === f.key && styles.filterLabelActive]}>
                                 {f.label}
@@ -123,11 +114,11 @@ export default function PaymentConfirmationListScreen() {
 
             {isLoading ? (
                 <View style={styles.centerContainer}>
-                    <ActivityIndicator size="large" color={Colors.green3} />
+                    <ActivityIndicator size="large" color={colors.primary} />
                 </View>
             ) : payments.length === 0 ? (
                 <View style={styles.emptyContainer}>
-                    <Ionicons name="receipt-outline" size={64} color={Colors.textSecondary} />
+                    <Ionicons name="receipt-outline" size={64} color={colors.textSecondary} />
                     <Text style={styles.emptyTitle}>Tidak Ada Pembayaran</Text>
                     <Text style={styles.emptySubtitle}>
                         {activeFilter === 'pending'
@@ -156,7 +147,7 @@ export default function PaymentConfirmationListScreen() {
                                         <Image source={{ uri: payment.profiles.avatar_url }} style={styles.avatar} />
                                     ) : (
                                         <View style={[styles.avatar, styles.avatarPlaceholder]}>
-                                            <Ionicons name="person" size={18} color={Colors.green4} />
+                                            <Ionicons name="person" size={18} color={colors.primary} />
                                         </View>
                                     )}
                                     <View style={{ flex: 1 }}>
@@ -196,13 +187,13 @@ export default function PaymentConfirmationListScreen() {
 
                             {payment.proof_url && (
                                 <View style={styles.proofIndicator}>
-                                    <Ionicons name="image-outline" size={14} color={Colors.green4} />
+                                    <Ionicons name="image-outline" size={14} color={colors.primary} />
                                     <Text style={styles.proofText}>Bukti terlampir</Text>
                                 </View>
                             )}
 
                             <View style={styles.cardFooter}>
-                                <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
+                                <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
                             </View>
                         </TouchableOpacity>
                     ))}
@@ -213,41 +204,41 @@ export default function PaymentConfirmationListScreen() {
 }
 
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.green1 },
+    container: { flex: 1, backgroundColor: colors.background },
     header: {
         flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: 20, paddingBottom: 15,
         backgroundColor: colors.surface,
     },
     backButton: { padding: 5, marginRight: 10 },
-    headerTitle: { fontSize: 20, fontWeight: 'bold', color: colors.green5 },
+    headerTitle: { fontSize: 20, fontWeight: 'bold', color: colors.primary },
     filterContainer: {
         marginBottom: 8,
     },
     filterTab: {
         flexDirection: 'row', alignItems: 'center', gap: 6,
         paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20,
-        backgroundColor: colors.white, marginRight: 8,
-        borderWidth: 1, borderColor: colors.green2,
+        backgroundColor: colors.surface, marginRight: 8,
+        borderWidth: 1, borderColor: colors.border,
     },
     filterTabActive: {
-        backgroundColor: '#F1F8E9', borderColor: colors.green3,
+        backgroundColor: colors.primarySubtle, borderColor: colors.primary,
     },
     filterLabel: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
-    filterLabelActive: { color: colors.green5 },
+    filterLabelActive: { color: colors.primary },
     centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     emptyContainer: {
         flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40,
     },
-    emptyTitle: { fontSize: 18, fontWeight: 'bold', color: colors.green5, marginTop: 16 },
+    emptyTitle: { fontSize: 18, fontWeight: 'bold', color: colors.primary, marginTop: 16 },
     emptySubtitle: {
         fontSize: 14, color: colors.textSecondary, textAlign: 'center',
         marginTop: 8, lineHeight: 20,
     },
     content: { padding: 16, paddingBottom: 40 },
     paymentCard: {
-        backgroundColor: colors.white, borderRadius: 16, padding: 16,
-        marginBottom: 12, borderWidth: 1, borderColor: 'rgba(0,0,0,0.05)',
+        backgroundColor: colors.surface, borderRadius: 16, padding: 16,
+        marginBottom: 12, borderWidth: 1, borderColor: colors.border,
     },
     cardHeader: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
@@ -258,21 +249,21 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
         width: 40, height: 40, borderRadius: 20, marginRight: 10,
     },
     avatarPlaceholder: {
-        backgroundColor: '#E8F5E9', alignItems: 'center', justifyContent: 'center',
+        backgroundColor: colors.successBg, alignItems: 'center', justifyContent: 'center',
     },
-    userName: { fontSize: 15, fontWeight: 'bold', color: colors.green5 },
+    userName: { fontSize: 15, fontWeight: 'bold', color: colors.primary },
     userAddress: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
     statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
     statusText: { fontSize: 11, fontWeight: '700' },
     cardBody: { gap: 6 },
     cardRow: { flexDirection: 'row', justifyContent: 'space-between' },
     cardLabel: { fontSize: 13, color: colors.textSecondary },
-    cardValue: { fontSize: 13, fontWeight: '500', color: colors.green5 },
-    cardAmount: { fontSize: 14, fontWeight: 'bold', color: colors.green3 },
+    cardValue: { fontSize: 13, fontWeight: '500', color: colors.primary },
+    cardAmount: { fontSize: 14, fontWeight: 'bold', color: colors.primary },
     proofIndicator: {
         flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 10,
-        paddingTop: 8, borderTopWidth: 1, borderTopColor: '#F0F0F0',
+        paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.border,
     },
-    proofText: { fontSize: 12, color: colors.green4, fontWeight: '500' },
+    proofText: { fontSize: 12, color: colors.primary, fontWeight: '500' },
     cardFooter: { alignItems: 'flex-end', marginTop: 4 },
 });

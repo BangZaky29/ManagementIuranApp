@@ -272,7 +272,7 @@ export default function BackupManagementScreen() {
                     </View>
 
                     {vm.isLoading ? (
-                        <ActivityIndicator size="large" color="#1B5E20" style={{ marginTop: 20 }} />
+                        <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 20 }} />
                     ) : vm.rows.length === 0 ? (
                         <View style={styles.emptyState}>
                             <Ionicons name="file-tray-outline" size={48} color="#CCC" />
@@ -317,7 +317,7 @@ export default function BackupManagementScreen() {
                     onPress={() => vm.setShowSchedulePicker(false)}
                 >
                     <Pressable style={{
-                        backgroundColor: '#FFF',
+                        backgroundColor: colors.surface,
                         borderTopLeftRadius: 24,
                         borderTopRightRadius: 24,
                         paddingTop: 12,
@@ -329,7 +329,7 @@ export default function BackupManagementScreen() {
                             width: 40, height: 4, borderRadius: 2,
                             backgroundColor: '#DDD', alignSelf: 'center', marginBottom: 20,
                         }} />
-                        <Text style={{ fontSize: 18, fontWeight: '700', color: '#1B5E20', marginBottom: 6 }}>
+                        <Text style={{ fontSize: 18, fontWeight: '700', color: colors.primary, marginBottom: 6 }}>
                             🔄 Jadwal Backup Otomatis
                         </Text>
                         <Text style={{ fontSize: 13, color: '#888', marginBottom: 20 }}>
@@ -351,7 +351,7 @@ export default function BackupManagementScreen() {
                                 <View style={{ flex: 1 }}>
                                     <Text style={{
                                         fontSize: 15, fontWeight: '600',
-                                        color: vm.selectedSchedule === opt.key ? '#1B5E20' : '#333',
+                                        color: vm.selectedSchedule === opt.key ? colors.primary : '#333',
                                     }}>{opt.label}</Text>
                                     <Text style={{ fontSize: 12, color: '#888', marginTop: 2 }}>{opt.desc}</Text>
                                 </View>

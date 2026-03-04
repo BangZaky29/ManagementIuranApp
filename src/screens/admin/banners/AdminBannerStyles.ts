@@ -2,13 +2,13 @@ import { StyleSheet, Platform } from 'react-native';
 import { ThemeColors } from '../../../theme/AppTheme';
 
 export const createStyles = (colors: ThemeColors) => StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F8FAF8' },
+    container: { flex: 1, backgroundColor: colors.background },
     header: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
         paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#EEE',
         backgroundColor: colors.surface
     },
-    headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#1B5E20' },
+    headerTitle: { fontSize: 20, fontWeight: 'bold', color: colors.primary },
 
     listContent: { padding: 20, paddingBottom: 100 },
     card: {
@@ -39,7 +39,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
 
     fab: {
         position: 'absolute', bottom: 30, right: 20,
-        backgroundColor: '#1B5E20', width: 56, height: 56, borderRadius: 28,
+        backgroundColor: colors.primary, width: 56, height: 56, borderRadius: 28,
         justifyContent: 'center', alignItems: 'center', elevation: 5,
         shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 4
     },
@@ -76,10 +76,10 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         backgroundColor: '#E8F5E9', paddingVertical: 12, borderRadius: 12, gap: 8,
         borderWidth: 1, borderColor: '#A5D6A7'
     },
-    pickerBtnText: { fontSize: 14, fontWeight: '700', color: '#1B5E20' },
+    pickerBtnText: { fontSize: 14, fontWeight: '700', color: colors.primary },
 
     submitBtn: {
-        backgroundColor: '#1B5E20', borderRadius: 12, padding: 16, alignItems: 'center',
+        backgroundColor: colors.primary, borderRadius: 12, padding: 16, alignItems: 'center',
         marginTop: 10
     },
     submitBtnText: { color: colors.textWhite, fontSize: 16, fontWeight: 'bold' },
@@ -95,7 +95,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         borderWidth: 1, borderColor: '#EEE', flexDirection: 'row', alignItems: 'center', gap: 10
     },
     dateInputText: { fontSize: 14, color: '#333', fontWeight: '500' },
-    dateValueText: { fontSize: 14, color: '#1B5E20', fontWeight: 'bold' },
+    dateValueText: { fontSize: 14, color: colors.primary, fontWeight: 'bold' },
 
     emptyState: { alignItems: 'center', justifyContent: 'center', paddingTop: 60 },
     emptyTitle: { fontSize: 18, fontWeight: 'bold', color: '#CCC', marginTop: 16 },

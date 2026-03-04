@@ -3,7 +3,7 @@ import React, { useState, useCallback } from 'react';
 
 import { View, Text, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { Colors } from '../../../constants/Colors';
+
 import { Ionicons } from '@expo/vector-icons';
 import { getDashboardStats } from '../../../services/admin';
 import { countPendingPayments } from '../../../services/payment';
@@ -17,7 +17,7 @@ import { useRouter } from 'expo-router';
 import { useTheme } from '../../../contexts/ThemeContext';
 
 export default function AdminDashboardScreen() {
-    const { colors } = useTheme();
+    const { colors, isDark } = useTheme();
     const styles = React.useMemo(() => createStyles(colors), [colors]);
     const router = useRouter();
     const [stats, setStats] = useState({ warga: 0, security: 0, activeUsers: 0, laporanMasuk: 0 });
@@ -63,8 +63,8 @@ export default function AdminDashboardScreen() {
 
     const StatCard = ({ title, count, icon, color, subtitle }: any) => {
         const isEmpty = !count || count === 0 || count === '0';
-        const activeColor = isEmpty ? Colors.textSecondary + '40' : color;
-        const iconColor = isEmpty ? Colors.textSecondary : '#FFF';
+        const activeColor = isEmpty ? colors.textSecondary + '40' : color;
+        const iconColor = isEmpty ? colors.textSecondary : '#FFF';
 
         return (
             <View style={styles.card}>
@@ -85,17 +85,17 @@ export default function AdminDashboardScreen() {
             onPress={() => setSidebarVisible(true)}
             style={{
                 padding: 6,
-                backgroundColor: '#E8F5E9',
+                backgroundColor: colors.primarySubtle,
                 borderRadius: 10,
             }}
         >
-            <Ionicons name="menu" size={22} color="#1B5E20" />
+            <Ionicons name="menu" size={22} color={colors.primary} />
         </TouchableOpacity>
     );
 
     return (
         <View style={styles.container}>
-            <StatusBar style="dark" />
+            <StatusBar style={isDark ? 'light' : 'dark'} />
             <CustomHeader
                 title="Dashboard Admin"
                 showBack={false}
@@ -104,7 +104,7 @@ export default function AdminDashboardScreen() {
 
             <ScrollView
                 contentContainerStyle={styles.scrollContent}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary]} />}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />}
             >
                 <View style={styles.welcomeSection}>
                     <Text style={styles.welcomeText}>Selamat Datang, Admin</Text>
@@ -116,28 +116,28 @@ export default function AdminDashboardScreen() {
                         title="Total Warga"
                         count={stats.warga}
                         icon="people"
-                        color={Colors.primary}
+                        color={colors.primary}
                         subtitle="Terdaftar"
                     />
                     <StatCard
                         title="Total Security"
                         count={stats.security}
                         icon="shield-checkmark"
-                        color={Colors.primary}
+                        color={colors.primary}
                         subtitle="Personil"
                     />
                     <StatCard
                         title="User Aktif"
                         count={stats.activeUsers}
                         icon="checkmark-circle"
-                        color={Colors.success}
+                        color={colors.success}
                         subtitle="Sudah Login"
                     />
                     <StatCard
                         title="Laporan Masuk"
                         count={stats.laporanMasuk}
                         icon="document-text"
-                        color={Colors.warning}
+                        color={colors.warning}
                         subtitle="Total"
                     />
                 </View>
@@ -145,7 +145,7 @@ export default function AdminDashboardScreen() {
                 {/* Pending Payments Banner */}
                 {pendingPayments > 0 && (
                     <View style={{
-                        backgroundColor: '#FFF8E1',
+                        backgroundColor: colors.warningBg,
                         padding: 16,
                         borderRadius: 14,
                         marginHorizontal: 16,
@@ -156,15 +156,15 @@ export default function AdminDashboardScreen() {
                     }}>
                         <View style={{
                             width: 40, height: 40, borderRadius: 12,
-                            backgroundColor: '#F57F17', alignItems: 'center', justifyContent: 'center',
+                            backgroundColor: colors.warning, alignItems: 'center', justifyContent: 'center',
                         }}>
                             <Ionicons name="receipt" size={20} color="#FFF" />
                         </View>
                         <View style={{ flex: 1 }}>
-                            <Text style={{ fontSize: 14, fontWeight: '700', color: '#F57F17' }}>
+                            <Text style={{ fontSize: 14, fontWeight: '700', color: colors.warning }}>
                                 {pendingPayments} Pembayaran Menunggu Konfirmasi
                             </Text>
-                            <Text style={{ fontSize: 12, color: '#888', marginTop: 2 }}>
+                            <Text style={{ fontSize: 12, color: colors.textSecondary, marginTop: 2 }}>
                                 Buka via Menu → Management Iuran
                             </Text>
                         </View>
@@ -174,7 +174,7 @@ export default function AdminDashboardScreen() {
                 <View style={styles.sectionHeader}>
                     <Text style={styles.sectionTitle}>Ringkasan Aktivitas</Text>
                     <TouchableOpacity onPress={() => router.push('/admin/activity-log')}>
-                        <Text style={{ color: Colors.primary, fontSize: 13, fontWeight: '600' }}>Lihat Semua</Text>
+                        <Text style={{ color: colors.primary, fontSize: 13, fontWeight: '600' }}>Lihat Semua</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -183,7 +183,7 @@ export default function AdminDashboardScreen() {
                         <View key={item.id} style={[styles.card, { padding: 12, marginBottom: 10, flexDirection: 'row', alignItems: 'center', gap: 12 }]}>
                             <View style={{
                                 width: 42, height: 42, borderRadius: 21,
-                                backgroundColor: item.action_type === 'panic' ? '#FFEBEE' : '#E8F5E9',
+                                backgroundColor: item.action_type === 'panic' ? colors.dangerBg : colors.successBg,
                                 alignItems: 'center', justifyContent: 'center'
                             }}>
                                 <Ionicons
@@ -201,21 +201,21 @@ export default function AdminDashboardScreen() {
                                 />
                             </View>
                             <View style={{ flex: 1 }}>
-                                <Text style={{ fontSize: 14, fontWeight: '700', color: Colors.textPrimary }} numberOfLines={1}>
+                                <Text style={{ fontSize: 14, fontWeight: '700', color: colors.textPrimary }} numberOfLines={1}>
                                     {item.action_title}
                                 </Text>
-                                <Text style={{ fontSize: 12, color: Colors.textSecondary, marginTop: 2 }} numberOfLines={1}>
+                                <Text style={{ fontSize: 12, color: colors.textSecondary, marginTop: 2 }} numberOfLines={1}>
                                     {item.description}
                                 </Text>
                             </View>
                             <View style={{ alignItems: 'flex-end' }}>
-                                <Text style={{ fontSize: 10, color: '#999' }}>{formatDateTimeSafe(item.created_at)}</Text>
+                                <Text style={{ fontSize: 10, color: colors.textSecondary }}>{formatDateTimeSafe(item.created_at)}</Text>
                             </View>
                         </View>
                     ))
                 ) : (
                     <View style={[styles.card, { padding: 20, alignItems: 'center' }]}>
-                        <Text style={{ color: Colors.textSecondary }}>Belum ada aktivitas terbaru.</Text>
+                        <Text style={{ color: colors.textSecondary }}>Belum ada aktivitas terbaru.</Text>
                     </View>
                 )}
 

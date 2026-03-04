@@ -8,7 +8,6 @@ import { useAdminProfileViewModel } from './AdminProfileViewModel';
 import { createStyles } from './AdminProfileStyles';
 import { CustomHeader } from '../../../components/common/CustomHeader';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
-import { Colors } from '../../../constants/Colors';
 import Constants from 'expo-constants';
 import { FeatureFlags } from '../../../constants/FeatureFlags';
 
@@ -83,16 +82,16 @@ export default function AdminProfileScreen() {
 
     const renderInfoItem = (icon: string, label: string, value: string, isVerified = false) => (
         <View style={styles.infoRow}>
-            <View style={[styles.infoIconBox, { backgroundColor: '#E3F2FD' }]}>
-                <Ionicons name={icon as any} size={20} color="#2196F3" />
+            <View style={[styles.infoIconBox, { backgroundColor: colors.primarySubtle }]}>
+                <Ionicons name={icon as any} size={20} color={colors.primary} />
             </View>
             <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Text style={styles.infoLabel}>{label}</Text>
                     {isVerified && (
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 8, backgroundColor: '#E3F2FD', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
-                            <Ionicons name="checkmark-circle" size={12} color="#2196F3" />
-                            <Text style={{ fontSize: 10, color: '#2196F3', marginLeft: 2, fontWeight: '600' }}>Terverifikasi</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 8, backgroundColor: colors.primarySubtle, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+                            <Ionicons name="checkmark-circle" size={12} color={colors.primary} />
+                            <Text style={{ fontSize: 10, color: colors.primary, marginLeft: 2, fontWeight: '600' }}>Terverifikasi</Text>
                         </View>
                     )}
                 </View>
@@ -111,47 +110,47 @@ export default function AdminProfileScreen() {
     );
 
     return (
-        <SafeAreaView edges={['left', 'right', 'bottom']} style={[styles.container, { backgroundColor: '#F5F7FA' }]}>
-            <StatusBar barStyle="dark-content" backgroundColor="#F5F7FA" />
+        <SafeAreaView edges={['left', 'right', 'bottom']} style={[styles.container, { backgroundColor: colors.background }]}>
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
             <CustomHeader title="Profil Admin" showBack={false} />
 
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
                 {/* Header Card */}
-                <View style={[styles.headerCard, { backgroundColor: '#FFF' }]}>
+                <View style={[styles.headerCard, { backgroundColor: colors.surface }]}>
                     <TouchableOpacity onPress={handleAvatarUpdate} disabled={isUploading} style={{ position: 'relative' }}>
-                        <View style={[styles.avatarContainer, { borderColor: '#E3F2FD' }]}>
+                        <View style={[styles.avatarContainer, { borderColor: colors.primarySubtle }]}>
                             {isUploading ? (
-                                <ActivityIndicator color={Colors.primary} />
+                                <ActivityIndicator color={colors.primary} />
                             ) : user.avatarUrl ? (
                                 <Image source={{ uri: user.avatarUrl }} style={{ width: '100%', height: '100%', borderRadius: 50 }} />
                             ) : (
-                                <Ionicons name="person" size={50} color={Colors.textSecondary} />
+                                <Ionicons name="person" size={50} color={colors.textSecondary} />
                             )}
                         </View>
                         <View style={{
                             position: 'absolute',
                             bottom: 12,
                             right: 0,
-                            backgroundColor: Colors.primary,
+                            backgroundColor: colors.primary,
                             borderRadius: 12,
                             padding: 6,
                             borderWidth: 2,
-                            borderColor: '#FFF'
+                            borderColor: colors.surface
                         }}>
                             <Ionicons name="camera" size={12} color="#FFF" />
                         </View>
                     </TouchableOpacity>
 
                     <Text style={styles.userName}>{user.name}</Text>
-                    <Text style={[styles.userRole, { backgroundColor: '#E3F2FD', color: '#1565C0' }]}>
+                    <Text style={[styles.userRole, { backgroundColor: colors.primarySubtle, color: colors.primary }]}>
                         {user.role} • {user.housingComplexName ? user.housingComplexName : `RT ${user.rt_rw}`}
                     </Text>
                 </View>
 
                 {/* Info Section */}
                 <Text style={styles.sectionTitle}>Informasi Admin</Text>
-                <View style={[styles.infoCard, { backgroundColor: '#FFF' }]}>
+                <View style={[styles.infoCard, { backgroundColor: colors.surface }]}>
                     {renderInfoItem('person-outline', 'Nama Lengkap', user.name)}
                     {renderInfoItem('at-outline', 'Username', user.username)}
                     {renderInfoItem('mail-outline', 'Email', user.email, true)}
@@ -163,7 +162,7 @@ export default function AdminProfileScreen() {
 
                 {/* Settings Section */}
                 <Text style={styles.sectionTitle}>Pengaturan</Text>
-                <View style={[styles.menuContainer, { backgroundColor: '#FFF', borderColor: '#EEE' }]}>
+                <View style={[styles.menuContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                     {renderMenuItem('create-outline', 'Edit Profil & Data', handleEditProfile)}
                     {renderMenuItem('volume-high-outline', 'Pengaturan Suara', handleSoundSettings, !FeatureFlags.IS_SOUND_SETTINGS_ENABLED)}
 
@@ -189,11 +188,11 @@ export default function AdminProfileScreen() {
 
                 {/* Logout */}
                 <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                    <Ionicons name="log-out-outline" size={20} color={Colors.danger} />
+                    <Ionicons name="log-out-outline" size={20} color={colors.danger} />
                     <Text style={styles.logoutText}>Keluar Admin</Text>
                 </TouchableOpacity>
 
-                <Text style={[styles.versionText, { color: Colors.textSecondary }]}>
+                <Text style={[styles.versionText, { color: colors.textSecondary }]}>
                     Warlok Admin v{Constants.expoConfig?.version ?? '1.0.0'} (beta)
                 </Text>
 

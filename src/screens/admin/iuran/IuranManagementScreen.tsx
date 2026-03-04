@@ -8,9 +8,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { ThemeColors } from '../../../theme/AppTheme';
-import { Colors } from '../../../constants/Colors';
 import { countPendingPayments } from '../../../services/payment';
 import { useState, useCallback } from 'react';
+import { CustomHeader } from '../../../components/common/CustomHeader';
 
 interface MenuCard {
     key: string;
@@ -45,8 +45,8 @@ export default function IuranManagementScreen() {
             title: 'Kelola Iuran',
             subtitle: 'Tambah, edit, atau nonaktifkan jenis iuran untuk warga komplek Anda.',
             icon: 'create-outline',
-            iconColor: '#1565C0',
-            bgColor: '#E3F2FD',
+            iconColor: colors.info,
+            bgColor: colors.infoBg,
             route: '/admin/manage-fees',
         },
         {
@@ -54,8 +54,8 @@ export default function IuranManagementScreen() {
             title: 'Metode Pembayaran',
             subtitle: 'Kelola rekening bank, e-wallet, dan QRIS untuk menerima pembayaran.',
             icon: 'card-outline',
-            iconColor: '#2E7D32',
-            bgColor: '#E8F5E9',
+            iconColor: colors.success,
+            bgColor: colors.successBg,
             route: '/admin/payment-methods',
         },
         {
@@ -63,30 +63,21 @@ export default function IuranManagementScreen() {
             title: 'Konfirmasi Pembayaran',
             subtitle: 'Review dan konfirmasi bukti pembayaran yang dikirim oleh warga.',
             icon: 'checkmark-done-circle-outline',
-            iconColor: '#F57F17',
-            bgColor: '#FFF8E1',
+            iconColor: colors.warning,
+            bgColor: colors.warningBg,
             route: '/admin/payment-confirmation',
         },
     ];
 
     return (
         <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
-            <StatusBar barStyle="dark-content" backgroundColor="#F5F7F5" />
-
-            {/* Header */}
-            <SafeAreaView edges={['top']} style={{ backgroundColor: '#FFF' }}>
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={24} color="#1B5E20" />
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Management Iuran</Text>
-                </View>
-            </SafeAreaView>
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
+            <CustomHeader title="Management Iuran" showBack={true} />
 
             <ScrollView contentContainerStyle={styles.content}>
                 {/* Info Banner */}
                 <View style={styles.infoBanner}>
-                    <Ionicons name="information-circle" size={22} color="#1565C0" />
+                    <Ionicons name="information-circle" size={22} color={colors.info} />
                     <Text style={styles.infoText}>
                         Kelola seluruh aspek iuran komplek Anda dari sini — mulai dari jenis iuran, metode pembayaran, hingga konfirmasi.
                     </Text>
@@ -114,7 +105,7 @@ export default function IuranManagementScreen() {
                             </View>
                         )}
 
-                        <Ionicons name="chevron-forward" size={20} color="#CCC" />
+                        <Ionicons name="chevron-forward" size={20} color={colors.border} />
                     </TouchableOpacity>
                 ))}
             </ScrollView>
@@ -123,29 +114,23 @@ export default function IuranManagementScreen() {
 }
 
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F5F7F5' },
-    header: {
-        flexDirection: 'row', alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingBottom: 15,
-        backgroundColor: colors.surface,
-    },
-    backButton: { padding: 5, marginRight: 10 },
-    headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#1B5E20' },
+    container: { flex: 1, backgroundColor: colors.background },
     content: { padding: 20, paddingBottom: 40 },
     infoBanner: {
         flexDirection: 'row', alignItems: 'flex-start', gap: 10,
-        backgroundColor: '#E3F2FD', padding: 14, borderRadius: 14,
+        backgroundColor: colors.infoBg, padding: 14, borderRadius: 14,
         marginBottom: 20,
     },
-    infoText: { flex: 1, fontSize: 13, color: '#1565C0', lineHeight: 18 },
+    infoText: { flex: 1, fontSize: 13, color: colors.info, lineHeight: 18 },
     card: {
         flexDirection: 'row', alignItems: 'center',
         backgroundColor: colors.surface, borderRadius: 16, padding: 18,
         marginBottom: 12,
+        borderWidth: 1,
+        borderColor: colors.border,
         ...Platform.select({
-            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6 },
-            android: { elevation: 3 },
+            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8 },
+            android: { elevation: 2 },
         }),
     },
     cardIcon: {
@@ -154,10 +139,10 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
         marginRight: 16,
     },
     cardContent: { flex: 1 },
-    cardTitle: { fontSize: 16, fontWeight: 'bold', color: '#333' },
-    cardSubtitle: { fontSize: 12, color: '#888', marginTop: 4, lineHeight: 17 },
+    cardTitle: { fontSize: 16, fontWeight: '700', color: colors.textPrimary },
+    cardSubtitle: { fontSize: 12, color: colors.textSecondary, marginTop: 4, lineHeight: 17 },
     badgeContainer: {
-        backgroundColor: '#F44336',
+        backgroundColor: colors.danger,
         borderRadius: 12,
         minWidth: 22,
         height: 22,
@@ -165,13 +150,9 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
         justifyContent: 'center',
         marginRight: 8,
         paddingHorizontal: 6,
-        ...Platform.select({
-            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.2, shadowRadius: 2 },
-            android: { elevation: 2 },
-        }),
     },
     badgeText: {
-        color: colors.textWhite,
+        color: '#FFF',
         fontSize: 11,
         fontWeight: 'bold',
     },

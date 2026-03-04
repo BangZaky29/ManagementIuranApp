@@ -12,7 +12,7 @@ import { StatusBar } from 'expo-status-bar';
 import { fetchComplexInfo, upsertComplexInfo } from '../../../services/complex';
 
 export default function EditComplexInfoScreen() {
-    const { colors } = useTheme();
+    const { colors, isDark } = useTheme();
     const styles = React.useMemo(() => createStyles(colors), [colors]);
     const router = useRouter();
     const { profile } = useAuth();
@@ -80,7 +80,7 @@ export default function EditComplexInfoScreen() {
 
     return (
         <SafeAreaView edges={['left', 'right', 'bottom']} style={[styles.container, { backgroundColor: '#F5F7FA' }]}>
-            <StatusBar style="dark" />
+            <StatusBar style={isDark ? 'light' : 'dark'} />
             <CustomHeader title="Edit Informasi Komplek" showBack={true} />
 
             <KeyboardAwareScrollView

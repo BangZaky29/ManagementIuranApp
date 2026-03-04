@@ -7,7 +7,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemeColors } from '../../../theme/AppTheme';
-import { Colors } from '../../../constants/Colors';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
 import { fetchRecentActivityLogs, ActivityLog } from '../../../services/activityLog';
 import { CustomHeader } from '../../../components/common/CustomHeader';
@@ -31,9 +30,6 @@ export default function ActivityLogScreen() {
             else setIsLoading(true);
 
             const data = await fetchRecentActivityLogs(PAGE_SIZE, 0);
-
-            // If we want oldest first, we could re-sort here or change service
-            // But the requirement says "always show latest on top"
             setActivities(data);
             setHasMore(data.length === PAGE_SIZE);
         } catch (error) {
@@ -74,25 +70,39 @@ export default function ActivityLogScreen() {
         loadData(true);
     };
 
-    const renderItem = ({ item }: { item: ActivityLog }) => {
-        let iconName: any = 'ellipse';
-        let iconColor = '#999';
-        let bgColor = '#F5F5F5';
-
-        if (item.action_type === 'payment') {
-            iconName = 'wallet'; iconColor = '#4CAF50'; bgColor = '#E8F5E9';
-        } else if (item.action_type === 'report') {
-            iconName = 'chatbubble-ellipses'; iconColor = '#2196F3'; bgColor = '#E3F2FD';
-        } else if (item.action_type === 'panic') {
-            iconName = 'alert-circle'; iconColor = '#F44336'; bgColor = '#FFEBEE';
-        } else if (item.action_type === 'visitor') {
-            iconName = 'id-card'; iconColor = '#FF9800'; bgColor = '#FFF3E0';
+    const getIconConfig = (actionType: string) => {
+        switch (actionType) {
+            case 'payment':
+                return { name: 'wallet', color: colors.success, bg: colors.successBg };
+            case 'report':
+                return { name: 'chatbubble-ellipses', color: colors.info, bg: colors.infoBg };
+            case 'panic':
+                return { name: 'alert-circle', color: colors.danger, bg: colors.dangerBg };
+            case 'visitor':
+                return { name: 'id-card', color: colors.warning, bg: colors.warningBg };
+            default:
+                return { name: 'ellipse', color: colors.textSecondary, bg: colors.surfaceSubtle };
         }
+    };
+
+    const getRoleBadge = (role: string) => {
+        switch (role) {
+            case 'admin':
+                return { bg: colors.status.admin.bg, text: colors.status.admin.text };
+            case 'security':
+                return { bg: colors.status.security.bg, text: colors.status.security.text };
+            default:
+                return { bg: colors.status.warga.bg, text: colors.status.warga.text };
+        }
+    };
+
+    const renderItem = ({ item }: { item: ActivityLog }) => {
+        const icon = getIconConfig(item.action_type);
 
         return (
             <View style={styles.card}>
-                <View style={[styles.iconContainer, { backgroundColor: bgColor }]}>
-                    <Ionicons name={iconName} size={22} color={iconColor} />
+                <View style={[styles.iconContainer, { backgroundColor: icon.bg }]}>
+                    <Ionicons name={icon.name as any} size={22} color={icon.color} />
                 </View>
                 <View style={styles.cardContent}>
                     <View style={styles.cardHeader}>
@@ -105,33 +115,21 @@ export default function ActivityLogScreen() {
                             {item.profiles.avatar_url ? (
                                 <Image source={{ uri: item.profiles.avatar_url }} style={styles.avatarMini} />
                             ) : (
-                                <Ionicons name="person-circle-outline" size={14} color="#666" />
+                                <Ionicons name="person-circle-outline" size={14} color={colors.textSecondary} />
                             )}
                             <Text style={styles.userName}>{item.profiles.full_name}</Text>
 
                             {/* Role Badge */}
-                            {item.profiles.role && (
-                                <View style={[
-                                    {
-                                        marginLeft: 6,
-                                        paddingHorizontal: 6,
-                                        paddingVertical: 2,
-                                        borderRadius: 4,
-                                    },
-                                    item.profiles.role === 'admin' ? { backgroundColor: '#E3F2FD' } :
-                                        item.profiles.role === 'security' ? { backgroundColor: '#FFF3E0' } :
-                                            { backgroundColor: '#E8F5E9' } // warga
-                                ]}>
-                                    <Text style={[
-                                        { fontSize: 9, fontWeight: 'bold' },
-                                        item.profiles.role === 'admin' ? { color: '#1565C0' } :
-                                            item.profiles.role === 'security' ? { color: '#E65100' } :
-                                                { color: '#2E7D32' } // warga
-                                    ]}>
-                                        {item.profiles.role.toUpperCase()}
-                                    </Text>
-                                </View>
-                            )}
+                            {item.profiles.role && (() => {
+                                const badge = getRoleBadge(item.profiles.role);
+                                return (
+                                    <View style={[styles.roleBadge, { backgroundColor: badge.bg }]}>
+                                        <Text style={[styles.roleBadgeText, { color: badge.text }]}>
+                                            {item.profiles.role.toUpperCase()}
+                                        </Text>
+                                    </View>
+                                );
+                            })()}
                         </View>
                     )}
                 </View>
@@ -154,7 +152,7 @@ export default function ActivityLogScreen() {
                 disabled={isLoadingMore}
             >
                 {isLoadingMore ? (
-                    <ActivityIndicator size="small" color={Colors.primary} />
+                    <ActivityIndicator size="small" color={colors.primary} />
                 ) : (
                     <Text style={styles.loadMoreText}>Lihat Lebih Banyak</Text>
                 )}
@@ -167,7 +165,7 @@ export default function ActivityLogScreen() {
             <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
                 <CustomHeader title="Riwayat Aktivitas" showBack={true} />
                 <View style={styles.centered}>
-                    <ActivityIndicator size="large" color={Colors.primary} />
+                    <ActivityIndicator size="large" color={colors.primary} />
                 </View>
             </SafeAreaView>
         );
@@ -175,15 +173,15 @@ export default function ActivityLogScreen() {
 
     return (
         <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
-            <StatusBar barStyle="dark-content" />
+            <StatusBar barStyle={colors.statusBar} />
             <CustomHeader title="Riwayat Aktivitas" showBack={true} />
 
             <View style={styles.filterBar}>
                 <View style={styles.filterChipActive}>
-                    <Ionicons name="time-outline" size={16} color="#FFF" />
+                    <Ionicons name="time-outline" size={16} color={colors.textWhite} />
                     <Text style={styles.filterChipTextActive}>Terbaru</Text>
                 </View>
-                <Text style={{ fontSize: 12, color: '#999', marginLeft: 8 }}>
+                <Text style={styles.totalLabel}>
                     Total: {activities.length} Aktivitas
                 </Text>
             </View>
@@ -194,12 +192,12 @@ export default function ActivityLogScreen() {
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.listContent}
                 refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary]} />
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
                 }
                 ListFooterComponent={FooterComponent}
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
-                        <Ionicons name="document-text-outline" size={64} color="#CCC" />
+                        <Ionicons name="document-text-outline" size={64} color={colors.border} />
                         <Text style={styles.emptyText}>Belum ada riwayat aktivitas.</Text>
                     </View>
                 }
@@ -209,7 +207,7 @@ export default function ActivityLogScreen() {
 }
 
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F8F9FA' },
+    container: { flex: 1, backgroundColor: colors.background },
     centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     listContent: { padding: 16, paddingBottom: 40 },
     card: {
@@ -219,8 +217,10 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
         marginBottom: 12,
         flexDirection: 'row',
         gap: 12,
+        borderWidth: 1,
+        borderColor: colors.border,
         ...Platform.select({
-            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8 },
+            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8 },
             android: { elevation: 2 },
         }),
     },
@@ -234,13 +234,20 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     cardContent: { flex: 1 },
     cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
     cardTitle: { fontSize: 15, fontWeight: '700', color: colors.textPrimary, flex: 1 },
-    timeText: { fontSize: 11, color: '#999' },
+    timeText: { fontSize: 11, color: colors.textSecondary },
     descriptionText: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
     userRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 8 },
-    userName: { fontSize: 12, color: '#666', fontWeight: '500' },
+    userName: { fontSize: 12, color: colors.textSecondary, fontWeight: '500' },
     avatarMini: { width: 14, height: 14, borderRadius: 7, marginRight: 2 },
+    roleBadge: {
+        marginLeft: 6,
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 4,
+    },
+    roleBadgeText: { fontSize: 9, fontWeight: 'bold' },
     emptyContainer: { alignItems: 'center', marginTop: 100 },
-    emptyText: { marginTop: 16, fontSize: 16, color: '#999', fontWeight: '500' },
+    emptyText: { marginTop: 16, fontSize: 16, color: colors.textSecondary, fontWeight: '500' },
     filterBar: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -248,7 +255,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
         paddingVertical: 12,
         backgroundColor: colors.surface,
         borderBottomWidth: 1,
-        borderBottomColor: '#EEE',
+        borderBottomColor: colors.border,
     },
     filterChipActive: {
         flexDirection: 'row',
@@ -264,8 +271,13 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
         fontSize: 11,
         fontWeight: '700',
     },
+    totalLabel: {
+        fontSize: 12,
+        color: colors.textSecondary,
+        marginLeft: 8,
+    },
     loadMoreButton: {
-        backgroundColor: '#E8F5E9',
+        backgroundColor: colors.primarySubtle,
         padding: 12,
         borderRadius: 12,
         alignItems: 'center',
@@ -273,13 +285,13 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
         marginBottom: 20,
     },
     loadMoreText: {
-        color: '#2E7D32',
+        color: colors.primary,
         fontSize: 14,
         fontWeight: '700',
     },
     footerText: {
         textAlign: 'center',
-        color: '#999',
+        color: colors.textSecondary,
         fontSize: 12,
         paddingVertical: 20,
     },

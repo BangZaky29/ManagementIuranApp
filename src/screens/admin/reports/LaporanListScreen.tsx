@@ -6,7 +6,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../../lib/supabaseConfig';
 import { createStyles } from './LaporanListStyles';
 import { CustomHeader } from '../../../components/common/CustomHeader';
-import { Colors } from '../../../constants/Colors';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
 import { useTheme } from '../../../contexts/ThemeContext';
 
@@ -30,7 +29,7 @@ const CATEGORIES = ['Semua', 'Fasilitas', 'Keamanan', 'Kebersihan', 'Lainnya'];
 const STATUSES = ['Semua', 'Menunggu', 'Diproses', 'Selesai', 'Ditolak'];
 
 export default function LaporanListScreen() {
-    const { colors } = useTheme();
+    const { colors, isDark } = useTheme();
     const styles = useMemo(() => createStyles(colors), [colors]);
     const router = useRouter();
     const [reports, setReports] = useState<Report[]>([]);
@@ -146,8 +145,8 @@ export default function LaporanListScreen() {
                             resizeMode="cover"
                         />
                     ) : (
-                        <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: Colors.green1, justifyContent: 'center', alignItems: 'center', marginRight: 8 }}>
-                            <Ionicons name="person" size={16} color={Colors.primary} />
+                        <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: colors.primarySubtle, justifyContent: 'center', alignItems: 'center', marginRight: 8 }}>
+                            <Ionicons name="person" size={16} color={colors.primary} />
                         </View>
                     )}
                     <View style={{ justifyContent: 'center' }}>
@@ -168,7 +167,7 @@ export default function LaporanListScreen() {
 
     return (
         <View style={styles.container}>
-            <StatusBar style="dark" />
+            <StatusBar style={isDark ? 'light' : 'dark'} />
             <CustomHeader
                 title=""
                 showBack={true}
@@ -202,7 +201,7 @@ export default function LaporanListScreen() {
                         <Text style={styles.dropdownLabel}>Kategori</Text>
                         <Text style={styles.dropdownText}>{filterCategory}</Text>
                     </View>
-                    <Ionicons name="chevron-down" size={16} color={Colors.textSecondary} />
+                    <Ionicons name="chevron-down" size={16} color={colors.textSecondary} />
                 </TouchableOpacity>
 
                 {/* Status Dropdown */}
@@ -214,7 +213,7 @@ export default function LaporanListScreen() {
                         <Text style={styles.dropdownLabel}>Status</Text>
                         <Text style={styles.dropdownText}>{filterStatus}</Text>
                     </View>
-                    <Ionicons name="chevron-down" size={16} color={Colors.textSecondary} />
+                    <Ionicons name="chevron-down" size={16} color={colors.textSecondary} />
                 </TouchableOpacity>
             </View>
 
@@ -234,7 +233,7 @@ export default function LaporanListScreen() {
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Pilih Kategori</Text>
                             <TouchableOpacity onPress={() => setShowCategoryModal(false)} style={styles.modalClose}>
-                                <Ionicons name="close" size={24} color={Colors.textPrimary} />
+                                <Ionicons name="close" size={24} color={colors.textPrimary} />
                             </TouchableOpacity>
                         </View>
                         <ScrollView>
@@ -251,7 +250,7 @@ export default function LaporanListScreen() {
                                         {cat}
                                     </Text>
                                     {filterCategory === cat && (
-                                        <Ionicons name="checkmark" size={20} color={Colors.primary} />
+                                        <Ionicons name="checkmark" size={20} color={colors.primary} />
                                     )}
                                 </TouchableOpacity>
                             ))}
@@ -276,7 +275,7 @@ export default function LaporanListScreen() {
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Pilih Status</Text>
                             <TouchableOpacity onPress={() => setShowStatusModal(false)} style={styles.modalClose}>
-                                <Ionicons name="close" size={24} color={Colors.textPrimary} />
+                                <Ionicons name="close" size={24} color={colors.textPrimary} />
                             </TouchableOpacity>
                         </View>
                         <ScrollView>
@@ -293,7 +292,7 @@ export default function LaporanListScreen() {
                                         {stat}
                                     </Text>
                                     {filterStatus === stat && (
-                                        <Ionicons name="checkmark" size={20} color={Colors.primary} />
+                                        <Ionicons name="checkmark" size={20} color={colors.primary} />
                                     )}
                                 </TouchableOpacity>
                             ))}
@@ -304,7 +303,7 @@ export default function LaporanListScreen() {
 
             {isLoading ? (
                 <View style={styles.centered}>
-                    <ActivityIndicator size="large" color={Colors.primary} />
+                    <ActivityIndicator size="large" color={colors.primary} />
                 </View>
             ) : (
                 <FlatList
@@ -317,19 +316,19 @@ export default function LaporanListScreen() {
                             {filteredReports.length > visibleCount ? (
                                 <TouchableOpacity style={styles.paginationBtn} onPress={handleShowMore}>
                                     <Text style={styles.paginationBtnText}>Lihat lebih banyak</Text>
-                                    <Ionicons name="chevron-down" size={16} color={Colors.primary} />
+                                    <Ionicons name="chevron-down" size={16} color={colors.primary} />
                                 </TouchableOpacity>
                             ) : filteredReports.length > PAGE_SIZE && (
                                 <TouchableOpacity style={styles.paginationBtn} onPress={handleShowLess}>
                                     <Text style={styles.paginationBtnText}>Lihat lebih sedikit</Text>
-                                    <Ionicons name="chevron-up" size={16} color={Colors.primary} />
+                                    <Ionicons name="chevron-up" size={16} color={colors.primary} />
                                 </TouchableOpacity>
                             )}
                         </View>
                     }
                     ListEmptyComponent={
                         <View style={styles.emptyState}>
-                            <Ionicons name="document-text-outline" size={48} color={Colors.textSecondary} />
+                            <Ionicons name="document-text-outline" size={48} color={colors.textSecondary} />
                             <Text style={styles.emptyStateText}>Belum ada laporan masuk</Text>
                         </View>
                     }

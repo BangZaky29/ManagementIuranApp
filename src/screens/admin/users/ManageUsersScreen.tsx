@@ -8,14 +8,13 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { CustomHeader } from '../../../components/common/CustomHeader';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { useTheme } from '../../../contexts/ThemeContext';
-import { Colors } from '../../../constants/Colors';
 import { createStyles } from './ManageUsersStyles';
 import * as Clipboard from 'expo-clipboard';
 
 export default function ManageUsersScreen() {
     const router = useRouter();
     const { profile } = useAuth(); // Get logged in admin profile
-    const { colors } = useTheme();
+    const { colors, isDark } = useTheme();
     const styles = useMemo(() => createStyles(colors), [colors]);
     const [residents, setResidents] = useState<VerifiedResident[]>([]);
     const [housingComplexes, setHousingComplexes] = useState<any[]>([]);
@@ -320,8 +319,8 @@ export default function ManageUsersScreen() {
                                 resizeMode="cover"
                             />
                         ) : (
-                            <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.green1, justifyContent: 'center', alignItems: 'center', marginRight: 12 }}>
-                                <Ionicons name="person" size={20} color={Colors.primary} />
+                            <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primarySubtle, justifyContent: 'center', alignItems: 'center', marginRight: 12 }}>
+                                <Ionicons name="person" size={20} color={colors.primary} />
                             </View>
                         );
                     })()}
@@ -356,7 +355,7 @@ export default function ManageUsersScreen() {
                                 style={styles.copyTokenButton}
                                 onPress={() => handleCopyToken(item.access_token)}
                             >
-                                <Ionicons name="copy-outline" size={18} color={Colors.primary} />
+                                <Ionicons name="copy-outline" size={18} color={colors.primary} />
                                 <Text style={styles.copyTokenText}>Salin</Text>
                             </TouchableOpacity>
                         </View>
@@ -366,7 +365,7 @@ export default function ManageUsersScreen() {
                                 onPress={() => handleEdit(item)}
                                 style={[styles.actionButton, styles.editButton]}
                             >
-                                <Ionicons name="pencil" size={16} color="#1565C0" />
+                                <Ionicons name="pencil" size={16} color={colors.primary} />
                                 <Text style={styles.editText}>Edit</Text>
                             </TouchableOpacity>
 
@@ -374,7 +373,7 @@ export default function ManageUsersScreen() {
                                 onPress={() => handleDelete(item.id)}
                                 style={[styles.actionButton, styles.deleteButton]}
                             >
-                                <Ionicons name="trash-outline" size={16} color={Colors.danger} />
+                                <Ionicons name="trash-outline" size={16} color={colors.danger} />
                                 <Text style={styles.deleteText}>Hapus</Text>
                             </TouchableOpacity>
                         </View>
@@ -386,13 +385,13 @@ export default function ManageUsersScreen() {
 
     return (
         <View style={styles.container}>
-            <StatusBar style="dark" />
+            <StatusBar style={isDark ? 'light' : 'dark'} />
             <CustomHeader title="Kelola User" showBack={true} />
 
             {/* Search */}
             <View style={styles.filterContainer}>
                 <View style={styles.searchInputContainer}>
-                    <Ionicons name="search" size={20} color={Colors.textSecondary} style={styles.searchIcon} />
+                    <Ionicons name="search" size={20} color={colors.textSecondary} style={styles.searchIcon} />
                     <TextInput
                         style={styles.searchInput}
                         placeholder="Cari Nama, NIK..."
@@ -401,7 +400,7 @@ export default function ManageUsersScreen() {
                     />
                     {searchQuery.length > 0 && (
                         <TouchableOpacity onPress={() => setSearchQuery('')}>
-                            <Ionicons name="close-circle" size={18} color={Colors.textSecondary} />
+                            <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
                         </TouchableOpacity>
                     )}
                 </View>
@@ -445,10 +444,10 @@ export default function ManageUsersScreen() {
                 <View style={{ alignItems: 'flex-end', gap: 10 }}>
                     <View style={{ flexDirection: 'row', gap: 8 }}>
                         <TouchableOpacity style={styles.actionIconButton} onPress={handleExport}>
-                            <Ionicons name="download-outline" size={20} color={Colors.primary} />
+                            <Ionicons name="download-outline" size={20} color={colors.primary} />
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.actionIconButton} onPress={() => setShowImportModal(true)}>
-                            <Ionicons name="cloud-upload-outline" size={20} color={Colors.primary} />
+                            <Ionicons name="cloud-upload-outline" size={20} color={colors.primary} />
                         </TouchableOpacity>
                     </View>
                     <View style={styles.totalUserContainer}>
@@ -459,7 +458,7 @@ export default function ManageUsersScreen() {
 
             {isLoading ? (
                 <View style={styles.centered}>
-                    <ActivityIndicator size="large" color={Colors.primary} />
+                    <ActivityIndicator size="large" color={colors.primary} />
                 </View>
             ) : (
                 <FlatList
@@ -469,7 +468,7 @@ export default function ManageUsersScreen() {
                     contentContainerStyle={styles.listContent}
                     ListEmptyComponent={
                         <View style={styles.emptyState}>
-                            <Ionicons name="people-outline" size={48} color={Colors.textSecondary} />
+                            <Ionicons name="people-outline" size={48} color={colors.textSecondary} />
                             <Text style={styles.emptyText}>Belum ada data warga.</Text>
                         </View>
                     }
@@ -527,7 +526,7 @@ export default function ManageUsersScreen() {
                                         backgroundColor: '#F5F7FA',
                                         borderRadius: 12,
                                         borderWidth: 1,
-                                        borderColor: '#E0E0E0',
+                                        borderColor: colors.border,
                                         overflow: 'hidden'
                                     }}>
                                         {housingComplexes.map((complex) => (
@@ -539,24 +538,24 @@ export default function ManageUsersScreen() {
                                                     flexDirection: 'row',
                                                     justifyContent: 'space-between',
                                                     alignItems: 'center',
-                                                    backgroundColor: selectedComplexId === complex.id ? '#E3F2FD' : 'transparent',
+                                                    backgroundColor: selectedComplexId === complex.id ? colors.primarySubtle : 'transparent',
                                                     borderBottomWidth: 1,
-                                                    borderBottomColor: '#EEE'
+                                                    borderBottomColor: colors.border
                                                 }}
                                             >
                                                 <Text style={{
-                                                    color: selectedComplexId === complex.id ? Colors.primary : Colors.textPrimary,
+                                                    color: selectedComplexId === complex.id ? colors.primary : colors.textPrimary,
                                                     fontWeight: selectedComplexId === complex.id ? 'bold' : 'normal'
                                                 }}>
                                                     {complex.name}
                                                 </Text>
                                                 {selectedComplexId === complex.id && (
-                                                    <Ionicons name="checkmark" size={16} color={Colors.primary} />
+                                                    <Ionicons name="checkmark" size={16} color={colors.primary} />
                                                 )}
                                             </TouchableOpacity>
                                         ))}
                                         {housingComplexes.length === 0 && (
-                                            <Text style={{ padding: 12, color: Colors.textSecondary, fontStyle: 'italic' }}>
+                                            <Text style={{ padding: 12, color: colors.textSecondary, fontStyle: 'italic' }}>
                                                 Belum ada data cluster. Hubungi Super Admin.
                                             </Text>
                                         )}
@@ -570,14 +569,14 @@ export default function ManageUsersScreen() {
                                             style={[styles.roleOption, role === 'warga' && styles.roleOptionActive]}
                                             onPress={() => setRole('warga')}
                                         >
-                                            <Ionicons name="people" size={16} color={role === 'warga' ? '#FFF' : Colors.textSecondary} />
+                                            <Ionicons name="people" size={16} color={role === 'warga' ? '#FFF' : colors.textSecondary} />
                                             <Text style={[styles.roleText, role === 'warga' && styles.roleTextActive]}>Warga</Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity
                                             style={[styles.roleOption, role === 'security' && styles.roleOptionActive]}
                                             onPress={() => setRole('security')}
                                         >
-                                            <Ionicons name="shield-checkmark" size={16} color={role === 'security' ? '#FFF' : Colors.textSecondary} />
+                                            <Ionicons name="shield-checkmark" size={16} color={role === 'security' ? '#FFF' : colors.textSecondary} />
                                             <Text style={[styles.roleText, role === 'security' && styles.roleTextActive]}>Security</Text>
                                         </TouchableOpacity>
                                     </View>
@@ -619,7 +618,7 @@ export default function ManageUsersScreen() {
                     <View style={[styles.formContainer, { maxHeight: 'auto' }]}>
                         <Text style={styles.formTitle}>Import Data Warga</Text>
 
-                        <Text style={{ textAlign: 'center', marginBottom: 20, color: Colors.textSecondary }}>
+                        <Text style={{ textAlign: 'center', marginBottom: 20, color: colors.textSecondary }}>
                             Pastikan file Excel/CSV anda memiliki kolom "nik" dan "Nama Lengkap".
                         </Text>
 
@@ -630,14 +629,14 @@ export default function ManageUsersScreen() {
                                     style={[styles.roleOption, importRole === 'warga' && styles.roleOptionActive]}
                                     onPress={() => setImportRole('warga')}
                                 >
-                                    <Ionicons name="people" size={16} color={importRole === 'warga' ? '#FFF' : Colors.textSecondary} />
+                                    <Ionicons name="people" size={16} color={importRole === 'warga' ? '#FFF' : colors.textSecondary} />
                                     <Text style={[styles.roleText, importRole === 'warga' && styles.roleTextActive]}>Warga</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     style={[styles.roleOption, importRole === 'security' && styles.roleOptionActive]}
                                     onPress={() => setImportRole('security')}
                                 >
-                                    <Ionicons name="shield-checkmark" size={16} color={importRole === 'security' ? '#FFF' : Colors.textSecondary} />
+                                    <Ionicons name="shield-checkmark" size={16} color={importRole === 'security' ? '#FFF' : colors.textSecondary} />
                                     <Text style={[styles.roleText, importRole === 'security' && styles.roleTextActive]}>Security</Text>
                                 </TouchableOpacity>
                             </View>
@@ -678,7 +677,7 @@ export default function ManageUsersScreen() {
                     <View style={[styles.formContainer, { maxHeight: 'auto' }]}>
                         <Text style={styles.formTitle}>Ekspor Data Warga</Text>
 
-                        <Text style={{ textAlign: 'center', marginBottom: 20, color: Colors.textSecondary }}>
+                        <Text style={{ textAlign: 'center', marginBottom: 20, color: colors.textSecondary }}>
                             Pilih format dan metode ekspor.
                         </Text>
 
@@ -689,25 +688,25 @@ export default function ManageUsersScreen() {
                                 padding: 16,
                                 borderRadius: 12,
                                 borderWidth: 1,
-                                borderColor: Colors.green3
+                                borderColor: colors.primary
                             }}>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-                                    <Ionicons name="document-text" size={24} color={Colors.green5} />
+                                    <Ionicons name="document-text" size={24} color={colors.primary} />
                                     <View style={{ marginLeft: 12 }}>
-                                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: Colors.green5 }}>Excel (.xlsx)</Text>
-                                        <Text style={{ fontSize: 12, color: Colors.green4 }}>Format standar spreadsheet</Text>
+                                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: colors.primary }}>Excel (.xlsx)</Text>
+                                        <Text style={{ fontSize: 12, color: colors.textSecondary }}>Format standar spreadsheet</Text>
                                     </View>
                                 </View>
                                 <View style={{ flexDirection: 'row', gap: 8 }}>
                                     <TouchableOpacity
-                                        style={[styles.button, { flex: 1, backgroundColor: Colors.green5, paddingVertical: 8 }]}
+                                        style={[styles.button, { flex: 1, backgroundColor: colors.primary, paddingVertical: 8 }]}
                                         onPress={() => performExport('xlsx', 'download')}
                                     >
                                         <Ionicons name="download-outline" size={16} color="#FFF" style={{ marginRight: 4 }} />
                                         <Text style={[styles.buttonText, { fontSize: 12 }]}>Simpan</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity
-                                        style={[styles.button, { flex: 1, backgroundColor: Colors.green4, paddingVertical: 8 }]}
+                                        style={[styles.button, { flex: 1, backgroundColor: colors.primary, paddingVertical: 8 }]}
                                         onPress={() => performExport('xlsx', 'share')}
                                     >
                                         <Ionicons name="share-social-outline" size={16} color="#FFF" style={{ marginRight: 4 }} />

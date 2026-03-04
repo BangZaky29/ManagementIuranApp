@@ -9,7 +9,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { ThemeColors } from '../../../theme/AppTheme';
-import { Colors } from '../../../constants/Colors';
 import { CustomButton } from '../../../components/common/CustomButton';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -219,11 +218,11 @@ export default function ManageFeeScreen() {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'paid': return '#2E7D32';
-            case 'pending': return '#F57F17';
-            case 'unpaid': return '#C62828';
-            case 'rejected': return '#D32F2F';
-            default: return '#999';
+            case 'paid': return colors.success;
+            case 'pending': return colors.warning;
+            case 'unpaid': return colors.danger;
+            case 'rejected': return colors.danger;
+            default: return colors.textSecondary;
         }
     };
 
@@ -272,17 +271,17 @@ export default function ManageFeeScreen() {
 
     return (
         <SafeAreaView style={s.container} edges={['left', 'right', 'bottom']}>
-            <StatusBar barStyle="dark-content" backgroundColor="#F5F7F5" />
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
 
             {/* Header */}
-            <SafeAreaView edges={['top']} style={{ backgroundColor: '#FFF' }}>
+            <SafeAreaView edges={['top']} style={{ backgroundColor: colors.surface }}>
                 <View style={s.header}>
                     <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
-                        <Ionicons name="arrow-back" size={24} color="#1B5E20" />
+                        <Ionicons name="arrow-back" size={24} color={colors.primary} />
                     </TouchableOpacity>
                     <Text style={s.headerTitle}>Kelola Iuran</Text>
                     <TouchableOpacity onPress={openAddForm} style={s.addBtn}>
-                        <Ionicons name="add-circle" size={28} color="#1B5E20" />
+                        <Ionicons name="add-circle" size={28} color={colors.primary} />
                     </TouchableOpacity>
                 </View>
             </SafeAreaView>
@@ -290,21 +289,21 @@ export default function ManageFeeScreen() {
             {/* Tab Switcher */}
             <View style={s.tabRow}>
                 <TouchableOpacity style={[s.tab, activeTab === 'overview' && s.tabActive]} onPress={() => setActiveTab('overview')}>
-                    <Ionicons name="analytics-outline" size={16} color={activeTab === 'overview' ? '#FFF' : '#1B5E20'} />
+                    <Ionicons name="analytics-outline" size={16} color={activeTab === 'overview' ? colors.textWhite : colors.primary} />
                     <Text style={[s.tabText, activeTab === 'overview' && s.tabTextActive]}>Ringkasan</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[s.tab, activeTab === 'manage' && s.tabActive]} onPress={() => setActiveTab('manage')}>
-                    <Ionicons name="settings-outline" size={16} color={activeTab === 'manage' ? '#FFF' : '#1B5E20'} />
+                    <Ionicons name="settings-outline" size={16} color={activeTab === 'manage' ? colors.textWhite : colors.primary} />
                     <Text style={[s.tabText, activeTab === 'manage' && s.tabTextActive]}>Kelola</Text>
                 </TouchableOpacity>
             </View>
 
             {isLoading ? (
-                <View style={s.center}><ActivityIndicator size="large" color="#1B5E20" /></View>
+                <View style={s.center}><ActivityIndicator size="large" color={colors.primary} /></View>
             ) : (
                 <ScrollView
                     contentContainerStyle={s.content}
-                    refreshControl={<RefreshControl refreshing={false} onRefresh={loadAllData} colors={['#1B5E20']} />}
+                    refreshControl={<RefreshControl refreshing={false} onRefresh={loadAllData} colors={[colors.primary]} />}
                 >
                     {activeTab === 'overview' ? renderOverviewTab() : renderManageTab()}
                 </ScrollView>
@@ -333,7 +332,7 @@ export default function ManageFeeScreen() {
                     <View style={s.monthArrow}>
                         {canGoBack && (
                             <TouchableOpacity onPress={() => shiftMonth(-1)} style={s.monthArrowBtn}>
-                                <Ionicons name="chevron-back" size={20} color="#1B5E20" />
+                                <Ionicons name="chevron-back" size={20} color={colors.primary} />
                             </TouchableOpacity>
                         )}
                     </View>
@@ -344,13 +343,13 @@ export default function ManageFeeScreen() {
                             setDatePickerVisible('nav');
                         }}
                     >
-                        <Ionicons name="calendar-outline" size={16} color="#1B5E20" />
+                        <Ionicons name="calendar-outline" size={16} color={colors.primary} />
                         <Text style={s.monthText}>{formatPeriodLabel(currentPeriod)}</Text>
                     </TouchableOpacity>
                     <View style={s.monthArrow}>
                         {canGoForward && (
                             <TouchableOpacity onPress={() => shiftMonth(1)} style={s.monthArrowBtn}>
-                                <Ionicons name="chevron-forward" size={20} color="#1B5E20" />
+                                <Ionicons name="chevron-forward" size={20} color={colors.primary} />
                             </TouchableOpacity>
                         )}
                     </View>
@@ -358,25 +357,25 @@ export default function ManageFeeScreen() {
 
                 {/* Overall Revenue Card */}
                 {overallRevenue && (
-                    <View style={[s.revenueCard, { backgroundColor: '#E8F5E9', borderLeftWidth: 4, borderLeftColor: '#1B5E20', marginBottom: 16 }]}>
+                    <View style={[s.revenueCard, { backgroundColor: colors.successBg, borderLeftWidth: 4, borderLeftColor: colors.primary, marginBottom: 16 }]}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                            <Text style={[s.revenueTitle, { color: '#2E7D32', fontWeight: 'bold' }]}>Total Pemasukan Keseluruhan</Text>
-                            <View style={{ backgroundColor: '#1B5E20', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 }}>
-                                <Text style={{ fontSize: 10, color: '#FFF', fontWeight: 'bold' }}>AKUMULASI</Text>
+                            <Text style={[s.revenueTitle, { color: colors.success, fontWeight: 'bold' }]}>Total Pemasukan Keseluruhan</Text>
+                            <View style={{ backgroundColor: colors.primary, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 }}>
+                                <Text style={{ fontSize: 10, color: colors.textWhite, fontWeight: 'bold' }}>AKUMULASI</Text>
                             </View>
                         </View>
 
                         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4 }}>
-                            <Text style={[s.revenueAmount, { color: '#1B5E20' }]}>{formatCurrency(overallRevenue.totalCollected)}</Text>
-                            <Text style={{ fontSize: 16, color: '#666', fontWeight: '600' }}>/</Text>
-                            <Text style={{ fontSize: 16, color: '#666', fontWeight: '600' }}>{formatCurrency(overallRevenue.totalExpected)}</Text>
+                            <Text style={[s.revenueAmount, { color: colors.primary }]}>{formatCurrency(overallRevenue.totalCollected)}</Text>
+                            <Text style={{ fontSize: 16, color: colors.textSecondary, fontWeight: '600' }}>/</Text>
+                            <Text style={{ fontSize: 16, color: colors.textSecondary, fontWeight: '600' }}>{formatCurrency(overallRevenue.totalExpected)}</Text>
                         </View>
 
-                        <View style={[s.revenueMeta, { borderTopColor: 'rgba(27,94,32,0.1)', marginTop: 10 }]}>
-                            <Text style={[s.revenueMetaText, { color: '#558B2F' }]}>
+                        <View style={[s.revenueMeta, { borderTopColor: colors.border, marginTop: 10 }]}>
+                            <Text style={[s.revenueMetaText, { color: colors.success }]}>
                                 💸 Piutang Tertunda: {formatCurrency(overallRevenue.totalPending)}
                             </Text>
-                            <Text style={[s.revenueMetaText, { color: '#1B5E20', marginTop: 4, fontWeight: '700' }]}>
+                            <Text style={[s.revenueMetaText, { color: colors.primary, marginTop: 4, fontWeight: '700' }]}>
                                 🎯 Total yang akan didapatkan: {formatCurrency(overallRevenue.totalExpected)}
                             </Text>
                         </View>
@@ -418,7 +417,7 @@ export default function ManageFeeScreen() {
                 <Text style={s.sectionTitle}>Rincian Per Iuran</Text>
                 {feeStats.length === 0 ? (
                     <View style={s.emptyBox}>
-                        <Ionicons name="receipt-outline" size={40} color="#CCC" />
+                        <Ionicons name="receipt-outline" size={40} color={colors.border} />
                         <Text style={s.emptyText}>Belum ada iuran aktif</Text>
                     </View>
                 ) : (
@@ -426,14 +425,14 @@ export default function ManageFeeScreen() {
                         <TouchableOpacity key={stat.fee.id} style={s.statCard} onPress={() => openPayerList(stat.fee)} activeOpacity={0.7}>
                             <View style={s.statHeader}>
                                 <View style={s.statIconBox}>
-                                    <Ionicons name="receipt" size={20} color="#1B5E20" />
+                                    <Ionicons name="receipt" size={20} color={colors.primary} />
                                 </View>
                                 <View style={{ flex: 1 }}>
                                     <Text style={s.statName}>{stat.fee.name}</Text>
                                     <Text style={s.statAmount}>{formatCurrency(stat.fee.amount)}/warga</Text>
                                 </View>
                                 <View style={s.statRate}>
-                                    <Text style={[s.statRateText, { color: stat.collectionRate >= 70 ? '#2E7D32' : stat.collectionRate >= 40 ? '#F57F17' : '#C62828' }]}>
+                                    <Text style={[s.statRateText, { color: stat.collectionRate >= 70 ? colors.success : stat.collectionRate >= 40 ? colors.warning : colors.danger }]}>
                                         {stat.collectionRate}%
                                     </Text>
                                 </View>
@@ -459,7 +458,7 @@ export default function ManageFeeScreen() {
                                     <View style={[s.footerDot, { backgroundColor: '#E0E0E0' }]} />
                                     <Text style={s.footerLabel}>Belum {stat.unpaidCount}</Text>
                                 </View>
-                                <Ionicons name="chevron-forward" size={16} color="#CCC" />
+                                <Ionicons name="chevron-forward" size={16} color={colors.border} />
                             </View>
                         </TouchableOpacity>
                     ))
@@ -475,7 +474,7 @@ export default function ManageFeeScreen() {
             <>
                 {fees.length === 0 ? (
                     <View style={s.emptyBox}>
-                        <Ionicons name="receipt-outline" size={64} color="#CCC" />
+                        <Ionicons name="receipt-outline" size={64} color={colors.border} />
                         <Text style={s.emptyTitle}>Belum Ada Iuran</Text>
                         <Text style={s.emptySubtext}>Buat iuran pertama, contoh: Iuran Bulanan, Sampah, Keamanan.</Text>
                         <CustomButton title="Tambah Iuran" onPress={openAddForm} style={{ marginTop: 16 }} />
@@ -484,7 +483,7 @@ export default function ManageFeeScreen() {
                     <>
                         {activeFees.length > 0 && <Text style={s.sectionTitle}>Iuran Aktif ({activeFees.length})</Text>}
                         {activeFees.map(fee => renderFeeCard(fee))}
-                        {inactiveFees.length > 0 && <Text style={[s.sectionTitle, { color: '#999', marginTop: 20 }]}>Nonaktif ({inactiveFees.length})</Text>}
+                        {inactiveFees.length > 0 && <Text style={[s.sectionTitle, { color: colors.textSecondary, marginTop: 20 }]}>Nonaktif ({inactiveFees.length})</Text>}
                         {inactiveFees.map(fee => renderFeeCard(fee))}
                     </>
                 )}
@@ -496,13 +495,13 @@ export default function ManageFeeScreen() {
         return (
             <View key={fee.id} style={[s.feeCard, !fee.is_active && { opacity: 0.55 }]}>
                 <View style={s.feeHeader}>
-                    <View style={s.feeIcon}><Ionicons name="receipt" size={20} color={fee.is_active ? '#1B5E20' : '#999'} /></View>
+                    <View style={s.feeIcon}><Ionicons name="receipt" size={20} color={fee.is_active ? colors.primary : colors.textSecondary} /></View>
                     <View style={{ flex: 1 }}>
                         <Text style={s.feeName}>{fee.name}</Text>
                         <Text style={s.feeAmount}>{formatCurrency(fee.amount)}</Text>
                     </View>
-                    <View style={[s.badge, { backgroundColor: fee.is_active ? '#E8F5E9' : '#F5F5F5' }]}>
-                        <Text style={{ fontSize: 11, fontWeight: '600', color: fee.is_active ? '#2E7D32' : '#999' }}>{fee.is_active ? 'Aktif' : 'Nonaktif'}</Text>
+                    <View style={[s.badge, { backgroundColor: fee.is_active ? colors.successBg : colors.surfaceSubtle }]}>
+                        <Text style={{ fontSize: 11, fontWeight: '600', color: fee.is_active ? colors.success : colors.textSecondary }}>{fee.is_active ? 'Aktif' : 'Nonaktif'}</Text>
                     </View>
                 </View>
                 <View style={s.feeDetails}>
@@ -511,8 +510,8 @@ export default function ManageFeeScreen() {
                 </View>
                 {(fee.active_from || fee.active_to) && (
                     <View style={[s.feeDetails, { marginTop: 4, paddingTop: 0, borderTopWidth: 0 }]}>
-                        <Ionicons name="time-outline" size={13} color="#1B5E20" />
-                        <Text style={[s.feeDetailText, { color: '#1B5E20' }]}>
+                        <Ionicons name="time-outline" size={13} color={colors.primary} />
+                        <Text style={[s.feeDetailText, { color: colors.primary }]}>
                             Aktif: {fee.active_from ? formatPeriodLabel(fee.active_from) : 'Awal'}
                             {' - '}
                             {fee.active_to ? formatPeriodLabel(fee.active_to) : 'Seterusnya'}
@@ -521,11 +520,11 @@ export default function ManageFeeScreen() {
                 )}
                 <View style={s.feeActions}>
                     <TouchableOpacity style={s.actionBtn} onPress={() => handleToggle(fee)}>
-                        <Ionicons name={fee.is_active ? 'pause-circle-outline' : 'play-circle-outline'} size={18} color="#1B5E20" />
+                        <Ionicons name={fee.is_active ? 'pause-circle-outline' : 'play-circle-outline'} size={18} color={colors.primary} />
                         <Text style={s.actionText}>{fee.is_active ? 'Nonaktifkan' : 'Aktifkan'}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={s.actionBtn} onPress={() => openEditForm(fee)}>
-                        <Ionicons name="create-outline" size={18} color="#1B5E20" />
+                        <Ionicons name="create-outline" size={18} color={colors.primary} />
                         <Text style={s.actionText}>Edit</Text>
                     </TouchableOpacity>
                 </View>
@@ -547,7 +546,7 @@ export default function ManageFeeScreen() {
                                 <Text style={s.modalSubtitle}>{formatPeriodLabel(currentPeriod)} • {formatCurrency(payerFee?.amount || 0)}/warga</Text>
                             </View>
                             <TouchableOpacity onPress={() => setPayerModalVisible(false)}>
-                                <Ionicons name="close" size={24} color="#1B5E20" />
+                                <Ionicons name="close" size={24} color={colors.primary} />
                             </TouchableOpacity>
                         </View>
 
@@ -564,10 +563,10 @@ export default function ManageFeeScreen() {
 
                         {/* List */}
                         {payerLoading ? (
-                            <View style={s.center}><ActivityIndicator size="large" color="#1B5E20" /></View>
+                            <View style={s.center}><ActivityIndicator size="large" color={colors.primary} /></View>
                         ) : payerList.length === 0 ? (
                             <View style={[s.emptyBox, { marginHorizontal: 20 }]}>
-                                <Ionicons name="people-outline" size={40} color="#CCC" />
+                                <Ionicons name="people-outline" size={40} color={colors.border} />
                                 <Text style={s.emptyText}>Tidak ada data</Text>
                             </View>
                         ) : (
@@ -611,7 +610,7 @@ export default function ManageFeeScreen() {
                     <View style={s.modalSheet}>
                         <View style={s.modalHeader}>
                             <Text style={s.modalTitle}>{editingFee ? 'Edit Iuran' : 'Tambah Iuran Baru'}</Text>
-                            <TouchableOpacity onPress={() => setFormVisible(false)}><Ionicons name="close" size={24} color="#1B5E20" /></TouchableOpacity>
+                            <TouchableOpacity onPress={() => setFormVisible(false)}><Ionicons name="close" size={24} color={colors.primary} /></TouchableOpacity>
                         </View>
                         <ScrollView style={{ padding: 20 }} contentContainerStyle={{ paddingBottom: 40 }}>
                             <Text style={s.formLabel}>Nama Iuran *</Text>
@@ -697,11 +696,11 @@ export default function ManageFeeScreen() {
                     <View style={s.datePickerContainer}>
                         <View style={s.datePickerHeader}>
                             <TouchableOpacity onPress={() => setPickerTempYear(y => y - 1)} style={{ padding: 10 }}>
-                                <Ionicons name="chevron-back" size={24} color="#1B5E20" />
+                                <Ionicons name="chevron-back" size={24} color={colors.primary} />
                             </TouchableOpacity>
                             <Text style={s.datePickerYear}>{pickerTempYear}</Text>
                             <TouchableOpacity onPress={() => setPickerTempYear(y => y + 1)} style={{ padding: 10 }}>
-                                <Ionicons name="chevron-forward" size={24} color="#1B5E20" />
+                                <Ionicons name="chevron-forward" size={24} color={colors.primary} />
                             </TouchableOpacity>
                         </View>
                         <View style={s.datePickerGrid}>
@@ -742,124 +741,124 @@ export default function ManageFeeScreen() {
 
 function createStyles(colors: ThemeColors) {
     return StyleSheet.create({
-        container: { flex: 1, backgroundColor: '#F5F7F5' },
+        container: { flex: 1, backgroundColor: colors.background },
         header: {
             flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-            paddingHorizontal: 20, paddingBottom: 12, backgroundColor: '#FFF',
+            paddingHorizontal: 20, paddingBottom: 12, backgroundColor: colors.surface,
         },
         backBtn: { padding: 5 },
-        headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#1B5E20', flex: 1, marginLeft: 10 },
+        headerTitle: { fontSize: 20, fontWeight: 'bold', color: colors.primary, flex: 1, marginLeft: 10 },
         addBtn: { padding: 5 },
 
         // Tabs
-        tabRow: { flexDirection: 'row', paddingHorizontal: 20, paddingVertical: 10, marginTop: 10, backgroundColor: '#FFF', gap: 10, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
-        tab: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderRadius: 12, backgroundColor: '#F1F8E9' },
-        tabActive: { backgroundColor: '#1B5E20' },
-        tabText: { fontSize: 14, fontWeight: '600', color: '#1B5E20' },
-        tabTextActive: { color: '#FFF' },
+        tabRow: { flexDirection: 'row', paddingHorizontal: 20, paddingVertical: 10, marginTop: 10, backgroundColor: colors.surface, gap: 10, borderBottomWidth: 1, borderBottomColor: colors.border },
+        tab: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderRadius: 12, backgroundColor: colors.primarySubtle },
+        tabActive: { backgroundColor: colors.primary },
+        tabText: { fontSize: 14, fontWeight: '600', color: colors.primary },
+        tabTextActive: { color: colors.textWhite },
 
         center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 60 },
         content: { padding: 16, paddingBottom: 40 },
 
         // Month selector
-        monthSelector: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, backgroundColor: '#FFF', borderRadius: 14, padding: 8, ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 3 }, android: { elevation: 2 } }) },
+        monthSelector: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, backgroundColor: colors.surface, borderRadius: 14, padding: 8, ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 3 }, android: { elevation: 2 } }) },
         monthArrow: { width: 40, alignItems: 'center', justifyContent: 'center' },
         monthArrowBtn: { padding: 6 },
         monthLabel: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-        monthText: { fontSize: 16, fontWeight: '700', color: '#1B5E20' },
+        monthText: { fontSize: 16, fontWeight: '700', color: colors.primary },
 
         // Revenue card
-        revenueCard: { backgroundColor: '#1B5E20', borderRadius: 20, padding: 20, marginBottom: 20 },
+        revenueCard: { backgroundColor: colors.primary, borderRadius: 20, padding: 20, marginBottom: 20 },
         revenueTitle: { fontSize: 13, color: 'rgba(255,255,255,0.7)' },
-        revenueAmount: { fontSize: 28, fontWeight: 'bold', color: '#FFF', marginTop: 4 },
+        revenueAmount: { fontSize: 28, fontWeight: 'bold', color: colors.textWhite, marginTop: 4 },
         revenueBar: { height: 8, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 4, marginTop: 16 },
         revenueBarFill: { height: 8, backgroundColor: '#81C784', borderRadius: 4 },
         revenueDetails: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 14 },
         revDetailItem: { flexDirection: 'row', alignItems: 'center', gap: 5 },
         revDot: { width: 8, height: 8, borderRadius: 4 },
         revDetailLabel: { fontSize: 11, color: 'rgba(255,255,255,0.65)' },
-        revDetailValue: { fontSize: 11, color: '#FFF', fontWeight: '600' },
+        revDetailValue: { fontSize: 11, color: colors.textWhite, fontWeight: '600' },
         revenueMeta: { marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.15)' },
         revenueMetaText: { fontSize: 13, color: 'rgba(255,255,255,0.85)', fontWeight: '500' },
 
         // Sections
-        sectionTitle: { fontSize: 16, fontWeight: '700', color: '#333', marginBottom: 10, marginTop: 4 },
+        sectionTitle: { fontSize: 16, fontWeight: '700', color: colors.textPrimary, marginBottom: 10, marginTop: 4 },
 
         // Stat card
-        statCard: { backgroundColor: '#FFF', borderRadius: 16, padding: 16, marginBottom: 10, ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4 }, android: { elevation: 2 } }) },
+        statCard: { backgroundColor: colors.surface, borderRadius: 16, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: colors.border, ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4 }, android: { elevation: 2 } }) },
         statHeader: { flexDirection: 'row', alignItems: 'center' },
-        statIconBox: { width: 40, height: 40, borderRadius: 12, backgroundColor: '#F1F8E9', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
-        statName: { fontSize: 15, fontWeight: '700', color: '#333' },
-        statAmount: { fontSize: 12, color: '#888', marginTop: 1 },
-        statRate: { backgroundColor: '#F1F8E9', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10 },
+        statIconBox: { width: 40, height: 40, borderRadius: 12, backgroundColor: colors.primarySubtle, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+        statName: { fontSize: 15, fontWeight: '700', color: colors.textPrimary },
+        statAmount: { fontSize: 12, color: colors.textSecondary, marginTop: 1 },
+        statRate: { backgroundColor: colors.primarySubtle, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10 },
         statRateText: { fontSize: 15, fontWeight: 'bold' },
         miniBar: { flexDirection: 'row', height: 6, borderRadius: 3, overflow: 'hidden', marginTop: 12 },
         miniBarPaid: { backgroundColor: '#4CAF50' },
         miniBarPending: { backgroundColor: '#FF9800' },
-        miniBarUnpaid: { backgroundColor: '#E0E0E0' },
+        miniBarUnpaid: { backgroundColor: colors.border },
         statFooter: { flexDirection: 'row', alignItems: 'center', marginTop: 10, gap: 12 },
         statFooterItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
         footerDot: { width: 6, height: 6, borderRadius: 3 },
-        footerLabel: { fontSize: 11, color: '#888' },
+        footerLabel: { fontSize: 11, color: colors.textSecondary },
 
         // Empty
-        emptyBox: { alignItems: 'center', paddingVertical: 40, backgroundColor: '#FFF', borderRadius: 16, padding: 20 },
-        emptyText: { fontSize: 14, color: '#999', marginTop: 10 },
-        emptyTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginTop: 16 },
-        emptySubtext: { fontSize: 14, color: '#888', textAlign: 'center', marginTop: 8, lineHeight: 20 },
+        emptyBox: { alignItems: 'center', paddingVertical: 40, backgroundColor: colors.surface, borderRadius: 16, padding: 20 },
+        emptyText: { fontSize: 14, color: colors.textSecondary, marginTop: 10 },
+        emptyTitle: { fontSize: 18, fontWeight: 'bold', color: colors.textPrimary, marginTop: 16 },
+        emptySubtext: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', marginTop: 8, lineHeight: 20 },
 
         // Fee card (manage tab)
-        feeCard: { backgroundColor: '#FFF', borderRadius: 16, padding: 16, marginBottom: 10, ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4 }, android: { elevation: 2 } }) },
+        feeCard: { backgroundColor: colors.surface, borderRadius: 16, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: colors.border, ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4 }, android: { elevation: 2 } }) },
         feeHeader: { flexDirection: 'row', alignItems: 'center' },
-        feeIcon: { width: 42, height: 42, borderRadius: 12, backgroundColor: '#F1F8E9', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
-        feeName: { fontSize: 15, fontWeight: 'bold', color: '#333' },
-        feeAmount: { fontSize: 14, fontWeight: '600', color: '#1B5E20', marginTop: 2 },
+        feeIcon: { width: 42, height: 42, borderRadius: 12, backgroundColor: colors.primarySubtle, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+        feeName: { fontSize: 15, fontWeight: 'bold', color: colors.textPrimary },
+        feeAmount: { fontSize: 14, fontWeight: '600', color: colors.primary, marginTop: 2 },
         badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-        feeDetails: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#F5F5F5' },
-        feeDetailText: { fontSize: 12, color: '#888' },
-        feeActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 14, marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#F5F5F5' },
+        feeDetails: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: colors.border },
+        feeDetailText: { fontSize: 12, color: colors.textSecondary },
+        feeActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 14, marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: colors.border },
         actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-        actionText: { fontSize: 12, fontWeight: '600', color: '#1B5E20' },
+        actionText: { fontSize: 12, fontWeight: '600', color: colors.primary },
 
         // Payer modal
         filterRow: { maxHeight: 50, marginBottom: 10 },
-        filterChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: '#F1F8E9' },
-        filterChipActive: { backgroundColor: '#1B5E20' },
-        filterChipText: { fontSize: 13, fontWeight: '600', color: '#1B5E20' },
-        filterChipTextActive: { color: '#FFF' },
-        payerCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF', borderRadius: 14, padding: 14, marginBottom: 8, ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 3 }, android: { elevation: 1 } }) },
+        filterChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: colors.primarySubtle },
+        filterChipActive: { backgroundColor: colors.primary },
+        filterChipText: { fontSize: 13, fontWeight: '600', color: colors.primary },
+        filterChipTextActive: { color: colors.textWhite },
+        payerCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: 14, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: colors.border, ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 3 }, android: { elevation: 1 } }) },
         payerAvatar: { width: 40, height: 40, borderRadius: 20 },
-        payerAvatarPlaceholder: { backgroundColor: '#1B5E20', alignItems: 'center', justifyContent: 'center' },
-        payerName: { fontSize: 14, fontWeight: '600', color: '#333' },
-        payerAddress: { fontSize: 11, color: '#888', marginTop: 2 },
-        payerMethod: { fontSize: 11, color: '#1B5E20', marginTop: 2, fontWeight: '500' },
+        payerAvatarPlaceholder: { backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
+        payerName: { fontSize: 14, fontWeight: '600', color: colors.textPrimary },
+        payerAddress: { fontSize: 11, color: colors.textSecondary, marginTop: 2 },
+        payerMethod: { fontSize: 11, color: colors.primary, marginTop: 2, fontWeight: '500' },
         statusBadge: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
         statusBadgeText: { fontSize: 11, fontWeight: '700' },
 
         // Modals
         modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-        modalSheet: { backgroundColor: '#F5F7F5', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '80%' },
-        modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: '#E0E0E0' },
-        modalTitle: { fontSize: 18, fontWeight: 'bold', color: '#1B5E20' },
-        modalSubtitle: { fontSize: 12, color: '#888', marginTop: 2 },
+        modalSheet: { backgroundColor: colors.background, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '80%' },
+        modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: colors.border },
+        modalTitle: { fontSize: 18, fontWeight: 'bold', color: colors.primary },
+        modalSubtitle: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
         modalFooter: { flexDirection: 'row', padding: 20, gap: 10 },
-        formLabel: { fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8, marginTop: 16 },
-        input: { backgroundColor: '#FFF', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 14, color: '#333', borderWidth: 1, borderColor: '#E0E0E0' },
-        inputBtn: { backgroundColor: '#FFF', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, borderWidth: 1, borderColor: '#E0E0E0', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-        inputText: { fontSize: 14, color: '#333', flex: 1 },
-        inputPlaceholder: { fontSize: 14, color: '#999', flex: 1 },
-        preview: { fontSize: 13, fontWeight: '600', color: '#1B5E20', marginTop: 6 },
-        helper: { fontSize: 12, color: '#888', marginTop: 6, fontStyle: 'italic' },
+        formLabel: { fontSize: 14, fontWeight: '600', color: colors.textPrimary, marginBottom: 8, marginTop: 16 },
+        input: { backgroundColor: colors.surface, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 14, color: colors.textPrimary, borderWidth: 1, borderColor: colors.border },
+        inputBtn: { backgroundColor: colors.surface, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, borderWidth: 1, borderColor: colors.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+        inputText: { fontSize: 14, color: colors.textPrimary, flex: 1 },
+        inputPlaceholder: { fontSize: 14, color: colors.textSecondary, flex: 1 },
+        preview: { fontSize: 13, fontWeight: '600', color: colors.primary, marginTop: 6 },
+        helper: { fontSize: 12, color: colors.textSecondary, marginTop: 6, fontStyle: 'italic' },
 
         // Date Picker specific
-        datePickerContainer: { width: '85%', backgroundColor: '#FFF', borderRadius: 20, overflow: 'hidden', ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8 }, android: { elevation: 6 } }) },
-        datePickerHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 10, backgroundColor: '#F1F8E9' },
-        datePickerYear: { fontSize: 20, fontWeight: 'bold', color: '#1B5E20' },
+        datePickerContainer: { width: '85%', backgroundColor: colors.surface, borderRadius: 20, overflow: 'hidden', ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8 }, android: { elevation: 6 } }) },
+        datePickerHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 10, backgroundColor: colors.primarySubtle },
+        datePickerYear: { fontSize: 20, fontWeight: 'bold', color: colors.primary },
         datePickerGrid: { flexDirection: 'row', flexWrap: 'wrap', padding: 16, justifyContent: 'space-between' },
-        monthBox: { width: '30%', paddingVertical: 14, alignItems: 'center', borderRadius: 12, marginBottom: 12, backgroundColor: '#F5F5F5' },
-        monthBoxSelected: { backgroundColor: '#1B5E20' },
-        monthBoxDisabled: { opacity: 0.4, backgroundColor: '#FAFAFA' },
-        monthBoxText: { fontSize: 15, fontWeight: '600', color: '#555' },
-        monthBoxTextSelected: { color: '#FFF' },
+        monthBox: { width: '30%', paddingVertical: 14, alignItems: 'center', borderRadius: 12, marginBottom: 12, backgroundColor: colors.surfaceSubtle },
+        monthBoxSelected: { backgroundColor: colors.primary },
+        monthBoxDisabled: { opacity: 0.4, backgroundColor: colors.surfaceSubtle },
+        monthBoxText: { fontSize: 15, fontWeight: '600', color: colors.textSecondary },
+        monthBoxTextSelected: { color: colors.textWhite },
     });
 }

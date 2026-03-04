@@ -1,6 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
 import { ThemeColors } from '../../../theme/AppTheme';
-import { Colors } from '../../../constants/Colors';
 
 const { width } = Dimensions.get('window');
 
@@ -35,7 +34,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         backgroundColor: colors.surface,
         borderRadius: 16,
         padding: 16,
-        width: (width - 50) / 2, // 2 columns with spacing
+        width: (width - 50) / 2,
         marginBottom: 16,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
@@ -68,7 +67,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     },
     cardSubtitle: {
         fontSize: 12,
-        color: colors.green4, // Using a subtly colored text for subtitle
+        color: colors.primary,
         fontWeight: '500',
     },
     sectionHeader: {

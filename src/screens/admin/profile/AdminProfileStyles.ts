@@ -1,6 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
 import { ThemeColors } from '../../../theme/AppTheme';
-import { Colors } from '../../../constants/Colors';
 
 const { width } = Dimensions.get('window');
 
@@ -39,6 +38,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 4,
         textAlign: 'center',
+        color: colors.textPrimary,
     },
     userRole: {
         fontSize: 12,
@@ -57,6 +57,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 12,
         marginLeft: 4,
+        color: colors.textPrimary,
     },
     infoCard: {
         borderRadius: 20,
@@ -74,6 +75,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         marginBottom: 16,
         paddingBottom: 16,
         borderBottomWidth: 1,
+        borderBottomColor: colors.border,
     },
     infoIconBox: {
         width: 40,
@@ -86,10 +88,12 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     infoLabel: {
         fontSize: 12,
         marginBottom: 2,
+        color: colors.textSecondary,
     },
     infoValue: {
         fontSize: 15,
         fontWeight: '600',
+        color: colors.textPrimary,
     },
 
     // Menu
@@ -118,13 +122,14 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         justifyContent: 'center',
         padding: 16,
         borderRadius: 16,
-        backgroundColor: '#FEE2E2',
+        backgroundColor: colors.dangerBg,
         marginBottom: 24,
     },
     logoutText: {
         fontSize: 16,
         fontWeight: 'bold',
         marginLeft: 8,
+        color: colors.danger,
     },
     versionText: {
         textAlign: 'center',
@@ -176,7 +181,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         fontSize: 16,
         color: colors.textPrimary,
         borderWidth: 1,
-        borderColor: '#E0E0E0',
+        borderColor: colors.border,
     },
     formActions: {
         flexDirection: 'row',
@@ -191,11 +196,11 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         justifyContent: 'center',
     },
     cancelButton: {
-        backgroundColor: '#F3F4F6',
+        backgroundColor: colors.surfaceSubtle,
         marginRight: 10,
     },
     buttonTextCancel: {
-        color: '#4B5563',
+        color: colors.textSecondary,
         fontWeight: '600',
         fontSize: 15,
     },
