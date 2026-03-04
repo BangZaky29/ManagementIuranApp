@@ -1,20 +1,21 @@
 import { StyleSheet, Platform } from 'react-native';
+import { ThemeColors } from '../../../../src/theme/AppTheme'; // Fixing import path slightly if needed, assuming the correct typing
 
-export const createStyles = (colors: any) => StyleSheet.create({
+export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background }, // Softer modern background
 
     // Header
     header: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start',
         paddingHorizontal: 20, paddingTop: Platform.OS === 'android' ? 12 : 24, paddingBottom: 20,
-        backgroundColor: colors.backgroundCard,
+        backgroundColor: colors.surface,
         borderBottomWidth: 1, borderBottomColor: colors.border,
     },
     greeting: { fontSize: 13, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: '600' },
     userName: { fontSize: 24, fontWeight: '800', color: colors.primary, marginTop: 2 },
     menuBtn: {
         padding: 10,
-        backgroundColor: colors.primary + '10',
+        backgroundColor: colors.primarySubtle,
         borderRadius: 12,
         borderWidth: 1,
         borderColor: colors.primary + '20',
@@ -30,7 +31,7 @@ export const createStyles = (colors: any) => StyleSheet.create({
     },
     statCard: {
         width: '48%',
-        backgroundColor: colors.backgroundCard,
+        backgroundColor: colors.surface,
         borderRadius: 16,
         padding: 16,
         alignItems: 'flex-start',
@@ -80,7 +81,7 @@ export const createStyles = (colors: any) => StyleSheet.create({
     // Premium Activity Cards (Log Aktifitas)
     activityCard: {
         flexDirection: 'row', alignItems: 'center',
-        backgroundColor: colors.backgroundCard, marginHorizontal: 20, marginBottom: 12,
+        backgroundColor: colors.surface, marginHorizontal: 20, marginBottom: 12,
         padding: 16, borderRadius: 16,
         borderWidth: 1, borderColor: colors.border,
     },
@@ -100,7 +101,7 @@ export const createStyles = (colors: any) => StyleSheet.create({
     // Empty State
     emptyActivity: {
         alignItems: 'center', paddingVertical: 40, marginHorizontal: 20,
-        backgroundColor: colors.backgroundCard, borderRadius: 16, borderWidth: 1, borderColor: colors.border,
+        backgroundColor: colors.surface, borderRadius: 16, borderWidth: 1, borderColor: colors.border,
         borderStyle: 'dashed',
     },
     emptyText: { fontSize: 15, fontWeight: '700', color: colors.textPrimary, marginTop: 16 },

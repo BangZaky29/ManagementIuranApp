@@ -1,10 +1,10 @@
 import { StyleSheet, Platform } from 'react-native';
-import { Colors } from '../../../constants/Colors';
+import { ThemeColors } from '../../../theme/AppTheme';
 
-export const ProfilStyles = StyleSheet.create({
+export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.green1,
+        backgroundColor: colors.background,
     },
     content: {
         padding: 20,
@@ -14,7 +14,7 @@ export const ProfilStyles = StyleSheet.create({
     // Header Section
     headerCard: {
         alignItems: 'center',
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         borderRadius: 20,
         padding: 24,
         marginBottom: 24,
@@ -37,23 +37,24 @@ export const ProfilStyles = StyleSheet.create({
         width: 100,
         height: 100,
         borderRadius: 50,
-        backgroundColor: '#F1F8E9',
+        backgroundColor: colors.surfaceSubtle,
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 16,
         borderWidth: 4,
-        borderColor: Colors.green1,
+        borderColor: colors.border,
+        overflow: 'hidden',
     },
     userName: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: Colors.green5,
+        color: colors.textPrimary,
         marginBottom: 4,
     },
     userRole: {
         fontSize: 14,
-        color: Colors.green4,
-        backgroundColor: '#E8F5E9',
+        color: colors.primary,
+        backgroundColor: colors.primarySubtle,
         paddingHorizontal: 12,
         paddingVertical: 4,
         borderRadius: 12,
@@ -64,12 +65,12 @@ export const ProfilStyles = StyleSheet.create({
     sectionTitle: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: Colors.green5,
+        color: colors.textPrimary,
         marginBottom: 12,
         marginLeft: 4,
     },
     infoCard: {
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         borderRadius: 20,
         padding: 20,
         marginBottom: 24,
@@ -79,54 +80,49 @@ export const ProfilStyles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 12,
         borderBottomWidth: 1,
-        borderBottomColor: '#F5F5F5',
+        borderBottomColor: colors.border,
     },
     infoIconBox: {
         width: 40,
         height: 40,
         borderRadius: 12,
-        backgroundColor: Colors.green1,
+        backgroundColor: colors.surfaceSubtle,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 16,
     },
     infoLabel: {
         fontSize: 12,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
         marginBottom: 2,
     },
     infoValue: {
         fontSize: 15,
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
         fontWeight: '500',
     },
 
     // Menu Actions
     menuContainer: {
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         borderRadius: 20,
-        // padding: 8, // Removed padding inside card for cleaner edge-to-edge feel if desired, 
-        // but the image shows items inside a card. keeping padding but removing inner padding 
-        // so the border radius clips.
         paddingVertical: 10,
         paddingHorizontal: 8,
         marginBottom: 24,
-        borderWidth: 1, // Added border to match image style usually seen in settings
-        borderColor: Colors.green5, // Darker border as per image hint (black/dark green border)
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     menuItem: {
         flexDirection: 'row',
         alignItems: 'center',
         padding: 16,
-        paddingVertical: 18, // Slightly taller
-        // borderBottomWidth: 1, // Optional divider
-        // borderBottomColor: '#F5F5F5',
+        paddingVertical: 18,
     },
     menuText: {
         flex: 1,
         fontSize: 16,
         fontWeight: '600',
-        color: Colors.green5, // Dark green text
+        color: colors.textPrimary,
         marginLeft: 16,
     },
     logoutButton: {
@@ -134,7 +130,7 @@ export const ProfilStyles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         padding: 16,
-        backgroundColor: '#FFE5E7', // Pinkish background matching the image
+        backgroundColor: colors.dangerBg,
         borderRadius: 16,
         zIndex: 10,
         elevation: 5,
@@ -142,7 +138,7 @@ export const ProfilStyles = StyleSheet.create({
     logoutText: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#FF5252', // Red/Pink text
+        color: colors.danger,
         marginLeft: 8,
     },
 
@@ -150,6 +146,6 @@ export const ProfilStyles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 24,
         fontSize: 12,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
     },
 });

@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useWargaGuestViewModel } from './WargaGuestViewModel';
 import { formatDateSafe } from '../../../utils/dateUtils';
-import { styles } from './WargaGuestStyles';
+import { createStyles } from './WargaGuestStyles';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { useTheme } from '../../../contexts/ThemeContext';
 
@@ -16,6 +16,8 @@ const VISITOR_TYPES = ['tamu', 'gojek', 'kurir', 'pekerja', 'lainnya'] as const;
 
 export default function WargaGuestScreen() {
     const { colors } = useTheme();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
+
     const vm = useWargaGuestViewModel();
     const router = useRouter();
 
@@ -23,7 +25,7 @@ export default function WargaGuestScreen() {
         return (
             <SafeAreaView style={styles.container}>
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <ActivityIndicator size="large" color="#0D47A1" />
+                    <ActivityIndicator size="large" color={colors.primary} />
                 </View>
             </SafeAreaView>
         );
@@ -31,16 +33,16 @@ export default function WargaGuestScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
 
             {/* Header */}
             <View style={styles.header}>
                 <View style={styles.headerRow}>
                     <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 8 }}>
-                        <Ionicons name="arrow-back" size={24} color="#333" />
+                        <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.addButton} onPress={() => vm.setAddModalVisible(true)}>
-                        <Ionicons name="add" size={20} color="#FFF" />
+                        <Ionicons name="add" size={20} color={colors.textWhite} />
                         <Text style={styles.addButtonText}>Undang Tamu</Text>
                     </TouchableOpacity>
                 </View>
@@ -57,7 +59,7 @@ export default function WargaGuestScreen() {
                 onRefresh={vm.loadData}
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
-                        <Ionicons name="mail-open-outline" size={64} color="#B0BEC5" />
+                        <Ionicons name="mail-open-outline" size={64} color={colors.textSecondary} />
                         <Text style={styles.emptyTitle}>Belum Ada Tamu</Text>
                         <Text style={styles.emptySubtitle}>
                             Buat undangan masuk untuk tamu Anda agar proses di gerbang lebih cepat.
@@ -107,7 +109,7 @@ export default function WargaGuestScreen() {
                         {/* Status timeline */}
                         <View style={styles.timelineRow}>
                             <View style={styles.timelineItem}>
-                                <Ionicons name="time-outline" size={14} color="#888" />
+                                <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
                                 <Text style={styles.timelineText}>Dibuat: {formatDateSafe(item.created_at)}</Text>
                             </View>
                             {item.check_in_time && (
@@ -135,17 +137,18 @@ export default function WargaGuestScreen() {
 
                             <ScrollView showsVerticalScrollIndicator={false}>
                                 <View style={styles.inputGroup}>
-                                    <Text style={styles.inputLabel}>Nama Tamu / Layanan <Text style={{ color: 'red' }}>*</Text></Text>
+                                    <Text style={styles.inputLabel}>Nama Tamu / Layanan <Text style={{ color: colors.danger }}>*</Text></Text>
                                     <TextInput
                                         style={styles.input}
                                         placeholder="Contoh: Budi (Keluarga) atau Gojek"
+                                        placeholderTextColor={colors.textSecondary}
                                         value={vm.formName}
                                         onChangeText={vm.setFormName}
                                     />
                                 </View>
 
                                 <View style={styles.inputGroup}>
-                                    <Text style={styles.inputLabel}>Jenis Kunjungan <Text style={{ color: 'red' }}>*</Text></Text>
+                                    <Text style={styles.inputLabel}>Jenis Kunjungan <Text style={{ color: colors.danger }}>*</Text></Text>
                                     <View style={styles.typeSelector}>
                                         {VISITOR_TYPES.map(type => (
                                             <TouchableOpacity
@@ -160,10 +163,11 @@ export default function WargaGuestScreen() {
                                 </View>
 
                                 <View style={styles.inputGroup}>
-                                    <Text style={styles.inputLabel}>Keperluan <Text style={{ color: 'red' }}>*</Text></Text>
+                                    <Text style={styles.inputLabel}>Keperluan <Text style={{ color: colors.danger }}>*</Text></Text>
                                     <TextInput
                                         style={styles.input}
                                         placeholder="Contoh: Silaturahmi Keluarga"
+                                        placeholderTextColor={colors.textSecondary}
                                         value={vm.formPurpose}
                                         onChangeText={vm.setFormPurpose}
                                     />
@@ -176,7 +180,7 @@ export default function WargaGuestScreen() {
                                 disabled={vm.isSubmitting}
                             >
                                 {vm.isSubmitting ? (
-                                    <ActivityIndicator color="#FFF" />
+                                    <ActivityIndicator color={colors.textWhite} />
                                 ) : (
                                     <Text style={styles.submitBtnText}>Buat PIN Undangan</Text>
                                 )}

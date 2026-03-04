@@ -1,3 +1,4 @@
+import { useTheme } from '../../../contexts/ThemeContext';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     View, Text, ScrollView, TouchableOpacity,
@@ -8,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { ThemeColors } from '../../../theme/AppTheme';
 import { Colors } from '../../../constants/Colors';
 import { CustomButton } from '../../../components/common/CustomButton';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
@@ -64,6 +66,8 @@ const EMPTY_FORM: FormData = {
 };
 
 export default function ManagePaymentMethodsScreen() {
+    const { colors } = useTheme();
+    const st = React.useMemo(() => createStyles(colors), [colors]);
     const router = useRouter();
     const { user, profile } = useAuth();
 
@@ -569,93 +573,95 @@ export default function ManagePaymentMethodsScreen() {
 
 // ====== STYLES ======
 
-const st = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F5F7F5' },
-    header: {
-        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-        paddingHorizontal: 20, paddingBottom: 12, backgroundColor: '#FFF',
-    },
-    backBtn: { padding: 5 },
-    headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#1B5E20', flex: 1, marginLeft: 10 },
-    addBtn: { padding: 5 },
-    center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    content: { padding: 16, paddingBottom: 40 },
-    emptyBox: { alignItems: 'center', paddingVertical: 60, backgroundColor: '#FFF', borderRadius: 20, padding: 30 },
-    emptyTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginTop: 16 },
-    emptySubtext: { fontSize: 14, color: '#888', textAlign: 'center', marginTop: 8 },
+function createStyles(colors: ThemeColors) {
+    return StyleSheet.create({
+        container: { flex: 1, backgroundColor: '#F5F7F5' },
+        header: {
+            flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+            paddingHorizontal: 20, paddingBottom: 12, backgroundColor: '#FFF',
+        },
+        backBtn: { padding: 5 },
+        headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#1B5E20', flex: 1, marginLeft: 10 },
+        addBtn: { padding: 5 },
+        center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+        content: { padding: 16, paddingBottom: 40 },
+        emptyBox: { alignItems: 'center', paddingVertical: 60, backgroundColor: '#FFF', borderRadius: 20, padding: 30 },
+        emptyTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginTop: 16 },
+        emptySubtext: { fontSize: 14, color: '#888', textAlign: 'center', marginTop: 8 },
 
-    // Method card
-    card: {
-        backgroundColor: '#FFF', borderRadius: 16, padding: 16, marginBottom: 12,
-        ...Platform.select({
-            ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4 },
-            android: { elevation: 2 },
-        }),
-    },
-    cardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-    cardIconBox: { width: 44, height: 44, borderRadius: 12, backgroundColor: '#F1F8E9', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
-    cardName: { fontSize: 16, fontWeight: 'bold', color: '#333' },
-    cardType: { fontSize: 12, color: '#888', marginTop: 2 },
-    badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-    infoRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 3 },
-    infoLabel: { fontSize: 12, color: '#888' },
-    infoValue: { fontSize: 13, fontWeight: '600', color: '#333' },
-    qrPreviewRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 6, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#F0F0F0' },
-    qrPreviewThumb: { width: 48, height: 48, borderRadius: 8, backgroundColor: '#F5F5F5' },
-    qrPreviewLabel: { fontSize: 12, color: '#1B5E20', fontWeight: '500' },
-    cardDesc: { fontSize: 12, color: '#888', fontStyle: 'italic', marginTop: 6, lineHeight: 18 },
-    cardActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 14, marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#F0F0F0' },
-    actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    actionText: { fontSize: 12, fontWeight: '600', color: '#1B5E20' },
+        // Method card
+        card: {
+            backgroundColor: '#FFF', borderRadius: 16, padding: 16, marginBottom: 12,
+            ...Platform.select({
+                ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4 },
+                android: { elevation: 2 },
+            }),
+        },
+        cardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+        cardIconBox: { width: 44, height: 44, borderRadius: 12, backgroundColor: '#F1F8E9', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+        cardName: { fontSize: 16, fontWeight: 'bold', color: '#333' },
+        cardType: { fontSize: 12, color: '#888', marginTop: 2 },
+        badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
+        infoRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 3 },
+        infoLabel: { fontSize: 12, color: '#888' },
+        infoValue: { fontSize: 13, fontWeight: '600', color: '#333' },
+        qrPreviewRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 6, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#F0F0F0' },
+        qrPreviewThumb: { width: 48, height: 48, borderRadius: 8, backgroundColor: '#F5F5F5' },
+        qrPreviewLabel: { fontSize: 12, color: '#1B5E20', fontWeight: '500' },
+        cardDesc: { fontSize: 12, color: '#888', fontStyle: 'italic', marginTop: 6, lineHeight: 18 },
+        cardActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 14, marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#F0F0F0' },
+        actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+        actionText: { fontSize: 12, fontWeight: '600', color: '#1B5E20' },
 
-    // Modal
-    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-    modalSheet: { backgroundColor: '#F5F7F5', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '90%' },
-    modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: '#E0E0E0' },
-    modalTitle: { fontSize: 18, fontWeight: 'bold', color: '#1B5E20' },
-    modalFooter: { flexDirection: 'row', padding: 20, gap: 10 },
+        // Modal
+        modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+        modalSheet: { backgroundColor: '#F5F7F5', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '90%' },
+        modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: '#E0E0E0' },
+        modalTitle: { fontSize: 18, fontWeight: 'bold', color: '#1B5E20' },
+        modalFooter: { flexDirection: 'row', padding: 20, gap: 10 },
 
-    // Form
-    formLabel: { fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8, marginTop: 16 },
-    input: { backgroundColor: '#FFF', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 14, color: '#333', borderWidth: 1, borderColor: '#E0E0E0' },
-    helperPreview: { fontSize: 12, color: '#1B5E20', marginTop: 6, fontWeight: '500' },
+        // Form
+        formLabel: { fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8, marginTop: 16 },
+        input: { backgroundColor: '#FFF', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 14, color: '#333', borderWidth: 1, borderColor: '#E0E0E0' },
+        helperPreview: { fontSize: 12, color: '#1B5E20', marginTop: 6, fontWeight: '500' },
 
-    // Type selector
-    typeRow: { flexDirection: 'row', gap: 8 },
-    typeChip: {
-        flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5,
-        paddingVertical: 10, borderRadius: 12, backgroundColor: '#FFF', borderWidth: 1, borderColor: '#E0E0E0',
-    },
-    typeChipActive: { backgroundColor: '#1B5E20', borderColor: '#1B5E20' },
-    typeChipText: { fontSize: 11, fontWeight: '600', color: '#555' },
+        // Type selector
+        typeRow: { flexDirection: 'row', gap: 8 },
+        typeChip: {
+            flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5,
+            paddingVertical: 10, borderRadius: 12, backgroundColor: '#FFF', borderWidth: 1, borderColor: '#E0E0E0',
+        },
+        typeChipActive: { backgroundColor: '#1B5E20', borderColor: '#1B5E20' },
+        typeChipText: { fontSize: 11, fontWeight: '600', color: '#555' },
 
-    // QR Upload
-    qrUploadBox: {
-        borderWidth: 2, borderColor: '#1B5E20', borderStyle: 'dashed', borderRadius: 16,
-        overflow: 'hidden', backgroundColor: '#FAFFF5', minHeight: 200, alignItems: 'center', justifyContent: 'center',
-    },
-    qrUploadImage: { width: '100%', height: 250 },
-    qrUploadPlaceholder: { alignItems: 'center', padding: 30 },
-    qrUploadText: { fontSize: 14, fontWeight: '600', color: '#1B5E20', marginTop: 10 },
-    qrUploadHint: { fontSize: 12, color: '#888', marginTop: 4 },
-    qrChangeBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 10, paddingVertical: 8, borderRadius: 10, backgroundColor: '#F1F8E9' },
-    qrChangeBtnText: { fontSize: 13, fontWeight: '600', color: '#1B5E20' },
+        // QR Upload
+        qrUploadBox: {
+            borderWidth: 2, borderColor: '#1B5E20', borderStyle: 'dashed', borderRadius: 16,
+            overflow: 'hidden', backgroundColor: '#FAFFF5', minHeight: 200, alignItems: 'center', justifyContent: 'center',
+        },
+        qrUploadImage: { width: '100%', height: 250 },
+        qrUploadPlaceholder: { alignItems: 'center', padding: 30 },
+        qrUploadText: { fontSize: 14, fontWeight: '600', color: '#1B5E20', marginTop: 10 },
+        qrUploadHint: { fontSize: 12, color: '#888', marginTop: 4 },
+        qrChangeBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 10, paddingVertical: 8, borderRadius: 10, backgroundColor: '#F1F8E9' },
+        qrChangeBtnText: { fontSize: 13, fontWeight: '600', color: '#1B5E20' },
 
-    // Picker button
-    pickerBtn: {
-        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-        backgroundColor: '#FFF', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14,
-        borderWidth: 1, borderColor: '#E0E0E0',
-    },
-    pickerBtnText: { fontSize: 14, color: '#333', fontWeight: '500' },
-    pickerBtnPlaceholder: { fontSize: 14, color: '#999' },
-    ewalletDot: { width: 12, height: 12, borderRadius: 6 },
+        // Picker button
+        pickerBtn: {
+            flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+            backgroundColor: '#FFF', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14,
+            borderWidth: 1, borderColor: '#E0E0E0',
+        },
+        pickerBtnText: { fontSize: 14, color: '#333', fontWeight: '500' },
+        pickerBtnPlaceholder: { fontSize: 14, color: '#999' },
+        ewalletDot: { width: 12, height: 12, borderRadius: 6 },
 
-    // Picker overlay
-    pickerOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', paddingHorizontal: 30 },
-    pickerSheet: { backgroundColor: '#FFF', borderRadius: 20, padding: 20, maxHeight: '60%' },
-    pickerSheetTitle: { fontSize: 18, fontWeight: 'bold', color: '#1B5E20', marginBottom: 16, textAlign: 'center' },
-    pickerOption: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14, paddingHorizontal: 12, borderRadius: 12 },
-    pickerOptionActive: { backgroundColor: '#F1F8E9' },
-    pickerOptionText: { fontSize: 15, color: '#333', flex: 1 },
-});
+        // Picker overlay
+        pickerOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', paddingHorizontal: 30 },
+        pickerSheet: { backgroundColor: '#FFF', borderRadius: 20, padding: 20, maxHeight: '60%' },
+        pickerSheetTitle: { fontSize: 18, fontWeight: 'bold', color: '#1B5E20', marginBottom: 16, textAlign: 'center' },
+        pickerOption: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14, paddingHorizontal: 12, borderRadius: 12 },
+        pickerOptionActive: { backgroundColor: '#F1F8E9' },
+        pickerOptionText: { fontSize: 15, color: '#333', flex: 1 },
+    });
+}

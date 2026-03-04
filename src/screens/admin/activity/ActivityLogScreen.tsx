@@ -1,3 +1,4 @@
+import { useTheme } from '../../../contexts/ThemeContext';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     View, Text, FlatList, TouchableOpacity,
@@ -5,6 +6,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { ThemeColors } from '../../../theme/AppTheme';
 import { Colors } from '../../../constants/Colors';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
 import { fetchRecentActivityLogs, ActivityLog } from '../../../services/activityLog';
@@ -12,6 +14,8 @@ import { CustomHeader } from '../../../components/common/CustomHeader';
 import { useRouter, useFocusEffect } from 'expo-router';
 
 export default function ActivityLogScreen() {
+    const { colors } = useTheme();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
     const [activities, setActivities] = useState<ActivityLog[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -204,12 +208,12 @@ export default function ActivityLogScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F8F9FA' },
     centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     listContent: { padding: 16, paddingBottom: 40 },
     card: {
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         borderRadius: 16,
         padding: 14,
         marginBottom: 12,
@@ -229,9 +233,9 @@ const styles = StyleSheet.create({
     },
     cardContent: { flex: 1 },
     cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
-    cardTitle: { fontSize: 15, fontWeight: '700', color: Colors.textPrimary, flex: 1 },
+    cardTitle: { fontSize: 15, fontWeight: '700', color: colors.textPrimary, flex: 1 },
     timeText: { fontSize: 11, color: '#999' },
-    descriptionText: { fontSize: 13, color: Colors.textSecondary, lineHeight: 18 },
+    descriptionText: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
     userRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 8 },
     userName: { fontSize: 12, color: '#666', fontWeight: '500' },
     avatarMini: { width: 14, height: 14, borderRadius: 7, marginRight: 2 },
@@ -242,21 +246,21 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 16,
         paddingVertical: 12,
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         borderBottomWidth: 1,
         borderBottomColor: '#EEE',
     },
     filterChipActive: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: Colors.primary,
+        backgroundColor: colors.primary,
         paddingHorizontal: 10,
         paddingVertical: 4,
         borderRadius: 20,
         gap: 4,
     },
     filterChipTextActive: {
-        color: '#FFF',
+        color: colors.textWhite,
         fontSize: 11,
         fontWeight: '700',
     },

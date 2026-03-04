@@ -1,10 +1,10 @@
 import { StyleSheet, Platform, StatusBar } from 'react-native';
-import { Colors } from '../../constants/Colors';
+import { ThemeColors } from '../../theme/AppTheme';
 
-export const styles = StyleSheet.create({
+export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F5F7F9',
+        backgroundColor: colors.background,
     },
     header: {
         flexDirection: 'row',
@@ -12,51 +12,51 @@ export const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
         height: Platform.OS === 'android' ? 80 : 60,
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
     },
     headerTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#0D47A1',
+        color: colors.primary,
         marginLeft: 12,
     },
     filterContainer: {
         flexDirection: 'row',
         paddingVertical: 12,
         paddingHorizontal: 16,
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         borderBottomWidth: 1,
-        borderBottomColor: '#EEE',
+        borderBottomColor: colors.border,
     },
     filterChip: {
         paddingHorizontal: 16,
         paddingVertical: 6,
         borderRadius: 20,
-        backgroundColor: '#F0F0F0',
+        backgroundColor: colors.surfaceSubtle,
         marginRight: 8,
     },
     filterChipActive: {
-        backgroundColor: '#0D47A1',
+        backgroundColor: colors.primary,
     },
     filterText: {
         fontSize: 12,
-        color: '#666',
+        color: colors.textSecondary,
         fontWeight: '600',
     },
     filterTextActive: {
-        color: '#FFF',
+        color: colors.textWhite,
     },
     listContent: {
         padding: 16,
         paddingBottom: 40,
     },
     reportCard: {
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         borderRadius: 16,
         marginBottom: 16,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: '#EEE',
+        borderColor: colors.border,
         ...Platform.select({
             ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4 },
             android: { elevation: 1 },
@@ -67,7 +67,7 @@ export const styles = StyleSheet.create({
         padding: 12,
         alignItems: 'center',
         borderBottomWidth: 1,
-        borderBottomColor: '#F5F5F5',
+        borderBottomColor: colors.surfaceSubtle,
     },
     avatar: {
         width: 36,
@@ -75,7 +75,7 @@ export const styles = StyleSheet.create({
         borderRadius: 18,
     },
     avatarPlaceholder: {
-        backgroundColor: '#E3F2FD',
+        backgroundColor: colors.primarySubtle,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -86,11 +86,11 @@ export const styles = StyleSheet.create({
     userName: {
         fontSize: 14,
         fontWeight: '700',
-        color: '#333',
+        color: colors.textPrimary,
     },
     dateText: {
         fontSize: 11,
-        color: '#999',
+        color: colors.textSecondary,
         marginTop: 1,
     },
     statusBadge: {
@@ -108,12 +108,12 @@ export const styles = StyleSheet.create({
     reportTitle: {
         fontSize: 15,
         fontWeight: 'bold',
-        color: '#333',
+        color: colors.textPrimary,
         marginBottom: 2,
     },
     reportDesc: {
         fontSize: 12,
-        color: '#666',
+        color: colors.textSecondary,
         lineHeight: 16,
     },
     imagePreview: {
@@ -121,25 +121,25 @@ export const styles = StyleSheet.create({
         height: 180,
         marginTop: 10,
         borderRadius: 8,
-        backgroundColor: '#F0F0F0',
+        backgroundColor: colors.surfaceSubtle,
     },
     locationRow: {
         flexDirection: 'row',
         alignItems: 'center',
         marginTop: 10,
-        backgroundColor: '#F8F9FA',
+        backgroundColor: colors.surfaceSubtle,
         padding: 8,
         borderRadius: 6,
     },
     locationText: {
         fontSize: 11,
-        color: '#0D47A1',
+        color: colors.primary,
         marginLeft: 4,
         flex: 1,
     },
     categoryTag: {
         alignSelf: 'flex-start',
-        backgroundColor: '#E8EAF6',
+        backgroundColor: colors.primarySubtle,
         paddingHorizontal: 8,
         paddingVertical: 2,
         borderRadius: 4,
@@ -147,7 +147,7 @@ export const styles = StyleSheet.create({
     },
     categoryText: {
         fontSize: 10,
-        color: '#3F51B5',
+        color: colors.primary,
         fontWeight: '600',
     },
     actionRow: {
@@ -155,8 +155,8 @@ export const styles = StyleSheet.create({
         padding: 12,
         gap: 8,
         borderTopWidth: 1,
-        borderTopColor: '#F5F5F5',
-        backgroundColor: '#FAFBFC',
+        borderTopColor: colors.surfaceSubtle,
+        backgroundColor: colors.surface,
     },
     actionButton: {
         flex: 1,
@@ -168,13 +168,13 @@ export const styles = StyleSheet.create({
         gap: 6,
     },
     btnBlue: {
-        backgroundColor: '#0D47A1',
+        backgroundColor: colors.primary,
     },
     btnGreen: {
-        backgroundColor: '#2E7D32',
+        backgroundColor: colors.success,
     },
     btnText: {
-        color: '#FFF',
+        color: colors.textWhite,
         fontSize: 12,
         fontWeight: 'bold',
     },
@@ -185,7 +185,7 @@ export const styles = StyleSheet.create({
     emptyText: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#999',
+        color: colors.textSecondary,
         marginTop: 16,
     },
     emptySubtext: {
@@ -194,39 +194,39 @@ export const styles = StyleSheet.create({
         marginTop: 6,
     },
     loadMoreBtn: {
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         paddingVertical: 12,
         borderRadius: 12,
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,
-        borderColor: '#E5E7EB',
+        borderColor: colors.border,
         marginTop: 10,
         marginHorizontal: 16,
     },
     loadMoreText: {
-        color: '#0D47A1',
+        color: colors.primary,
         fontSize: 14,
         fontWeight: 'bold',
     },
     // Rejection UI
     rejectionBox: {
         marginTop: 10,
-        backgroundColor: '#FEF2F2',
+        backgroundColor: colors.danger + '10',
         padding: 10,
         borderRadius: 8,
         borderLeftWidth: 3,
-        borderLeftColor: '#EF4444',
+        borderLeftColor: colors.danger,
     },
     rejectionLabel: {
         fontSize: 11,
         fontWeight: 'bold',
-        color: '#EF4444',
+        color: colors.danger,
         marginBottom: 2,
     },
     rejectionText: {
         fontSize: 12,
-        color: '#333',
+        color: colors.textPrimary,
         lineHeight: 16,
     },
 
@@ -238,7 +238,7 @@ export const styles = StyleSheet.create({
         padding: 20,
     },
     modalContent: {
-        backgroundColor: 'white',
+        backgroundColor: colors.surface,
         borderRadius: 20,
         padding: 24,
         elevation: 5,
@@ -250,23 +250,23 @@ export const styles = StyleSheet.create({
     modalTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#333',
+        color: colors.textPrimary,
         marginBottom: 8,
     },
     modalSubtitle: {
         fontSize: 14,
-        color: '#666',
+        color: colors.textSecondary,
         marginBottom: 20,
         lineHeight: 20,
     },
     input: {
         borderWidth: 1,
-        borderColor: '#E5E7EB',
+        borderColor: colors.border,
         borderRadius: 12,
         padding: 12,
         fontSize: 14,
-        color: '#333',
-        backgroundColor: '#F9FAFB',
+        color: colors.textPrimary,
+        backgroundColor: colors.surfaceSubtle,
         textAlignVertical: 'top',
         marginBottom: 20,
     },
@@ -281,9 +281,9 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
     },
     btnCancel: {
-        backgroundColor: '#F3F4F6',
+        backgroundColor: colors.surfaceSubtle,
     },
     btnConfirm: {
-        backgroundColor: '#EF4444',
+        backgroundColor: colors.danger,
     },
 });

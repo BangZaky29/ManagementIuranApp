@@ -9,13 +9,14 @@ import { CustomHeader } from '../../../components/common/CustomHeader';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { Colors } from '../../../constants/Colors';
-import { styles } from './ManageUsersStyles';
+import { createStyles } from './ManageUsersStyles';
 import * as Clipboard from 'expo-clipboard';
 
 export default function ManageUsersScreen() {
     const router = useRouter();
     const { profile } = useAuth(); // Get logged in admin profile
     const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
     const [residents, setResidents] = useState<VerifiedResident[]>([]);
     const [housingComplexes, setHousingComplexes] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);

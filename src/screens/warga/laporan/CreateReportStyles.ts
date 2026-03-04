@@ -1,91 +1,91 @@
 import { StyleSheet } from 'react-native';
-import { Colors } from '../../../constants/Colors';
+import { ThemeColors } from '../../../theme/AppTheme';
 
-export const CreateReportStyles = StyleSheet.create({
+export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.green1,
+        backgroundColor: colors.background,
     },
     content: {
         padding: 20,
     },
     formCard: {
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         padding: 24,
         borderRadius: 24,
         marginBottom: 25,
         borderWidth: 1,
-        borderColor: Colors.green2,
+        borderColor: colors.border,
     },
     inputGroup: {
         marginBottom: 20,
     },
     label: {
         fontSize: 14,
-        color: Colors.green5,
+        color: colors.textPrimary,
         marginBottom: 8,
         fontWeight: '600',
         paddingLeft: 4,
     },
     input: {
         borderWidth: 1,
-        borderColor: '#E0E0E0',
+        borderColor: colors.border,
         borderRadius: 12,
         paddingHorizontal: 16,
         paddingVertical: 12,
         fontSize: 15,
-        color: Colors.green5,
-        backgroundColor: '#FAFAFA',
+        color: colors.textPrimary,
+        backgroundColor: colors.surfaceSubtle,
     },
     dropdownButton: {
         borderWidth: 1,
-        borderColor: '#E0E0E0',
+        borderColor: colors.border,
         borderRadius: 12,
         paddingHorizontal: 16,
         paddingVertical: 12,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: '#FAFAFA',
+        backgroundColor: colors.surfaceSubtle,
     },
     dropdownList: {
         marginTop: 8,
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: Colors.green2,
+        borderColor: colors.border,
         overflow: 'hidden',
     },
     dropdownItem: {
         paddingVertical: 12,
         paddingHorizontal: 16,
         borderBottomWidth: 1,
-        borderBottomColor: '#F0F0F0',
+        borderBottomColor: colors.border,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
     },
     dropdownText: {
         fontSize: 14,
-        color: Colors.green5,
+        color: colors.textPrimary,
     },
     textArea: {
         minHeight: 120,
     },
     uploadArea: {
         borderWidth: 1,
-        borderColor: Colors.green3,
+        borderColor: colors.primary,
         borderStyle: 'dashed',
         borderRadius: 12,
         height: 120,
-        backgroundColor: '#F1F8E9',
+        backgroundColor: colors.primarySubtle,
         justifyContent: 'center',
         alignItems: 'center',
     },
     uploadText: {
         marginTop: 8,
         fontSize: 13,
-        color: Colors.green4,
+        color: colors.textSecondary,
     },
 
     // Photo Action Buttons
@@ -105,25 +105,25 @@ export const CreateReportStyles = StyleSheet.create({
         gap: 8,
     },
     galleryButton: {
-        backgroundColor: '#F1F8E9',
-        borderColor: Colors.green3,
+        backgroundColor: colors.primarySubtle,
+        borderColor: colors.primary,
     },
     cameraButton: {
-        backgroundColor: '#E8F5E9',
-        borderColor: Colors.green4,
+        backgroundColor: colors.successBg,
+        borderColor: colors.success,
     },
     photoButtonText: {
         fontSize: 13,
         fontWeight: '700',
-        color: Colors.green5,
+        color: colors.primary,
     },
     imagePreviewContainer: {
         position: 'relative',
         borderRadius: 16,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: '#E5E7EB',
-        backgroundColor: '#F9FAFB',
+        borderColor: colors.border,
+        backgroundColor: colors.surfaceSubtle,
         marginTop: 12,
     },
     removeImageBtn: {

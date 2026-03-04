@@ -29,7 +29,7 @@ export default function AdminHomeScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.backgroundCard} />
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
 
             <ScrollView
                 contentContainerStyle={{ paddingBottom: 100 }}
@@ -45,7 +45,7 @@ export default function AdminHomeScreen() {
                         style={styles.menuBtn}
                         onPress={() => setSidebarVisible(true)}
                     >
-                        <Ionicons name="menu" size={24} color={colors.green5} />
+                        <Ionicons name="menu" size={24} color={colors.primary} />
                         {(vm.pendingReports > 0 || vm.processingReports > 0 || vm.pendingPayments > 0) && (
                             <View style={{
                                 position: 'absolute',
@@ -56,7 +56,7 @@ export default function AdminHomeScreen() {
                                 borderRadius: 4,
                                 backgroundColor: colors.danger,
                                 borderWidth: 1.5,
-                                borderColor: colors.backgroundCard
+                                borderColor: colors.surface
                             }} />
                         )}
                     </TouchableOpacity>
@@ -105,16 +105,16 @@ export default function AdminHomeScreen() {
                         >
                             <View style={styles.actionBannerLeft}>
                                 <View style={[styles.actionIconBox, { backgroundColor: 'rgba(255,255,255,0.25)' }]}>
-                                    <Ionicons name="alert-circle" size={24} color={colors.white} />
+                                    <Ionicons name="alert-circle" size={24} color={colors.textWhite} />
                                 </View>
                                 <View style={{ flex: 1 }}>
-                                    <Text style={[styles.actionBannerTitle, { color: colors.white }]}>
+                                    <Text style={[styles.actionBannerTitle, { color: colors.textWhite }]}>
                                         🚨 {vm.activePanics} Darurat Aktif
                                     </Text>
-                                    <Text style={[styles.actionBannerSubtitle, { color: colors.white }]}>Warga membunyikan alarm. Segera periksa lokasi!</Text>
+                                    <Text style={[styles.actionBannerSubtitle, { color: colors.textWhite }]}>Warga membunyikan alarm. Segera periksa lokasi!</Text>
                                 </View>
                             </View>
-                            <Ionicons name="chevron-forward" size={20} color={colors.white} />
+                            <Ionicons name="chevron-forward" size={20} color={colors.textWhite} />
                         </TouchableOpacity>
                     )}
 
@@ -127,16 +127,16 @@ export default function AdminHomeScreen() {
                         >
                             <View style={styles.actionBannerLeft}>
                                 <View style={styles.actionIconBox}>
-                                    <Ionicons name="wallet" size={20} color={colors.white} />
+                                    <Ionicons name="wallet" size={20} color={colors.textWhite} />
                                 </View>
                                 <View style={{ flex: 1 }}>
-                                    <Text style={[styles.actionBannerTitle, { color: colors.white }]}>
+                                    <Text style={[styles.actionBannerTitle, { color: colors.textWhite }]}>
                                         {vm.pendingPayments} Iuran Menunggu
                                     </Text>
-                                    <Text style={[styles.actionBannerSubtitle, { color: colors.white }]}>Ada bukti transfer yang butuh konfirmasi Anda.</Text>
+                                    <Text style={[styles.actionBannerSubtitle, { color: colors.textWhite }]}>Ada bukti transfer yang butuh konfirmasi Anda.</Text>
                                 </View>
                             </View>
-                            <Ionicons name="chevron-forward" size={20} color={colors.white} />
+                            <Ionicons name="chevron-forward" size={20} color={colors.textWhite} />
                         </TouchableOpacity>
                     )}
 
@@ -149,16 +149,16 @@ export default function AdminHomeScreen() {
                         >
                             <View style={styles.actionBannerLeft}>
                                 <View style={styles.actionIconBox}>
-                                    <Ionicons name="chatbubbles" size={20} color={colors.white} />
+                                    <Ionicons name="chatbubbles" size={20} color={colors.textWhite} />
                                 </View>
                                 <View style={{ flex: 1 }}>
-                                    <Text style={[styles.actionBannerTitle, { color: colors.white }]}>
+                                    <Text style={[styles.actionBannerTitle, { color: colors.textWhite }]}>
                                         {vm.pendingReports} Laporan Baru
                                     </Text>
-                                    <Text style={[styles.actionBannerSubtitle, { color: colors.white }]}>Warga mengirim laporan yang butuh dicek.</Text>
+                                    <Text style={[styles.actionBannerSubtitle, { color: colors.textWhite }]}>Warga mengirim laporan yang butuh dicek.</Text>
                                 </View>
                             </View>
-                            <Ionicons name="chevron-forward" size={20} color={colors.white} />
+                            <Ionicons name="chevron-forward" size={20} color={colors.textWhite} />
                         </TouchableOpacity>
                     )}
                 </View>
@@ -181,7 +181,7 @@ export default function AdminHomeScreen() {
                     vm.activityLogs.slice(0, 5).map((log) => {
                         let iconName = 'ellipse';
                         let iconColor = colors.textSecondary;
-                        let bgColor = colors.backgroundCard;
+                        let bgColor = colors.surface; // Default to surface
 
                         if (log.action_type === 'payment') {
                             iconName = 'wallet'; iconColor = colors.status.selesai.text; bgColor = colors.status.selesai.bg;

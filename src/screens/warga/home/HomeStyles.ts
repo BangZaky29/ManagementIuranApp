@@ -1,12 +1,12 @@
-import { StyleSheet, Platform, StatusBar, Dimensions } from 'react-native';
-import { Colors } from '../../../constants/Colors';
+import { StyleSheet, Platform, Dimensions } from 'react-native';
+import { ThemeColors } from '../../../theme/AppTheme';
 
 const { width } = Dimensions.get('window');
 
-export const HomeStyles = StyleSheet.create({
+export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.green1,
+        backgroundColor: colors.background,
     },
     scrollContent: {
         paddingBottom: 120, // Extra padding for floating tab bar
@@ -18,6 +18,7 @@ export const HomeStyles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 20,
         paddingVertical: 15,
+        backgroundColor: colors.surface,
     },
     headerTitleContainer: {
         flex: 1,
@@ -25,18 +26,18 @@ export const HomeStyles = StyleSheet.create({
     },
     headerGreeting: {
         fontSize: 16,
-        color: Colors.green4,
+        color: colors.textSecondary,
     },
     headerName: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: Colors.green5,
+        color: colors.textPrimary,
     },
     profileImage: {
         width: 45,
         height: 45,
         borderRadius: 22.5,
-        backgroundColor: Colors.green2,
+        backgroundColor: colors.primarySubtle,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -47,15 +48,16 @@ export const HomeStyles = StyleSheet.create({
         marginBottom: 20,
         borderRadius: 20,
         overflow: 'hidden',
-        borderColor: Colors.green2,
+        borderColor: colors.border,
         borderWidth: 1,
+        backgroundColor: colors.surface,
     },
     weatherGradient: {
         padding: 15,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        backgroundColor: '#E8F5E9',
+        backgroundColor: colors.surfaceSubtle,
     },
     weatherInfo: {
         flexDirection: 'column',
@@ -63,11 +65,11 @@ export const HomeStyles = StyleSheet.create({
     weatherTemp: {
         fontSize: 28,
         fontWeight: 'bold',
-        color: Colors.green5,
+        color: colors.textPrimary,
     },
     weatherLocation: {
         fontSize: 14,
-        color: Colors.green4,
+        color: colors.textSecondary,
         marginTop: 2,
     },
 
@@ -76,14 +78,14 @@ export const HomeStyles = StyleSheet.create({
         marginHorizontal: 20,
         marginBottom: 25,
         padding: 20,
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         borderRadius: 20,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         ...Platform.select({
             ios: {
-                shadowColor: Colors.danger,
+                shadowColor: colors.danger,
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.1,
                 shadowRadius: 8,
@@ -96,29 +98,29 @@ export const HomeStyles = StyleSheet.create({
             }
         }),
         borderLeftWidth: 5,
-        borderLeftColor: Colors.danger, // Red accent for unpaid
+        borderLeftColor: colors.danger, // Red accent for unpaid
     },
     billTextContainer: {
         flex: 1,
     },
     billLabel: {
         fontSize: 12,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
         marginBottom: 4,
     },
     billAmount: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: Colors.danger,
+        color: colors.danger,
     },
     payButtonSmall: {
         paddingVertical: 8,
         paddingHorizontal: 16,
-        backgroundColor: Colors.danger,
+        backgroundColor: colors.danger,
         borderRadius: 20,
     },
     payButtonText: {
-        color: Colors.white,
+        color: colors.textWhite,
         fontWeight: 'bold',
         fontSize: 12,
     },
@@ -127,7 +129,7 @@ export const HomeStyles = StyleSheet.create({
     sectionTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: Colors.green5,
+        color: colors.textPrimary,
         marginHorizontal: 20,
         marginBottom: 15,
         marginTop: 10,
@@ -170,7 +172,7 @@ export const HomeStyles = StyleSheet.create({
         position: 'absolute',
         top: -5,
         right: -5,
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         borderRadius: 10,
         width: 20,
         height: 20,
@@ -184,7 +186,7 @@ export const HomeStyles = StyleSheet.create({
     },
     actionText: {
         fontSize: 12,
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
         textAlign: 'center',
         fontWeight: '500',
     },
@@ -196,15 +198,15 @@ export const HomeStyles = StyleSheet.create({
     },
     newsCard: {
         width: 280,
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         borderRadius: 15,
         marginRight: 15,
         padding: 15,
         borderWidth: 1,
-        borderColor: Colors.green1,
+        borderColor: colors.border,
         ...Platform.select({
             ios: {
-                shadowColor: Colors.green5,
+                shadowColor: colors.primary,
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.1,
                 shadowRadius: 4,
@@ -226,7 +228,7 @@ export const HomeStyles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 10,
-        backgroundColor: '#f0f0f0',
+        backgroundColor: colors.surfaceSubtle,
     },
     newsThumbPlaceholder: {
         width: 48,
@@ -239,24 +241,24 @@ export const HomeStyles = StyleSheet.create({
         alignSelf: 'flex-start',
         paddingHorizontal: 8,
         paddingVertical: 4,
-        backgroundColor: Colors.green2,
+        backgroundColor: colors.primarySubtle,
         borderRadius: 8,
         marginBottom: 10,
     },
     newsBadgeText: {
         fontSize: 10,
         fontWeight: 'bold',
-        color: Colors.green5,
+        color: colors.primary,
     },
     newsTitle: {
         fontSize: 14,
         fontWeight: 'bold',
-        color: Colors.green5,
+        color: colors.textPrimary,
         marginBottom: 6,
     },
     newsContent: {
         fontSize: 12,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
     },
 
     // Banner Styles
@@ -267,7 +269,7 @@ export const HomeStyles = StyleSheet.create({
         borderRadius: 20,
         overflow: 'hidden',
         position: 'relative',
-        backgroundColor: Colors.green2,
+        backgroundColor: colors.primarySubtle,
     },
     bannerImage: {
         width: '100%',
@@ -280,7 +282,7 @@ export const HomeStyles = StyleSheet.create({
         justifyContent: 'center',
     },
     bannerTag: {
-        backgroundColor: '#FFD700',
+        backgroundColor: colors.warning,
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 6,
@@ -296,7 +298,7 @@ export const HomeStyles = StyleSheet.create({
     bannerTitleText: {
         fontSize: 22,
         fontWeight: 'bold',
-        color: Colors.white,
+        color: colors.textWhite,
         marginBottom: 4,
     },
     bannerSubtitleText: {

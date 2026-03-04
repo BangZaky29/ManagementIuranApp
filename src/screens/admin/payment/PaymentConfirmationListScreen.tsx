@@ -6,6 +6,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { ThemeColors } from '../../../theme/AppTheme';
 import { Colors } from '../../../constants/Colors';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
 import {
@@ -18,6 +19,7 @@ type FilterStatus = 'pending' | 'paid' | 'rejected' | 'all';
 
 export default function PaymentConfirmationListScreen() {
     const { colors } = useTheme();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
     const router = useRouter();
     const [payments, setPayments] = useState<PendingPaymentItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -210,41 +212,41 @@ export default function PaymentConfirmationListScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: Colors.green1 },
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.green1 },
     header: {
         flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: 20, paddingBottom: 15,
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
     },
     backButton: { padding: 5, marginRight: 10 },
-    headerTitle: { fontSize: 20, fontWeight: 'bold', color: Colors.green5 },
+    headerTitle: { fontSize: 20, fontWeight: 'bold', color: colors.green5 },
     filterContainer: {
         marginBottom: 8,
     },
     filterTab: {
         flexDirection: 'row', alignItems: 'center', gap: 6,
         paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20,
-        backgroundColor: Colors.white, marginRight: 8,
-        borderWidth: 1, borderColor: Colors.green2,
+        backgroundColor: colors.white, marginRight: 8,
+        borderWidth: 1, borderColor: colors.green2,
     },
     filterTabActive: {
-        backgroundColor: '#F1F8E9', borderColor: Colors.green3,
+        backgroundColor: '#F1F8E9', borderColor: colors.green3,
     },
-    filterLabel: { fontSize: 13, fontWeight: '600', color: Colors.textSecondary },
-    filterLabelActive: { color: Colors.green5 },
+    filterLabel: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
+    filterLabelActive: { color: colors.green5 },
     centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     emptyContainer: {
         flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40,
     },
-    emptyTitle: { fontSize: 18, fontWeight: 'bold', color: Colors.green5, marginTop: 16 },
+    emptyTitle: { fontSize: 18, fontWeight: 'bold', color: colors.green5, marginTop: 16 },
     emptySubtitle: {
-        fontSize: 14, color: Colors.textSecondary, textAlign: 'center',
+        fontSize: 14, color: colors.textSecondary, textAlign: 'center',
         marginTop: 8, lineHeight: 20,
     },
     content: { padding: 16, paddingBottom: 40 },
     paymentCard: {
-        backgroundColor: Colors.white, borderRadius: 16, padding: 16,
+        backgroundColor: colors.white, borderRadius: 16, padding: 16,
         marginBottom: 12, borderWidth: 1, borderColor: 'rgba(0,0,0,0.05)',
     },
     cardHeader: {
@@ -258,19 +260,19 @@ const styles = StyleSheet.create({
     avatarPlaceholder: {
         backgroundColor: '#E8F5E9', alignItems: 'center', justifyContent: 'center',
     },
-    userName: { fontSize: 15, fontWeight: 'bold', color: Colors.green5 },
-    userAddress: { fontSize: 12, color: Colors.textSecondary, marginTop: 2 },
+    userName: { fontSize: 15, fontWeight: 'bold', color: colors.green5 },
+    userAddress: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
     statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
     statusText: { fontSize: 11, fontWeight: '700' },
     cardBody: { gap: 6 },
     cardRow: { flexDirection: 'row', justifyContent: 'space-between' },
-    cardLabel: { fontSize: 13, color: Colors.textSecondary },
-    cardValue: { fontSize: 13, fontWeight: '500', color: Colors.green5 },
-    cardAmount: { fontSize: 14, fontWeight: 'bold', color: Colors.green3 },
+    cardLabel: { fontSize: 13, color: colors.textSecondary },
+    cardValue: { fontSize: 13, fontWeight: '500', color: colors.green5 },
+    cardAmount: { fontSize: 14, fontWeight: 'bold', color: colors.green3 },
     proofIndicator: {
         flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 10,
         paddingTop: 8, borderTopWidth: 1, borderTopColor: '#F0F0F0',
     },
-    proofText: { fontSize: 12, color: Colors.green4, fontWeight: '500' },
+    proofText: { fontSize: 12, color: colors.green4, fontWeight: '500' },
     cardFooter: { alignItems: 'flex-end', marginTop: 4 },
 });

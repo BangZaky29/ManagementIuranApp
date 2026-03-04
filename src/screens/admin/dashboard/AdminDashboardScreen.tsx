@@ -10,12 +10,15 @@ import { countPendingPayments } from '../../../services/payment';
 import { supabase } from '../../../lib/supabaseConfig';
 import { CustomHeader } from '../../../components/common/CustomHeader';
 import { AdminSidebar } from '../../../components/navigation/AdminSidebar';
-import { styles } from './AdminDashboardStyles';
+import { createStyles } from './AdminDashboardStyles';
 import { formatFullDateSafe, formatDateTimeSafe } from '../../../utils/dateUtils';
 import { fetchRecentActivityLogs, ActivityLog } from '../../../services/activityLog';
 import { useRouter } from 'expo-router';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 export default function AdminDashboardScreen() {
+    const { colors } = useTheme();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
     const router = useRouter();
     const [stats, setStats] = useState({ warga: 0, security: 0, activeUsers: 0, laporanMasuk: 0 });
     const [pendingPayments, setPendingPayments] = useState(0);
@@ -186,14 +189,14 @@ export default function AdminDashboardScreen() {
                                 <Ionicons
                                     name={
                                         item.action_type === 'payment' ? 'wallet' :
-                                        item.action_type === 'report' ? 'chatbubble-ellipses' :
-                                        item.action_type === 'panic' ? 'alert-circle' : 'id-card'
+                                            item.action_type === 'report' ? 'chatbubble-ellipses' :
+                                                item.action_type === 'panic' ? 'alert-circle' : 'id-card'
                                     }
                                     size={20}
                                     color={
                                         item.action_type === 'payment' ? '#4CAF50' :
-                                        item.action_type === 'report' ? '#2196F3' :
-                                        item.action_type === 'panic' ? '#F44336' : '#FF9800'
+                                            item.action_type === 'report' ? '#2196F3' :
+                                                item.action_type === 'panic' ? '#F44336' : '#FF9800'
                                     }
                                 />
                             </View>

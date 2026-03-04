@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, TextInput, StatusBar, StyleSheet, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -7,10 +7,51 @@ import { CustomHeader } from '../../../components/common/CustomHeader';
 import { CustomButton } from '../../../components/common/CustomButton';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { ThemeColors } from '../../../theme/AppTheme';
+
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: colors.background,
+    },
+    content: {
+        padding: 20,
+    },
+    formCard: {
+        backgroundColor: colors.surface,
+        padding: 24,
+        borderRadius: 20,
+        marginBottom: 24,
+        borderWidth: 1,
+        borderColor: colors.border,
+    },
+    inputGroup: {
+        marginBottom: 16,
+    },
+    label: {
+        fontSize: 14,
+        color: colors.primary,
+        marginBottom: 8,
+        fontWeight: '600',
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 12,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        fontSize: 15,
+        color: colors.textPrimary,
+        backgroundColor: colors.surfaceSubtle,
+    },
+});
 
 export default function EditSecurityProfileScreen() {
     const router = useRouter();
     const { profile, updateUserProfile } = useAuth();
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
 
     const [name, setName] = useState(profile?.full_name || '');
     const [nik, setNik] = useState(profile?.nik || '');
@@ -69,7 +110,7 @@ export default function EditSecurityProfileScreen() {
 
     return (
         <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#F0F4F8" />
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
             <CustomHeader title="Edit Profil" showBack={true} />
 
             <KeyboardAwareScrollView
@@ -87,6 +128,7 @@ export default function EditSecurityProfileScreen() {
                             value={name}
                             onChangeText={setName}
                             placeholder="Nama Lengkap"
+                            placeholderTextColor={colors.textSecondary}
                         />
                     </View>
 
@@ -98,6 +140,7 @@ export default function EditSecurityProfileScreen() {
                             onChangeText={setPhone}
                             keyboardType="phone-pad"
                             placeholder="Nomor Telepon WhatsApp"
+                            placeholderTextColor={colors.textSecondary}
                         />
                     </View>
 
@@ -109,6 +152,7 @@ export default function EditSecurityProfileScreen() {
                             onChangeText={setNik}
                             keyboardType="numeric"
                             placeholder="Nomor Induk Kependudukan"
+                            placeholderTextColor={colors.textSecondary}
                         />
                     </View>
 
@@ -119,6 +163,7 @@ export default function EditSecurityProfileScreen() {
                             value={username}
                             onChangeText={setUsername}
                             placeholder="Username"
+                            placeholderTextColor={colors.textSecondary}
                         />
                     </View>
 
@@ -129,6 +174,7 @@ export default function EditSecurityProfileScreen() {
                             value={address}
                             onChangeText={setAddress}
                             placeholder="Alamat Lengkap"
+                            placeholderTextColor={colors.textSecondary}
                             multiline
                         />
                     </View>
@@ -140,13 +186,14 @@ export default function EditSecurityProfileScreen() {
                             value={rtRw}
                             onChangeText={setRtRw}
                             placeholder="Contoh: 001/005"
+                            placeholderTextColor={colors.textSecondary}
                         />
                     </View>
 
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Email (Tidak dapat diubah)</Text>
                         <TextInput
-                            style={[styles.input, { backgroundColor: '#EEEEEE', color: '#999' }]}
+                            style={[styles.input, { backgroundColor: colors.surfaceSubtle, color: colors.textSecondary }]}
                             value={profile?.email || ''}
                             editable={false}
                         />
@@ -167,40 +214,3 @@ export default function EditSecurityProfileScreen() {
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#F0F4F8',
-    },
-    content: {
-        padding: 20,
-    },
-    formCard: {
-        backgroundColor: '#FFFFFF',
-        padding: 24,
-        borderRadius: 20,
-        marginBottom: 24,
-        borderWidth: 1,
-        borderColor: '#BBDEFB',
-    },
-    inputGroup: {
-        marginBottom: 16,
-    },
-    label: {
-        fontSize: 14,
-        color: '#0D47A1',
-        marginBottom: 8,
-        fontWeight: '600',
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#E0E0E0',
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        fontSize: 15,
-        color: '#333',
-        backgroundColor: '#FAFAFA',
-    },
-});

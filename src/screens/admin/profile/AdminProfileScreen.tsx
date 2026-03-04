@@ -1,11 +1,11 @@
+import { useTheme } from '../../../contexts/ThemeContext';
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StatusBar, Image, ActivityIndicator, Modal, TextInput, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { useAnimatedStyle, withTiming, useSharedValue } from 'react-native-reanimated';
-import { useTheme } from '../../../contexts/ThemeContext';
 import { useAdminProfileViewModel } from './AdminProfileViewModel';
-import { AdminProfileStyles as styles } from './AdminProfileStyles';
+import { createStyles } from './AdminProfileStyles';
 import { CustomHeader } from '../../../components/common/CustomHeader';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { Colors } from '../../../constants/Colors';
@@ -58,6 +58,8 @@ const ThemeToggle = ({ isDark, onToggle, colors }: { isDark: boolean; onToggle: 
 };
 
 export default function AdminProfileScreen() {
+    const { colors } = useTheme();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
     const {
         user,
         handleEditProfile,
@@ -77,7 +79,7 @@ export default function AdminProfileScreen() {
         isSubmitting
     } = useAdminProfileViewModel();
 
-    const { isDark, toggleTheme, colors } = useTheme();
+    const { isDark, toggleTheme } = useTheme();
 
     const renderInfoItem = (icon: string, label: string, value: string, isVerified = false) => (
         <View style={styles.infoRow}>

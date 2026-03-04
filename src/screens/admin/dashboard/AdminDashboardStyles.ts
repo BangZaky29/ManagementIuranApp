@@ -1,12 +1,13 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { ThemeColors } from '../../../theme/AppTheme';
 import { Colors } from '../../../constants/Colors';
 
 const { width } = Dimensions.get('window');
 
-export const styles = StyleSheet.create({
+export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F5F7FA',
+        backgroundColor: colors.background,
     },
     scrollContent: {
         padding: 20,
@@ -17,12 +18,12 @@ export const styles = StyleSheet.create({
     welcomeText: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
         marginBottom: 4,
     },
     dateText: {
         fontSize: 14,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
     },
     statsGrid: {
         flexDirection: 'row',
@@ -31,7 +32,7 @@ export const styles = StyleSheet.create({
         marginBottom: 24,
     },
     card: {
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         borderRadius: 16,
         padding: 16,
         width: (width - 50) / 2, // 2 columns with spacing
@@ -56,18 +57,18 @@ export const styles = StyleSheet.create({
     },
     cardTitle: {
         fontSize: 14,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
         marginBottom: 4,
     },
     cardCount: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
         marginBottom: 2,
     },
     cardSubtitle: {
         fontSize: 12,
-        color: Colors.green4, // Using a subtly colored text for subtitle
+        color: colors.green4, // Using a subtly colored text for subtitle
         fontWeight: '500',
     },
     sectionHeader: {
@@ -76,6 +77,6 @@ export const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
     },
 });

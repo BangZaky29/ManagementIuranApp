@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
     View, Text, ScrollView, TouchableOpacity,
     Image, StatusBar, ActivityIndicator, Linking, Modal, TextInput,
@@ -11,9 +11,8 @@ import { fetchReportById, updateReportStatus } from '../../services/laporan';
 import { formatDateSafe, formatDateTimeSafe } from '../../utils/dateUtils';
 import { CustomHeader } from '../../components/common/CustomHeader';
 import { CustomAlertModal } from '../../components/common/CustomAlertModal';
-import { Colors } from '../../constants/Colors';
 import * as ImagePicker from 'expo-image-picker';
-import { styles } from './SecurityReportDetailStyles';
+import { createStyles } from './SecurityReportDetailStyles';
 import { supabase } from '../../lib/supabaseConfig';
 import { useTheme } from '../../contexts/ThemeContext';
 
@@ -21,6 +20,8 @@ export default function SecurityReportDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const router = useRouter();
     const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+
     const [data, setData] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -120,7 +121,7 @@ export default function SecurityReportDetailScreen() {
             <SafeAreaView style={styles.container}>
                 <CustomHeader title="Detail Laporan" showBack={true} />
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <ActivityIndicator size="large" color={Colors.primary} />
+                    <ActivityIndicator size="large" color={colors.primary} />
                 </View>
             </SafeAreaView>
         );
@@ -131,8 +132,8 @@ export default function SecurityReportDetailScreen() {
             <SafeAreaView style={styles.container}>
                 <CustomHeader title="Detail Laporan" showBack={true} />
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-                    <Ionicons name="alert-circle-outline" size={64} color="#CCC" />
-                    <Text style={{ marginTop: 10, color: '#666' }}>Laporan tidak ditemukan.</Text>
+                    <Ionicons name="alert-circle-outline" size={64} color={colors.textSecondary} />
+                    <Text style={{ marginTop: 10, color: colors.textSecondary }}>Laporan tidak ditemukan.</Text>
                 </View>
             </SafeAreaView>
         );
@@ -173,14 +174,14 @@ export default function SecurityReportDetailScreen() {
 
     return (
         <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
             <CustomHeader
                 title="Detail Laporan"
                 showBack={true}
                 rightIcon={
                     (data.status !== 'Menunggu') ? (
                         <TouchableOpacity onPress={handleRewindStatus}>
-                            <Ionicons name="arrow-undo-outline" size={24} color={Colors.primary} />
+                            <Ionicons name="arrow-undo-outline" size={24} color={colors.primary} />
                         </TouchableOpacity>
                     ) : undefined
                 }
@@ -194,7 +195,7 @@ export default function SecurityReportDetailScreen() {
                             <Image source={{ uri: data.profiles.avatar_url }} style={styles.reporterAvatar} />
                         ) : (
                             <View style={[styles.reporterAvatar, styles.avatarPlaceholder]}>
-                                <Ionicons name="person" size={20} color="#FFF" />
+                                <Ionicons name="person" size={20} color={colors.textWhite} />
                             </View>
                         )}
                         <View style={{ flex: 1 }}>
@@ -223,7 +224,7 @@ export default function SecurityReportDetailScreen() {
                         >
                             <Image source={{ uri: data.image_url }} style={styles.reportImage} resizeMode="cover" />
                             <View style={styles.zoomIcon}>
-                                <Ionicons name="expand" size={16} color="white" />
+                                <Ionicons name="expand" size={16} color={colors.textWhite} />
                             </View>
                         </TouchableOpacity>
                     )}
@@ -233,11 +234,11 @@ export default function SecurityReportDetailScreen() {
                             style={styles.locationBox}
                             onPress={() => Linking.openURL(data.location)}
                         >
-                            <Ionicons name="location" size={16} color={Colors.primary} />
+                            <Ionicons name="location" size={16} color={colors.primary} />
                             <Text style={styles.locationText} numberOfLines={1}>
                                 {data.location.startsWith('http') ? 'Lihat Lokasi di Google Maps' : data.location}
                             </Text>
-                            <Ionicons name="open-outline" size={14} color={Colors.primary} />
+                            <Ionicons name="open-outline" size={14} color={colors.primary} />
                         </TouchableOpacity>
                     )}
                 </View>
@@ -251,13 +252,13 @@ export default function SecurityReportDetailScreen() {
                         <View style={styles.timelineItem}>
                             <View style={styles.timelineIconBox}>
                                 <View style={[styles.timelineDot, { backgroundColor: colors.status.selesai.text }]}>
-                                    <Ionicons name="checkmark" size={10} color="white" />
+                                    <Ionicons name="checkmark" size={10} color={colors.textWhite} />
                                 </View>
                                 <View style={[styles.timelineLine, isProcessed && { backgroundColor: colors.status.diproses.text }]} />
                             </View>
                             <View style={styles.timelineContent}>
                                 <Text style={styles.timelineLabel}>Laporan Diterima</Text>
-                                <Text style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 2 }}>{formatDateTimeSafe(data.created_at)}</Text>
+                                <Text style={{ fontSize: 11, color: colors.textSecondary, marginBottom: 2 }}>{formatDateTimeSafe(data.created_at)}</Text>
                                 <Text style={styles.timelineSublabel}>Laporan masuk antrean penanganan.</Text>
                             </View>
                         </View>
@@ -265,10 +266,10 @@ export default function SecurityReportDetailScreen() {
                         {/* Status 2: Diproses */}
                         <View style={styles.timelineItem}>
                             <View style={styles.timelineIconBox}>
-                                <View style={[styles.timelineDot, { backgroundColor: isProcessed ? colors.status.diproses.text : '#E5E7EB' }]}>
-                                    {isProcessed && <Ionicons name="sync" size={10} color="white" />}
+                                <View style={[styles.timelineDot, { backgroundColor: isProcessed ? colors.status.diproses.text : colors.border }]}>
+                                    {isProcessed && <Ionicons name="sync" size={10} color={colors.textWhite} />}
                                 </View>
-                                <View style={[styles.timelineLine, isFinished && { backgroundColor: isFinished ? (data.status === 'Ditolak' ? colors.status.ditolak.text : colors.status.selesai.text) : '#E5E7EB' }]} />
+                                <View style={[styles.timelineLine, isFinished && { backgroundColor: isFinished ? (data.status === 'Ditolak' ? colors.status.ditolak.text : colors.status.selesai.text) : colors.border }]} />
                             </View>
                             <View style={styles.timelineContent}>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
@@ -291,7 +292,7 @@ export default function SecurityReportDetailScreen() {
                                         </Text>
                                     )}
                                 </View>
-                                <Text style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6 }}>{isProcessed ? formatDateTimeSafe(data.updated_at || data.created_at) : '-'}</Text>
+                                <Text style={{ fontSize: 11, color: colors.textSecondary, marginBottom: 6 }}>{isProcessed ? formatDateTimeSafe(data.updated_at || data.created_at) : '-'}</Text>
                                 <Text style={[styles.timelineSublabel, !isProcessed && styles.textInactive]}>
                                     Petugas sedang menindaklanjuti laporan ini.
                                 </Text>
@@ -301,8 +302,8 @@ export default function SecurityReportDetailScreen() {
                         {/* Status 3: Selesai/Ditolak */}
                         <View style={[styles.timelineItem, { marginBottom: 0 }]}>
                             <View style={styles.timelineIconBox}>
-                                <View style={[styles.timelineDot, { backgroundColor: isFinished ? (data.status === 'Ditolak' ? colors.status.ditolak.text : colors.status.selesai.text) : '#E5E7EB' }]}>
-                                    {isFinished && <Ionicons name={data.status === 'Ditolak' ? 'close' : 'checkmark-done'} size={10} color="white" />}
+                                <View style={[styles.timelineDot, { backgroundColor: isFinished ? (data.status === 'Ditolak' ? colors.status.ditolak.text : colors.status.selesai.text) : colors.border }]}>
+                                    {isFinished && <Ionicons name={data.status === 'Ditolak' ? 'close' : 'checkmark-done'} size={10} color={colors.textWhite} />}
                                 </View>
                             </View>
                             <View style={styles.timelineContent}>
@@ -328,7 +329,7 @@ export default function SecurityReportDetailScreen() {
                                         </Text>
                                     )}
                                 </View>
-                                <Text style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6 }}>{isFinished ? formatDateTimeSafe(data.updated_at || data.created_at) : '-'}</Text>
+                                <Text style={{ fontSize: 11, color: colors.textSecondary, marginBottom: 6 }}>{isFinished ? formatDateTimeSafe(data.updated_at || data.created_at) : '-'}</Text>
                                 <Text style={[styles.timelineSublabel, !isFinished && styles.textInactive]}>
                                     {data.status === 'Selesai' ? 'Kendala telah diatasi sepenuhnya.' :
                                         data.status === 'Ditolak' ? `Ditolak: ${data.rejection_reason || '-'}` :
@@ -340,19 +341,19 @@ export default function SecurityReportDetailScreen() {
                                         style={{
                                             flexDirection: 'row',
                                             alignItems: 'center',
-                                            backgroundColor: '#F0FDF4',
+                                            backgroundColor: colors.success + '1A',
                                             paddingVertical: 8,
                                             paddingHorizontal: 12,
                                             borderRadius: 8,
                                             borderWidth: 1,
-                                            borderColor: '#DCFCE7',
+                                            borderColor: colors.success + '33',
                                             alignSelf: 'flex-start',
                                             marginTop: 8
                                         }}
                                         onPress={() => setSelectedImage(data.completion_image_url ?? null)}
                                     >
-                                        <Ionicons name="image-outline" size={16} color={Colors.success} />
-                                        <Text style={{ marginLeft: 8, fontSize: 13, fontWeight: 'bold', color: Colors.success }}>Lihat Bukti Penanganan</Text>
+                                        <Ionicons name="image-outline" size={16} color={colors.success} />
+                                        <Text style={{ marginLeft: 8, fontSize: 13, fontWeight: 'bold', color: colors.success }}>Lihat Bukti Penanganan</Text>
                                     </TouchableOpacity>
                                 )}
                             </View>
@@ -366,20 +367,20 @@ export default function SecurityReportDetailScreen() {
                 <View style={styles.actionBar}>
                     {data.status === 'Menunggu' ? (
                         <TouchableOpacity
-                            style={[styles.mainBtn, { backgroundColor: Colors.primary }]}
+                            style={[styles.mainBtn, { backgroundColor: colors.primary }]}
                             onPress={() => handleUpdateStatus('Diproses')}
                             disabled={isUpdating}
                         >
-                            <Ionicons name="play-circle-outline" size={20} color="white" />
+                            <Ionicons name="play-circle-outline" size={20} color={colors.textWhite} />
                             <Text style={styles.btnLabel}>Proses Laporan</Text>
                         </TouchableOpacity>
                     ) : (
                         <TouchableOpacity
-                            style={[styles.mainBtn, { backgroundColor: Colors.success }]}
+                            style={[styles.mainBtn, { backgroundColor: colors.success }]}
                             onPress={() => setShowCompletionModal(true)}
                             disabled={isUpdating}
                         >
-                            <Ionicons name="checkmark-circle-outline" size={20} color="white" />
+                            <Ionicons name="checkmark-circle-outline" size={20} color={colors.textWhite} />
                             <Text style={styles.btnLabel}>Tandai Selesai</Text>
                         </TouchableOpacity>
                     )}
@@ -389,8 +390,8 @@ export default function SecurityReportDetailScreen() {
                         onPress={() => setShowRejectionModal(true)}
                         disabled={isUpdating}
                     >
-                        <Ionicons name="close-circle-outline" size={20} color={Colors.danger} />
-                        <Text style={[styles.btnLabel, { color: Colors.danger }]}>Tolak</Text>
+                        <Ionicons name="close-circle-outline" size={20} color={colors.danger} />
+                        <Text style={[styles.btnLabel, { color: colors.danger }]}>Tolak</Text>
                     </TouchableOpacity>
                 </View>
             )}
@@ -403,6 +404,7 @@ export default function SecurityReportDetailScreen() {
                         <TextInput
                             style={styles.modalInput}
                             placeholder="Berikan alasan penolakan..."
+                            placeholderTextColor={colors.textSecondary}
                             multiline
                             numberOfLines={4}
                             value={rejectionReason}
@@ -422,7 +424,7 @@ export default function SecurityReportDetailScreen() {
                                     setShowRejectionModal(false);
                                 }}
                             >
-                                <Text style={[styles.modalBtnText, { color: 'white' }]}>Konfirmasi</Text>
+                                <Text style={[styles.modalBtnText, { color: colors.textWhite }]}>Konfirmasi</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -443,12 +445,12 @@ export default function SecurityReportDetailScreen() {
                                     style={styles.removeImageBtn}
                                     onPress={() => setCompletionImage(null)}
                                 >
-                                    <Ionicons name="close" size={20} color="white" />
+                                    <Ionicons name="close" size={20} color={colors.textWhite} />
                                 </TouchableOpacity>
                             </View>
                         ) : (
                             <TouchableOpacity style={styles.pickImageBtn} onPress={pickImage}>
-                                <Ionicons name="camera" size={32} color={Colors.primary} />
+                                <Ionicons name="camera" size={32} color={colors.primary} />
                                 <Text style={styles.pickImageText}>Ambil Foto Bukti</Text>
                             </TouchableOpacity>
                         )}
@@ -461,13 +463,13 @@ export default function SecurityReportDetailScreen() {
                                 <Text style={styles.modalBtnText}>Batal</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
-                                style={[styles.modalBtn, { backgroundColor: Colors.success }]}
+                                style={[styles.modalBtn, { backgroundColor: colors.success }]}
                                 onPress={() => {
                                     handleUpdateStatus('Selesai', { completionImageUri: completionImage || undefined });
                                     setShowCompletionModal(false);
                                 }}
                             >
-                                <Text style={[styles.modalBtnText, { color: 'white' }]}>Selesai</Text>
+                                <Text style={[styles.modalBtnText, { color: colors.textWhite }]}>Selesai</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -507,7 +509,7 @@ export default function SecurityReportDetailScreen() {
                             style={styles.closeImageBtn}
                             onPress={() => setSelectedImage(null)}
                         >
-                            <Ionicons name="close" size={28} color="white" />
+                            <Ionicons name="close" size={28} color={colors.textWhite} />
                         </TouchableOpacity>
                     </View>
                 </TouchableOpacity>

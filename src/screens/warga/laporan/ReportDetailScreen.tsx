@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, StatusBar, Image, TouchableOpacity, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ReportDetailStyles as styles } from './ReportDetailStyles';
+import { createStyles } from './ReportDetailStyles';
 import { useFocusEffect } from 'expo-router';
-import { Colors } from '../../../constants/Colors';
 import { CustomHeader } from '../../../components/common/CustomHeader';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 import { useReportDetailViewModel } from './ReportDetailViewModel';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
@@ -13,6 +13,9 @@ import { ReportLocationViewer } from '../../../components/laporan/ReportLocation
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
 
 export default function ReportDetailScreen() {
+    const { colors } = useTheme();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
+
     const {
         data,
         loading,
@@ -30,11 +33,11 @@ export default function ReportDetailScreen() {
     const [showProofModal, setShowProofModal] = useState(false);
 
     const getRoleColor = (role?: string) => {
-        return role === 'admin' ? Colors.status.admin.text : Colors.status.security.text;
+        return role === 'admin' ? colors.status.admin.text : colors.status.security.text;
     };
 
     const getRoleBg = (role?: string) => {
-        return role === 'admin' ? Colors.status.admin.bg : Colors.status.security.bg;
+        return role === 'admin' ? colors.status.admin.bg : colors.status.security.bg;
     };
 
     // Reload data when screen is focused (in case we return from Edit)
@@ -47,10 +50,10 @@ export default function ReportDetailScreen() {
     if (loading) {
         return (
             <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
-                <StatusBar barStyle="dark-content" backgroundColor={Colors.green1} />
+                <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
                 <CustomHeader title="Detail Laporan" showBack={true} />
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <Text>Memuat...</Text>
+                    <Text style={{ color: colors.textPrimary }}>Memuat...</Text>
                 </View>
             </SafeAreaView>
         );
@@ -59,10 +62,10 @@ export default function ReportDetailScreen() {
     if (!data) {
         return (
             <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
-                <StatusBar barStyle="dark-content" backgroundColor={Colors.green1} />
+                <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
                 <CustomHeader title="Detail Laporan" showBack={true} />
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <Text>Laporan tidak ditemukan.</Text>
+                    <Text style={{ color: colors.textPrimary }}>Laporan tidak ditemukan.</Text>
                 </View>
             </SafeAreaView>
         );
@@ -87,7 +90,7 @@ export default function ReportDetailScreen() {
 
     return (
         <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
             <CustomHeader title="Detail Laporan" showBack={true} />
 
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -103,12 +106,12 @@ export default function ReportDetailScreen() {
                             {/* Edit Button */}
                             {data.status === 'Menunggu' && (
                                 <TouchableOpacity onPress={handleEdit} style={styles.iconBtn}>
-                                    <Ionicons name="create-outline" size={18} color={Colors.primary} />
+                                    <Ionicons name="create-outline" size={18} color={colors.primary} />
                                 </TouchableOpacity>
                             )}
                             {/* Delete Button */}
                             <TouchableOpacity onPress={handleDelete} style={styles.iconBtn}>
-                                <Ionicons name="trash-outline" size={18} color={Colors.danger} />
+                                <Ionicons name="trash-outline" size={18} color={colors.danger} />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -117,7 +120,7 @@ export default function ReportDetailScreen() {
 
                     <View style={styles.categoryRow}>
                         <View style={styles.categoryIcon}>
-                            <Ionicons name={getCategoryIcon(data.category)} size={16} color={Colors.green5} />
+                            <Ionicons name={getCategoryIcon(data.category)} size={16} color={colors.primary} />
                         </View>
                         <Text style={styles.category}>{data.category}</Text>
                     </View>
@@ -143,7 +146,7 @@ export default function ReportDetailScreen() {
                 {/* Modern Status Timeline */}
                 <View style={styles.timelineSection}>
                     <View style={styles.sectionTitleRow}>
-                        <Ionicons name="time-outline" size={24} color={Colors.green5} />
+                        <Ionicons name="time-outline" size={24} color={colors.textPrimary} />
                         <Text style={styles.sectionTitle}>Alur Penanganan</Text>
                     </View>
 
@@ -152,7 +155,7 @@ export default function ReportDetailScreen() {
                         <View style={styles.timelineItem}>
                             <View style={styles.timelineLeft}>
                                 <View style={[styles.dot, styles.dotActive]}>
-                                    <Ionicons name="checkmark" size={10} color="white" />
+                                    <Ionicons name="checkmark" size={10} color={colors.textWhite} />
                                 </View>
                                 <View style={[styles.line, (isProcessed || isFinal) && styles.lineActive]} />
                             </View>
@@ -169,13 +172,13 @@ export default function ReportDetailScreen() {
                         <View style={styles.timelineItem}>
                             <View style={styles.timelineLeft}>
                                 <View style={[styles.dot, isProcessed ? styles.dotActive : styles.dotInactive]}>
-                                    {isProcessed && <Ionicons name="search" size={10} color="white" />}
+                                    {isProcessed && <Ionicons name="search" size={10} color={colors.textWhite} />}
                                 </View>
                                 <View style={[styles.line, isFinal && styles.lineActive]} />
                             </View>
                             <View style={styles.timelineContent}>
                                 <View style={{ flex: 1 }}>
-                                    <Text style={[styles.timelineTitle, !isProcessed && { color: '#9CA3AF' }]}>
+                                    <Text style={[styles.timelineTitle, !isProcessed && { color: colors.textSecondary }]}>
                                         {isProcessed ? (
                                             <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
                                                 <Text style={[styles.timelineTitle, { flex: 0, marginRight: 4 }]}>Sedang Diproses oleh </Text>
@@ -198,7 +201,7 @@ export default function ReportDetailScreen() {
                                         <Text style={styles.timelineDate}>{updatedDate}</Text>
                                     )}
                                 </View>
-                                <Text style={[styles.timelineDesc, !isProcessed && { color: '#9CA3AF' }]}>
+                                <Text style={[styles.timelineDesc, !isProcessed && { color: colors.textSecondary }]}>
                                     {isProcessed
                                         ? 'Laporan telah divalidasi dan saat ini dalam tahap penanganan oleh petugas terkait.'
                                         : 'Laporan Anda menunggu konfirmasi petugas untuk segera ditindaklanjuti.'}
@@ -210,13 +213,13 @@ export default function ReportDetailScreen() {
                         <View style={[styles.timelineItem, { minHeight: undefined }]}>
                             <View style={styles.timelineLeft}>
                                 <View style={[styles.dot, isFinal ? styles.dotActive : styles.dotInactive]}>
-                                    {isFinal && <Ionicons name={data.status === 'Ditolak' ? 'close' : 'star'} size={10} color="white" />}
+                                    {isFinal && <Ionicons name={data.status === 'Ditolak' ? 'close' : 'star'} size={10} color={colors.textWhite} />}
                                 </View>
                             </View>
                             <View style={[styles.timelineContent, { paddingBottom: 0 }]}>
                                 <View style={{ flex: 1 }}>
                                     <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
-                                        <Text style={[styles.timelineTitle, !isFinal && { color: '#9CA3AF' }, { flex: 0, marginRight: 4 }]}>
+                                        <Text style={[styles.timelineTitle, !isFinal && { color: colors.textSecondary }, { flex: 0, marginRight: 4 }]}>
                                             {data.status === 'Ditolak' ? 'Laporan Ditolak' :
                                                 data.status === 'Selesai' ? 'Laporan Selesai oleh ' : 'Laporan Ditutup'}
                                         </Text>
@@ -239,7 +242,7 @@ export default function ReportDetailScreen() {
                                         <Text style={styles.timelineDate}>{updatedDate}</Text>
                                     )}
                                 </View>
-                                <Text style={[styles.timelineDesc, !isFinal && { color: '#9CA3AF' }]}>
+                                <Text style={[styles.timelineDesc, !isFinal && { color: colors.textSecondary }]}>
                                     {data.status === 'Selesai' ? 'Terima kasih atas laporan Anda. Kendala telah berhasil diatasi sepenuhnya.' :
                                         data.status === 'Ditolak' ? 'Mohon maaf, laporan Anda belum dapat kami proses saat ini karena alasan tertentu.' :
                                             'Status akhir laporan akan diperbarui setelah penanganan dinyatakan selesai.'}
@@ -251,7 +254,7 @@ export default function ReportDetailScreen() {
                                         style={styles.proofButton}
                                         onPress={() => setShowProofModal(true)}
                                     >
-                                        <Ionicons name="image-outline" size={18} color={Colors.green5} />
+                                        <Ionicons name="image-outline" size={18} color={colors.success} />
                                         <Text style={styles.proofButtonText}>Lihat Bukti Penanganan</Text>
                                     </TouchableOpacity>
                                 )}
@@ -260,7 +263,7 @@ export default function ReportDetailScreen() {
                                 {data.status === 'Ditolak' && data.rejection_reason && (
                                     <View style={styles.rejectionReasonBox}>
                                         <View style={styles.rejectionHeader}>
-                                            <Ionicons name="alert-circle" size={18} color={Colors.danger} />
+                                            <Ionicons name="alert-circle" size={18} color={colors.danger} />
                                             <Text style={styles.rejectionLabel}>Catatan Petugas:</Text>
                                         </View>
                                         <Text style={styles.rejectionText}>{data.rejection_reason}</Text>

@@ -6,9 +6,12 @@ import { useTheme } from '../../../contexts/ThemeContext';
 import { CustomHeader } from '../../../components/common/CustomHeader';
 import { Ionicons } from '@expo/vector-icons';
 import { useLaporanViewModel } from './LaporanViewModel';
-import { LaporanStyles as styles } from './LaporanStyles';
+import { createStyles } from './LaporanStyles';
 
 export default function LaporanScreen() {
+    const { colors } = useTheme();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
+
     const {
         selectedFilter,
         setSelectedFilter,
@@ -16,7 +19,6 @@ export default function LaporanScreen() {
         handleCreateReport,
         handleReportClick
     } = useLaporanViewModel();
-    const { colors } = useTheme();
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -34,7 +36,7 @@ export default function LaporanScreen() {
             case 'Diproses': return colors.status.diproses.bg;
             case 'Menunggu': return colors.status.menunggu.bg;
             case 'Ditolak': return colors.status.ditolak.bg;
-            default: return '#F5F5F5';
+            default: return colors.surfaceSubtle;
         }
     };
 
@@ -49,11 +51,11 @@ export default function LaporanScreen() {
     };
 
     return (
-        <SafeAreaView edges={['left', 'right', 'bottom']} style={[styles.container, { backgroundColor: colors.background }]}>
-            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.green1} />
+        <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
             <CustomHeader title="Lapor & Keluhan" showBack={false} />
 
-            <View style={[styles.container, { backgroundColor: colors.background }]}>
+            <View style={styles.container}>
                 <ScrollView contentContainerStyle={styles.content}>
 
                     {/* Filter Tabs */}
@@ -69,15 +71,13 @@ export default function LaporanScreen() {
                                     key={filter}
                                     style={[
                                         styles.filterTab,
-                                        { backgroundColor: colors.backgroundCard, borderColor: colors.border },
-                                        selectedFilter === filter && { backgroundColor: colors.green5, borderColor: colors.green5 }
+                                        selectedFilter === filter && styles.filterTabActive
                                     ]}
                                     onPress={() => setSelectedFilter(filter as any)}
                                 >
                                     <Text style={[
                                         styles.filterText,
-                                        { color: colors.green5 },
-                                        selectedFilter === filter && { color: colors.backgroundCard }
+                                        selectedFilter === filter && styles.filterTextActive
                                     ]}>
                                         {filter}
                                     </Text>
@@ -91,19 +91,19 @@ export default function LaporanScreen() {
                         filteredReports.map((item) => (
                             <TouchableOpacity
                                 key={item.id}
-                                style={[styles.reportItem, { backgroundColor: colors.backgroundCard }]}
+                                style={styles.reportItem}
                                 onPress={() => handleReportClick(item.id)}
                             >
                                 <View style={styles.reportIconCard}>
                                     <Ionicons
                                         name={getCategoryIcon(item.category)}
                                         size={24}
-                                        color={colors.green5}
+                                        color={colors.primary}
                                     />
                                 </View>
                                 <View style={styles.reportContent}>
-                                    <Text style={[styles.reportTitle, { color: colors.green5 }]}>{item.title}</Text>
-                                    <Text style={[styles.reportMeta, { color: colors.textSecondary }]}>{item.date} • {item.category}</Text>
+                                    <Text style={styles.reportTitle}>{item.title}</Text>
+                                    <Text style={styles.reportMeta}>{item.date} • {item.category}</Text>
                                 </View>
                                 <View style={[styles.statusBadge, { backgroundColor: getStatusBg(item.status) }]}>
                                     <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>
@@ -114,8 +114,8 @@ export default function LaporanScreen() {
                         ))
                     ) : (
                         <View style={styles.emptyState}>
-                            <Ionicons name="document-text-outline" size={48} color={colors.green4} />
-                            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Belum ada laporan</Text>
+                            <Ionicons name="document-text-outline" size={48} color={colors.textSecondary} />
+                            <Text style={styles.emptyText}>Belum ada laporan</Text>
                         </View>
                     )}
 
@@ -127,7 +127,7 @@ export default function LaporanScreen() {
                     onPress={handleCreateReport}
                     activeOpacity={0.8}
                 >
-                    <Ionicons name="add" size={30} color={colors.backgroundCard} />
+                    <Ionicons name="add" size={30} color={colors.textWhite} />
                 </TouchableOpacity>
             </View>
         </SafeAreaView>

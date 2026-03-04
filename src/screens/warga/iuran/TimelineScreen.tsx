@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { CustomHeader } from '../../../components/common/CustomHeader';
 import { useIuranViewModel } from './IuranViewModel';
 import { useTheme } from '../../../contexts/ThemeContext';
+import { ThemeColors } from '../../../theme/AppTheme';
 
 const formatCurrency = (value: number) =>
     new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
@@ -28,6 +29,7 @@ export default function TimelineScreen() {
         handlePay,
     } = useIuranViewModel();
     const { colors } = useTheme();
+    const s = React.useMemo(() => createStyles(colors), [colors]);
 
     const unpaidItemCount = billSummary?.periods.flatMap(p => p.items.filter(i => i.status === 'unpaid')).length || 0;
     const allPaid = billSummary?.periods.length && unpaidItemCount === 0;
@@ -43,13 +45,13 @@ export default function TimelineScreen() {
     }) || [];
 
     return (
-        <SafeAreaView edges={['left', 'right', 'bottom']} style={[s.container, { backgroundColor: colors.background }]}>
-            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.green1} />
+        <SafeAreaView edges={['left', 'right', 'bottom']} style={s.container}>
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
             <CustomHeader title="Timeline Tagihan Lengkap" showBack={true} />
 
             {isLoading ? (
                 <View style={s.center}>
-                    <ActivityIndicator size="large" color="#1B5E20" />
+                    <ActivityIndicator size="large" color={colors.primary} />
                     <Text style={s.loadingText}>Memuat timeline...</Text>
                 </View>
             ) : (
@@ -63,7 +65,7 @@ export default function TimelineScreen() {
                                         <TouchableOpacity
                                             onPress={selectedCount === unpaidItemCount ? deselectAll : selectAllUnpaid}
                                         >
-                                            <Text style={[s.selectAllText, { color: '#FF9800' }]}>
+                                            <Text style={s.selectAllText}>
                                                 {selectedCount === unpaidItemCount ? 'Hapus Semua' : 'Pilih Semua'}
                                             </Text>
                                         </TouchableOpacity>
@@ -84,7 +86,7 @@ export default function TimelineScreen() {
 
                                 {filteredPeriods.length === 0 ? (
                                     <View style={s.emptyBox}>
-                                        <Ionicons name="documents-outline" size={48} color="#CCC" />
+                                        <Ionicons name="documents-outline" size={48} color={colors.border} />
                                         <Text style={s.emptyTitle}>Tidak ada tagihan {timelineFilter}</Text>
                                     </View>
                                 ) : filteredPeriods.map(period => {
@@ -95,7 +97,7 @@ export default function TimelineScreen() {
                                     const allSelectedInPeriod = unpaidItemsInPeriod.length > 0 && unpaidItemsInPeriod.every(i => selectedItemKeys.has(`${period.id}|${i.fee.id}`));
                                     const someSelectedInPeriod = unpaidItemsInPeriod.length > 0 && unpaidItemsInPeriod.some(i => selectedItemKeys.has(`${period.id}|${i.fee.id}`));
 
-                                    let statusColor = '#4CAF50';
+                                    let statusColor = colors.success;
                                     let statusLabel = 'Lunas';
                                     let statusIcon = 'checkmark-circle';
 
@@ -104,7 +106,7 @@ export default function TimelineScreen() {
                                     } else if (period.status === 'pending') {
                                         statusColor = colors.status.pending.text; statusLabel = 'Menunggu Konfirmasi'; statusIcon = 'time';
                                     } else if (period.status === 'unpaid') {
-                                        statusColor = period.isCurrentMonth ? colors.status.pending.text : '#888';
+                                        statusColor = period.isCurrentMonth ? colors.status.pending.text : colors.textSecondary;
                                         statusLabel = period.isCurrentMonth ? 'Bulan Ini' : 'Belum Dibayar';
                                         statusIcon = 'ellipse-outline';
                                     } else if (period.status === 'partial') {
@@ -125,7 +127,6 @@ export default function TimelineScreen() {
                                                     { marginBottom: 0 },
                                                     (allSelectedInPeriod || someSelectedInPeriod) && s.feeCardSelected,
                                                     period.status === 'paid' && s.feeCardPaid,
-                                                    { backgroundColor: colors.backgroundCard },
                                                 ]}
                                                 onPress={() => toggleExpandPeriod(period.id)}
                                                 activeOpacity={0.7}
@@ -137,8 +138,8 @@ export default function TimelineScreen() {
                                                         onPress={() => togglePeriodSelection(period.id)}
                                                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                                                     >
-                                                        {allSelectedInPeriod && <Ionicons name="checkmark" size={14} color="#FFF" />}
-                                                        {!allSelectedInPeriod && someSelectedInPeriod && <Ionicons name="remove" size={14} color="#1B5E20" />}
+                                                        {allSelectedInPeriod && <Ionicons name="checkmark" size={14} color={colors.textWhite} />}
+                                                        {!allSelectedInPeriod && someSelectedInPeriod && <Ionicons name="remove" size={14} color={colors.primary} />}
                                                     </TouchableOpacity>
                                                 ) : (
                                                     <Ionicons name={statusIcon as any} size={22} color={statusColor} />
@@ -154,17 +155,17 @@ export default function TimelineScreen() {
                                                             </>
                                                         )}
                                                         {periodRejectedCount > 0 && (
-                                                            <Text style={[s.feeStatus, { color: '#D32F2F', fontWeight: '500' }]}>
+                                                            <Text style={[s.feeStatus, { color: colors.danger, fontWeight: '500' }]}>
                                                                 {period.status !== 'rejected' ? '• ' : ''}Pembayaran ditolak {periodRejectedCount}
                                                             </Text>
                                                         )}
                                                     </View>
                                                 </View>
 
-                                                <Text style={[s.feeAmount, period.status === 'paid' && { color: '#999' }]}>
+                                                <Text style={[s.feeAmount, period.status === 'paid' && { color: colors.textSecondary }]}>
                                                     {formatCurrency(period.totalAmount)}
                                                 </Text>
-                                                <Ionicons name={isExpanded ? "chevron-up" : "chevron-down"} size={20} color="#888" style={{ marginLeft: 8 }} />
+                                                <Ionicons name={isExpanded ? "chevron-up" : "chevron-down"} size={20} color={colors.textSecondary} style={{ marginLeft: 8 }} />
                                             </TouchableOpacity>
 
                                             {/* EXPANDED ITEMS LIST */}
@@ -183,27 +184,27 @@ export default function TimelineScreen() {
                                                                                 onPress={() => toggleItemSelection(period.id, item.fee.id)}
                                                                                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                                                                             >
-                                                                                {isItemSelected && <Ionicons name="checkmark" size={12} color="#FFF" />}
+                                                                                {isItemSelected && <Ionicons name="checkmark" size={12} color={colors.textWhite} />}
                                                                             </TouchableOpacity>
                                                                         ) : (
-                                                                            <Ionicons name="checkmark-circle" size={20} color={item.status === 'paid' ? '#4CAF50' : '#FF9800'} style={{ marginRight: 10 }} />
+                                                                            <Ionicons name="checkmark-circle" size={20} color={item.status === 'paid' ? colors.success : colors.warning} style={{ marginRight: 10 }} />
                                                                         )}
                                                                         <View style={{ flex: 1 }}>
-                                                                            <Text style={[s.itemName, (!isItemPayable && item.status !== 'rejected') && { color: '#888' }]}>{item.fee.name}</Text>
+                                                                            <Text style={[s.itemName, (!isItemPayable && item.status !== 'rejected') && { color: colors.textSecondary }]}>{item.fee.name}</Text>
                                                                             <Text style={[
                                                                                 s.itemStatusLabel,
-                                                                                { color: item.status === 'paid' ? colors.status.lunas.text : item.status === 'pending' ? colors.status.pending.text : item.status === 'rejected' ? colors.status.ditolak.text : '#888' }
+                                                                                { color: item.status === 'paid' ? colors.status.lunas.text : item.status === 'pending' ? colors.status.pending.text : item.status === 'rejected' ? colors.status.ditolak.text : colors.textSecondary }
                                                                             ]}>
                                                                                 {item.status === 'paid' ? 'Lunas' : item.status === 'pending' ? 'Menunggu Konfirmasi' : item.status === 'rejected' ? 'Ditolak' : 'Belum Dibayar'}
                                                                             </Text>
 
                                                                             {item.status === 'rejected' && item.rejectionReason && (
-                                                                                <Text style={{ fontSize: 11, color: '#D32F2F', marginTop: 4, fontStyle: 'italic' }}>
+                                                                                <Text style={{ fontSize: 11, color: colors.danger, marginTop: 4, fontStyle: 'italic' }}>
                                                                                     "{item.rejectionReason}"
                                                                                 </Text>
                                                                             )}
                                                                         </View>
-                                                                        <Text style={[s.itemAmountText, (!isItemPayable && item.status !== 'rejected') && { color: '#888' }]}>{formatCurrency(item.amount)}</Text>
+                                                                        <Text style={[s.itemAmountText, (!isItemPayable && item.status !== 'rejected') && { color: colors.textSecondary }]}>{formatCurrency(item.amount)}</Text>
                                                                     </View>
                                                                     {idx < period.items.length - 1 && <View style={s.divider} />}
                                                                 </View>
@@ -218,7 +219,7 @@ export default function TimelineScreen() {
                             </View>
                         ) : (
                             <View style={s.emptyBox}>
-                                <Ionicons name="calendar-clear-outline" size={48} color="#CCC" />
+                                <Ionicons name="calendar-clear-outline" size={48} color={colors.border} />
                                 <Text style={s.emptyTitle}>Belum ada tagihan.</Text>
                             </View>
                         )}
@@ -233,7 +234,7 @@ export default function TimelineScreen() {
                             </View>
                             <TouchableOpacity style={s.payBtn} onPress={handlePay}>
                                 <Text style={s.payBtnText}>Bayar</Text>
-                                <Ionicons name="chevron-forward" size={18} color="#FFF" />
+                                <Ionicons name="chevron-forward" size={18} color={colors.textWhite} />
                             </TouchableOpacity>
                         </View>
                     )}
@@ -243,67 +244,68 @@ export default function TimelineScreen() {
     );
 }
 
-const s = StyleSheet.create({
-    container: { flex: 1 },
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
     center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    loadingText: { marginTop: 12, fontSize: 14, color: '#888' },
+    loadingText: { marginTop: 12, fontSize: 14, color: colors.textSecondary },
     content: { padding: 16, paddingBottom: 40 },
 
     sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, marginTop: 8 },
-    sectionTitle: { fontSize: 16, fontWeight: 'bold', color: '#333' },
-    selectAllText: { fontSize: 13, fontWeight: '600' },
+    sectionTitle: { fontSize: 16, fontWeight: 'bold', color: colors.textPrimary },
+    selectAllText: { fontSize: 13, fontWeight: '600', color: colors.warning },
 
     feeCard: {
         flexDirection: 'row', alignItems: 'center',
         paddingVertical: 14, paddingHorizontal: 16, borderRadius: 12, marginBottom: 8,
-        borderWidth: 1, borderColor: '#E0E0E0',
+        borderWidth: 1, borderColor: colors.border,
+        backgroundColor: colors.surface
     },
-    feeCardSelected: { borderColor: '#4CAF50', backgroundColor: '#F1F8E9' },
-    feeCardPaid: { borderColor: '#EEE', opacity: 0.8 },
+    feeCardSelected: { borderColor: colors.primary, backgroundColor: colors.primarySubtle },
+    feeCardPaid: { borderColor: colors.border, opacity: 0.8 },
 
     checkbox: {
-        width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: '#1B5E20',
-        justifyContent: 'center', alignItems: 'center', marginRight: 12, backgroundColor: '#FFF',
+        width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: colors.primary,
+        justifyContent: 'center', alignItems: 'center', marginRight: 12, backgroundColor: 'transparent',
     },
-    checkboxChecked: { backgroundColor: '#1B5E20' },
+    checkboxChecked: { backgroundColor: colors.primary },
 
     feeInfo: { flex: 1, marginLeft: 12 },
-    feeName: { fontSize: 14, fontWeight: '600', color: '#333' },
+    feeName: { fontSize: 14, fontWeight: '600', color: colors.textPrimary },
     feeMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 },
     feeStatus: { fontSize: 11, fontWeight: '500' },
-    feeAmount: { fontSize: 15, fontWeight: 'bold', color: '#1B5E20' },
+    feeAmount: { fontSize: 15, fontWeight: 'bold', color: colors.primary },
 
-    expandedBox: { marginTop: 12, borderTopWidth: 1, borderTopColor: '#EEE', paddingTop: 8, paddingHorizontal: 16, paddingBottom: 12, backgroundColor: '#FAFAFA', borderBottomLeftRadius: 12, borderBottomRightRadius: 12 },
+    expandedBox: { marginTop: 12, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 8, paddingHorizontal: 16, paddingBottom: 12, backgroundColor: colors.surface, borderBottomLeftRadius: 12, borderBottomRightRadius: 12 },
     itemRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 8 },
     itemCheckbox: { width: 18, height: 18, marginRight: 10, borderRadius: 4 },
-    itemName: { flex: 1, fontSize: 13, color: '#333' },
-    itemAmountText: { fontSize: 13, fontWeight: 'bold', color: '#1B5E20' },
+    itemName: { flex: 1, fontSize: 13, color: colors.textPrimary },
+    itemAmountText: { fontSize: 13, fontWeight: 'bold', color: colors.primary },
     itemsContainer: {
-        backgroundColor: '#F9F9F9', borderRadius: 12, paddingVertical: 4, paddingHorizontal: 12,
-        marginTop: 4, borderWidth: 1, borderColor: '#EEE'
+        backgroundColor: colors.surfaceSubtle, borderRadius: 12, paddingVertical: 4, paddingHorizontal: 12,
+        marginTop: 4, borderWidth: 1, borderColor: colors.border
     },
     itemStatusLabel: { fontSize: 11, marginTop: 2, fontWeight: '500' },
-    divider: { height: 1, backgroundColor: '#EEE', marginVertical: 8 },
+    divider: { height: 1, backgroundColor: colors.border, marginVertical: 8 },
 
     payContainer: {
         flexDirection: 'row', alignItems: 'center', padding: 16, margin: 16,
-        backgroundColor: '#FFF', borderRadius: 16,
+        backgroundColor: colors.surface, borderRadius: 16,
         ...Platform.select({
             ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6 },
             android: { elevation: 3 },
         }),
     },
     payInfo: { flex: 1 },
-    payInfoLabel: { fontSize: 12, color: '#888' },
-    payInfoAmount: { fontSize: 18, fontWeight: 'bold', color: '#1B5E20' },
-    payBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#1B5E20', paddingHorizontal: 24, paddingVertical: 14, borderRadius: 14 },
-    payBtnText: { fontSize: 15, fontWeight: 'bold', color: '#FFF' },
-    emptyBox: { alignItems: 'center', paddingVertical: 30, backgroundColor: '#FFF', borderRadius: 16, padding: 20 },
-    emptyTitle: { fontSize: 16, fontWeight: 'bold', color: '#333', marginTop: 12 },
+    payInfoLabel: { fontSize: 12, color: colors.textSecondary },
+    payInfoAmount: { fontSize: 18, fontWeight: 'bold', color: colors.primary },
+    payBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.primary, paddingHorizontal: 24, paddingVertical: 14, borderRadius: 14 },
+    payBtnText: { fontSize: 15, fontWeight: 'bold', color: colors.textWhite },
+    emptyBox: { alignItems: 'center', paddingVertical: 30, backgroundColor: colors.surface, borderRadius: 16, padding: 20 },
+    emptyTitle: { fontSize: 16, fontWeight: 'bold', color: colors.textPrimary, marginTop: 12 },
 
     filterRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
-    filterChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: '#E8F5E9', borderWidth: 1, borderColor: 'transparent' },
-    filterChipActive: { backgroundColor: '#1B5E20' },
-    filterText: { fontSize: 13, color: '#1B5E20', fontWeight: '600' },
-    filterTextActive: { color: '#FFF' },
+    filterChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: colors.surfaceSubtle, borderWidth: 1, borderColor: 'transparent' },
+    filterChipActive: { backgroundColor: colors.primary },
+    filterText: { fontSize: 13, color: colors.primary, fontWeight: '600' },
+    filterTextActive: { color: colors.textWhite },
 });

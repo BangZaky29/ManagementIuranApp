@@ -1,11 +1,12 @@
+import { ThemeColors } from '../../../theme/AppTheme';
 import { StyleSheet, Platform } from 'react-native';
 
-export const styles = StyleSheet.create({
+export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F8FAF8' },
 
     // Summary
     summaryContainer: {
-        marginHorizontal: 20, marginTop: 20, backgroundColor: '#FFF',
+        marginHorizontal: 20, marginTop: 20, backgroundColor: colors.surface,
         borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#F0F0F0',
         ...Platform.select({
             ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8 },
@@ -35,14 +36,14 @@ export const styles = StyleSheet.create({
     filterRow: { flexDirection: 'row', gap: 8 },
     filterChip: {
         paddingHorizontal: 14, paddingVertical: 8,
-        borderRadius: 20, backgroundColor: '#FFF',
+        borderRadius: 20, backgroundColor: colors.surface,
         borderWidth: 1, borderColor: '#E0E0E0',
     },
     filterChipActive: {
         backgroundColor: '#1B5E20', borderColor: '#1B5E20',
     },
     filterChipText: { fontSize: 12, fontWeight: '600', color: '#666' },
-    filterChipTextActive: { color: '#FFF' },
+    filterChipTextActive: { color: colors.textWhite },
 
     // Download Section
     downloadSection: {
@@ -60,11 +61,11 @@ export const styles = StyleSheet.create({
     },
     pdfBtn: { backgroundColor: '#C62828' },
     excelBtn: { backgroundColor: '#1B5E20' },
-    downloadBtnText: { fontSize: 14, fontWeight: '700', color: '#FFF' },
+    downloadBtnText: { fontSize: 14, fontWeight: '700', color: colors.textWhite },
 
     // Backup Section (future)
     backupSection: {
-        marginHorizontal: 20, marginTop: 20, backgroundColor: '#FFF',
+        marginHorizontal: 20, marginTop: 20, backgroundColor: colors.surface,
         borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#F0F0F0',
     },
     backupTitle: { fontSize: 14, fontWeight: '700', color: '#555', marginBottom: 4 },
@@ -79,7 +80,7 @@ export const styles = StyleSheet.create({
         }),
     },
     backupBtnDisabled: { backgroundColor: '#CCC' },
-    backupBtnText: { fontSize: 14, fontWeight: '700', color: '#FFF' },
+    backupBtnText: { fontSize: 14, fontWeight: '700', color: colors.textWhite },
 
     // Auto backup toggle
     autoBackupRow: {
@@ -102,7 +103,7 @@ export const styles = StyleSheet.create({
     },
     previewCount: { fontSize: 12, color: '#999' },
     previewCard: {
-        backgroundColor: '#FFF', borderRadius: 12, padding: 14,
+        backgroundColor: colors.surface, borderRadius: 12, padding: 14,
         borderWidth: 1, borderColor: '#F0F0F0', marginBottom: 8,
     },
     previewName: { fontSize: 14, fontWeight: '700', color: '#333' },

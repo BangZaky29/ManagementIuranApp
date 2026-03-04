@@ -181,7 +181,7 @@ export default function IuranScreen() {
                                                     { marginBottom: 0 },
                                                     (allSelectedInPeriod || someSelectedInPeriod) && s.feeCardSelected,
                                                     period.status === 'paid' && s.feeCardPaid,
-                                                    { backgroundColor: colors.backgroundCard },
+                                                    { backgroundColor: colors.surface },
                                                 ]}
                                                 onPress={() => toggleExpandPeriod(period.id)}
                                                 activeOpacity={0.7}

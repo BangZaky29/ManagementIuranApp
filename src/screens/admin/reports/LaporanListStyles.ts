@@ -1,10 +1,11 @@
 import { StyleSheet, Platform } from 'react-native';
+import { ThemeColors } from '../../../theme/AppTheme';
 import { Colors } from '../../../constants/Colors';
 
-export const styles = StyleSheet.create({
+export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F5F7FA',
+        backgroundColor: colors.background,
     },
     listContent: {
         padding: 16,
@@ -28,7 +29,7 @@ export const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         paddingHorizontal: 12,
         paddingVertical: 10,
         borderRadius: 8,
@@ -37,12 +38,12 @@ export const styles = StyleSheet.create({
     },
     dropdownText: {
         fontSize: 13,
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
         fontWeight: '500',
     },
     dropdownLabel: {
         fontSize: 10,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
         marginBottom: 2,
     },
 
@@ -53,7 +54,7 @@ export const styles = StyleSheet.create({
         justifyContent: 'flex-end',
     },
     modalContent: {
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         paddingBottom: Platform.OS === 'ios' ? 40 : 20,
@@ -70,7 +71,7 @@ export const styles = StyleSheet.create({
     modalTitle: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
     },
     modalClose: {
         padding: 4,
@@ -86,17 +87,17 @@ export const styles = StyleSheet.create({
     },
     modalItemText: {
         fontSize: 14,
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
     },
     modalItemActive: {
         backgroundColor: '#F0F7FF',
     },
     modalItemTextActive: {
-        color: Colors.primary,
+        color: colors.primary,
         fontWeight: 'bold',
     },
     card: {
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         borderRadius: 12,
         padding: 12,
         marginBottom: 10,
@@ -119,12 +120,12 @@ export const styles = StyleSheet.create({
     userName: {
         fontSize: 13,
         fontWeight: 'bold',
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
         marginBottom: 2,
     },
     dateText: {
         fontSize: 10,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
     },
     statusBadge: {
         paddingHorizontal: 6,
@@ -133,7 +134,7 @@ export const styles = StyleSheet.create({
         marginLeft: 8,
     },
     statusText: {
-        color: '#FFF',
+        color: colors.textWhite,
         fontSize: 9,
         fontWeight: 'bold',
         textTransform: 'uppercase',
@@ -144,18 +145,18 @@ export const styles = StyleSheet.create({
     reportTitle: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
         marginBottom: 4,
     },
     reportCategory: {
         fontSize: 12,
-        color: Colors.primary,
+        color: colors.primary,
         fontWeight: '600',
         marginBottom: 8,
     },
     reportDescription: {
         fontSize: 14,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
         lineHeight: 20,
     },
     reportImage: {
@@ -172,7 +173,7 @@ export const styles = StyleSheet.create({
     },
     locationText: {
         fontSize: 12,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
         marginLeft: 4,
     },
     cardFooter: {
@@ -191,7 +192,7 @@ export const styles = StyleSheet.create({
         marginLeft: 8,
     },
     actionText: {
-        color: '#FFF',
+        color: colors.textWhite,
         fontSize: 12,
         fontWeight: 'bold',
         marginLeft: 4,
@@ -203,12 +204,12 @@ export const styles = StyleSheet.create({
     emptyStateText: {
         marginTop: 12,
         fontSize: 16,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
     },
     headerTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
     },
     headerBubble: {
         minWidth: 20,
@@ -228,14 +229,14 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 12,
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         borderRadius: 10,
         marginTop: 10,
         borderWidth: 1,
         borderColor: '#E0E0E0',
     },
     paginationBtnText: {
-        color: Colors.primary,
+        color: colors.primary,
         fontSize: 14,
         fontWeight: '600',
         marginRight: 4,

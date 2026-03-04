@@ -1,17 +1,18 @@
 import { StyleSheet, Platform } from 'react-native';
+import { ThemeColors } from '../../../theme/AppTheme';
 
-export const styles = StyleSheet.create({
+export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F8FAF8' },
     header: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
         paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#EEE',
-        backgroundColor: '#FFF'
+        backgroundColor: colors.surface
     },
     headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#1B5E20' },
 
     listContent: { padding: 20, paddingBottom: 100 },
     card: {
-        backgroundColor: '#FFF', borderRadius: 16, marginBottom: 16, overflow: 'hidden',
+        backgroundColor: colors.surface, borderRadius: 16, marginBottom: 16, overflow: 'hidden',
         borderWidth: 1, borderColor: '#EEE',
         ...Platform.select({
             ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8 },
@@ -48,7 +49,7 @@ export const styles = StyleSheet.create({
         flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end'
     },
     modalContent: {
-        backgroundColor: '#FFF', borderTopLeftRadius: 24, borderTopRightRadius: 24,
+        backgroundColor: colors.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24,
         padding: 24, paddingBottom: Platform.OS === 'ios' ? 40 : 24
     },
     modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
@@ -57,7 +58,7 @@ export const styles = StyleSheet.create({
     inputGroup: { marginBottom: 16 },
     label: { fontSize: 14, fontWeight: '600', color: '#666', marginBottom: 8 },
     input: {
-        backgroundColor: '#F5F5F5', borderRadius: 12, padding: 14, fontSize: 15,
+        backgroundColor: colors.background, borderRadius: 12, padding: 14, fontSize: 15,
         borderWidth: 1, borderColor: '#EEE'
     },
 
@@ -81,16 +82,16 @@ export const styles = StyleSheet.create({
         backgroundColor: '#1B5E20', borderRadius: 12, padding: 16, alignItems: 'center',
         marginTop: 10
     },
-    submitBtnText: { color: '#FFF', fontSize: 16, fontWeight: 'bold' },
+    submitBtnText: { color: colors.textWhite, fontSize: 16, fontWeight: 'bold' },
     cancelBtn: {
-        backgroundColor: '#F5F5F5', borderRadius: 12, padding: 16, alignItems: 'center',
+        backgroundColor: colors.background, borderRadius: 12, padding: 16, alignItems: 'center',
         marginTop: 10, borderWidth: 1, borderColor: '#EEE'
     },
     cancelBtnText: { color: '#666', fontSize: 16, fontWeight: 'bold' },
 
     dateInputRow: { flexDirection: 'row', gap: 12 },
     dateInputBtn: {
-        flex: 1, backgroundColor: '#F5F5F5', borderRadius: 12, padding: 14,
+        flex: 1, backgroundColor: colors.background, borderRadius: 12, padding: 14,
         borderWidth: 1, borderColor: '#EEE', flexDirection: 'row', alignItems: 'center', gap: 10
     },
     dateInputText: { fontSize: 14, color: '#333', fontWeight: '500' },

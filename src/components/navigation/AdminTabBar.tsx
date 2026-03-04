@@ -9,7 +9,7 @@ export const AdminTabBar = ({ state, descriptors, navigation }: MaterialTopTabBa
     const { colors } = useTheme();
 
     return (
-        <View style={[styles.tabBarContainer, { backgroundColor: '#FFFFFF' }]}>
+        <View style={[styles.tabBarContainer, { backgroundColor: colors.surface }]}>
             {state.routes.map((route, index) => {
                 const { options } = descriptors[route.key];
                 const isFocused = state.index === index;
@@ -61,10 +61,9 @@ export const AdminTabBar = ({ state, descriptors, navigation }: MaterialTopTabBa
                             <Ionicons
                                 name={iconName}
                                 size={24}
-                                // Use Primary Color (Green) for active, Gray for inactive
-                                color={isFocused ? '#2E7D32' : '#9E9E9E'}
+                                color={isFocused ? colors.primary : colors.textSecondary}
                             />
-                            {isFocused && <View style={[styles.activeDot, { backgroundColor: '#2E7D32' }]} />}
+                            {isFocused && <View style={[styles.activeDot, { backgroundColor: colors.primary }]} />}
                         </View>
                     </TouchableOpacity>
                 );

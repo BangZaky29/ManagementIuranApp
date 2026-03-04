@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StatusBar, Image, ActivityIndicator, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Constants from 'expo-constants';
@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Animated, { useAnimatedStyle, withTiming, useSharedValue } from 'react-native-reanimated';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { useSecurityProfileViewModel } from './SecurityProfileViewModel';
-import { styles } from './SecurityProfileStyles';
+import { createStyles } from './SecurityProfileStyles';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { FeatureFlags } from '../../../constants/FeatureFlags';
 
@@ -29,7 +29,7 @@ const ThemeToggle = ({ isDark, onToggle, colors }: { isDark: boolean; onToggle: 
                 width: 48,
                 height: 28,
                 borderRadius: 14,
-                backgroundColor: isDark ? colors.green3 : '#D1D5DB',
+                backgroundColor: isDark ? colors.success : colors.border,
                 justifyContent: 'center',
                 padding: 2,
             }}
@@ -41,7 +41,7 @@ const ThemeToggle = ({ isDark, onToggle, colors }: { isDark: boolean; onToggle: 
                         width: 24,
                         height: 24,
                         borderRadius: 12,
-                        backgroundColor: isDark ? colors.accent : '#FFFFFF',
+                        backgroundColor: colors.surface,
                         elevation: 2,
                         shadowColor: '#000',
                         shadowOffset: { width: 0, height: 1 },
@@ -70,11 +70,12 @@ export default function SecurityProfileScreen() {
     } = useSecurityProfileViewModel();
 
     const { isDark, toggleTheme, colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
 
     const renderInfoItem = (icon: string, label: string, value: string) => (
         <View style={styles.infoRow}>
             <View style={styles.infoIconBox}>
-                <Ionicons name={icon as any} size={20} color="#0D47A1" />
+                <Ionicons name={icon as any} size={20} color={colors.primary} />
             </View>
             <View style={{ flex: 1 }}>
                 <Text style={styles.infoLabel}>{label}</Text>
@@ -94,7 +95,7 @@ export default function SecurityProfileScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#F0F4F8" />
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
 
             {/* Header Aligned with Guest Book */}
             <View style={styles.header}>
@@ -108,20 +109,20 @@ export default function SecurityProfileScreen() {
                     <TouchableOpacity onPress={handleAvatarUpdate} disabled={isUploading} style={{ position: 'relative' }}>
                         <View style={styles.avatarContainer}>
                             {isUploading ? (
-                                <ActivityIndicator color="#0D47A1" />
+                                <ActivityIndicator color={colors.primary} />
                             ) : user.avatarUrl ? (
                                 <Image source={{ uri: user.avatarUrl }} style={{ width: '100%', height: '100%', borderRadius: 50 }} />
                             ) : (
-                                <Ionicons name="person" size={50} color="#90CAF9" />
+                                <Ionicons name="person" size={50} color={colors.primary} />
                             )}
                         </View>
                         {/* Camera Icon Overlay */}
                         <View style={{
                             position: 'absolute', bottom: 16, right: 0,
-                            backgroundColor: '#0D47A1', borderRadius: 16, padding: 6,
-                            borderWidth: 2, borderColor: '#FFF'
+                            backgroundColor: colors.primary, borderRadius: 16, padding: 6,
+                            borderWidth: 2, borderColor: colors.surface
                         }}>
-                            <Ionicons name="camera" size={14} color="#FFF" />
+                            <Ionicons name="camera" size={14} color={colors.textWhite} />
                         </View>
                     </TouchableOpacity>
                     <Text style={styles.userName}>{user.name}</Text>
@@ -166,7 +167,7 @@ export default function SecurityProfileScreen() {
 
                 {/* Logout Button */}
                 <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                    <Ionicons name="log-out-outline" size={20} color="#C62828" />
+                    <Ionicons name="log-out-outline" size={20} color={colors.danger} />
                     <Text style={styles.logoutText}>Keluar Aplikasi</Text>
                 </TouchableOpacity>
 

@@ -41,7 +41,7 @@ export default function AllNewsScreen() {
 
     const renderItem = ({ item }: { item: NewsItem }) => (
         <TouchableOpacity
-            style={[styles.newsCard, { backgroundColor: colors.backgroundCard }]}
+            style={[styles.newsCard, { backgroundColor: colors.surface }]}
             onPress={() => handleNewsClick(item.id)}
             activeOpacity={0.7}
         >

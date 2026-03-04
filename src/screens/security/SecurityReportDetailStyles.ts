@@ -1,23 +1,22 @@
 import { StyleSheet, Platform, Dimensions } from 'react-native';
-// Version: 1.0.1 - Force refresh for IDE
-import { Colors } from '../../constants/Colors';
+import { ThemeColors } from '../../theme/AppTheme';
 
 const { width } = Dimensions.get('window');
 
-export const styles = StyleSheet.create({
+export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F8F9FA',
+        backgroundColor: colors.background,
     },
     scrollContent: {
         paddingBottom: 100,
     },
     reporterCard: {
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         padding: 16,
         marginBottom: 12,
         borderBottomWidth: 1,
-        borderBottomColor: '#F0F0F0',
+        borderBottomColor: colors.border,
     },
     reporterInfo: {
         flexDirection: 'row',
@@ -30,22 +29,22 @@ export const styles = StyleSheet.create({
         marginRight: 12,
     },
     avatarPlaceholder: {
-        backgroundColor: Colors.primary,
+        backgroundColor: colors.primary,
         justifyContent: 'center',
         alignItems: 'center',
     },
     reporterName: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#333',
+        color: colors.textPrimary,
     },
     reporterAddress: {
         fontSize: 13,
-        color: '#666',
+        color: colors.textSecondary,
         marginTop: 2,
     },
     contentCard: {
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         padding: 16,
         marginBottom: 12,
     },
@@ -56,29 +55,29 @@ export const styles = StyleSheet.create({
         marginBottom: 12,
     },
     categoryBadge: {
-        backgroundColor: '#E8EAF6',
+        backgroundColor: colors.primarySubtle,
         paddingHorizontal: 10,
         paddingVertical: 4,
         borderRadius: 6,
     },
     categoryText: {
         fontSize: 12,
-        color: '#3F51B5',
+        color: colors.primary,
         fontWeight: '700',
     },
     timestamp: {
         fontSize: 12,
-        color: '#999',
+        color: colors.textSecondary,
     },
     reportTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#1A1A1A',
+        color: colors.textPrimary,
         marginBottom: 8,
     },
     reportDesc: {
         fontSize: 15,
-        color: '#444',
+        color: colors.textSecondary,
         lineHeight: 22,
         marginBottom: 16,
     },
@@ -88,7 +87,7 @@ export const styles = StyleSheet.create({
         borderRadius: 16,
         overflow: 'hidden',
         marginBottom: 16,
-        backgroundColor: '#F0F0F0',
+        backgroundColor: colors.surfaceSubtle,
     },
     reportImage: {
         width: '100%',
@@ -109,27 +108,27 @@ export const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         padding: 12,
-        backgroundColor: '#F0F7FF',
+        backgroundColor: colors.primarySubtle,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: '#D0E4FF',
+        borderColor: colors.border,
     },
     locationText: {
         flex: 1,
         fontSize: 13,
-        color: Colors.primary,
+        color: colors.primary,
         fontWeight: '600',
         marginHorizontal: 8,
     },
     timelineCard: {
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         padding: 16,
         marginBottom: 20,
     },
     sectionTitle: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#333',
+        color: colors.textPrimary,
         marginBottom: 20,
     },
     timeline: {
@@ -152,24 +151,24 @@ export const styles = StyleSheet.create({
         zIndex: 2,
     },
     dotActive: {
-        backgroundColor: Colors.primary,
+        backgroundColor: colors.primary,
     },
     dotInactive: {
-        backgroundColor: '#E5E7EB',
+        backgroundColor: colors.border,
     },
     dotDanger: {
-        backgroundColor: Colors.danger,
+        backgroundColor: colors.danger,
     },
     timelineLine: {
         position: 'absolute',
         top: 20,
         width: 2,
         bottom: -24,
-        backgroundColor: '#E5E7EB',
+        backgroundColor: colors.border,
         zIndex: 1,
     },
     lineActive: {
-        backgroundColor: Colors.primary,
+        backgroundColor: colors.primary,
     },
     timelineContent: {
         flex: 1,
@@ -179,16 +178,16 @@ export const styles = StyleSheet.create({
         flex: 1,
         fontSize: 15,
         fontWeight: 'bold',
-        color: '#333',
+        color: colors.textPrimary,
         marginRight: 8,
     },
     timelineSublabel: {
         fontSize: 13,
-        color: '#666',
+        color: colors.textSecondary,
         marginTop: 4,
     },
     textInactive: {
-        color: '#9CA3AF',
+        color: colors.textSecondary,
     },
     proofBox: {
         marginTop: 12,
@@ -197,7 +196,7 @@ export const styles = StyleSheet.create({
         borderRadius: 12,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: '#EEE',
+        borderColor: colors.border,
     },
     proofImage: {
         width: '100%',
@@ -225,12 +224,12 @@ export const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: 'white',
+        backgroundColor: colors.surface,
         flexDirection: 'row',
         padding: 16,
         paddingBottom: Platform.OS === 'ios' ? 32 : 16,
         borderTopWidth: 1,
-        borderTopColor: '#F0F0F0',
+        borderTopColor: colors.border,
         gap: 12,
     },
     mainBtn: {
@@ -247,14 +246,14 @@ export const styles = StyleSheet.create({
         height: 52,
         borderRadius: 16,
         borderWidth: 1.5,
-        borderColor: Colors.danger,
+        borderColor: colors.danger,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         gap: 6,
     },
     btnLabel: {
-        color: 'white',
+        color: colors.textWhite,
         fontSize: 15,
         fontWeight: 'bold',
     },
@@ -265,28 +264,29 @@ export const styles = StyleSheet.create({
         padding: 24,
     },
     modalContent: {
-        backgroundColor: 'white',
+        backgroundColor: colors.surface,
         borderRadius: 24,
         padding: 24,
     },
     modalTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#333',
+        color: colors.textPrimary,
         marginBottom: 8,
     },
     modalSubtitle: {
         fontSize: 14,
-        color: '#666',
+        color: colors.textSecondary,
         marginBottom: 20,
     },
     modalInput: {
-        backgroundColor: '#F9FAFB',
+        backgroundColor: colors.surfaceSubtle,
         borderWidth: 1,
-        borderColor: '#E5E7EB',
+        borderColor: colors.border,
         borderRadius: 12,
         padding: 12,
         fontSize: 14,
+        color: colors.textPrimary,
         textAlignVertical: 'top',
         marginBottom: 20,
     },
@@ -302,30 +302,30 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     modalBtnCancel: {
-        backgroundColor: '#F3F4F6',
+        backgroundColor: colors.surfaceSubtle,
     },
     modalBtnConfirm: {
-        backgroundColor: Colors.danger,
+        backgroundColor: colors.danger,
     },
     modalBtnText: {
         fontSize: 14,
         fontWeight: 'bold',
-        color: '#666',
+        color: colors.textSecondary,
     },
     pickImageBtn: {
         height: 150,
         borderRadius: 16,
         borderWidth: 2,
-        borderColor: Colors.primary,
+        borderColor: colors.primary,
         borderStyle: 'dashed',
-        backgroundColor: '#F0F7FF',
+        backgroundColor: colors.primarySubtle,
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 20,
     },
     pickImageText: {
         marginTop: 8,
-        color: Colors.primary,
+        color: colors.primary,
         fontWeight: 'bold',
     },
     imagePreviewBox: {

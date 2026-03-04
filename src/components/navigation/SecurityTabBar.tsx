@@ -8,7 +8,7 @@ export const SecurityTabBar = ({ state, descriptors, navigation }: MaterialTopTa
     const { colors } = useTheme();
 
     return (
-        <View style={[styles.tabBarContainer, { backgroundColor: '#FFFFFF' }]}>
+        <View style={[styles.tabBarContainer, { backgroundColor: colors.surface }]}>
             {state.routes.map((route, index) => {
                 const { options } = descriptors[route.key];
                 const isFocused = state.index === index;
@@ -61,10 +61,9 @@ export const SecurityTabBar = ({ state, descriptors, navigation }: MaterialTopTa
                             <Ionicons
                                 name={iconName}
                                 size={24}
-                                // Use Primary Color (Blue) for active, Gray for inactive
-                                color={isFocused ? '#0D47A1' : '#9E9E9E'}
+                                color={isFocused ? colors.primary : colors.textSecondary}
                             />
-                            {isFocused && <View style={[styles.activeDot, { backgroundColor: '#0D47A1' }]} />}
+                            {isFocused && <View style={[styles.activeDot, { backgroundColor: colors.primary }]} />}
                         </View>
                     </TouchableOpacity>
                 );

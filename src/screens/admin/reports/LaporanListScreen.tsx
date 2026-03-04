@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../../lib/supabaseConfig';
-import { styles } from './LaporanListStyles';
+import { createStyles } from './LaporanListStyles';
 import { CustomHeader } from '../../../components/common/CustomHeader';
 import { Colors } from '../../../constants/Colors';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
@@ -31,6 +31,7 @@ const STATUSES = ['Semua', 'Menunggu', 'Diproses', 'Selesai', 'Ditolak'];
 
 export default function LaporanListScreen() {
     const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
     const router = useRouter();
     const [reports, setReports] = useState<Report[]>([]);
     const [isLoading, setIsLoading] = useState(true);

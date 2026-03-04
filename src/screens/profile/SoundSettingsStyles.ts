@@ -1,5 +1,5 @@
 import { StyleSheet, Platform } from 'react-native';
-import { ThemeColors } from '../../constants/Colors';
+import { ThemeColors } from '../../theme/AppTheme';
 
 export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1 },
@@ -22,7 +22,7 @@ export const createStyles = (colors: ThemeColors) => StyleSheet.create({
         padding: 16,
         borderRadius: 16,
         marginBottom: 20,
-        backgroundColor: colors.backgroundCard,
+        backgroundColor: colors.surface,
         ...Platform.select({
             ios: {
                 shadowColor: '#000',

@@ -1,10 +1,10 @@
 import { StyleSheet, Platform } from 'react-native';
-import { Colors } from '../../../constants/Colors';
+import { ThemeColors } from '../../../theme/AppTheme';
 
-export const LaporanStyles = StyleSheet.create({
+export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.green1,
+        backgroundColor: colors.background,
     },
     content: {
         padding: 20,
@@ -25,33 +25,33 @@ export const LaporanStyles = StyleSheet.create({
         paddingVertical: 8,
         paddingHorizontal: 16,
         borderRadius: 20,
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         borderWidth: 1,
-        borderColor: Colors.green2,
+        borderColor: colors.border,
     },
     filterTabActive: {
-        backgroundColor: Colors.green5,
-        borderColor: Colors.green5,
+        backgroundColor: colors.primary,
+        borderColor: colors.primary,
     },
     filterText: {
         fontSize: 13,
         fontWeight: '600',
-        color: Colors.green5,
+        color: colors.primary,
     },
     filterTextActive: {
-        color: Colors.white,
+        color: colors.textWhite,
     },
 
     // Report List
     reportItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         padding: 16,
         borderRadius: 16,
         marginBottom: 12,
         borderWidth: 1,
-        borderColor: 'rgba(0,0,0,0.05)',
+        borderColor: colors.border,
         ...Platform.select({
             ios: {
                 shadowColor: '#000',
@@ -71,7 +71,7 @@ export const LaporanStyles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 12,
-        backgroundColor: '#F1F8E9',
+        backgroundColor: colors.surfaceSubtle,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 16,
@@ -82,12 +82,12 @@ export const LaporanStyles = StyleSheet.create({
     reportTitle: {
         fontSize: 15,
         fontWeight: 'bold',
-        color: Colors.green5,
+        color: colors.textPrimary,
         marginBottom: 4,
     },
     reportMeta: {
         fontSize: 12,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
     },
     statusBadge: {
         paddingHorizontal: 10,
@@ -107,12 +107,12 @@ export const LaporanStyles = StyleSheet.create({
         width: 56,
         height: 56,
         borderRadius: 28,
-        backgroundColor: Colors.green3,
+        backgroundColor: colors.primary,
         justifyContent: 'center',
         alignItems: 'center',
         ...Platform.select({
             ios: {
-                shadowColor: Colors.green3,
+                shadowColor: colors.primary,
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.3,
                 shadowRadius: 8,
@@ -134,6 +134,6 @@ export const LaporanStyles = StyleSheet.create({
     emptyText: {
         marginTop: 12,
         fontSize: 14,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
     },
 });

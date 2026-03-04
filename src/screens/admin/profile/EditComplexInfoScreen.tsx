@@ -1,3 +1,4 @@
+import { useTheme } from '../../../contexts/ThemeContext';
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -5,12 +6,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../../contexts/AuthContext';
 import { CustomHeader } from '../../../components/common/CustomHeader';
-import { AdminProfileStyles as styles } from './AdminProfileStyles';
+import { createStyles } from './AdminProfileStyles';
 import { Colors } from '../../../constants/Colors';
 import { StatusBar } from 'expo-status-bar';
 import { fetchComplexInfo, upsertComplexInfo } from '../../../services/complex';
 
 export default function EditComplexInfoScreen() {
+    const { colors } = useTheme();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
     const router = useRouter();
     const { profile } = useAuth();
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
     View, Text, TouchableOpacity, FlatList,
     StatusBar, Modal, TextInput, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, Image
@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useGuestBookViewModel } from './GuestBookViewModel';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
-import { styles } from './GuestBookStyles';
+import { createStyles } from './GuestBookStyles';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { CustomHeader } from '../../../components/common/CustomHeader';
 import { useTheme } from '../../../contexts/ThemeContext';
@@ -17,12 +17,13 @@ const VISITOR_TYPES = ['tamu', 'gojek', 'kurir', 'pekerja', 'lainnya'] as const;
 export default function GuestBookScreen() {
     const { colors } = useTheme();
     const vm = useGuestBookViewModel();
+    const styles = useMemo(() => createStyles(colors), [colors]);
 
     if (vm.isLoading && vm.activeGuests.length === 0) {
         return (
             <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <ActivityIndicator size="large" color="#0D47A1" />
+                    <ActivityIndicator size="large" color={colors.primary} />
                 </View>
             </SafeAreaView>
         );
@@ -30,7 +31,7 @@ export default function GuestBookScreen() {
 
     return (
         <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
             <CustomHeader title="Buku Tamu" showBack={true} />
 
             {/* Filter Tabs */}
@@ -83,7 +84,7 @@ export default function GuestBookScreen() {
                 onRefresh={() => vm.loadData(true)}
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
-                        <Ionicons name="document-text-outline" size={64} color="#B0BEC5" />
+                        <Ionicons name="document-text-outline" size={64} color={colors.textSecondary} />
                         <Text style={styles.emptyTitle}>
                             {vm.activeTab === 'Aktif' ? 'Tidak Ada Tamu Aktif' : 'Riwayat Kosong'}
                         </Text>
@@ -106,19 +107,19 @@ export default function GuestBookScreen() {
                                     <Text style={styles.showMoreText}>
                                         Lihat Lebih Banyak (+{Math.min(3, currentData.length - vm.visibleHistoryCount)})
                                     </Text>
-                                    <Ionicons name="chevron-down" size={16} color="#0D47A1" />
+                                    <Ionicons name="chevron-down" size={16} color={colors.primary} />
                                 </TouchableOpacity>
                             )}
 
                             {vm.visibleHistoryCount > 3 && (
                                 <TouchableOpacity
-                                    style={[styles.showMoreBtn, { borderColor: '#E57373', backgroundColor: '#FFEBEE' }]}
+                                    style={[styles.showMoreBtn, { borderColor: colors.danger, backgroundColor: colors.danger + '1A' }]}
                                     onPress={vm.handleCollapseHistory}
                                 >
-                                    <Text style={[styles.showMoreText, { color: '#D32F2F' }]}>
+                                    <Text style={[styles.showMoreText, { color: colors.danger }]}>
                                         Lihat Lebih Sedikit
                                     </Text>
-                                    <Ionicons name="chevron-up" size={16} color="#D32F2F" />
+                                    <Ionicons name="chevron-up" size={16} color={colors.danger} />
                                 </TouchableOpacity>
                             )}
                         </View>
@@ -156,7 +157,7 @@ export default function GuestBookScreen() {
                                 <Text style={styles.timeText}>
                                     {item.status === 'pending' ? 'Dibuat Pada' : (item.status === 'completed' ? 'Keluar Pukul' : 'Masuk Pukul')}
                                 </Text>
-                                <Text style={[styles.timeText, { fontWeight: 'bold', color: '#333' }]}>
+                                <Text style={[styles.timeText, { fontWeight: 'bold', color: colors.textPrimary }]}>
                                     {item.status === 'pending'
                                         ? formatDateTimeSafe(item.created_at)
                                         : (item.status === 'completed'
@@ -172,7 +173,7 @@ export default function GuestBookScreen() {
                                 <Text style={styles.detailValue} numberOfLines={1}>
                                     {item.profiles?.full_name || 'Tidak diketahui'}
                                 </Text>
-                                <Text style={{ fontSize: 13, color: '#666', marginTop: 2 }} numberOfLines={1}>
+                                <Text style={{ fontSize: 13, color: colors.textSecondary, marginTop: 2 }} numberOfLines={1}>
                                     {item.profiles ? `${item.profiles.rt_rw || '?'}` : ''}
                                 </Text>
                             </View>
@@ -195,7 +196,7 @@ export default function GuestBookScreen() {
                                 </TouchableOpacity>
                             ) : (
                                 <TouchableOpacity style={styles.checkoutBtn} onPress={() => vm.handleCheckOut(item)}>
-                                    <Ionicons name="exit-outline" size={18} color="#C62828" />
+                                    <Ionicons name="exit-outline" size={18} color={colors.danger} />
                                     <Text style={styles.checkoutBtnText}>Checkout Keluar</Text>
                                 </TouchableOpacity>
                             )
@@ -203,8 +204,8 @@ export default function GuestBookScreen() {
 
                         {item.status === 'completed' && item.check_in_time && (
                             <View style={{ marginTop: 12, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                                <Ionicons name="time-outline" size={12} color="#888" />
-                                <Text style={{ fontSize: 12, color: '#888' }}>
+                                <Ionicons name="time-outline" size={12} color={colors.textSecondary} />
+                                <Text style={{ fontSize: 12, color: colors.textSecondary }}>
                                     Masuk: {new Date(item.check_in_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} •
                                     Keluar: {new Date(item.check_out_time!).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
                                 </Text>
@@ -228,17 +229,18 @@ export default function GuestBookScreen() {
 
                             <ScrollView showsVerticalScrollIndicator={false}>
                                 <View style={styles.inputGroup}>
-                                    <Text style={styles.inputLabel}>Nama Tamu / Kurir <Text style={{ color: 'red' }}>*</Text></Text>
+                                    <Text style={styles.inputLabel}>Nama Tamu / Kurir <Text style={{ color: colors.danger }}>*</Text></Text>
                                     <TextInput
                                         style={styles.input}
                                         placeholder="Contoh: Anton (JNE)"
+                                        placeholderTextColor={colors.textSecondary}
                                         value={vm.formName}
                                         onChangeText={vm.setFormName}
                                     />
                                 </View>
 
                                 <View style={styles.inputGroup}>
-                                    <Text style={styles.inputLabel}>Jenis Kunjungan <Text style={{ color: 'red' }}>*</Text></Text>
+                                    <Text style={styles.inputLabel}>Jenis Kunjungan <Text style={{ color: colors.danger }}>*</Text></Text>
                                     <View style={styles.typeSelector}>
                                         {VISITOR_TYPES.map(type => (
                                             <TouchableOpacity
@@ -253,25 +255,26 @@ export default function GuestBookScreen() {
                                 </View>
 
                                 <View style={styles.inputGroup}>
-                                    <Text style={styles.inputLabel}>Tujuan (Pilih Warga) <Text style={{ color: 'red' }}>*</Text></Text>
+                                    <Text style={styles.inputLabel}>Tujuan (Pilih Warga) <Text style={{ color: colors.danger }}>*</Text></Text>
                                     <TouchableOpacity
                                         style={styles.pickerButton}
                                         onPress={() => vm.setResidentModalVisible(true)}
                                     >
-                                        <Text style={[styles.pickerButtonText, !vm.formDestination && { color: '#999' }]}>
+                                        <Text style={[styles.pickerButtonText, !vm.formDestination && { color: colors.textSecondary }]}>
                                             {vm.formDestination
                                                 ? vm.residents.find(r => r.id === vm.formDestination)?.full_name || 'Pilih Warga...'
                                                 : 'Pencet untuk pilih warga tujuan...'}
                                         </Text>
-                                        <Ionicons name="chevron-down" size={20} color="#666" />
+                                        <Ionicons name="chevron-down" size={20} color={colors.textSecondary} />
                                     </TouchableOpacity>
                                 </View>
 
                                 <View style={styles.inputGroup}>
-                                    <Text style={styles.inputLabel}>Keperluan <Text style={{ color: 'red' }}>*</Text></Text>
+                                    <Text style={styles.inputLabel}>Keperluan <Text style={{ color: colors.danger }}>*</Text></Text>
                                     <TextInput
                                         style={styles.input}
                                         placeholder="Contoh: Antar Paket Shopee"
+                                        placeholderTextColor={colors.textSecondary}
                                         value={vm.formPurpose}
                                         onChangeText={vm.setFormPurpose}
                                     />
@@ -284,7 +287,7 @@ export default function GuestBookScreen() {
                                 disabled={vm.isSubmitting}
                             >
                                 {vm.isSubmitting ? (
-                                    <ActivityIndicator color="#FFF" />
+                                    <ActivityIndicator color={colors.textWhite} />
                                 ) : (
                                     <Text style={styles.submitBtnText}>Izinkan Masuk</Text>
                                 )}
@@ -309,7 +312,7 @@ export default function GuestBookScreen() {
                         <View style={styles.headerRow}>
                             <Text style={styles.modalTitle}>Verifikasi PIN Tamu</Text>
                             <TouchableOpacity onPress={() => vm.setPinModalVisible(false)}>
-                                <Ionicons name="close" size={24} color="#333" />
+                                <Ionicons name="close" size={24} color={colors.textPrimary} />
                             </TouchableOpacity>
                         </View>
 
@@ -348,7 +351,7 @@ export default function GuestBookScreen() {
                             disabled={vm.pinInput.length < 6 || vm.isLoading}
                         >
                             {vm.isLoading ? (
-                                <ActivityIndicator color="#FFF" />
+                                <ActivityIndicator color={colors.textWhite} />
                             ) : (
                                 <Text style={styles.submitBtnText}>Verifikasi & Izinkan Masuk</Text>
                             )}
@@ -377,15 +380,16 @@ export default function GuestBookScreen() {
                             <View style={styles.headerRow}>
                                 <Text style={styles.modalTitle}>Cari Warga</Text>
                                 <TouchableOpacity onPress={() => vm.setResidentModalVisible(false)}>
-                                    <Ionicons name="close" size={24} color="#333" />
+                                    <Ionicons name="close" size={24} color={colors.textPrimary} />
                                 </TouchableOpacity>
                             </View>
 
                             <View style={styles.searchContainer}>
-                                <Ionicons name="search" size={20} color="#888" style={{ marginRight: 8 }} />
+                                <Ionicons name="search" size={20} color={colors.textSecondary} style={{ marginRight: 8 }} />
                                 <TextInput
                                     style={styles.searchInput}
                                     placeholder="Ketik nama warga atau blok..."
+                                    placeholderTextColor={colors.textSecondary}
                                     value={vm.searchQuery}
                                     onChangeText={vm.setSearchQuery}
                                     autoFocus
@@ -420,18 +424,18 @@ export default function GuestBookScreen() {
                                             <Image source={{ uri: item.avatar_url }} style={styles.residentAvatarImg} />
                                         ) : (
                                             <View style={styles.residentAvatar}>
-                                                <Ionicons name="person" size={20} color="#FFF" />
+                                                <Ionicons name="person" size={20} color={colors.textWhite} />
                                             </View>
                                         )}
                                         <View style={{ flex: 1 }}>
                                             <Text style={styles.residentName}>{item.full_name}</Text>
                                             <Text style={styles.residentBlock}>{item.block || 'Blok tidak diketahui'}</Text>
                                         </View>
-                                        <Ionicons name="chevron-forward" size={20} color="#CCC" />
+                                        <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
                                     </TouchableOpacity>
                                 )}
                                 ListEmptyComponent={
-                                    <Text style={{ textAlign: 'center', marginTop: 20, color: '#888' }}>Warga tidak ditemukan.</Text>
+                                    <Text style={{ textAlign: 'center', marginTop: 20, color: colors.textSecondary }}>Warga tidak ditemukan.</Text>
                                 }
                             />
                         </View>
@@ -449,7 +453,7 @@ export default function GuestBookScreen() {
                 style={styles.floatingAddBtn}
                 onPress={() => vm.setAddModalVisible(true)}
             >
-                <Ionicons name="add" size={32} color="#FFF" />
+                <Ionicons name="add" size={32} color={colors.textWhite} />
             </TouchableOpacity>
         </SafeAreaView>
     );

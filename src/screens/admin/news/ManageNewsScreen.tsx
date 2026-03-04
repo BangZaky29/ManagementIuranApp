@@ -6,15 +6,18 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { styles } from './ManageNewsStyles';
+import { createStyles } from './ManageNewsStyles';
 import { Colors } from '../../../constants/Colors';
 import { CustomHeader } from '../../../components/common/CustomHeader';
 import { formatDateSafe } from '../../../utils/dateUtils';
 import { fetchNews, createNews, updateNews, deleteNews, NewsItem, uploadNewsImage } from '../../../services/news';
 import { useAuth } from '../../../contexts/AuthContext';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 export default function ManageNewsScreen() {
+    const { colors } = useTheme();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
     const router = useRouter();
     const { session, profile } = useAuth();
     const [news, setNews] = useState<NewsItem[]>([]);

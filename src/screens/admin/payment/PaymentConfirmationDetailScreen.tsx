@@ -6,6 +6,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { ThemeColors } from '../../../theme/AppTheme';
 import { Colors } from '../../../constants/Colors';
 import { CustomButton } from '../../../components/common/CustomButton';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
@@ -22,6 +23,7 @@ const { width } = Dimensions.get('window');
 
 export default function PaymentConfirmationDetailScreen() {
     const { colors } = useTheme();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
     const router = useRouter();
     const { user } = useAuth();
     const { id } = useLocalSearchParams<{ id: string }>();
@@ -432,15 +434,15 @@ export default function PaymentConfirmationDetailScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: Colors.green1 },
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.green1 },
     header: {
         flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: 20, paddingBottom: 15,
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
     },
     backButton: { padding: 5, marginRight: 10 },
-    headerTitle: { fontSize: 20, fontWeight: 'bold', color: Colors.green5 },
+    headerTitle: { fontSize: 20, fontWeight: 'bold', color: colors.green5 },
     content: { padding: 20, paddingBottom: 120 },
     statusCard: {
         flexDirection: 'row', alignItems: 'center', gap: 10,
@@ -449,10 +451,10 @@ const styles = StyleSheet.create({
     statusLabel: { fontSize: 16, fontWeight: 'bold' },
     section: { marginBottom: 20 },
     sectionTitle: {
-        fontSize: 16, fontWeight: 'bold', color: Colors.green5, marginBottom: 12,
+        fontSize: 16, fontWeight: 'bold', color: colors.green5, marginBottom: 12,
     },
     card: {
-        backgroundColor: Colors.white, borderRadius: 16, padding: 16,
+        backgroundColor: colors.white, borderRadius: 16, padding: 16,
         borderWidth: 1, borderColor: 'rgba(0,0,0,0.05)',
     },
     userRow: { flexDirection: 'row', alignItems: 'center' },
@@ -460,18 +462,18 @@ const styles = StyleSheet.create({
     avatarPlaceholder: {
         backgroundColor: '#E8F5E9', alignItems: 'center', justifyContent: 'center',
     },
-    userName: { fontSize: 16, fontWeight: 'bold', color: Colors.green5 },
-    userAddress: { fontSize: 13, color: Colors.textSecondary, marginTop: 3 },
-    userPhone: { fontSize: 13, color: Colors.green4, marginTop: 3 },
+    userName: { fontSize: 16, fontWeight: 'bold', color: colors.green5 },
+    userAddress: { fontSize: 13, color: colors.textSecondary, marginTop: 3 },
+    userPhone: { fontSize: 13, color: colors.green4, marginTop: 3 },
     detailRow: {
         flexDirection: 'row', justifyContent: 'space-between',
         paddingVertical: 6,
     },
-    detailLabel: { fontSize: 14, color: Colors.textSecondary },
-    detailValue: { fontSize: 14, fontWeight: '500', color: Colors.green5 },
+    detailLabel: { fontSize: 14, color: colors.textSecondary },
+    detailValue: { fontSize: 14, fontWeight: '500', color: colors.green5 },
     proofContainer: {
-        backgroundColor: Colors.white, borderRadius: 16,
-        overflow: 'hidden', borderWidth: 1, borderColor: Colors.green2,
+        backgroundColor: colors.white, borderRadius: 16,
+        overflow: 'hidden', borderWidth: 1, borderColor: colors.green2,
     },
     proofImage: { width: '100%', height: 280 },
     proofImageZoomed: { height: 500 },
@@ -480,28 +482,28 @@ const styles = StyleSheet.create({
         gap: 6, paddingVertical: 10,
         borderTopWidth: 1, borderTopColor: '#F0F0F0',
     },
-    zoomText: { fontSize: 12, fontWeight: '600', color: Colors.green5 },
+    zoomText: { fontSize: 12, fontWeight: '600', color: colors.green5 },
     rejectionBox: {
         flexDirection: 'row', gap: 10, backgroundColor: '#FFEBEE',
         padding: 14, borderRadius: 12, marginBottom: 20,
     },
-    rejectionTitle: { fontSize: 13, fontWeight: 'bold', color: Colors.danger },
+    rejectionTitle: { fontSize: 13, fontWeight: 'bold', color: colors.danger },
     rejectionText: { fontSize: 13, color: '#B71C1C', marginTop: 4, lineHeight: 18 },
     notesBox: {
         flexDirection: 'row', gap: 10, backgroundColor: '#F1F8E9',
         padding: 14, borderRadius: 12, marginBottom: 20,
     },
-    notesTitle: { fontSize: 13, fontWeight: 'bold', color: Colors.green4 },
-    notesText: { fontSize: 13, color: Colors.green5, marginTop: 4 },
+    notesTitle: { fontSize: 13, fontWeight: 'bold', color: colors.green4 },
+    notesText: { fontSize: 13, color: colors.green5, marginTop: 4 },
     inputLabel: {
-        fontSize: 14, fontWeight: '600', color: Colors.green5,
+        fontSize: 14, fontWeight: '600', color: colors.green5,
         marginBottom: 8, marginTop: 8,
     },
     input: {
-        backgroundColor: Colors.white, borderRadius: 12,
+        backgroundColor: colors.white, borderRadius: 12,
         paddingHorizontal: 16, paddingVertical: 12,
-        fontSize: 14, color: Colors.green5,
-        borderWidth: 1, borderColor: Colors.green2,
+        fontSize: 14, color: colors.green5,
+        borderWidth: 1, borderColor: colors.green2,
         minHeight: 60, textAlignVertical: 'top',
     },
     rejectForm: {
@@ -510,7 +512,7 @@ const styles = StyleSheet.create({
     },
     footer: {
         position: 'absolute', bottom: 0, left: 0, right: 0,
-        backgroundColor: Colors.white, padding: 20,
+        backgroundColor: colors.white, padding: 20,
         borderTopLeftRadius: 24, borderTopRightRadius: 24,
         flexDirection: 'row',
         shadowColor: '#000', shadowOffset: { width: 0, height: -4 },

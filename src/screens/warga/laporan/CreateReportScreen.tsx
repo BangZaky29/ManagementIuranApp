@@ -2,17 +2,20 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StatusBar, Image, ActivityIndicator, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { CreateReportStyles as styles } from './CreateReportStyles';
-import { Colors } from '../../../constants/Colors';
+import { createStyles } from './CreateReportStyles';
 import { CustomHeader } from '../../../components/common/CustomHeader';
 import { CustomButton } from '../../../components/common/CustomButton';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { LocationPickerModal } from '../../../components/laporan/LocationPickerModal';
 import { useCreateReportViewModel } from './CreateReportViewModel';
 
 export default function CreateReportScreen() {
+    const { colors } = useTheme();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
+
     const {
         title, setTitle,
         description, setDescription,
@@ -42,7 +45,7 @@ export default function CreateReportScreen() {
 
     return (
         <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor={Colors.green1} />
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
             <CustomHeader title={isEditMode ? "Edit Laporan" : "Buat Laporan Baru"} showBack={true} />
 
             <KeyboardAwareScrollView
@@ -56,11 +59,11 @@ export default function CreateReportScreen() {
                 <View style={styles.formCard}>
                     {/* Title Input */}
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Judul Laporan <Text style={{ color: Colors.danger }}>*</Text></Text>
+                        <Text style={styles.label}>Judul Laporan <Text style={{ color: colors.danger }}>*</Text></Text>
                         <TextInput
                             style={styles.input}
                             placeholder="Contoh: Lampu Taman Mati"
-                            placeholderTextColor={Colors.textSecondary}
+                            placeholderTextColor={colors.textSecondary}
                             value={title}
                             onChangeText={setTitle}
                             editable={!isLoading}
@@ -69,16 +72,16 @@ export default function CreateReportScreen() {
 
                     {/* Category Dropdown */}
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Kategori <Text style={{ color: Colors.danger }}>*</Text></Text>
+                        <Text style={styles.label}>Kategori <Text style={{ color: colors.danger }}>*</Text></Text>
                         <TouchableOpacity
                             style={styles.dropdownButton}
                             onPress={() => setShowCategoryDropdown(!showCategoryDropdown)}
                             disabled={isLoading}
                         >
-                            <Text style={{ color: category ? Colors.green5 : Colors.textSecondary }}>
+                            <Text style={{ color: category ? colors.textPrimary : colors.textSecondary }}>
                                 {category || "Pilih Kategori..."}
                             </Text>
-                            <Ionicons name={showCategoryDropdown ? "chevron-up" : "chevron-down"} size={20} color={Colors.green4} />
+                            <Ionicons name={showCategoryDropdown ? "chevron-up" : "chevron-down"} size={20} color={colors.textSecondary} />
                         </TouchableOpacity>
 
                         {showCategoryDropdown && (
@@ -93,7 +96,7 @@ export default function CreateReportScreen() {
                                         }}
                                     >
                                         <Text style={styles.dropdownText}>{cat}</Text>
-                                        {category === cat && <Ionicons name="checkmark" size={16} color={Colors.green5} />}
+                                        {category === cat && <Ionicons name="checkmark" size={16} color={colors.primary} />}
                                     </TouchableOpacity>
                                 ))}
                             </View>
@@ -102,11 +105,11 @@ export default function CreateReportScreen() {
 
                     {/* Description Input */}
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Deskripsi <Text style={{ color: Colors.danger }}>*</Text></Text>
+                        <Text style={styles.label}>Deskripsi <Text style={{ color: colors.danger }}>*</Text></Text>
                         <TextInput
                             style={[styles.input, styles.textArea]}
                             placeholder="Jelaskan detail laporan anda..."
-                            placeholderTextColor={Colors.textSecondary}
+                            placeholderTextColor={colors.textSecondary}
                             multiline
                             numberOfLines={4}
                             textAlignVertical="top"
@@ -121,8 +124,8 @@ export default function CreateReportScreen() {
                         <Text style={styles.label}>Lokasi Kejadian</Text>
 
                         {/* Display Link if exists */}
-                        <View style={[styles.input, { backgroundColor: '#F9FAFB', marginBottom: 12 }]}>
-                            <Text numberOfLines={1} style={{ color: locationLink ? Colors.textPrimary : Colors.textSecondary }}>
+                        <View style={[styles.input, { backgroundColor: colors.surfaceSubtle, marginBottom: 12 }]}>
+                            <Text numberOfLines={1} style={{ color: locationLink ? colors.textPrimary : colors.textSecondary }}>
                                 {locationLink || "Belum ada lokasi dipilih"}
                             </Text>
                         </View>
@@ -134,25 +137,24 @@ export default function CreateReportScreen() {
                                     flexDirection: 'row',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    backgroundColor: '#E0F2F1',
+                                    backgroundColor: colors.primarySubtle,
                                     paddingVertical: 10,
                                     borderRadius: 8,
                                     borderWidth: 1,
-                                    borderColor: Colors.green4,
+                                    borderColor: colors.primary,
                                     marginRight: 5
                                 }}
                                 onPress={() => {
-                                    console.log("Tombol Lokasi Saya ditekan");
                                     handleGetCurrentLocation();
                                 }}
                                 disabled={locationStatus === 'fetching'}
                             >
                                 {locationStatus === 'fetching' ? (
-                                    <ActivityIndicator size="small" color={Colors.green5} />
+                                    <ActivityIndicator size="small" color={colors.primary} />
                                 ) : (
-                                    <Ionicons name="navigate" size={18} color={Colors.green5} style={{ marginRight: 6 }} />
+                                    <Ionicons name="navigate" size={18} color={colors.primary} style={{ marginRight: 6 }} />
                                 )}
-                                <Text style={{ color: Colors.green5, fontWeight: '600', fontSize: 13 }}>
+                                <Text style={{ color: colors.primary, fontWeight: '600', fontSize: 13 }}>
                                     {locationStatus === 'fetching' ? 'Ambil...' : 'Lokasi Saya'}
                                 </Text>
                             </TouchableOpacity>
@@ -163,20 +165,19 @@ export default function CreateReportScreen() {
                                     flexDirection: 'row',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    backgroundColor: Colors.white,
+                                    backgroundColor: colors.surface,
                                     paddingVertical: 10,
                                     borderRadius: 8,
                                     borderWidth: 1,
-                                    borderColor: '#E5E7EB',
+                                    borderColor: colors.border,
                                     marginLeft: 5
                                 }}
                                 onPress={() => {
-                                    console.log("Tombol Pilih di Peta ditekan");
                                     setShowMapPicker(true);
                                 }}
                             >
-                                <Ionicons name="map-outline" size={18} color={Colors.textPrimary} style={{ marginRight: 6 }} />
-                                <Text style={{ color: Colors.textPrimary, fontWeight: '600', fontSize: 13 }}>Pilih di Peta</Text>
+                                <Ionicons name="map-outline" size={18} color={colors.textPrimary} style={{ marginRight: 6 }} />
+                                <Text style={{ color: colors.textPrimary, fontWeight: '600', fontSize: 13 }}>Pilih di Peta</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -192,7 +193,7 @@ export default function CreateReportScreen() {
                                     onPress={handlePickImage}
                                     disabled={isLoading}
                                 >
-                                    <Ionicons name="images-outline" size={20} color={Colors.green5} />
+                                    <Ionicons name="images-outline" size={20} color={colors.primary} />
                                     <Text style={styles.photoButtonText}>Pilih Foto</Text>
                                 </TouchableOpacity>
 
@@ -201,7 +202,7 @@ export default function CreateReportScreen() {
                                     onPress={handleLaunchCamera}
                                     disabled={isLoading}
                                 >
-                                    <Ionicons name="camera-outline" size={20} color={Colors.green5} />
+                                    <Ionicons name="camera-outline" size={20} color={colors.primary} />
                                     <Text style={styles.photoButtonText}>Buka Kamera</Text>
                                 </TouchableOpacity>
                             </View>
@@ -217,7 +218,7 @@ export default function CreateReportScreen() {
                                     onPress={() => setImage(null)}
                                     disabled={isLoading}
                                 >
-                                    <Ionicons name="close" size={20} color={Colors.danger} />
+                                    <Ionicons name="close" size={20} color={colors.danger} />
                                 </TouchableOpacity>
                             </View>
                         )}
@@ -229,7 +230,7 @@ export default function CreateReportScreen() {
                     title={isLoading ? "Menyimpan..." : (isEditMode ? "Simpan Perubahan" : "Kirim Laporan")}
                     onPress={handleSubmit}
                     disabled={isLoading}
-                    icon={!isLoading ? <Ionicons name="send" size={18} color={Colors.white} style={{ marginRight: 8 }} /> : undefined}
+                    icon={!isLoading ? <Ionicons name="send" size={18} color={colors.textWhite} style={{ marginRight: 8 }} /> : undefined}
                 />
             </KeyboardAwareScrollView>
 

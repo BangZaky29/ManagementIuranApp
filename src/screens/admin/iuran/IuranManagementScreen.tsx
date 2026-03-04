@@ -1,3 +1,4 @@
+import { useTheme } from '../../../contexts/ThemeContext';
 import React from 'react';
 import {
     View, Text, ScrollView, TouchableOpacity,
@@ -6,6 +7,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
+import { ThemeColors } from '../../../theme/AppTheme';
 import { Colors } from '../../../constants/Colors';
 import { countPendingPayments } from '../../../services/payment';
 import { useState, useCallback } from 'react';
@@ -21,6 +23,8 @@ interface MenuCard {
 }
 
 export default function IuranManagementScreen() {
+    const { colors } = useTheme();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
     const router = useRouter();
     const [pendingCount, setPendingCount] = useState(0);
 
@@ -118,13 +122,13 @@ export default function IuranManagementScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F5F7F5' },
     header: {
         flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: 20,
         paddingBottom: 15,
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
     },
     backButton: { padding: 5, marginRight: 10 },
     headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#1B5E20' },
@@ -137,7 +141,7 @@ const styles = StyleSheet.create({
     infoText: { flex: 1, fontSize: 13, color: '#1565C0', lineHeight: 18 },
     card: {
         flexDirection: 'row', alignItems: 'center',
-        backgroundColor: '#FFF', borderRadius: 16, padding: 18,
+        backgroundColor: colors.surface, borderRadius: 16, padding: 18,
         marginBottom: 12,
         ...Platform.select({
             ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6 },
@@ -167,7 +171,7 @@ const styles = StyleSheet.create({
         }),
     },
     badgeText: {
-        color: '#FFF',
+        color: colors.textWhite,
         fontSize: 11,
         fontWeight: 'bold',
     },

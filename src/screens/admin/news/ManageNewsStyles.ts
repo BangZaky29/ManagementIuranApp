@@ -1,11 +1,12 @@
 
 import { StyleSheet, Platform } from 'react-native';
+import { ThemeColors } from '../../../theme/AppTheme';
 import { Colors } from '../../../constants/Colors';
 
-export const styles = StyleSheet.create({
+export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F5F7FA',
+        backgroundColor: colors.background,
     },
     listContent: {
         padding: 16,
@@ -19,7 +20,7 @@ export const styles = StyleSheet.create({
 
     // Card
     card: {
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         borderRadius: 12,
         marginBottom: 16,
         padding: 16,
@@ -43,23 +44,23 @@ export const styles = StyleSheet.create({
     },
     categoryText: {
         fontSize: 10,
-        color: Colors.primary,
+        color: colors.primary,
         fontWeight: 'bold',
         textTransform: 'uppercase',
     },
     dateText: {
         fontSize: 12,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
     },
     title: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
         marginBottom: 8,
     },
     contentPreview: {
         fontSize: 14,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
         lineHeight: 20,
         marginBottom: 12,
     },
@@ -108,7 +109,7 @@ export const styles = StyleSheet.create({
         width: 56,
         height: 56,
         borderRadius: 28,
-        backgroundColor: Colors.primary,
+        backgroundColor: colors.primary,
         justifyContent: 'center',
         alignItems: 'center',
         shadowColor: '#000',
@@ -126,7 +127,7 @@ export const styles = StyleSheet.create({
         justifyContent: 'flex-end',
     },
     formContainer: {
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
         padding: 24,
@@ -141,12 +142,12 @@ export const styles = StyleSheet.create({
     formTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
     },
     inputLabel: {
         fontSize: 14,
         fontWeight: '700',
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
         marginBottom: 8,
         marginTop: 16,
     },
@@ -155,7 +156,7 @@ export const styles = StyleSheet.create({
         borderRadius: 12,
         padding: 14,
         fontSize: 15,
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
         borderWidth: 1,
         borderColor: '#E2E8F0',
     },
@@ -217,17 +218,17 @@ export const styles = StyleSheet.create({
     checkboxLabel: {
         marginLeft: 12,
         fontSize: 16,
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
     },
     saveButton: {
-        backgroundColor: Colors.primary,
+        backgroundColor: colors.primary,
         borderRadius: 12,
         padding: 16,
         alignItems: 'center',
         marginTop: 16,
     },
     saveButtonText: {
-        color: '#FFF',
+        color: colors.textWhite,
         fontSize: 16,
         fontWeight: 'bold',
     },
@@ -237,7 +238,7 @@ export const styles = StyleSheet.create({
         marginTop: 40,
     },
     emptyText: {
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
         fontSize: 14,
         marginTop: 12,
     },

@@ -5,13 +5,16 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { useHomeViewModel } from './HomeViewModel';
-import { HomeStyles as styles } from './HomeStyles';
+import { createStyles } from './HomeStyles';
 import { BannerCarousel } from '../../../components/banner/BannerCarousel';
 import { PanicCountdown } from '../../../components/panic/PanicCountdown';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { FeatureFlags } from '../../../constants/FeatureFlags';
 
 export default function HomeScreen() {
+    const { colors } = useTheme();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
+
     const {
         userName,
         avatarUrl,
@@ -35,7 +38,6 @@ export default function HomeScreen() {
         panicTimeLeft,
         panicClickCount
     } = useHomeViewModel();
-    const { colors } = useTheme();
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -44,8 +46,8 @@ export default function HomeScreen() {
     };
 
     return (
-        <SafeAreaView edges={['left', 'right', 'bottom']} style={[styles.container, { backgroundColor: colors.background }]}>
-            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.green1} />
+        <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
 
             {/* Panic Countdown Overlay */}
             <PanicCountdown
@@ -55,11 +57,11 @@ export default function HomeScreen() {
             />
 
             {/* Header */}
-            <SafeAreaView edges={['top']} style={{ backgroundColor: colors.green1 }}>
-                <View style={[styles.headerContainer, { backgroundColor: colors.green1 }]}>
-                    <View style={[styles.headerTitleContainer, { marginLeft: 0 }]}>
-                        <Text style={[styles.headerGreeting, { color: colors.textSecondary }]}>Halo,</Text>
-                        <Text style={[styles.headerName, { color: colors.green5 }]}>{userName}!</Text>
+            <SafeAreaView edges={['top']} style={{ backgroundColor: colors.surface }}>
+                <View style={styles.headerContainer}>
+                    <View style={styles.headerTitleContainer}>
+                        <Text style={styles.headerGreeting}>Halo,</Text>
+                        <Text style={styles.headerName}>{userName}!</Text>
                     </View>
 
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -67,13 +69,13 @@ export default function HomeScreen() {
                             style={{ marginRight: 12, padding: 4, position: 'relative' }}
                             onPress={() => handleNavigation('/warga/notifications')}
                         >
-                            <Ionicons name="notifications-outline" size={24} color={colors.green5} />
+                            <Ionicons name="notifications-outline" size={24} color={colors.textPrimary} />
                             {unreadNotifCount > 0 && (
                                 <View style={{
                                     position: 'absolute',
                                     top: -2,
                                     right: -2,
-                                    backgroundColor: colors.status.ditolak.text,
+                                    backgroundColor: colors.danger,
                                     minWidth: 16,
                                     height: 16,
                                     borderRadius: 8,
@@ -81,7 +83,7 @@ export default function HomeScreen() {
                                     alignItems: 'center',
                                     paddingHorizontal: 4,
                                     borderWidth: 1.5,
-                                    borderColor: colors.green1
+                                    borderColor: colors.surface
                                 }}>
                                     <Text style={{
                                         color: 'white',
@@ -95,11 +97,11 @@ export default function HomeScreen() {
                             )}
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={[styles.profileImage, { backgroundColor: colors.green3, overflow: 'hidden' }]} onPress={() => handleNavigation('/(tabs)/profil')}>
+                        <TouchableOpacity style={styles.profileImage} onPress={() => handleNavigation('/(tabs)/profil')}>
                             {avatarUrl ? (
                                 <Image source={{ uri: avatarUrl }} style={{ width: '100%', height: '100%' }} />
                             ) : (
-                                <Ionicons name="person" size={24} color={colors.backgroundCard} />
+                                <Ionicons name="person" size={24} color={colors.primary} />
                             )}
                         </TouchableOpacity>
                     </View>
@@ -111,14 +113,14 @@ export default function HomeScreen() {
                 showsVerticalScrollIndicator={false}
             >
                 {/* Weather Widget (Dynamic) */}
-                <Animated.View entering={FadeInDown.delay(100).duration(500)} style={[styles.weatherCard, { backgroundColor: colors.backgroundCard }]}>
+                <Animated.View entering={FadeInDown.delay(100).duration(500)} style={styles.weatherCard}>
                     <View style={styles.weatherGradient}>
                         <View style={styles.weatherInfo}>
-                            <Text style={[styles.weatherTemp, { color: colors.green5 }]}>{weather.temp}</Text>
-                            <Text style={[styles.weatherLocation, { color: colors.green4 }]}>
-                                <Ionicons name="location-sharp" size={12} color={colors.green4} /> {weather.location}
+                            <Text style={styles.weatherTemp}>{weather.temp}</Text>
+                            <Text style={styles.weatherLocation}>
+                                <Ionicons name="location-sharp" size={12} color={colors.textSecondary} /> {weather.location}
                             </Text>
-                            <Text style={{ fontSize: 10, color: colors.green4, marginTop: 4 }}>
+                            <Text style={{ fontSize: 10, color: colors.textSecondary, marginTop: 4 }}>
                                 Kondisi: {weather.condition}
                             </Text>
                         </View>
@@ -132,7 +134,7 @@ export default function HomeScreen() {
                                 style={{ marginTop: 8, padding: 4 }}
                                 onPress={verifyLocation}
                             >
-                                <Ionicons name="refresh-circle" size={24} color={colors.green3} />
+                                <Ionicons name="refresh-circle" size={24} color={colors.primary} />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -145,7 +147,7 @@ export default function HomeScreen() {
 
                 {/* Quick Actions Grid */}
                 <Animated.View entering={FadeInDown.delay(300).duration(500)}>
-                    <Text style={[styles.sectionTitle, { color: colors.green5 }]}>Layanan Warga</Text>
+                    <Text style={styles.sectionTitle}>Layanan Warga</Text>
                     <View style={styles.gridContainer}>
                         {quickActions.map((action) => {
                             const isGated =
@@ -169,15 +171,15 @@ export default function HomeScreen() {
                                         }
                                     }}
                                 >
-                                    <View style={[styles.iconCircle, { backgroundColor: action.bgColor }]}>
-                                        <Ionicons name={action.icon as any} size={26} color={action.color} />
+                                    <View style={styles.iconCircle}>
+                                        <Ionicons name={action.icon as any} size={26} color={colors.primary} />
                                         {isGated && (
                                             <View style={styles.gatedIcon}>
                                                 <Ionicons name="lock-closed" size={12} color={colors.textSecondary} />
                                             </View>
                                         )}
                                     </View>
-                                    <Text style={[styles.actionText, { color: colors.textPrimary }]}>{action.title}</Text>
+                                    <Text style={styles.actionText}>{action.title}</Text>
                                 </TouchableOpacity>
                             );
                         })}
@@ -187,9 +189,9 @@ export default function HomeScreen() {
                 {/* Latest News */}
                 <Animated.View entering={FadeInDown.delay(400).duration(500)} style={styles.newsContainer}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                        <Text style={[styles.sectionTitle, { marginLeft: 0, marginBottom: 0, color: colors.green5 }]}>Info Terbaru</Text>
+                        <Text style={[styles.sectionTitle, { marginLeft: 0, marginBottom: 0 }]}>Info Terbaru</Text>
                         <TouchableOpacity onPress={() => handleNavigation('/news')}>
-                            <Text style={{ marginTop: 10, marginRight: 10, fontSize: 13, color: colors.green5, fontWeight: '600' }}>Lihat Semua</Text>
+                            <Text style={{ marginTop: 10, marginRight: 10, fontSize: 13, color: colors.primary, fontWeight: '600' }}>Lihat Semua</Text>
                         </TouchableOpacity>
                     </View>
                     <ScrollView
@@ -204,13 +206,13 @@ export default function HomeScreen() {
                         {newsItems.slice(0, 3).map((item) => (
                             <TouchableOpacity
                                 key={item.id}
-                                style={[styles.newsCard, { backgroundColor: colors.backgroundCard }]}
+                                style={styles.newsCard}
                                 onPress={() => handleNewsClick(item.id)}
                             >
                                 {/* Top row: badge + thumbnail */}
                                 <View style={styles.newsCardTopRow}>
-                                    <View style={[styles.newsBadge, { backgroundColor: colors.accent, marginBottom: 0 }]}>
-                                        <Text style={[styles.newsBadgeText, { color: colors.green5 }]}>{item.category || 'PENGUMUMAN'}</Text>
+                                    <View style={[styles.newsBadge, { marginBottom: 0 }]}>
+                                        <Text style={styles.newsBadgeText}>{item.category || 'PENGUMUMAN'}</Text>
                                     </View>
                                     {item.image_url ? (
                                         <Image
@@ -218,16 +220,16 @@ export default function HomeScreen() {
                                             style={styles.newsThumb}
                                         />
                                     ) : (
-                                        <View style={[styles.newsThumbPlaceholder, { backgroundColor: colors.accent }]}>
-                                            <Ionicons name="newspaper-outline" size={20} color={colors.green4} />
+                                        <View style={styles.newsThumbPlaceholder}>
+                                            <Ionicons name="newspaper-outline" size={20} color={colors.primary} />
                                         </View>
                                     )}
                                 </View>
-                                <Text style={[styles.newsTitle, { color: colors.green5, marginTop: 10 }]} numberOfLines={2}>{item.title}</Text>
-                                <Text style={{ fontSize: 11, color: colors.green4, marginBottom: 8 }}>
-                                    <Ionicons name="calendar-outline" size={10} color={colors.green4} /> {formatDate(item.created_at)}
+                                <Text style={[styles.newsTitle, { marginTop: 10 }]} numberOfLines={2}>{item.title}</Text>
+                                <Text style={{ fontSize: 11, color: colors.textSecondary, marginBottom: 8 }}>
+                                    <Ionicons name="calendar-outline" size={10} color={colors.textSecondary} /> {formatDate(item.created_at)}
                                 </Text>
-                                <Text style={[styles.newsContent, { color: colors.textSecondary }]} numberOfLines={3}>{item.content}</Text>
+                                <Text style={styles.newsContent} numberOfLines={3}>{item.content}</Text>
                             </TouchableOpacity>
                         ))}
                     </ScrollView>

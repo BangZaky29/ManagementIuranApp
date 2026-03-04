@@ -1,3 +1,4 @@
+import { useTheme } from '../../../contexts/ThemeContext';
 import React from 'react';
 import {
     View, Text, ScrollView, TouchableOpacity, Modal, Pressable,
@@ -6,7 +7,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useBackupManagementViewModel, BACKUP_SCHEDULE_OPTIONS } from './BackupManagementViewModel';
-import { styles } from './BackupManagementStyles';
+import { createStyles } from './BackupManagementStyles';
 import { CustomHeader } from '../../../components/common/CustomHeader';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 
@@ -32,6 +33,8 @@ const BACKUP_STATUS_ICON: Record<string, { color: string; name: string }> = {
 };
 
 export default function BackupManagementScreen() {
+    const { colors } = useTheme();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
     const router = useRouter();
     const vm = useBackupManagementViewModel();
     const formatCurrency = (amount: number) => 'Rp ' + amount.toLocaleString('id-ID');

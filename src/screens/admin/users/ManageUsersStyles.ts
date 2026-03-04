@@ -1,10 +1,10 @@
 import { StyleSheet, Platform } from 'react-native';
-import { Colors } from '../../../constants/Colors';
+import { ThemeColors } from '../../../theme/AppTheme';
 
-export const styles = StyleSheet.create({
+export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F5F7FA',
+        backgroundColor: colors.background,
     },
     listContent: {
         padding: 16,
@@ -22,7 +22,7 @@ export const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingTop: 16,
         paddingBottom: 12, // Increased spacing between search and chips
-        backgroundColor: '#F5F7FA', // Match background
+        backgroundColor: colors.background, // Match background
     },
     // ... searchInputContainer etc ...
 
@@ -31,7 +31,7 @@ export const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         borderRadius: 12,
         paddingHorizontal: 12,
         height: 48,
@@ -47,7 +47,7 @@ export const styles = StyleSheet.create({
     searchInput: {
         flex: 1,
         fontSize: 14,
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
     },
 
     // Filter Chips
@@ -55,33 +55,33 @@ export const styles = StyleSheet.create({
         flexDirection: 'row',
         paddingHorizontal: 16,
         paddingBottom: 16,
-        backgroundColor: '#F5F7FA',
+        backgroundColor: colors.background,
         gap: 12,
     },
     filterChip: {
         paddingHorizontal: 16,
         paddingVertical: 8,
         borderRadius: 20,
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         borderWidth: 1,
         borderColor: '#E0E0E0',
     },
     filterChipActive: {
-        backgroundColor: Colors.primary,
-        borderColor: Colors.primary,
+        backgroundColor: colors.primary,
+        borderColor: colors.primary,
     },
     filterChipText: {
         fontSize: 13,
         fontWeight: '600',
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
     },
     filterChipTextActive: {
-        color: '#FFF',
+        color: colors.textWhite,
     },
 
     // Card Styles
     card: {
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         borderRadius: 16,
         padding: 16,
         marginBottom: 16,
@@ -102,17 +102,17 @@ export const styles = StyleSheet.create({
     clusterName: {
         fontSize: 12,
         fontWeight: '600',
-        color: Colors.primary,
+        color: colors.primary,
         marginBottom: 2,
     },
     cardTitle: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
     },
     cardSubtitle: {
         fontSize: 12,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
     },
     roleBadge: {
         paddingHorizontal: 8,
@@ -120,7 +120,7 @@ export const styles = StyleSheet.create({
         borderRadius: 6,
     },
     roleBadgeText: {
-        color: '#FFF',
+        color: colors.textWhite,
         fontSize: 10,
         fontWeight: 'bold',
         textTransform: 'uppercase',
@@ -131,7 +131,7 @@ export const styles = StyleSheet.create({
         borderRadius: 8,
     },
     statusText: {
-        color: '#FFF',
+        color: colors.textWhite,
         fontSize: 10,
         fontWeight: 'bold',
         textTransform: 'uppercase',
@@ -146,7 +146,7 @@ export const styles = StyleSheet.create({
     },
     cardText: {
         fontSize: 13,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
         marginBottom: 8,
     },
     tokenContainer: {
@@ -159,13 +159,13 @@ export const styles = StyleSheet.create({
     },
     tokenLabel: {
         fontSize: 12,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
         marginRight: 8,
     },
     tokenValue: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: Colors.primary,
+        color: colors.primary,
         letterSpacing: 2,
     },
     copyTokenButton: {
@@ -176,12 +176,12 @@ export const styles = StyleSheet.create({
         paddingVertical: 8,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: Colors.green2,
+        borderColor: colors.green2,
     },
     copyTokenText: {
         fontSize: 12,
         fontWeight: '600',
-        color: Colors.primary,
+        color: colors.primary,
         marginLeft: 6,
     },
     cardFooter: {
@@ -211,7 +211,7 @@ export const styles = StyleSheet.create({
         marginLeft: 4,
     },
     deleteText: {
-        color: Colors.danger,
+        color: colors.danger,
         fontSize: 12,
         fontWeight: '600',
         marginLeft: 4,
@@ -220,7 +220,7 @@ export const styles = StyleSheet.create({
         width: 36,
         height: 36,
         borderRadius: 18,
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
@@ -235,7 +235,7 @@ export const styles = StyleSheet.create({
         width: 56,
         height: 56,
         borderRadius: 28,
-        backgroundColor: Colors.primary,
+        backgroundColor: colors.primary,
         justifyContent: 'center',
         alignItems: 'center',
         shadowColor: '#000',
@@ -253,7 +253,7 @@ export const styles = StyleSheet.create({
         justifyContent: 'flex-end',
     },
     formContainer: {
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
         padding: 24,
@@ -262,16 +262,16 @@ export const styles = StyleSheet.create({
     formTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
         marginBottom: 20,
         textAlign: 'center',
     },
     input: {
-        backgroundColor: '#F5F7FA',
+        backgroundColor: colors.background,
         borderRadius: 12,
         padding: 16,
         fontSize: 14,
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
         marginBottom: 16,
         borderWidth: 1,
         borderColor: '#E0E0E0',
@@ -282,7 +282,7 @@ export const styles = StyleSheet.create({
     roleLabel: {
         fontSize: 14,
         marginBottom: 8,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
         fontWeight: '600',
     },
     roleSelector: {
@@ -298,19 +298,19 @@ export const styles = StyleSheet.create({
         borderRadius: 12,
         borderWidth: 1,
         borderColor: '#E0E0E0',
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
     },
     roleOptionActive: {
-        backgroundColor: Colors.primary,
-        borderColor: Colors.primary,
+        backgroundColor: colors.primary,
+        borderColor: colors.primary,
     },
     roleText: {
         marginLeft: 8,
         fontWeight: '600',
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
     },
     roleTextActive: {
-        color: '#FFF',
+        color: colors.textWhite,
     },
     formActions: {
         flexDirection: 'row',
@@ -324,18 +324,18 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     cancelButton: {
-        backgroundColor: '#F5F7FA',
+        backgroundColor: colors.background,
     },
     saveButton: {
-        backgroundColor: Colors.primary,
+        backgroundColor: colors.primary,
     },
     buttonText: {
-        color: '#FFF',
+        color: colors.textWhite,
         fontWeight: 'bold',
         fontSize: 16,
     },
     buttonTextCancel: {
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
         fontWeight: 'bold',
         fontSize: 16,
     },
@@ -345,7 +345,7 @@ export const styles = StyleSheet.create({
         marginTop: 40,
     },
     emptyText: {
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
         fontSize: 14,
     },
     totalUserContainer: {

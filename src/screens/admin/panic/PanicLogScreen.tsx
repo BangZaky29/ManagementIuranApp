@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { ThemeColors } from '../../../theme/AppTheme';
 import { Colors } from '../../../constants/Colors';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
 import { fetchPanicLogs, PanicLog, resolvePanicLog } from '../../../services/panic';
@@ -14,6 +15,7 @@ import { PanicLogCard } from '../../../components/panic/PanicLogCard';
 
 export default function PanicLogScreen() {
     const { colors } = useTheme();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
     const [logs, setLogs] = useState<PanicLog[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -215,7 +217,7 @@ export default function PanicLogScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1 },
     header: {
         flexDirection: 'row',
@@ -224,7 +226,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 20,
         paddingTop: Platform.OS === 'android' ? 48 : 20,
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         borderBottomWidth: 1,
         borderBottomColor: '#F0F0F0',
         elevation: 2,
@@ -270,21 +272,21 @@ const styles = StyleSheet.create({
     seeMoreButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         paddingHorizontal: 20,
         paddingVertical: 12,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: Colors.primary,
+        borderColor: colors.primary,
         gap: 8,
         elevation: 2,
-        shadowColor: Colors.primary,
+        shadowColor: colors.primary,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
     },
     seeMoreText: {
-        color: Colors.primary,
+        color: colors.primary,
         fontWeight: '700',
         fontSize: 14,
     },
@@ -295,7 +297,7 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     seeLessText: {
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
         fontWeight: '600',
         fontSize: 14,
     },
@@ -332,7 +334,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 24,
         paddingVertical: 12,
         borderRadius: 25,
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         borderWidth: 1,
         borderColor: '#DDD',
     },

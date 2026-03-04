@@ -1,16 +1,16 @@
 import { StyleSheet } from 'react-native';
-import { Colors } from '../../../constants/Colors';
+import { ThemeColors } from '../../../theme/AppTheme';
 
-export const styles = StyleSheet.create({
+export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F9FAFB',
+        backgroundColor: colors.background,
     },
     headerRight: {
         paddingRight: 16,
     },
     markAllText: {
-        color: Colors.primary,
+        color: colors.primary,
         fontWeight: '600',
         fontSize: 14,
     },
@@ -20,7 +20,7 @@ export const styles = StyleSheet.create({
     },
     notificationCard: {
         flexDirection: 'row',
-        backgroundColor: 'white',
+        backgroundColor: colors.surface,
         borderRadius: 12,
         padding: 16,
         marginBottom: 12,
@@ -51,17 +51,17 @@ export const styles = StyleSheet.create({
     title: {
         fontSize: 15,
         fontWeight: 'bold',
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
         flex: 1,
         marginRight: 8,
     },
     dateText: {
         fontSize: 12,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
     },
     bodyText: {
         fontSize: 14,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
         lineHeight: 20,
     },
     emptyState: {
@@ -73,20 +73,20 @@ export const styles = StyleSheet.create({
     emptyTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
         marginTop: 16,
         marginBottom: 8,
     },
     emptyDesc: {
         fontSize: 14,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
         textAlign: 'center',
     },
     // Filter Styles
     filterContainer: {
-        backgroundColor: 'white',
+        backgroundColor: colors.surface,
         borderBottomWidth: 1,
-        borderBottomColor: '#F0F0F0',
+        borderBottomColor: colors.border,
     },
     filterContent: {
         paddingHorizontal: 16,
@@ -97,19 +97,19 @@ export const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 6,
         borderRadius: 20,
-        backgroundColor: '#F5F5F5',
+        backgroundColor: colors.surfaceSubtle,
         marginRight: 8,
     },
     filterChipActive: {
-        backgroundColor: Colors.primary,
+        backgroundColor: colors.primary,
     },
     filterText: {
         fontSize: 13,
         fontWeight: '600',
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
     },
     filterTextActive: {
-        color: 'white',
+        color: colors.textWhite,
     },
     // Footer Styles
     footerContainer: {
@@ -120,12 +120,12 @@ export const styles = StyleSheet.create({
         paddingVertical: 8,
         paddingHorizontal: 20,
         borderRadius: 20,
-        backgroundColor: '#E3F2FD',
+        backgroundColor: colors.primarySubtle,
         borderWidth: 1,
-        borderColor: Colors.primary,
+        borderColor: colors.primary,
     },
     loadMoreText: {
-        color: Colors.primary,
+        color: colors.primary,
         fontWeight: '600',
         fontSize: 13,
     },
@@ -133,10 +133,10 @@ export const styles = StyleSheet.create({
         paddingVertical: 8,
         paddingHorizontal: 20,
         borderRadius: 20,
-        backgroundColor: '#F5F5F5',
+        backgroundColor: colors.surfaceSubtle,
     },
     showLessText: {
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
         fontWeight: '600',
         fontSize: 13,
     }

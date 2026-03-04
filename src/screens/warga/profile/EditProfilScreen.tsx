@@ -51,10 +51,10 @@ export default function EditProfilScreen() {
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.backgroundCard} />
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
 
             {/* Header */}
-            <View style={[styles.header, { backgroundColor: colors.backgroundCard, borderBottomColor: colors.border, paddingTop: Platform.OS === 'android' ? 40 : 0 }]}>
+            <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border, paddingTop: Platform.OS === 'android' ? 40 : 0 }]}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
                 </TouchableOpacity>

@@ -36,7 +36,7 @@ export default function SoundSettingsScreen() {
                 style={[
                     styles.optionContainer,
                     {
-                        backgroundColor: isSelected ? colors.primary + '10' : colors.backgroundCard,
+                        backgroundColor: isSelected ? colors.primary + '10' : colors.surface,
                         borderColor: isSelected ? colors.primary : 'transparent',
                     }
                 ]}
@@ -142,7 +142,7 @@ export default function SoundSettingsScreen() {
                                         onPress={() => vm.updateAlertDuration(sec)}
                                         style={[
                                             styles.durationChip,
-                                            { backgroundColor: colors.backgroundCard },
+                                            { backgroundColor: colors.surface },
                                             vm.settings?.alert_duration === sec && {
                                                 backgroundColor: colors.danger + '20',
                                                 borderColor: colors.danger

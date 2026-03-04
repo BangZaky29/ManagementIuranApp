@@ -1,9 +1,10 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { ThemeColors } from '../../../theme/AppTheme';
 import { Colors } from '../../../constants/Colors';
 
 const { width } = Dimensions.get('window');
 
-export const AdminProfileStyles = StyleSheet.create({
+export const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
     },
@@ -140,7 +141,7 @@ export const AdminProfileStyles = StyleSheet.create({
     },
     // Used for both full screen edit and modal
     formContainer: {
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         borderRadius: 20,
         padding: 24,
         width: '100%',
@@ -157,7 +158,7 @@ export const AdminProfileStyles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 20,
         textAlign: 'center',
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
     },
     inputGroup: {
         marginBottom: 20,
@@ -166,14 +167,14 @@ export const AdminProfileStyles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '600',
         marginBottom: 8,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
     },
     input: {
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         borderRadius: 12,
         padding: 16,
         fontSize: 16,
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
         borderWidth: 1,
         borderColor: '#E0E0E0',
     },
@@ -199,7 +200,7 @@ export const AdminProfileStyles = StyleSheet.create({
         fontSize: 15,
     },
     saveButton: { // Re-using saveButton style name for consistency if used elsewhere, or just link to button
-        backgroundColor: Colors.primary,
+        backgroundColor: colors.primary,
         flex: 1,
         padding: 14,
         borderRadius: 12,
@@ -207,12 +208,12 @@ export const AdminProfileStyles = StyleSheet.create({
         justifyContent: 'center',
     },
     buttonText: { // used in modal
-        color: '#FFF',
+        color: colors.textWhite,
         fontWeight: 'bold',
         fontSize: 15,
     },
     saveButtonText: { // used in EditScreen if any
-        color: '#FFF',
+        color: colors.textWhite,
         fontSize: 16,
         fontWeight: 'bold',
     },

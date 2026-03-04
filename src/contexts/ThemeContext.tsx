@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getColors, ThemeColors } from '../constants/Colors';
+import { getThemeColors, ThemeColors } from '../theme/AppTheme';
 import { useAuth } from './AuthContext';
 import { themeService, ThemeMode } from '../services/theme/themeService';
 
@@ -18,7 +18,7 @@ const THEME_STORAGE_KEY = '@warga_pintar_theme';
 const ThemeContext = createContext<ThemeContextType>({
     themeMode: 'light',
     isDark: false,
-    colors: getColors('light'),
+    colors: getThemeColors('light'),
     setThemeMode: () => { },
     toggleTheme: () => { },
 });
@@ -78,7 +78,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             : themeMode;
 
     const isDark = effectiveScheme === 'dark';
-    const colors = getColors(effectiveScheme);
+    const colors = getThemeColors(effectiveScheme);
 
     return (
         <ThemeContext.Provider value={{ themeMode, isDark, colors, setThemeMode, toggleTheme }}>

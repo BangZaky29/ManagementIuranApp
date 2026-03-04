@@ -12,8 +12,8 @@ const ScanButton = ({ onPress, colors }: { onPress: () => void; colors: any }) =
         onPress={onPress}
         activeOpacity={0.8}
     >
-        <View style={[styles.scanButton, { backgroundColor: colors.backgroundCard }]}>
-            <Ionicons name="camera" size={28} color={colors.green5} />
+        <View style={[styles.scanButton, { backgroundColor: colors.surface }]}>
+            <Ionicons name="camera" size={28} color={colors.primary} />
         </View>
     </TouchableOpacity>
 );
@@ -29,7 +29,7 @@ export const CustomTabBar = ({ state, descriptors, navigation }: MaterialTopTabB
     };
 
     return (
-        <View style={[styles.tabBarContainer, { backgroundColor: colors.green5 }]}>
+        <View style={[styles.tabBarContainer, { backgroundColor: colors.surface }]}>
             {state.routes.map((route, index) => {
                 const { options } = descriptors[route.key];
                 const isFocused = state.index === index;
@@ -65,8 +65,8 @@ export const CustomTabBar = ({ state, descriptors, navigation }: MaterialTopTabB
                         accessibilityLabel={options.tabBarAccessibilityLabel}
                     >
                         <View style={[styles.iconContainer, isFocused && styles.activeIconContainer]}>
-                            <Ionicons name={iconName} size={24} color={isFocused ? colors.accent : colors.green4} />
-                            {isFocused && <View style={[styles.activeDot, { backgroundColor: colors.accent }]} />}
+                            <Ionicons name={iconName} size={24} color={isFocused ? colors.primary : colors.textSecondary} />
+                            {isFocused && <View style={[styles.activeDot, { backgroundColor: colors.primary }]} />}
                         </View>
                     </TouchableOpacity>
                 );

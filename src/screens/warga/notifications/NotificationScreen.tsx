@@ -12,10 +12,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomHeader } from '../../../components/common/CustomHeader';
 import { useNotificationViewModel } from './NotificationViewModel';
-import { styles } from './NotificationStyles';
-import { Colors } from '../../../constants/Colors';
+import { createStyles } from './NotificationStyles';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 export default function NotificationScreen() {
+    const { colors } = useTheme();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
+
     const {
         notifications,
         isLoading,
@@ -38,13 +41,13 @@ export default function NotificationScreen() {
         const type = data?.type || 'general';
         switch (type) {
             case 'payment':
-                return { name: 'receipt-outline', bgColor: '#E8F5E9', color: Colors.success };
+                return { name: 'receipt-outline', bgColor: colors.successBg, color: colors.success };
             case 'report':
-                return { name: 'alert-circle-outline', bgColor: '#FFF3E0', color: Colors.warning };
+                return { name: 'alert-circle-outline', bgColor: colors.warningBg, color: colors.warning };
             case 'sos':
-                return { name: 'warning-outline', bgColor: '#FFEBEE', color: Colors.danger };
+                return { name: 'warning-outline', bgColor: colors.dangerBg, color: colors.danger };
             default:
-                return { name: 'notifications-outline', bgColor: '#E3F2FD', color: Colors.primary };
+                return { name: 'notifications-outline', bgColor: colors.infoBg, color: colors.primary };
         }
     };
 
@@ -56,16 +59,15 @@ export default function NotificationScreen() {
 
     return (
         <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
-            <StatusBar barStyle="dark-content" />
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
             <CustomHeader
                 title="Notifikasi"
                 showBack={true}
             />
-            {/* Implement your own HeaderRight if CustomHeader supports it, otherwise place below header */}
 
             {isLoading && limit === 10 ? (
                 <View style={{ flex: 1, justifyContent: 'center' }}>
-                    <ActivityIndicator size="large" color={Colors.primary} />
+                    <ActivityIndicator size="large" color={colors.primary} />
                 </View>
             ) : (
                 <View style={{ flex: 1 }}>
@@ -105,7 +107,7 @@ export default function NotificationScreen() {
                         }
                         ListEmptyComponent={
                             <View style={styles.emptyState}>
-                                <Ionicons name="notifications-off-outline" size={60} color={Colors.textSecondary} />
+                                <Ionicons name="notifications-off-outline" size={60} color={colors.textSecondary} />
                                 <Text style={styles.emptyTitle}>Belum ada notifikasi</Text>
                                 <Text style={styles.emptyDesc}>Pemberitahuan terkait iuran atau laporan akan muncul di sini.</Text>
                             </View>
@@ -116,7 +118,7 @@ export default function NotificationScreen() {
                                 <TouchableOpacity
                                     style={[
                                         styles.notificationCard,
-                                        { borderLeftColor: item.is_read ? 'transparent' : Colors.primary }
+                                        { borderLeftColor: item.is_read ? 'transparent' : colors.primary }
                                     ]}
                                     onPress={() => handleNotificationPress(item)}
                                     activeOpacity={0.7}
@@ -129,16 +131,15 @@ export default function NotificationScreen() {
                                         <View style={styles.titleRow}>
                                             <Text style={[
                                                 styles.title,
-                                                !item.is_read && { color: Colors.textPrimary }
+                                                !item.is_read && { color: colors.textPrimary }
                                             ]} numberOfLines={1}>
                                                 {item.title}
                                             </Text>
                                             <Text style={styles.dateText}>
                                                 {new Date(item.created_at).toLocaleDateString()}
-                                                {/* Prefer formatTimeAgo like "2 jam lalu" */}
                                             </Text>
                                         </View>
-                                        <Text style={[styles.bodyText, !item.is_read && { fontWeight: '500', color: '#444' }]} numberOfLines={2}>
+                                        <Text style={[styles.bodyText, !item.is_read && { fontWeight: '500', color: colors.textPrimary }]} numberOfLines={2}>
                                             {item.body}
                                         </Text>
                                     </View>
@@ -155,7 +156,7 @@ export default function NotificationScreen() {
                                             disabled={isLoadingMore}
                                         >
                                             {isLoadingMore ? (
-                                                <ActivityIndicator size="small" color={Colors.primary} />
+                                                <ActivityIndicator size="small" color={colors.primary} />
                                             ) : (
                                                 <Text style={styles.loadMoreText}>Lihat Lebih Banyak</Text>
                                             )}

@@ -55,7 +55,7 @@ export default function SecurityHomeScreen() {
 
     return (
         <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
-            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.backgroundCard} />
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
             <CustomHeader title="Dashboard Security" showBack={false} />
 
             <ScrollView
@@ -91,7 +91,7 @@ export default function SecurityHomeScreen() {
                             )}
                             {vm.stats.wargaInactive > 0 && (
                                 <View style={{ backgroundColor: colors.danger, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
-                                    <Text style={{ fontSize: 10, color: colors.white, fontWeight: 'bold' }}>{vm.stats.wargaInactive}</Text>
+                                    <Text style={{ fontSize: 10, color: colors.textWhite, fontWeight: 'bold' }}>{vm.stats.wargaInactive}</Text>
                                 </View>
                             )}
                         </View>
@@ -127,7 +127,7 @@ export default function SecurityHomeScreen() {
                                         backgroundColor: 'rgba(255,255,255,0.2)',
                                         padding: 8, borderRadius: 12
                                     }}>
-                                        <Ionicons name="notifications" size={24} color={colors.white} />
+                                        <Ionicons name="notifications" size={24} color={colors.textWhite} />
                                     </View>
                                     <View style={{ marginLeft: 12 }}>
                                         <Text style={styles.panicBannerTitle}>
@@ -136,7 +136,7 @@ export default function SecurityHomeScreen() {
                                         <Text style={styles.panicBannerSubtitle}>Ketuk untuk melihat detail kejadian</Text>
                                     </View>
                                 </View>
-                                <Ionicons name="chevron-forward" size={20} color={colors.white} />
+                                <Ionicons name="chevron-forward" size={20} color={colors.textWhite} />
                             </LinearGradient>
                         </TouchableOpacity>
                     </Animated.View>
@@ -148,7 +148,7 @@ export default function SecurityHomeScreen() {
                 </View>
                 <View style={styles.quickActionsRow}>
                     <TouchableOpacity style={styles.quickAction} onPress={vm.navigateToPanicLogs}>
-                        <View style={[styles.quickIcon, { backgroundColor: colors.danger + '20' }]}>
+                        <View style={[styles.quickIcon, { backgroundColor: colors.dangerBg }]}>
                             <Ionicons name="warning" size={24} color={colors.danger} />
                             {vm.activePanics > 0 && (
                                 <View style={styles.badge}>
@@ -159,7 +159,7 @@ export default function SecurityHomeScreen() {
                         <Text style={styles.quickLabel}>Log Darurat</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.quickAction} onPress={vm.navigateToGuestBook}>
-                        <View style={[styles.quickIcon, { backgroundColor: colors.primary + '20' }]}>
+                        <View style={[styles.quickIcon, { backgroundColor: colors.primarySubtle }]}>
                             <Ionicons name="id-card" size={24} color={colors.primary} />
                             {vm.pendingGuestsCount > 0 && (
                                 <View style={[styles.badge, styles.badgeYellow]}>
@@ -170,7 +170,7 @@ export default function SecurityHomeScreen() {
                         <Text style={styles.quickLabel}>Buku Tamu</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.quickAction} onPress={vm.navigateToReports}>
-                        <View style={[styles.quickIcon, { backgroundColor: colors.primary + '20' }]}>
+                        <View style={[styles.quickIcon, { backgroundColor: colors.primarySubtle }]}>
                             <Ionicons name="document-text" size={24} color={colors.primary} />
                             <View style={{ position: 'absolute', top: -4, right: -4, flexDirection: 'row', gap: 2 }}>
                                 {vm.pendingReportsCount > 0 && (
@@ -237,7 +237,7 @@ export default function SecurityHomeScreen() {
                             onPress={vm.navigateToReports}
                         >
                             <View style={styles.activityLeft}>
-                                <View style={[styles.activityIconBox, { backgroundColor: colors.primary + '20' }]}>
+                                <View style={[styles.activityIconBox, { backgroundColor: colors.primarySubtle }]}>
                                     <Ionicons name="document-text" size={20} color={colors.primary} />
                                 </View>
                                 <View style={{ marginLeft: 12, flex: 1 }}>

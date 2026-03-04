@@ -8,11 +8,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useAdminBannerViewModel } from './AdminBannerViewModel';
-import { styles } from './AdminBannerStyles';
+import { createStyles } from './AdminBannerStyles';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { CustomHeader } from '../../../components/common/CustomHeader';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 export default function AdminBannerScreen() {
+    const { colors } = useTheme();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
     const vm = useAdminBannerViewModel();
 
     const renderBannerItem = ({ item }: { item: any }) => (

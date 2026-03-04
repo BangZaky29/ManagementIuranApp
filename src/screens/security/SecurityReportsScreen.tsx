@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
     View, Text, FlatList, TouchableOpacity,
     Image, RefreshControl, StatusBar, ActivityIndicator, Linking, Modal, TextInput
@@ -6,12 +6,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useSecurityReportsViewModel } from './SecurityReportsViewModel';
-import { styles } from './SecurityReportsStyles';
+import { createStyles } from './SecurityReportsStyles';
 import { formatDateSafe } from '../../utils/dateUtils';
 import { CustomHeader } from '../../components/common/CustomHeader';
 import { CustomAlertModal } from '../../components/common/CustomAlertModal';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Colors } from '../../constants/Colors';
 import { useRouter } from 'expo-router';
 
 const STATUS_FILTERS = ['Semua', 'Menunggu', 'Diproses', 'Selesai', 'Ditolak'];
@@ -20,6 +19,7 @@ export default function SecurityReportsScreen() {
     const vm = useSecurityReportsViewModel();
     const router = useRouter();
     const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
 
     useEffect(() => {
         vm.loadReports();
@@ -78,7 +78,7 @@ export default function SecurityReportsScreen() {
 
     return (
         <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.surface} />
             <CustomHeader title="Laporan Warga" showBack={true} />
 
             {/* Filter Chips */}
@@ -108,7 +108,7 @@ export default function SecurityReportsScreen() {
 
             {vm.isLoading && !vm.refreshing ? (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <ActivityIndicator size="large" color="#0D47A1" />
+                    <ActivityIndicator size="large" color={colors.primary} />
                 </View>
             ) : (
                 <FlatList
@@ -147,14 +147,14 @@ export default function SecurityReportsScreen() {
                             )}
                             {!vm.hasMore && vm.reports.length > 0 && (
                                 <View style={{ padding: 20, alignItems: 'center' }}>
-                                    <Text style={{ color: '#999', fontSize: 12 }}>Sudah menampilkan semua laporan</Text>
+                                    <Text style={{ color: colors.textSecondary, fontSize: 12 }}>Sudah menampilkan semua laporan</Text>
                                 </View>
                             )}
                         </View>
                     }
                     ListEmptyComponent={
                         <View style={styles.emptyContainer}>
-                            <Ionicons name="document-text-outline" size={64} color="#CCC" />
+                            <Ionicons name="document-text-outline" size={64} color={colors.textSecondary} />
                             <Text style={styles.emptyText}>Tidak ada laporan</Text>
                             <Text style={styles.emptySubtext}>Semua laporan warga sudah tertangani.</Text>
                         </View>

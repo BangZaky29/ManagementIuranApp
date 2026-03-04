@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, StatusBar, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors } from '../../../constants/Colors';
 import { CustomHeader } from '../../../components/common/CustomHeader';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../../contexts/AuthContext';
 import { fetchComplexInfo, ComplexInfo } from '../../../services/complex';
 import * as Linking from 'expo-linking';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { ThemeColors } from '../../../theme/AppTheme';
 
 export default function HelpScreen() {
     const { profile } = useAuth();
     const [info, setInfo] = useState<ComplexInfo | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const { colors } = useTheme();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
 
     useEffect(() => {
         loadData();
@@ -43,13 +46,13 @@ export default function HelpScreen() {
 
     return (
         <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor={Colors.green1} />
+            <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
             <CustomHeader title="Bantuan" showBack={true} />
 
             <ScrollView contentContainerStyle={styles.content}>
                 {isLoading ? (
                     <View style={{ padding: 40, alignItems: 'center' }}>
-                        <ActivityIndicator color={Colors.primary} />
+                        <ActivityIndicator color={colors.primary} />
                     </View>
                 ) : (
                     <View style={styles.card}>
@@ -61,7 +64,7 @@ export default function HelpScreen() {
                         {info?.help_phone && (
                             <TouchableOpacity style={styles.contactRow} onPress={() => handleCall(info.help_phone!)}>
                                 <View style={styles.iconBox}>
-                                    <Ionicons name="call" size={20} color={Colors.white} />
+                                    <Ionicons name="call" size={20} color={colors.textWhite} />
                                 </View>
                                 <Text style={styles.contactText}>{info.help_phone} (Pak RT)</Text>
                             </TouchableOpacity>
@@ -70,14 +73,14 @@ export default function HelpScreen() {
                         {info?.help_whatsapp && (
                             <TouchableOpacity style={styles.contactRow} onPress={() => handleWA(info.help_whatsapp!)}>
                                 <View style={styles.iconBox}>
-                                    <Ionicons name="logo-whatsapp" size={20} color={Colors.white} />
+                                    <Ionicons name="logo-whatsapp" size={20} color={colors.textWhite} />
                                 </View>
                                 <Text style={styles.contactText}>{info.help_whatsapp} (WhatsApp)</Text>
                             </TouchableOpacity>
                         )}
 
                         {!info?.help_phone && !info?.help_whatsapp && (
-                            <Text style={[styles.cardText, { fontStyle: 'italic', color: Colors.textSecondary }]}>
+                            <Text style={[styles.cardText, { fontStyle: 'italic', color: colors.textSecondary }]}>
                                 Belum ada kontak yang tersedia untuk komplek ini.
                             </Text>
                         )}
@@ -107,30 +110,30 @@ export default function HelpScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.green1,
+        backgroundColor: colors.background,
     },
     content: {
         padding: 20,
     },
     card: {
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         padding: 24,
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: Colors.green2,
+        borderColor: colors.border,
     },
     cardTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: Colors.green5,
+        color: colors.textPrimary,
         marginBottom: 12,
     },
     cardText: {
         fontSize: 14,
-        color: Colors.textPrimary,
+        color: colors.textPrimary,
         marginBottom: 20,
         lineHeight: 20,
     },
@@ -143,7 +146,7 @@ const styles = StyleSheet.create({
         width: 36,
         height: 36,
         borderRadius: 18,
-        backgroundColor: Colors.green3, // Primary green
+        backgroundColor: colors.primary,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 12,
@@ -151,7 +154,7 @@ const styles = StyleSheet.create({
     contactText: {
         fontSize: 15,
         fontWeight: '500',
-        color: Colors.green5,
+        color: colors.textPrimary,
     },
     faqItem: {
         marginBottom: 16,
@@ -159,12 +162,12 @@ const styles = StyleSheet.create({
     faqQuestion: {
         fontSize: 15,
         fontWeight: 'bold',
-        color: Colors.green5,
+        color: colors.primary,
         marginBottom: 4,
     },
     faqAnswer: {
         fontSize: 14,
-        color: Colors.textSecondary,
+        color: colors.textSecondary,
         lineHeight: 20,
     },
 });

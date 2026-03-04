@@ -1,3 +1,4 @@
+import { useTheme } from '../../../contexts/ThemeContext';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     View, Text, ScrollView, TouchableOpacity,
@@ -7,6 +8,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { ThemeColors } from '../../../theme/AppTheme';
 import { Colors } from '../../../constants/Colors';
 import { CustomButton } from '../../../components/common/CustomButton';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
@@ -60,6 +62,8 @@ const formatCurrency = (value: number) =>
 // ====== COMPONENT ======
 
 export default function ManageFeeScreen() {
+    const { colors } = useTheme();
+    const s = React.useMemo(() => createStyles(colors), [colors]);
     const router = useRouter();
     const { profile } = useAuth();
 
@@ -736,124 +740,126 @@ export default function ManageFeeScreen() {
 
 // ====== STYLES ======
 
-const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F5F7F5' },
-    header: {
-        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-        paddingHorizontal: 20, paddingBottom: 12, backgroundColor: '#FFF',
-    },
-    backBtn: { padding: 5 },
-    headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#1B5E20', flex: 1, marginLeft: 10 },
-    addBtn: { padding: 5 },
+function createStyles(colors: ThemeColors) {
+    return StyleSheet.create({
+        container: { flex: 1, backgroundColor: '#F5F7F5' },
+        header: {
+            flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+            paddingHorizontal: 20, paddingBottom: 12, backgroundColor: '#FFF',
+        },
+        backBtn: { padding: 5 },
+        headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#1B5E20', flex: 1, marginLeft: 10 },
+        addBtn: { padding: 5 },
 
-    // Tabs
-    tabRow: { flexDirection: 'row', paddingHorizontal: 20, paddingVertical: 10, marginTop: 10, backgroundColor: '#FFF', gap: 10, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
-    tab: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderRadius: 12, backgroundColor: '#F1F8E9' },
-    tabActive: { backgroundColor: '#1B5E20' },
-    tabText: { fontSize: 14, fontWeight: '600', color: '#1B5E20' },
-    tabTextActive: { color: '#FFF' },
+        // Tabs
+        tabRow: { flexDirection: 'row', paddingHorizontal: 20, paddingVertical: 10, marginTop: 10, backgroundColor: '#FFF', gap: 10, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
+        tab: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderRadius: 12, backgroundColor: '#F1F8E9' },
+        tabActive: { backgroundColor: '#1B5E20' },
+        tabText: { fontSize: 14, fontWeight: '600', color: '#1B5E20' },
+        tabTextActive: { color: '#FFF' },
 
-    center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 60 },
-    content: { padding: 16, paddingBottom: 40 },
+        center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 60 },
+        content: { padding: 16, paddingBottom: 40 },
 
-    // Month selector
-    monthSelector: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, backgroundColor: '#FFF', borderRadius: 14, padding: 8, ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 3 }, android: { elevation: 2 } }) },
-    monthArrow: { width: 40, alignItems: 'center', justifyContent: 'center' },
-    monthArrowBtn: { padding: 6 },
-    monthLabel: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    monthText: { fontSize: 16, fontWeight: '700', color: '#1B5E20' },
+        // Month selector
+        monthSelector: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, backgroundColor: '#FFF', borderRadius: 14, padding: 8, ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 3 }, android: { elevation: 2 } }) },
+        monthArrow: { width: 40, alignItems: 'center', justifyContent: 'center' },
+        monthArrowBtn: { padding: 6 },
+        monthLabel: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+        monthText: { fontSize: 16, fontWeight: '700', color: '#1B5E20' },
 
-    // Revenue card
-    revenueCard: { backgroundColor: '#1B5E20', borderRadius: 20, padding: 20, marginBottom: 20 },
-    revenueTitle: { fontSize: 13, color: 'rgba(255,255,255,0.7)' },
-    revenueAmount: { fontSize: 28, fontWeight: 'bold', color: '#FFF', marginTop: 4 },
-    revenueBar: { height: 8, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 4, marginTop: 16 },
-    revenueBarFill: { height: 8, backgroundColor: '#81C784', borderRadius: 4 },
-    revenueDetails: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 14 },
-    revDetailItem: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-    revDot: { width: 8, height: 8, borderRadius: 4 },
-    revDetailLabel: { fontSize: 11, color: 'rgba(255,255,255,0.65)' },
-    revDetailValue: { fontSize: 11, color: '#FFF', fontWeight: '600' },
-    revenueMeta: { marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.15)' },
-    revenueMetaText: { fontSize: 13, color: 'rgba(255,255,255,0.85)', fontWeight: '500' },
+        // Revenue card
+        revenueCard: { backgroundColor: '#1B5E20', borderRadius: 20, padding: 20, marginBottom: 20 },
+        revenueTitle: { fontSize: 13, color: 'rgba(255,255,255,0.7)' },
+        revenueAmount: { fontSize: 28, fontWeight: 'bold', color: '#FFF', marginTop: 4 },
+        revenueBar: { height: 8, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 4, marginTop: 16 },
+        revenueBarFill: { height: 8, backgroundColor: '#81C784', borderRadius: 4 },
+        revenueDetails: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 14 },
+        revDetailItem: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+        revDot: { width: 8, height: 8, borderRadius: 4 },
+        revDetailLabel: { fontSize: 11, color: 'rgba(255,255,255,0.65)' },
+        revDetailValue: { fontSize: 11, color: '#FFF', fontWeight: '600' },
+        revenueMeta: { marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.15)' },
+        revenueMetaText: { fontSize: 13, color: 'rgba(255,255,255,0.85)', fontWeight: '500' },
 
-    // Sections
-    sectionTitle: { fontSize: 16, fontWeight: '700', color: '#333', marginBottom: 10, marginTop: 4 },
+        // Sections
+        sectionTitle: { fontSize: 16, fontWeight: '700', color: '#333', marginBottom: 10, marginTop: 4 },
 
-    // Stat card
-    statCard: { backgroundColor: '#FFF', borderRadius: 16, padding: 16, marginBottom: 10, ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4 }, android: { elevation: 2 } }) },
-    statHeader: { flexDirection: 'row', alignItems: 'center' },
-    statIconBox: { width: 40, height: 40, borderRadius: 12, backgroundColor: '#F1F8E9', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
-    statName: { fontSize: 15, fontWeight: '700', color: '#333' },
-    statAmount: { fontSize: 12, color: '#888', marginTop: 1 },
-    statRate: { backgroundColor: '#F1F8E9', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10 },
-    statRateText: { fontSize: 15, fontWeight: 'bold' },
-    miniBar: { flexDirection: 'row', height: 6, borderRadius: 3, overflow: 'hidden', marginTop: 12 },
-    miniBarPaid: { backgroundColor: '#4CAF50' },
-    miniBarPending: { backgroundColor: '#FF9800' },
-    miniBarUnpaid: { backgroundColor: '#E0E0E0' },
-    statFooter: { flexDirection: 'row', alignItems: 'center', marginTop: 10, gap: 12 },
-    statFooterItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    footerDot: { width: 6, height: 6, borderRadius: 3 },
-    footerLabel: { fontSize: 11, color: '#888' },
+        // Stat card
+        statCard: { backgroundColor: '#FFF', borderRadius: 16, padding: 16, marginBottom: 10, ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4 }, android: { elevation: 2 } }) },
+        statHeader: { flexDirection: 'row', alignItems: 'center' },
+        statIconBox: { width: 40, height: 40, borderRadius: 12, backgroundColor: '#F1F8E9', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+        statName: { fontSize: 15, fontWeight: '700', color: '#333' },
+        statAmount: { fontSize: 12, color: '#888', marginTop: 1 },
+        statRate: { backgroundColor: '#F1F8E9', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10 },
+        statRateText: { fontSize: 15, fontWeight: 'bold' },
+        miniBar: { flexDirection: 'row', height: 6, borderRadius: 3, overflow: 'hidden', marginTop: 12 },
+        miniBarPaid: { backgroundColor: '#4CAF50' },
+        miniBarPending: { backgroundColor: '#FF9800' },
+        miniBarUnpaid: { backgroundColor: '#E0E0E0' },
+        statFooter: { flexDirection: 'row', alignItems: 'center', marginTop: 10, gap: 12 },
+        statFooterItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+        footerDot: { width: 6, height: 6, borderRadius: 3 },
+        footerLabel: { fontSize: 11, color: '#888' },
 
-    // Empty
-    emptyBox: { alignItems: 'center', paddingVertical: 40, backgroundColor: '#FFF', borderRadius: 16, padding: 20 },
-    emptyText: { fontSize: 14, color: '#999', marginTop: 10 },
-    emptyTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginTop: 16 },
-    emptySubtext: { fontSize: 14, color: '#888', textAlign: 'center', marginTop: 8, lineHeight: 20 },
+        // Empty
+        emptyBox: { alignItems: 'center', paddingVertical: 40, backgroundColor: '#FFF', borderRadius: 16, padding: 20 },
+        emptyText: { fontSize: 14, color: '#999', marginTop: 10 },
+        emptyTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginTop: 16 },
+        emptySubtext: { fontSize: 14, color: '#888', textAlign: 'center', marginTop: 8, lineHeight: 20 },
 
-    // Fee card (manage tab)
-    feeCard: { backgroundColor: '#FFF', borderRadius: 16, padding: 16, marginBottom: 10, ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4 }, android: { elevation: 2 } }) },
-    feeHeader: { flexDirection: 'row', alignItems: 'center' },
-    feeIcon: { width: 42, height: 42, borderRadius: 12, backgroundColor: '#F1F8E9', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
-    feeName: { fontSize: 15, fontWeight: 'bold', color: '#333' },
-    feeAmount: { fontSize: 14, fontWeight: '600', color: '#1B5E20', marginTop: 2 },
-    badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-    feeDetails: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#F5F5F5' },
-    feeDetailText: { fontSize: 12, color: '#888' },
-    feeActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 14, marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#F5F5F5' },
-    actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    actionText: { fontSize: 12, fontWeight: '600', color: '#1B5E20' },
+        // Fee card (manage tab)
+        feeCard: { backgroundColor: '#FFF', borderRadius: 16, padding: 16, marginBottom: 10, ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4 }, android: { elevation: 2 } }) },
+        feeHeader: { flexDirection: 'row', alignItems: 'center' },
+        feeIcon: { width: 42, height: 42, borderRadius: 12, backgroundColor: '#F1F8E9', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+        feeName: { fontSize: 15, fontWeight: 'bold', color: '#333' },
+        feeAmount: { fontSize: 14, fontWeight: '600', color: '#1B5E20', marginTop: 2 },
+        badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
+        feeDetails: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#F5F5F5' },
+        feeDetailText: { fontSize: 12, color: '#888' },
+        feeActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 14, marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#F5F5F5' },
+        actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+        actionText: { fontSize: 12, fontWeight: '600', color: '#1B5E20' },
 
-    // Payer modal
-    filterRow: { maxHeight: 50, marginBottom: 10 },
-    filterChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: '#F1F8E9' },
-    filterChipActive: { backgroundColor: '#1B5E20' },
-    filterChipText: { fontSize: 13, fontWeight: '600', color: '#1B5E20' },
-    filterChipTextActive: { color: '#FFF' },
-    payerCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF', borderRadius: 14, padding: 14, marginBottom: 8, ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 3 }, android: { elevation: 1 } }) },
-    payerAvatar: { width: 40, height: 40, borderRadius: 20 },
-    payerAvatarPlaceholder: { backgroundColor: '#1B5E20', alignItems: 'center', justifyContent: 'center' },
-    payerName: { fontSize: 14, fontWeight: '600', color: '#333' },
-    payerAddress: { fontSize: 11, color: '#888', marginTop: 2 },
-    payerMethod: { fontSize: 11, color: '#1B5E20', marginTop: 2, fontWeight: '500' },
-    statusBadge: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
-    statusBadgeText: { fontSize: 11, fontWeight: '700' },
+        // Payer modal
+        filterRow: { maxHeight: 50, marginBottom: 10 },
+        filterChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: '#F1F8E9' },
+        filterChipActive: { backgroundColor: '#1B5E20' },
+        filterChipText: { fontSize: 13, fontWeight: '600', color: '#1B5E20' },
+        filterChipTextActive: { color: '#FFF' },
+        payerCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF', borderRadius: 14, padding: 14, marginBottom: 8, ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 3 }, android: { elevation: 1 } }) },
+        payerAvatar: { width: 40, height: 40, borderRadius: 20 },
+        payerAvatarPlaceholder: { backgroundColor: '#1B5E20', alignItems: 'center', justifyContent: 'center' },
+        payerName: { fontSize: 14, fontWeight: '600', color: '#333' },
+        payerAddress: { fontSize: 11, color: '#888', marginTop: 2 },
+        payerMethod: { fontSize: 11, color: '#1B5E20', marginTop: 2, fontWeight: '500' },
+        statusBadge: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
+        statusBadgeText: { fontSize: 11, fontWeight: '700' },
 
-    // Modals
-    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-    modalSheet: { backgroundColor: '#F5F7F5', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '80%' },
-    modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: '#E0E0E0' },
-    modalTitle: { fontSize: 18, fontWeight: 'bold', color: '#1B5E20' },
-    modalSubtitle: { fontSize: 12, color: '#888', marginTop: 2 },
-    modalFooter: { flexDirection: 'row', padding: 20, gap: 10 },
-    formLabel: { fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8, marginTop: 16 },
-    input: { backgroundColor: '#FFF', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 14, color: '#333', borderWidth: 1, borderColor: '#E0E0E0' },
-    inputBtn: { backgroundColor: '#FFF', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, borderWidth: 1, borderColor: '#E0E0E0', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-    inputText: { fontSize: 14, color: '#333', flex: 1 },
-    inputPlaceholder: { fontSize: 14, color: '#999', flex: 1 },
-    preview: { fontSize: 13, fontWeight: '600', color: '#1B5E20', marginTop: 6 },
-    helper: { fontSize: 12, color: '#888', marginTop: 6, fontStyle: 'italic' },
+        // Modals
+        modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+        modalSheet: { backgroundColor: '#F5F7F5', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '80%' },
+        modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: '#E0E0E0' },
+        modalTitle: { fontSize: 18, fontWeight: 'bold', color: '#1B5E20' },
+        modalSubtitle: { fontSize: 12, color: '#888', marginTop: 2 },
+        modalFooter: { flexDirection: 'row', padding: 20, gap: 10 },
+        formLabel: { fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8, marginTop: 16 },
+        input: { backgroundColor: '#FFF', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 14, color: '#333', borderWidth: 1, borderColor: '#E0E0E0' },
+        inputBtn: { backgroundColor: '#FFF', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, borderWidth: 1, borderColor: '#E0E0E0', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+        inputText: { fontSize: 14, color: '#333', flex: 1 },
+        inputPlaceholder: { fontSize: 14, color: '#999', flex: 1 },
+        preview: { fontSize: 13, fontWeight: '600', color: '#1B5E20', marginTop: 6 },
+        helper: { fontSize: 12, color: '#888', marginTop: 6, fontStyle: 'italic' },
 
-    // Date Picker specific
-    datePickerContainer: { width: '85%', backgroundColor: '#FFF', borderRadius: 20, overflow: 'hidden', ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8 }, android: { elevation: 6 } }) },
-    datePickerHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 10, backgroundColor: '#F1F8E9' },
-    datePickerYear: { fontSize: 20, fontWeight: 'bold', color: '#1B5E20' },
-    datePickerGrid: { flexDirection: 'row', flexWrap: 'wrap', padding: 16, justifyContent: 'space-between' },
-    monthBox: { width: '30%', paddingVertical: 14, alignItems: 'center', borderRadius: 12, marginBottom: 12, backgroundColor: '#F5F5F5' },
-    monthBoxSelected: { backgroundColor: '#1B5E20' },
-    monthBoxDisabled: { opacity: 0.4, backgroundColor: '#FAFAFA' },
-    monthBoxText: { fontSize: 15, fontWeight: '600', color: '#555' },
-    monthBoxTextSelected: { color: '#FFF' },
-});
+        // Date Picker specific
+        datePickerContainer: { width: '85%', backgroundColor: '#FFF', borderRadius: 20, overflow: 'hidden', ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8 }, android: { elevation: 6 } }) },
+        datePickerHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 10, backgroundColor: '#F1F8E9' },
+        datePickerYear: { fontSize: 20, fontWeight: 'bold', color: '#1B5E20' },
+        datePickerGrid: { flexDirection: 'row', flexWrap: 'wrap', padding: 16, justifyContent: 'space-between' },
+        monthBox: { width: '30%', paddingVertical: 14, alignItems: 'center', borderRadius: 12, marginBottom: 12, backgroundColor: '#F5F5F5' },
+        monthBoxSelected: { backgroundColor: '#1B5E20' },
+        monthBoxDisabled: { opacity: 0.4, backgroundColor: '#FAFAFA' },
+        monthBoxText: { fontSize: 15, fontWeight: '600', color: '#555' },
+        monthBoxTextSelected: { color: '#FFF' },
+    });
+}
