@@ -37,8 +37,8 @@ export default function AdminHomeScreen() {
                 {/* Header */}
                 <View style={styles.header}>
                     <View>
-                        <Text style={styles.greeting}>Halo, selamat datang</Text>
-                        <Text style={styles.userName}>{vm.user?.user_metadata?.full_name || 'Admin'}</Text>
+                        <Text style={styles.greeting}>Halo, selamat datang 👋</Text>
+                        <Text style={styles.userName}>{vm.profile?.full_name || vm.user?.user_metadata?.full_name || 'Admin'}</Text>
                     </View>
                     <TouchableOpacity
                         style={styles.menuBtn}

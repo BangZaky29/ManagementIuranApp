@@ -1,11 +1,11 @@
 import React from 'react';
 import {
-    View, Text, ScrollView, TouchableOpacity,
+    View, Text, ScrollView, TouchableOpacity, Modal, Pressable,
     ActivityIndicator, RefreshControl, Linking
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useBackupManagementViewModel } from './BackupManagementViewModel';
+import { useBackupManagementViewModel, BACKUP_SCHEDULE_OPTIONS } from './BackupManagementViewModel';
 import { styles } from './BackupManagementStyles';
 import { CustomHeader } from '../../../components/common/CustomHeader';
 
@@ -35,11 +35,15 @@ export default function BackupManagementScreen() {
     const vm = useBackupManagementViewModel();
     const formatCurrency = (amount: number) => 'Rp ' + amount.toLocaleString('id-ID');
 
+    const currentScheduleLabel = BACKUP_SCHEDULE_OPTIONS.find(o => o.key === vm.selectedSchedule)?.label || '-';
+
     return (
         <View style={styles.container}>
-            <CustomHeader title="Kelola Data" onBack={() => router.back()} />
+            {/* ── Header with Back Button ── */}
+            <CustomHeader title="Kelola Data" showBack onBack={() => router.back()} />
 
             <ScrollView refreshControl={<RefreshControl refreshing={vm.isLoading} onRefresh={vm.refresh} />}>
+
                 {/* ── Summary ── */}
                 <View style={styles.summaryContainer}>
                     <Text style={styles.summaryTitle}>📊 Rekap Iuran — {vm.complexName}</Text>
@@ -110,7 +114,7 @@ export default function BackupManagementScreen() {
 
                 {/* ── Download Buttons ── */}
                 <View style={styles.downloadSection}>
-                    <Text style={styles.sectionTitle}>Download Laporan</Text>
+                    <Text style={styles.sectionTitle}>💾 Download Laporan</Text>
                     <View style={styles.downloadRow}>
                         <TouchableOpacity
                             style={[styles.downloadBtn, styles.pdfBtn]}
@@ -149,48 +153,76 @@ export default function BackupManagementScreen() {
                             width: 8, height: 8, borderRadius: 4, marginRight: 8,
                             backgroundColor: vm.isDriveConnected ? '#2E7D32' : '#CCC',
                         }} />
-                        <Text style={{ fontSize: 12, color: vm.isDriveConnected ? '#2E7D32' : '#999' }}>
+                        <Text style={{ fontSize: 12, color: vm.isDriveConnected ? '#2E7D32' : '#999', flex: 1 }}>
                             {vm.isDriveConnected
-                                ? `Terhubung: ${vm.googleEmail}`
-                                : 'Belum terhubung ke akun Google'}
+                                ? `✅ Terhubung: ${vm.googleEmail}`
+                                : '❌ Belum terhubung ke akun Google'}
                         </Text>
                     </View>
 
-                    {vm.isDriveConnected ? (
+                    {/* Backup Button */}
+                    <TouchableOpacity
+                        style={[
+                            styles.backupBtn,
+                            !vm.isDriveConnected && { backgroundColor: '#5F6368' },
+                            (vm.isBackingUp || vm.isLinkingGoogle) && styles.backupBtnDisabled,
+                        ]}
+                        onPress={() => vm.handleBackupToDrive()}
+                        disabled={vm.isBackingUp || vm.isLinkingGoogle}
+                    >
+                        {vm.isBackingUp ? <ActivityIndicator size="small" color="#FFF" /> : (
+                            <>
+                                <Ionicons
+                                    name={vm.isDriveConnected ? 'logo-google' : 'link-outline'}
+                                    size={20} color="#FFF"
+                                />
+                                <Text style={styles.backupBtnText}>
+                                    {vm.isDriveConnected ? 'Backup ke Google Drive' : 'Hubungkan & Backup'}
+                                </Text>
+                            </>
+                        )}
+                    </TouchableOpacity>
+
+                    {/* If not connected — Link Google button */}
+                    {!vm.isDriveConnected && (
                         <TouchableOpacity
-                            style={[styles.backupBtn, vm.isBackingUp && styles.backupBtnDisabled]}
-                            onPress={() => vm.handleBackupToDrive()}
-                            disabled={vm.isBackingUp}
+                            style={{
+                                flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+                                marginTop: 10, paddingVertical: 10, borderRadius: 10,
+                                borderWidth: 1, borderColor: '#4285F4', gap: 8,
+                            }}
+                            onPress={() => vm.handleLinkGoogle()}
+                            disabled={vm.isLinkingGoogle}
                         >
-                            {vm.isBackingUp ? <ActivityIndicator size="small" color="#FFF" /> : (
-                                <>
-                                    <Ionicons name="logo-google" size={20} color="#FFF" />
-                                    <Text style={styles.backupBtnText}>Backup ke Google Drive</Text>
-                                </>
-                            )}
-                        </TouchableOpacity>
-                    ) : (
-                        <TouchableOpacity
-                            style={[styles.backupBtn, { backgroundColor: '#5F6368' }]}
-                            onPress={() => vm.handleConnectGoogle()}
-                            disabled={vm.isBackingUp}
-                        >
-                            {vm.isBackingUp ? <ActivityIndicator size="small" color="#FFF" /> : (
-                                <>
-                                    <Ionicons name="link-outline" size={20} color="#FFF" />
-                                    <Text style={styles.backupBtnText}>Hubungkan Akun Google</Text>
-                                </>
-                            )}
+                            {vm.isLinkingGoogle
+                                ? <ActivityIndicator size="small" color="#4285F4" />
+                                : <Ionicons name="logo-google" size={18} color="#4285F4" />
+                            }
+                            <Text style={{ color: '#4285F4', fontSize: 14, fontWeight: '600' }}>
+                                {vm.isLinkingGoogle ? 'Menghubungkan...' : 'Hubungkan Akun Google'}
+                            </Text>
                         </TouchableOpacity>
                     )}
 
                     {/* Auto Backup Row */}
                     {vm.isAutoBackupEnabled && (
-                        <View style={styles.autoBackupRow}>
-                            <Text style={styles.autoBackupLabel}>Backup Otomatis</Text>
-                            <View style={[styles.autoBackupBadge, { backgroundColor: '#E8F5E9' }]}>
-                                <Text style={[styles.autoBackupBadgeText, { color: '#2E7D32' }]}>Aktif</Text>
+                        <View style={[styles.autoBackupRow, { marginTop: 16 }]}>
+                            <View>
+                                <Text style={styles.autoBackupLabel}>🔄 Backup Otomatis</Text>
+                                <Text style={{ fontSize: 11, color: '#888', marginTop: 2 }}>
+                                    Jadwal: {currentScheduleLabel}
+                                </Text>
                             </View>
+                            <TouchableOpacity
+                                style={{
+                                    paddingHorizontal: 14, paddingVertical: 6,
+                                    backgroundColor: '#E8F5E9', borderRadius: 20,
+                                    borderWidth: 1, borderColor: '#A5D6A7',
+                                }}
+                                onPress={() => vm.setShowSchedulePicker(true)}
+                            >
+                                <Text style={{ color: '#2E7D32', fontWeight: '700', fontSize: 12 }}>Atur Jadwal</Text>
+                            </TouchableOpacity>
                         </View>
                     )}
                 </View>
@@ -206,9 +238,7 @@ export default function BackupManagementScreen() {
                                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                                         <Ionicons name={icon.name as any} size={18} color={icon.color} />
                                         <View style={{ flex: 1 }}>
-                                            <Text style={styles.previewName}>
-                                                {log.file_name || 'Backup'}
-                                            </Text>
+                                            <Text style={styles.previewName}>{log.file_name || 'Backup'}</Text>
                                             <Text style={styles.previewDetail}>
                                                 {vm.formatDateTime(log.created_at)} • {log.records_count || 0} data
                                             </Text>
@@ -270,6 +300,65 @@ export default function BackupManagementScreen() {
                     <View style={{ height: 60 }} />
                 </View>
             </ScrollView>
+
+            {/* ── Auto Backup Schedule Picker Modal ── */}
+            <Modal
+                visible={vm.showSchedulePicker}
+                transparent
+                animationType="slide"
+                onRequestClose={() => vm.setShowSchedulePicker(false)}
+            >
+                <Pressable
+                    style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' }}
+                    onPress={() => vm.setShowSchedulePicker(false)}
+                >
+                    <Pressable style={{
+                        backgroundColor: '#FFF',
+                        borderTopLeftRadius: 24,
+                        borderTopRightRadius: 24,
+                        paddingTop: 12,
+                        paddingBottom: 32,
+                        paddingHorizontal: 20,
+                    }}>
+                        {/* Handle */}
+                        <View style={{
+                            width: 40, height: 4, borderRadius: 2,
+                            backgroundColor: '#DDD', alignSelf: 'center', marginBottom: 20,
+                        }} />
+                        <Text style={{ fontSize: 18, fontWeight: '700', color: '#1B5E20', marginBottom: 6 }}>
+                            🔄 Jadwal Backup Otomatis
+                        </Text>
+                        <Text style={{ fontSize: 13, color: '#888', marginBottom: 20 }}>
+                            Pilih seberapa sering backup dilakukan secara otomatis
+                        </Text>
+                        {BACKUP_SCHEDULE_OPTIONS.map(opt => (
+                            <TouchableOpacity
+                                key={opt.key}
+                                style={{
+                                    flexDirection: 'row', alignItems: 'center',
+                                    paddingVertical: 14, paddingHorizontal: 16,
+                                    borderRadius: 12, marginBottom: 10,
+                                    backgroundColor: vm.selectedSchedule === opt.key ? '#E8F5E9' : '#F8F8F8',
+                                    borderWidth: 1.5,
+                                    borderColor: vm.selectedSchedule === opt.key ? '#2E7D32' : '#EEE',
+                                }}
+                                onPress={() => vm.handleScheduleSelect(opt.key)}
+                            >
+                                <View style={{ flex: 1 }}>
+                                    <Text style={{
+                                        fontSize: 15, fontWeight: '600',
+                                        color: vm.selectedSchedule === opt.key ? '#1B5E20' : '#333',
+                                    }}>{opt.label}</Text>
+                                    <Text style={{ fontSize: 12, color: '#888', marginTop: 2 }}>{opt.desc}</Text>
+                                </View>
+                                {vm.selectedSchedule === opt.key && (
+                                    <Ionicons name="checkmark-circle" size={22} color="#2E7D32" />
+                                )}
+                            </TouchableOpacity>
+                        ))}
+                    </Pressable>
+                </Pressable>
+            </Modal>
         </View>
     );
 }

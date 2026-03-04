@@ -12,7 +12,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 
 export default function RegisterAdminScreen() {
     const router = useRouter();
-    const { signUp } = useAuth();
+    const { signUp, signInWithGoogle } = useAuth();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -167,6 +167,33 @@ export default function RegisterAdminScreen() {
         }
     };
 
+    const handleRegisterWithGoogle = async () => {
+        setIsLoading(true);
+        try {
+            await signInWithGoogle();
+            // After Google sign-in, the trigger creates the admin profile automatically.
+            // We still need cluster info — show a prompt to navigate to complete profile.
+            setAlertConfig({
+                title: '✅ Akun Google Terhubung!',
+                message: 'Profil Anda sudah dibuat. Lengkapi data kompleks perumahan di halaman Profil Admin agar fitur berfungsi dengan baik.',
+                type: 'success',
+                buttons: [{
+                    text: 'Lanjutkan',
+                    onPress: () => {
+                        hideAlert();
+                    }
+                }]
+            });
+            setAlertVisible(true);
+        } catch (error: any) {
+            if (!error.message?.includes('dibatalkan')) {
+                showAlert('Gagal', error.message || 'Gagal register dengan Google.', 'error');
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <View style={styles.container}>
             <StatusBar style="dark" />
@@ -314,6 +341,30 @@ export default function RegisterAdminScreen() {
                         loading={isLoading}
                         style={styles.loginButton}
                     />
+
+                    {/* Divider */}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 16 }}>
+                        <View style={{ flex: 1, height: 1, backgroundColor: '#E0E0E0' }} />
+                        <Text style={{ marginHorizontal: 12, color: '#9E9E9E', fontSize: 13 }}>atau</Text>
+                        <View style={{ flex: 1, height: 1, backgroundColor: '#E0E0E0' }} />
+                    </View>
+
+                    {/* Google Register */}
+                    <TouchableOpacity
+                        style={{
+                            flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+                            backgroundColor: '#4285F4', borderRadius: 25, paddingVertical: 14,
+                            gap: 10, opacity: isLoading ? 0.7 : 1,
+                            shadowColor: '#4285F4', shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.25, shadowRadius: 6, elevation: 3,
+                        }}
+                        onPress={handleRegisterWithGoogle}
+                        disabled={isLoading}
+                        activeOpacity={0.8}
+                    >
+                        <Ionicons name="logo-google" size={20} color="#FFF" />
+                        <Text style={{ fontSize: 15, fontWeight: '700', color: '#FFF' }}>Daftar dengan Google</Text>
+                    </TouchableOpacity>
                 </View>
             </KeyboardAwareScrollView>
 

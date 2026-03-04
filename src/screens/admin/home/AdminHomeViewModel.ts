@@ -11,7 +11,7 @@ import { formatDateSafe } from '../../../utils/dateUtils';
 import { supabase } from '../../../lib/supabaseConfig';
 
 export function useAdminHomeViewModel() {
-    const { signOut, user } = useAuth();
+    const { signOut, user, profile } = useAuth();
     const router = useRouter();
 
     // Dashboard stats
@@ -128,7 +128,7 @@ export function useAdminHomeViewModel() {
     };
 
     return {
-        user, stats, activePanics, activeGuests, recentPanics, isLoading,
+        user, profile, stats, activePanics, activeGuests, recentPanics, isLoading,
         pendingPayments, pendingReports, processingReports, activityLogs,
         handleLogout, navigateToManageResidents, navigateToPanicLogs,
         navigateToPaymentMethods, navigateToPaymentConfirmation, navigateToReports,

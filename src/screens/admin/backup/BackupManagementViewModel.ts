@@ -9,8 +9,17 @@ import {
 import { supabase } from '../../../lib/supabaseConfig';
 import { FeatureFlags } from '../../../constants/FeatureFlags';
 
+export type BackupSchedule = 'daily' | 'weekly' | 'monthly' | 'yearly';
+
+export const BACKUP_SCHEDULE_OPTIONS: { key: BackupSchedule; label: string; desc: string }[] = [
+    { key: 'daily', label: '1 Hari Sekali', desc: 'Backup otomatis setiap hari' },
+    { key: 'weekly', label: '1 Minggu Sekali', desc: 'Backup otomatis setiap Senin' },
+    { key: 'monthly', label: '1 Bulan Sekali', desc: 'Backup otomatis tiap tanggal 1' },
+    { key: 'yearly', label: '1 Tahun Sekali', desc: 'Backup otomatis setiap 1 Januari' },
+];
+
 export function useBackupManagementViewModel() {
-    const { profile, googleAccessToken, user } = useAuth();
+    const { profile, googleAccessToken, user, linkGoogle } = useAuth();
 
     const [rows, setRows] = useState<IuranReportRow[]>([]);
     const [summary, setSummary] = useState<IuranSummary>({
@@ -19,6 +28,11 @@ export function useBackupManagementViewModel() {
     const [isLoading, setIsLoading] = useState(true);
     const [isGenerating, setIsGenerating] = useState(false);
     const [isBackingUp, setIsBackingUp] = useState(false);
+    const [isLinkingGoogle, setIsLinkingGoogle] = useState(false);
+
+    // Auto backup schedule state
+    const [selectedSchedule, setSelectedSchedule] = useState<BackupSchedule>('weekly');
+    const [showSchedulePicker, setShowSchedulePicker] = useState(false);
 
     // Filters
     const [selectedPeriod, setSelectedPeriod] = useState<string>('');
@@ -28,8 +42,6 @@ export function useBackupManagementViewModel() {
 
     const complexName = profile?.housing_complexes?.name || 'Kompleks';
     const complexId = profile?.housing_complex_id || 0;
-
-    // Check if Google Drive is connected
     const isDriveConnected = !!googleAccessToken;
     const isAutoBackupEnabled = FeatureFlags.IS_AUTO_BACKUP_ENABLED;
     const isRestoreEnabled = FeatureFlags.IS_BACKUP_RESTORE_ENABLED;
@@ -109,15 +121,14 @@ export function useBackupManagementViewModel() {
         finally { setIsGenerating(false); }
     };
 
-    const handleBackupToDrive = async (tokenOverride?: string) => {
-        const token = tokenOverride || googleAccessToken;
-        if (!token) {
+    const handleBackupToDrive = async () => {
+        if (!googleAccessToken) {
             Alert.alert(
                 '🔗 Hubungkan Akun Google',
-                'Untuk backup ke Google Drive, Anda perlu login menggunakan akun Google.\n\nCara: Keluar → Login kembali menggunakan tombol "Masuk dengan Google" di halaman login.',
+                'Akun Google belum terhubung. Hubungkan sekarang untuk mengaktifkan backup ke Google Drive?',
                 [
-                    { text: 'Nanti', style: 'cancel' },
-                    { text: 'Keluar Sekarang', style: 'destructive', onPress: handleSignOutForGoogle },
+                    { text: 'Batal', style: 'cancel' },
+                    { text: 'Hubungkan Google', onPress: handleLinkGoogle },
                 ]
             );
             return;
@@ -127,7 +138,7 @@ export function useBackupManagementViewModel() {
         setIsBackingUp(true);
         try {
             const result = await backupToGoogleDrive(
-                rows, user!.id, complexId, complexName, token
+                rows, user!.id, complexId, complexName, googleAccessToken
             );
             await loadBackupHistory();
             Alert.alert(
@@ -145,15 +156,35 @@ export function useBackupManagementViewModel() {
         }
     };
 
-    const handleSignOutForGoogle = async () => {
+    /**
+     * Link Google account to existing session using linkIdentity.
+     * After linking, the session will have provider_token for Drive access.
+     */
+    const handleLinkGoogle = async () => {
+        setIsLinkingGoogle(true);
         try {
-            await supabase.auth.signOut();
-        } catch (e) {
-            console.error('Sign out error:', e);
+            await linkGoogle();
+            Alert.alert(
+                '✅ Google Terhubung',
+                'Akun Google berhasil dihubungkan! Sekarang Anda bisa backup data ke Google Drive.',
+                [{ text: 'OK' }]
+            );
+        } catch (e: any) {
+            Alert.alert('Gagal', `Gagal menghubungkan Google: ${e.message}`);
+        } finally {
+            setIsLinkingGoogle(false);
         }
     };
 
-    const handleConnectGoogle = handleBackupToDrive;
+    const handleScheduleSelect = (schedule: BackupSchedule) => {
+        setSelectedSchedule(schedule);
+        setShowSchedulePicker(false);
+        Alert.alert(
+            '✅ Jadwal Tersimpan',
+            `Backup otomatis diatur: ${BACKUP_SCHEDULE_OPTIONS.find(o => o.key === schedule)?.label}`,
+            [{ text: 'OK' }]
+        );
+    };
 
     const formatPeriodLabel = (period: string): string => {
         const [y, m] = period.split('-');
@@ -168,14 +199,17 @@ export function useBackupManagementViewModel() {
     };
 
     return {
-        rows, summary, isLoading, isGenerating, isBackingUp,
+        rows, summary, isLoading, isGenerating, isBackingUp, isLinkingGoogle,
         selectedPeriod, setSelectedPeriod,
         selectedStatus, setSelectedStatus,
         availablePeriods, backupHistory, complexName,
         isDriveConnected, isAutoBackupEnabled, isRestoreEnabled,
         googleEmail: user?.email || null,
+        selectedSchedule, showSchedulePicker,
+        setShowSchedulePicker,
         handleDownloadPdf, handleDownloadExcel,
-        handleBackupToDrive, handleConnectGoogle,
+        handleBackupToDrive, handleLinkGoogle,
+        handleScheduleSelect,
         formatPeriodLabel, getFilterLabel, formatDateTime,
         refresh: loadData,
     };

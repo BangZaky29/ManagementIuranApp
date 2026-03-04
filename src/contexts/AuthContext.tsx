@@ -26,6 +26,7 @@ interface AuthContextType {
     signOut: () => Promise<void>;
     resetPassword: (email: string) => Promise<void>;
     signInWithGoogle: () => Promise<void>;
+    linkGoogle: () => Promise<void>;
     refreshProfile: () => Promise<void>;
     updateUserProfile: (updates: Partial<UserProfile>) => Promise<void>;
 }
@@ -123,6 +124,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await _signInWithGoogle();
     }, []);
 
+    const linkGoogle = useCallback(async () => {
+        // Link Google identity to existing session (does NOT create a new session)
+        const { data, error } = await supabase.auth.linkIdentity({
+            provider: 'google',
+            options: {
+                scopes: 'https://www.googleapis.com/auth/drive.file',
+                queryParams: {
+                    access_type: 'offline',
+                    prompt: 'consent',
+                },
+            },
+        });
+        if (error) throw error;
+    }, []);
+
     const refreshProfile = useCallback(async () => {
         if (user) await fetchProfile(user);
     }, [user, fetchProfile]);
@@ -153,6 +169,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 signOut,
                 resetPassword: resetPasswordFn,
                 signInWithGoogle,
+                linkGoogle,
                 refreshProfile,
                 updateUserProfile,
             }}
