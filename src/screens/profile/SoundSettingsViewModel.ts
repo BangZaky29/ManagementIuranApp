@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { soundSettingsService, UserSoundSettings } from '../../services/notificationSettingsService';
+import { soundSettingsService, UserSoundSettings } from '../../services/notification';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { Audio } from 'expo-av';

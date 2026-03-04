@@ -9,8 +9,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { CustomButton } from '../../../components/CustomButton';
 import { PaymentInstructionModal } from '../../../components/PaymentInstructionModal';
 import { useAuth } from '../../../contexts/AuthContext';
-import { fetchPaymentMethodsForUser, PaymentMethod } from '../../../services/paymentMethodService';
-import { BillingPeriod } from '../../../services/iuranService';
+import { fetchPaymentMethodsForUser, PaymentMethod } from '../../../services/payment';
+import { BillingPeriod } from '../../../services/iuran';
 
 export default function PaymentDetailScreen() {
     const router = useRouter();

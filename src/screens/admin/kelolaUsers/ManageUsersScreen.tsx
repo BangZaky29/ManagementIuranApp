@@ -3,7 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, TextInput, Alert, ActivityIndic
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { fetchVerifiedResidents, createVerifiedResident, deleteVerifiedResident, updateVerifiedResident, fetchHousingComplexes, VerifiedResident, exportResidents, importResidents } from '../../../services/adminService';
+import { fetchVerifiedResidents, createVerifiedResident, deleteVerifiedResident, updateVerifiedResident, fetchHousingComplexes, VerifiedResident, exportResidents, importResidents } from '../../../services/admin';
 import { useAuth } from '../../../contexts/AuthContext';
 import { CustomHeader } from '../../../components/CustomHeader';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
@@ -203,7 +203,7 @@ export default function ManageUsersScreen() {
     const hideAlert = () => setAlertConfig(prev => ({ ...prev, visible: false }));
 
     // Import/Export Imports
-    // const { exportResidents, importResidents } = require('../../../services/adminService'); // Switched to top-level import for types
+    // const { exportResidents, importResidents } = require('../../../services/admin'); // Switched to top-level import for types
 
     const handleExport = () => {
         setShowExportModal(true);

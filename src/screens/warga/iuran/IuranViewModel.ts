@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../../contexts/AuthContext';
-import { fetchMyPayments, fetchBillingPeriods, BillingPeriod, BillItem, submitBulkPayments, PaymentRecord, SmartBillSummary } from '../../../services/iuranService';
+import { fetchMyPayments, fetchBillingPeriods, BillingPeriod, BillItem, submitBulkPayments, PaymentRecord, SmartBillSummary } from '../../../services/iuran';
 import { formatDateSafe } from '../../../utils/dateUtils';
-import { generateAndShareReceipt } from '../../../services/receiptService';
+import { generateAndShareReceipt } from '../../../services/payment';
 
 export interface HistoryItem {
     id: string;

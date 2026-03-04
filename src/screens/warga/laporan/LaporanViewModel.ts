@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useFocusEffect } from 'expo-router';
-import { fetchMyReports, Report } from '../../../services/laporanService';
+import { fetchMyReports, Report } from '../../../services/laporan';
 import { useAuth } from '../../../contexts/AuthContext';
 import { formatDateSafe } from '../../../utils/dateUtils';
 

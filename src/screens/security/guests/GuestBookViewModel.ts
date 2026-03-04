@@ -7,7 +7,7 @@ import {
     checkOutVisitor,
     Visitor,
     VisitorType
-} from '../../../services/guestService';
+} from '../../../services/guest';
 
 export interface AlertConfig {
     title: string;

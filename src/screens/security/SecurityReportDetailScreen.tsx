@@ -7,7 +7,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { fetchReportById, updateReportStatus } from '../../services/laporanService';
+import { fetchReportById, updateReportStatus } from '../../services/laporan';
 import { formatDateSafe, formatDateTimeSafe } from '../../utils/dateUtils';
 import { CustomHeader } from '../../components/CustomHeader';
 import { CustomAlertModal } from '../../components/CustomAlertModal';

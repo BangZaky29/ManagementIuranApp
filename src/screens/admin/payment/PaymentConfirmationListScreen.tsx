@@ -11,7 +11,7 @@ import { formatDateTimeSafe } from '../../../utils/dateUtils';
 import {
     PendingPaymentItem,
     fetchPaymentsByStatus,
-} from '../../../services/paymentConfirmationService';
+} from '../../../services/payment';
 import { useTheme } from '../../../contexts/ThemeContext';
 
 type FilterStatus = 'pending' | 'paid' | 'rejected' | 'all';

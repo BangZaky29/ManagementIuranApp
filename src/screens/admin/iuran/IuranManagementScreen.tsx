@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Colors } from '../../../constants/Colors';
-import { countPendingPayments } from '../../../services/paymentConfirmationService';
+import { countPendingPayments } from '../../../services/payment';
 import { useState, useCallback } from 'react';
 
 interface MenuCard {

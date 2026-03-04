@@ -19,7 +19,7 @@ import {
     updatePaymentMethod,
     deletePaymentMethod,
     uploadQrisImage,
-} from '../../../services/paymentMethodService';
+} from '../../../services/payment';
 
 // ====== CONSTANTS ======
 

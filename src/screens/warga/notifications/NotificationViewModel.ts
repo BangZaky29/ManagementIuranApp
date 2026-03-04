@@ -5,7 +5,7 @@ import {
     fetchMyNotifications,
     markNotificationAsRead,
     markAllNotificationsAsRead
-} from '../../../services/notificationService';
+} from '../../../services/notification';
 import { Alert } from 'react-native';
 
 export type NotificationFilter = 'Semua' | 'Hari Ini' | 'Belum Dibaca';

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { fetchNewsDetail, NewsItem } from '../../../services/newsService';
+import { fetchNewsDetail, NewsItem } from '../../../services/news';
 import { toUserMessage } from '../../../utils/AppError';
 
 /**

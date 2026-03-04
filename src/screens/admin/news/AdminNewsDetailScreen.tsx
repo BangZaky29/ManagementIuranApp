@@ -5,7 +5,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { formatDateSafe } from '../../../utils/dateUtils';
 import { Colors } from '../../../constants/Colors';
-import { deleteNews } from '../../../services/newsService';
+import { deleteNews } from '../../../services/news';
 import { NewsDetailStyles as styles } from '../../warga/news/NewsDetailStyles'; // Reuse styles
 import { useTheme } from '../../../contexts/ThemeContext';
 import { useNewsDetailViewModel } from '../../warga/news/NewsDetailViewModel';

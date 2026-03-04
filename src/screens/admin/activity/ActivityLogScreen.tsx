@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
-import { fetchRecentActivityLogs, ActivityLog } from '../../../services/activityLogService';
+import { fetchRecentActivityLogs, ActivityLog } from '../../../services/activityLog';
 import { CustomHeader } from '../../../components/CustomHeader';
 import { useRouter, useFocusEffect } from 'expo-router';
 

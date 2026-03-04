@@ -26,7 +26,7 @@ import {
     fetchMonthlyRevenueSummary,
     fetchOverallRevenueSummary,
     OverallRevenue,
-} from '../../../services/feeService';
+} from '../../../services/fee';
 
 // ====== TYPES ======
 

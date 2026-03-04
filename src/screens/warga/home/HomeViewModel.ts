@@ -1,15 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../../contexts/AuthContext';
-import { fetchNews, NewsItem } from '../../../services/newsService';
-import { fetchBillingPeriods } from '../../../services/iuranService';
-import { triggerPanicButton } from '../../../services/panicService';
-import { getUnreadNotificationCount } from '../../../services/notificationService';
+import { fetchNews, NewsItem } from '../../../services/news';
+import { fetchBillingPeriods } from '../../../services/iuran';
+import { triggerPanicButton } from '../../../services/panic';
+import { getUnreadNotificationCount } from '../../../services/notification';
 import { supabase } from '../../../lib/supabaseConfig';
 import * as Linking from 'expo-linking';
 import { Platform } from 'react-native';
 import * as Location from 'expo-location';
-import { fetchActiveBanners, Banner } from '../../../services/bannerService';
+import { fetchActiveBanners, Banner } from '../../../services/banner';
 import { FeatureFlags } from '../../../constants/FeatureFlags';
 
 export interface QuickAction {

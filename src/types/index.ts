@@ -43,7 +43,7 @@ export interface ReportItem {
 
 // ─── News ────────────────────────────────────────
 // Canonical NewsItem is in newsService.ts — re-export for convenience
-export type { NewsItem } from '../services/newsService';
+export type { NewsItem } from '../services/news';
 
 // ─── Quick Actions ───────────────────────────────
 export interface QuickAction {

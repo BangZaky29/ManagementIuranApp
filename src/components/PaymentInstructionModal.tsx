@@ -7,7 +7,7 @@ import { ToastNotification } from './ToastNotification';
 import * as Clipboard from 'expo-clipboard';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as MediaLibrary from 'expo-media-library';
-import { PaymentMethod, fetchEwalletVaCodes, EwalletVaCode } from '../services/paymentMethodService';
+import { PaymentMethod, fetchEwalletVaCodes, EwalletVaCode } from '../services/payment';
 
 interface PaymentInstructionModalProps {
     visible: boolean;

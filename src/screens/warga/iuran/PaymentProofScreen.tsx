@@ -13,8 +13,8 @@ import { useAuth } from '../../../contexts/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
 import {
     uploadPaymentProof,
-} from '../../../services/paymentConfirmationService';
-import { submitBulkPayments, updateRejectedPayment, BillingPeriod } from '../../../services/iuranService';
+} from '../../../services/payment';
+import { submitBulkPayments, updateRejectedPayment, BillingPeriod } from '../../../services/iuran';
 
 
 

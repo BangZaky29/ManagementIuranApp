@@ -8,7 +8,7 @@ import { CustomHeader } from '../../../components/CustomHeader';
 import { AdminProfileStyles as styles } from './AdminProfileStyles';
 import { Colors } from '../../../constants/Colors';
 import { StatusBar } from 'expo-status-bar';
-import { fetchComplexInfo, upsertComplexInfo } from '../../../services/complexService';
+import { fetchComplexInfo, upsertComplexInfo } from '../../../services/complex';
 
 export default function EditComplexInfoScreen() {
     const router = useRouter();

@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
-import { fetchPanicLogs, PanicLog, resolvePanicLog } from '../../../services/panicService';
+import { fetchPanicLogs, PanicLog, resolvePanicLog } from '../../../services/panic';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { PanicLogCard } from '../../../components/PanicLogCard';

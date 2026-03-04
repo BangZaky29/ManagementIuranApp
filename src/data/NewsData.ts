@@ -1,4 +1,4 @@
-import { NewsItem } from '../services/newsService';
+import { NewsItem } from '../services/news';
 
 /**
  * Mock news data for offline/demo use.

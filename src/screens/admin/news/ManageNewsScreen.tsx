@@ -10,7 +10,7 @@ import { styles } from './ManageNewsStyles';
 import { Colors } from '../../../constants/Colors';
 import { CustomHeader } from '../../../components/CustomHeader';
 import { formatDateSafe } from '../../../utils/dateUtils';
-import { fetchNews, createNews, updateNews, deleteNews, NewsItem, uploadNewsImage } from '../../../services/newsService';
+import { fetchNews, createNews, updateNews, deleteNews, NewsItem, uploadNewsImage } from '../../../services/news';
 import { useAuth } from '../../../contexts/AuthContext';
 import { CustomAlertModal } from '../../../components/CustomAlertModal';
 

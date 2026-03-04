@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
-import { fetchMyPayments, PaymentRecord } from '../../../services/iuranService';
+import { fetchMyPayments, PaymentRecord } from '../../../services/iuran';
 import { formatDateSafe } from '../../../utils/dateUtils';
-import { generateAndShareReceipt } from '../../../services/receiptService';
+import { generateAndShareReceipt } from '../../../services/payment';
 
 export interface HistoryItem {
     id: string;

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ActivityIndi
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { fetchNews, NewsItem } from '../../src/services/newsService';
+import { fetchNews, NewsItem } from '../../src/services/news';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import { CustomHeader } from '../../src/components/CustomHeader';
 

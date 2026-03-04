@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
 import { CustomHeader } from '../../../components/CustomHeader';
 import { ReportLocationViewer } from '../../../components/ReportLocationViewer';
-import { Report, updateReportStatus } from '../../../services/laporanService';
+import { Report, updateReportStatus } from '../../../services/laporan';
 import { supabase } from '../../../lib/supabaseConfig';
 import { formatDateTimeSafe } from '../../../utils/dateUtils';
 import { useTheme } from '../../../contexts/ThemeContext';

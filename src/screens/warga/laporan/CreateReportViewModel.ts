@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { createReport, updateReport, fetchReportById } from '../../../services/laporanService';
+import { createReport, updateReport, fetchReportById } from '../../../services/laporan';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import { Alert } from 'react-native';

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../../lib/supabaseConfig';
-import { Visitor, VisitorType } from '../../../services/guestService';
+import { Visitor, VisitorType } from '../../../services/guest';
 import { useAuth } from '../../../contexts/AuthContext';
 
 export function useWargaGuestViewModel() {

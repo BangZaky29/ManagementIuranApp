@@ -5,8 +5,8 @@ import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../contexts/AuthContext';
-import { savePushToken, removePushToken } from '../services/notificationService';
-import { soundSettingsService } from '../services/notificationSettingsService';
+import { savePushToken, removePushToken } from '../services/notification';
+import { soundSettingsService } from '../services/notification';
 
 // Konfigurasi perilaku notifikasi saat aplikasi di foreground
 Notifications.setNotificationHandler({

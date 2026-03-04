@@ -15,7 +15,7 @@ import {
     fetchPaymentDetail,
     confirmPayment,
     rejectPayment,
-} from '../../../services/paymentConfirmationService';
+} from '../../../services/payment';
 import { useTheme } from '../../../contexts/ThemeContext';
 
 const { width } = Dimensions.get('window');

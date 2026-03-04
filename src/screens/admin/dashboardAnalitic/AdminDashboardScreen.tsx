@@ -5,14 +5,14 @@ import { View, Text, ScrollView, RefreshControl, TouchableOpacity } from 'react-
 import { StatusBar } from 'expo-status-bar';
 import { Colors } from '../../../constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
-import { getDashboardStats } from '../../../services/adminService';
-import { countPendingPayments } from '../../../services/paymentConfirmationService';
+import { getDashboardStats } from '../../../services/admin';
+import { countPendingPayments } from '../../../services/payment';
 import { supabase } from '../../../lib/supabaseConfig';
 import { CustomHeader } from '../../../components/CustomHeader';
 import { AdminSidebar } from '../../../components/navigation/AdminSidebar';
 import { styles } from './AdminDashboardStyles';
 import { formatFullDateSafe, formatDateTimeSafe } from '../../../utils/dateUtils';
-import { fetchRecentActivityLogs, ActivityLog } from '../../../services/activityLogService';
+import { fetchRecentActivityLogs, ActivityLog } from '../../../services/activityLog';
 import { useRouter } from 'expo-router';
 
 export default function AdminDashboardScreen() {

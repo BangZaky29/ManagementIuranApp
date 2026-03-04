@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabaseConfig';
 import * as ImagePicker from 'expo-image-picker';
-import { fetchAllBanners, toggleBannerStatus, createBanner, updateBanner, deleteBanner, uploadBannerImage, Banner } from '../../../services/bannerService';
+import { fetchAllBanners, toggleBannerStatus, createBanner, updateBanner, deleteBanner, uploadBannerImage, Banner } from '../../../services/banner';
 
 export const useAdminBannerViewModel = () => {
     const [banners, setBanners] = useState<Banner[]>([]);

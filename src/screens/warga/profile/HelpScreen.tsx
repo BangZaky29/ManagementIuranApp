@@ -5,7 +5,7 @@ import { Colors } from '../../../constants/Colors';
 import { CustomHeader } from '../../../components/CustomHeader';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../../contexts/AuthContext';
-import { fetchComplexInfo, ComplexInfo } from '../../../services/complexService';
+import { fetchComplexInfo, ComplexInfo } from '../../../services/complex';
 import * as Linking from 'expo-linking';
 
 export default function HelpScreen() {

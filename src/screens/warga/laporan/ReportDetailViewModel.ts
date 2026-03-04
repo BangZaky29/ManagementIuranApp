@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { fetchReportById, deleteReport, Report } from '../../../services/laporanService';
+import { fetchReportById, deleteReport, Report } from '../../../services/laporan';
 import { Image } from 'react-native';
 import { Colors } from '../../../constants/Colors';
 

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { fetchAllReports, updateReportStatus, Report } from '../../services/laporanService';
+import { fetchAllReports, updateReportStatus, Report } from '../../services/laporan';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../../contexts/AuthContext';
 
