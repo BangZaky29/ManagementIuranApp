@@ -1,11 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Linking } from 'react-native';
 import { useAuth } from '../../../contexts/AuthContext';
-import { fetchIuranReport, generateIuranPdf, generateIuranExcel, IuranReportRow, IuranSummary, BackupFilter } from '../../../services/backup';
+import {
+    fetchIuranReport, generateIuranPdf, generateIuranExcel,
+    backupToGoogleDrive,
+    IuranReportRow, IuranSummary, BackupFilter, BackupLog
+} from '../../../services/backup';
 import { supabase } from '../../../lib/supabaseConfig';
+import { FeatureFlags } from '../../../constants/FeatureFlags';
 
 export function useBackupManagementViewModel() {
-    const { profile } = useAuth();
+    const { profile, googleAccessToken, user } = useAuth();
 
     const [rows, setRows] = useState<IuranReportRow[]>([]);
     const [summary, setSummary] = useState<IuranSummary>({
@@ -13,17 +18,21 @@ export function useBackupManagementViewModel() {
     });
     const [isLoading, setIsLoading] = useState(true);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [isBackingUp, setIsBackingUp] = useState(false);
 
     // Filters
-    const [selectedPeriod, setSelectedPeriod] = useState<string>(''); // '' = semua
+    const [selectedPeriod, setSelectedPeriod] = useState<string>('');
     const [selectedStatus, setSelectedStatus] = useState<'all' | 'paid' | 'pending' | 'rejected' | 'overdue'>('all');
     const [availablePeriods, setAvailablePeriods] = useState<string[]>([]);
-
-    // Fees for filter
-    const [fees, setFees] = useState<{ id: number; name: string }[]>([]);
+    const [backupHistory, setBackupHistory] = useState<BackupLog[]>([]);
 
     const complexName = profile?.housing_complexes?.name || 'Kompleks';
     const complexId = profile?.housing_complex_id || 0;
+
+    // Check if Google Drive is connected
+    const isDriveConnected = !!googleAccessToken;
+    const isAutoBackupEnabled = FeatureFlags.IS_AUTO_BACKUP_ENABLED;
+    const isRestoreEnabled = FeatureFlags.IS_BACKUP_RESTORE_ENABLED;
 
     const loadData = useCallback(async () => {
         if (!complexId) return;
@@ -37,7 +46,6 @@ export function useBackupManagementViewModel() {
             setRows(result.rows);
             setSummary(result.summary);
         } catch (error: any) {
-            console.error('Failed to load iuran data:', error);
             Alert.alert('Error', 'Gagal memuat data iuran');
         } finally {
             setIsLoading(false);
@@ -45,45 +53,29 @@ export function useBackupManagementViewModel() {
     }, [complexId, selectedPeriod, selectedStatus]);
 
     const loadPeriods = useCallback(async () => {
-        try {
-            const { data } = await supabase
-                .from('payments')
-                .select('period')
-                .order('period', { ascending: false });
-
-            if (data) {
-                const uniquePeriods = [...new Set(data.map((d: any) => {
-                    const date = new Date(d.period);
-                    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-                }))];
-                setAvailablePeriods(uniquePeriods);
-            }
-        } catch (err) {
-            console.error('Failed to load periods:', err);
+        const { data } = await supabase.from('payments').select('period').order('period', { ascending: false });
+        if (data) {
+            const unique = [...new Set(data.map((d: any) => {
+                const date = new Date(d.period);
+                return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            }))];
+            setAvailablePeriods(unique);
         }
     }, []);
 
-    const loadFees = useCallback(async () => {
-        try {
-            const { data } = await supabase
-                .from('fees')
-                .select('id, name')
-                .eq('is_active', true)
-                .order('name');
-            if (data) setFees(data);
-        } catch (err) {
-            console.error('Failed to load fees:', err);
-        }
-    }, []);
+    const loadBackupHistory = useCallback(async () => {
+        if (!complexId) return;
+        const { data } = await supabase
+            .from('backup_logs')
+            .select('*')
+            .eq('housing_complex_id', complexId)
+            .order('created_at', { ascending: false })
+            .limit(10);
+        if (data) setBackupHistory(data as BackupLog[]);
+    }, [complexId]);
 
-    useEffect(() => {
-        loadData();
-    }, [loadData]);
-
-    useEffect(() => {
-        loadPeriods();
-        loadFees();
-    }, [loadPeriods, loadFees]);
+    useEffect(() => { loadData(); }, [loadData]);
+    useEffect(() => { loadPeriods(); loadBackupHistory(); }, [loadPeriods, loadBackupHistory]);
 
     const getFilterLabel = (): string => {
         const parts: string[] = [];
@@ -95,57 +87,96 @@ export function useBackupManagementViewModel() {
             parts.push('Semua Periode');
         }
         if (selectedStatus !== 'all') {
-            const statusMap: Record<string, string> = { paid: 'Lunas', pending: 'Menunggu', rejected: 'Ditolak', overdue: 'Terlambat' };
-            parts.push(statusMap[selectedStatus] || selectedStatus);
+            const map: Record<string, string> = { paid: 'Lunas', pending: 'Menunggu', rejected: 'Ditolak', overdue: 'Terlambat' };
+            parts.push(map[selectedStatus] || selectedStatus);
         }
         return parts.join(' • ');
     };
 
     const handleDownloadPdf = async () => {
-        if (rows.length === 0) {
-            Alert.alert('Info', 'Tidak ada data untuk diunduh');
-            return;
-        }
+        if (rows.length === 0) { Alert.alert('Info', 'Tidak ada data'); return; }
         setIsGenerating(true);
-        try {
-            await generateIuranPdf(rows, summary, complexName, getFilterLabel());
-        } catch (error: any) {
-            console.error('PDF generation error:', error);
-            Alert.alert('Gagal', 'Gagal membuat laporan PDF');
-        } finally {
-            setIsGenerating(false);
-        }
+        try { await generateIuranPdf(rows, summary, complexName, getFilterLabel()); }
+        catch (e: any) { Alert.alert('Gagal', 'Gagal membuat laporan PDF'); }
+        finally { setIsGenerating(false); }
     };
 
     const handleDownloadExcel = async () => {
-        if (rows.length === 0) {
-            Alert.alert('Info', 'Tidak ada data untuk diunduh');
+        if (rows.length === 0) { Alert.alert('Info', 'Tidak ada data'); return; }
+        setIsGenerating(true);
+        try { await generateIuranExcel(rows, summary, complexName, getFilterLabel()); }
+        catch (e: any) { Alert.alert('Gagal', 'Gagal membuat laporan Excel'); }
+        finally { setIsGenerating(false); }
+    };
+
+    const handleBackupToDrive = async (tokenOverride?: string) => {
+        const token = tokenOverride || googleAccessToken;
+        if (!token) {
+            Alert.alert(
+                '🔗 Hubungkan Akun Google',
+                'Untuk backup ke Google Drive, Anda perlu login menggunakan akun Google.\n\nCara: Keluar → Login kembali menggunakan tombol "Masuk dengan Google" di halaman login.',
+                [
+                    { text: 'Nanti', style: 'cancel' },
+                    { text: 'Keluar Sekarang', style: 'destructive', onPress: handleSignOutForGoogle },
+                ]
+            );
             return;
         }
-        setIsGenerating(true);
+        if (rows.length === 0) { Alert.alert('Info', 'Tidak ada data untuk di-backup'); return; }
+
+        setIsBackingUp(true);
         try {
-            await generateIuranExcel(rows, summary, complexName, getFilterLabel());
-        } catch (error: any) {
-            console.error('Excel generation error:', error);
-            Alert.alert('Gagal', 'Gagal membuat laporan Excel');
+            const result = await backupToGoogleDrive(
+                rows, user!.id, complexId, complexName, token
+            );
+            await loadBackupHistory();
+            Alert.alert(
+                '✅ Backup Berhasil',
+                `${rows.length} data berhasil di-backup ke Google Drive.\n\nBuka file di Drive?`,
+                [
+                    { text: 'Nanti', style: 'cancel' },
+                    { text: 'Buka Drive', onPress: () => result.driveLink && Linking.openURL(result.driveLink) },
+                ]
+            );
+        } catch (e: any) {
+            Alert.alert('Gagal', `Backup gagal: ${e.message}`);
         } finally {
-            setIsGenerating(false);
+            setIsBackingUp(false);
         }
     };
+
+    const handleSignOutForGoogle = async () => {
+        try {
+            await supabase.auth.signOut();
+        } catch (e) {
+            console.error('Sign out error:', e);
+        }
+    };
+
+    const handleConnectGoogle = handleBackupToDrive;
 
     const formatPeriodLabel = (period: string): string => {
         const [y, m] = period.split('-');
-        const d = new Date(parseInt(y), parseInt(m) - 1);
-        return d.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
+        return new Date(parseInt(y), parseInt(m) - 1).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
+    };
+
+    const formatDateTime = (dateStr: string): string => {
+        return new Date(dateStr).toLocaleDateString('id-ID', {
+            day: 'numeric', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit',
+        });
     };
 
     return {
-        rows, summary, isLoading, isGenerating,
+        rows, summary, isLoading, isGenerating, isBackingUp,
         selectedPeriod, setSelectedPeriod,
         selectedStatus, setSelectedStatus,
-        availablePeriods, fees, complexName,
+        availablePeriods, backupHistory, complexName,
+        isDriveConnected, isAutoBackupEnabled, isRestoreEnabled,
+        googleEmail: user?.email || null,
         handleDownloadPdf, handleDownloadExcel,
-        formatPeriodLabel, getFilterLabel,
+        handleBackupToDrive, handleConnectGoogle,
+        formatPeriodLabel, getFilterLabel, formatDateTime,
         refresh: loadData,
     };
 }

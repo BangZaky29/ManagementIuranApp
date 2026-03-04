@@ -209,6 +209,16 @@ export default function LoginScreen() {
                         <View style={styles.dividerLine} />
                     </View>
 
+                    {/* Google Login — Admin only */}
+                    <TouchableOpacity
+                        style={styles.googleLoginBtn}
+                        onPress={handleGoogleLogin}
+                        activeOpacity={0.8}
+                    >
+                        <Ionicons name="logo-google" size={20} color="#FFF" />
+                        <Text style={styles.googleLoginBtnText}>Masuk dengan Google</Text>
+                    </TouchableOpacity>
+
                     <CustomButton
                         title="Masuk sebagai Warga atau Sekuriti"
                         onPress={navigateToWargaLogin}
@@ -357,5 +367,25 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: Colors.green5,
         marginLeft: 8,
+    },
+    googleLoginBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#4285F4',
+        borderRadius: 25,
+        paddingVertical: 14,
+        marginBottom: 16,
+        gap: 10,
+        shadowColor: '#4285F4',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 6,
+        elevation: 3,
+    },
+    googleLoginBtnText: {
+        fontSize: 15,
+        fontWeight: '700',
+        color: '#FFF',
     },
 });

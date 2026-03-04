@@ -20,6 +20,7 @@ interface AuthContextType {
     session: Session | null;
     isLoading: boolean;
     isAuthenticated: boolean;
+    googleAccessToken: string | null;
     signIn: (data: SignInData) => Promise<any>;
     signUp: (data: SignUpData) => Promise<{ needsConfirmation: boolean }>;
     signOut: () => Promise<void>;
@@ -36,6 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [session, setSession] = useState<Session | null>(null);
     const [isLoading, setIsLoading] = useState(true); // Default TRUE
+    const [googleAccessToken, setGoogleAccessToken] = useState<string | null>(null);
 
     const fetchProfile = useCallback(async (u: User) => {
         try {
@@ -81,6 +83,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             async (_event, s) => {
                 setSession(s);
                 setUser(s?.user ?? null);
+                // Capture Google provider_token for Drive API usage
+                setGoogleAccessToken(s?.provider_token ?? null);
                 if (s?.user) {
                     await fetchProfile(s.user);
                 } else {
@@ -108,6 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
         setProfile(null);
         setSession(null);
+        setGoogleAccessToken(null);
     }, []);
 
     const resetPasswordFn = useCallback(async (email: string) => {
@@ -142,6 +147,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 session,
                 isLoading,
                 isAuthenticated: !!session && !!user,
+                googleAccessToken,
                 signIn,
                 signUp,
                 signOut,

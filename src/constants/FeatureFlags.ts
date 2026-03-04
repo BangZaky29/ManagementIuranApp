@@ -9,6 +9,6 @@ export const FeatureFlags = {
     IS_MESSAGE_ENABLED: false,
     IS_OTHERS_ENABLED: false,
     IS_DARK_MODE_ENABLED: false,
-    IS_AUTO_BACKUP_ENABLED: false,
-    IS_BACKUP_RESTORE_ENABLED: false,
+    IS_AUTO_BACKUP_ENABLED: true,
+    IS_BACKUP_RESTORE_ENABLED: true,
 };
