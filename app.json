@@ -16,7 +16,6 @@
       "color": "#0D47A1"
     },
     "android": {
-      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/logo_warlok/warlok_1024x1024_noTransparant.png",
