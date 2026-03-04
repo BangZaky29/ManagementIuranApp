@@ -61,6 +61,7 @@ export function useBackupManagementViewModel() {
     const complexName = profile?.housing_complexes?.name || 'Kompleks';
     const complexId = profile?.housing_complex_id || 0;
     const isDriveConnected = !!googleAccessToken;
+    const isGoogleLinked = user?.app_metadata?.providers?.includes('google') ?? false;
     const isAutoBackupEnabled = FeatureFlags.IS_AUTO_BACKUP_ENABLED;
     const isRestoreEnabled = FeatureFlags.IS_BACKUP_RESTORE_ENABLED;
 
@@ -138,15 +139,27 @@ export function useBackupManagementViewModel() {
 
     const handleBackupToDrive = async () => {
         if (!googleAccessToken) {
-            showAlert(
-                'Hubungkan Akun Google',
-                'Akun Google belum terhubung. Hubungkan sekarang untuk mengaktifkan backup ke Google Drive?',
-                'warning',
-                [
-                    { text: 'Batal', style: 'cancel', onPress: hideAlert },
-                    { text: 'Hubungkan Google', onPress: () => { hideAlert(); handleLinkGoogle(); } },
-                ]
-            );
+            if (isGoogleLinked) {
+                showAlert(
+                    'Akses Drive Belum Aktif',
+                    'Akun Anda sudah terhubung ke Google, namun token akses belum aktif pada sesi ini. Silakan keluar dan masuk kembali menggunakan tombol "Masuk dengan Google".',
+                    'warning',
+                    [
+                        { text: 'Nanti', style: 'cancel', onPress: hideAlert },
+                        { text: 'Keluar Sekarang', style: 'destructive', onPress: () => { hideAlert(); supabase.auth.signOut(); } },
+                    ]
+                );
+            } else {
+                showAlert(
+                    'Hubungkan Akun Google',
+                    'Akun Google belum terhubung. Hubungkan sekarang untuk mengaktifkan backup ke Google Drive?',
+                    'warning',
+                    [
+                        { text: 'Batal', style: 'cancel', onPress: hideAlert },
+                        { text: 'Hubungkan Google', onPress: () => { hideAlert(); handleLinkGoogle(); } },
+                    ]
+                );
+            }
             return;
         }
         if (rows.length === 0) { showAlert('Info', 'Tidak ada data untuk di-backup', 'info'); return; }
@@ -235,10 +248,10 @@ export function useBackupManagementViewModel() {
         selectedPeriod, setSelectedPeriod,
         selectedStatus, setSelectedStatus,
         availablePeriods, backupHistory, complexName,
-        isDriveConnected, isAutoBackupEnabled, isRestoreEnabled,
+        isGoogleLinked, isDriveConnected, isAutoBackupEnabled, isRestoreEnabled,
         googleEmail: user?.email || null,
         selectedSchedule, showSchedulePicker, setShowSchedulePicker,
-        alertVisible, alertConfig, hideAlert,
+        alertVisible, alertConfig, hideAlert, showAlert,
         handleDownloadPdf, handleDownloadExcel,
         handleBackupToDrive, handleLinkGoogle,
         handleScheduleSelect,

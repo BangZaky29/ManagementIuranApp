@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabaseConfig';
+import * as WebBrowser from 'expo-web-browser';
+import { makeRedirectUri } from 'expo-auth-session';
 import {
     signInWithEmail as _signIn,
     signInWithEmailOrUsername as _signInWithEmailOrUsername,
@@ -68,6 +71,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
                 if (initialSession?.user) {
                     await fetchProfile(initialSession.user);
+                    const storedGoogleToken = await AsyncStorage.getItem('google_provider_token');
+                    if (storedGoogleToken) {
+                        setGoogleAccessToken(storedGoogleToken);
+                    }
                 }
             } catch (error) {
                 console.error("Auth init error:", error);
@@ -84,12 +91,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             async (_event, s) => {
                 setSession(s);
                 setUser(s?.user ?? null);
-                // Capture Google provider_token for Drive API usage
-                setGoogleAccessToken(s?.provider_token ?? null);
+
                 if (s?.user) {
                     await fetchProfile(s.user);
+                    // Ensure we don't nullify an active provider_token on standard auth state changes (e.g. refresh)
+                    if (s.provider_token) {
+                        setGoogleAccessToken(s.provider_token);
+                        await AsyncStorage.setItem('google_provider_token', s.provider_token);
+                    } else if (_event === 'INITIAL_SESSION' || _event === 'SIGNED_IN') {
+                        const stored = await AsyncStorage.getItem('google_provider_token');
+                        if (stored) setGoogleAccessToken(stored);
+                    }
                 } else {
                     setProfile(null);
+                    setGoogleAccessToken(null);
+                    await AsyncStorage.removeItem('google_provider_token');
                 }
                 setIsLoading(false);
             }
@@ -114,6 +130,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setProfile(null);
         setSession(null);
         setGoogleAccessToken(null);
+        await AsyncStorage.removeItem('google_provider_token');
     }, []);
 
     const resetPasswordFn = useCallback(async (email: string) => {
@@ -121,14 +138,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     const signInWithGoogle = useCallback(async () => {
-        await _signInWithGoogle();
+        const result = await _signInWithGoogle();
+        if (result?.providerToken) {
+            setGoogleAccessToken(result.providerToken);
+            await AsyncStorage.setItem('google_provider_token', result.providerToken);
+        }
     }, []);
 
     const linkGoogle = useCallback(async () => {
-        // Link Google identity to existing session
-        const { error } = await supabase.auth.linkIdentity({
+        // Ensure supabase client has the latest session context ready 
+        const { data: { session: currentSession }, error: currentSessionError } = await supabase.auth.getSession();
+        if (currentSessionError || !currentSession) {
+            throw new Error('Sesi tidak ditemukan atau kedaluwarsa. Silakan login ulang sebelum menghubungkan Google.');
+        }
+
+        const redirectTo = makeRedirectUri({
+            scheme: 'warlok',
+            path: 'auth/callback',
+        });
+
+        // Get the OAuth URL for linking from Supabase
+        const { data: linkData, error: linkError } = await supabase.auth.linkIdentity({
             provider: 'google',
             options: {
+                redirectTo,
+                skipBrowserRedirect: true,
                 scopes: 'https://www.googleapis.com/auth/drive.file',
                 queryParams: {
                     access_type: 'offline',
@@ -136,25 +170,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 },
             },
         });
-        if (error) throw error;
 
-        // linkIdentity does NOT auto-update provider_token in local state.
-        // Manually pull the refreshed session to get the new provider_token.
-        const { data: refreshed } = await supabase.auth.refreshSession();
-        if (refreshed?.session?.provider_token) {
-            setGoogleAccessToken(refreshed.session.provider_token);
-        } else {
-            // Fallback: re-read current session
-            const { data: current } = await supabase.auth.getSession();
-            if (current?.session?.provider_token) {
-                setGoogleAccessToken(current.session.provider_token);
-            } else {
-                // provider_token not available after linking alone.
-                // Throw so the ViewModel can show an informative message.
+        if (linkError) throw linkError;
+        if (!linkData?.url) throw new Error('No OAuth URL returned from Supabase for linking');
+
+        // Open the browser for OAuth
+        const result = await WebBrowser.openAuthSessionAsync(
+            linkData.url,
+            redirectTo,
+            { showInRecents: true }
+        );
+
+        if (result.type === 'success') {
+            const url = result.url;
+            const params = new URLSearchParams(url.split('#')[1] || url.split('?')[1] || '');
+            const accessToken = params.get('access_token');
+            const refreshToken = params.get('refresh_token');
+            const providerToken = params.get('provider_token');
+
+            if (providerToken) {
+                setGoogleAccessToken(providerToken);
+                await AsyncStorage.setItem('google_provider_token', providerToken);
+            }
+
+            if (accessToken && refreshToken) {
+                const { error: sessionError } = await supabase.auth.setSession({
+                    access_token: accessToken,
+                    refresh_token: refreshToken,
+                });
+                if (sessionError) throw sessionError;
+            }
+
+            const { data: refreshed, error: refreshError } = await supabase.auth.refreshSession();
+            if (refreshError) throw refreshError;
+
+            // Force AuthStateChange event
+            const { data: { session: updatedSession } } = await supabase.auth.getSession();
+            setSession(updatedSession);
+
+            if (!providerToken && !updatedSession?.provider_token) {
                 throw new Error('Google terhubung, tapi token Drive belum tersedia. Coba login ulang dengan tombol "Masuk dengan Google".');
             }
+        } else if (result.type === 'cancel' || result.type === 'dismiss') {
+            throw new Error('Proses menghubungkan Google dibatalkan');
         }
     }, []);
+
 
     const refreshProfile = useCallback(async () => {
         if (user) await fetchProfile(user);

@@ -9,8 +9,9 @@ export const FeatureFlags = {
     // Set to false as requested for "Under Development" state
     IS_OTHERS_ENABLED: false,
     IS_MESSAGE_ENABLED: false,
-    IS_DARK_MODE_ENABLED: false,
-    IS_SOUND_SETTINGS_ENABLED: false,
-    IS_AUTO_BACKUP_ENABLED: true,
-    IS_BACKUP_RESTORE_ENABLED: true,
+    IS_DARK_MODE_ENABLED: true,
+    IS_SOUND_SETTINGS_ENABLED: true,
+    IS_AUTO_BACKUP_ENABLED: false,
+    IS_BACKUP_RESTORE_ENABLED: false,
+    IS_GOOGLE_LOGIN_ENABLED: false,
 };

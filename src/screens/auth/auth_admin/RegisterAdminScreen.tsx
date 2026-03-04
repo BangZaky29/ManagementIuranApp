@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { useAuth } from '../../../contexts/AuthContext';
+import { FeatureFlags } from '../../../constants/FeatureFlags';
 
 export default function RegisterAdminScreen() {
     const router = useRouter();
@@ -351,18 +352,25 @@ export default function RegisterAdminScreen() {
 
                     {/* Google Register */}
                     <TouchableOpacity
-                        style={{
-                            flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-                            backgroundColor: '#4285F4', borderRadius: 25, paddingVertical: 14,
-                            gap: 10, opacity: isLoading ? 0.7 : 1,
-                            shadowColor: '#4285F4', shadowOffset: { width: 0, height: 2 },
-                            shadowOpacity: 0.25, shadowRadius: 6, elevation: 3,
-                        }}
+                        style={[
+                            {
+                                flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+                                backgroundColor: '#4285F4', borderRadius: 25, paddingVertical: 14,
+                                gap: 10, opacity: isLoading ? 0.7 : 1,
+                                shadowColor: '#4285F4', shadowOffset: { width: 0, height: 2 },
+                                shadowOpacity: 0.25, shadowRadius: 6, elevation: 3,
+                            },
+                            !FeatureFlags.IS_GOOGLE_LOGIN_ENABLED && { backgroundColor: '#A0A0A0' }
+                        ]}
                         onPress={handleRegisterWithGoogle}
-                        disabled={isLoading}
+                        disabled={isLoading || !FeatureFlags.IS_GOOGLE_LOGIN_ENABLED}
                         activeOpacity={0.8}
                     >
-                        <Ionicons name="logo-google" size={20} color="#FFF" />
+                        <Ionicons
+                            name={FeatureFlags.IS_GOOGLE_LOGIN_ENABLED ? "logo-google" : "lock-closed"}
+                            size={20}
+                            color="#FFF"
+                        />
                         <Text style={{ fontSize: 15, fontWeight: '700', color: '#FFF' }}>Daftar dengan Google</Text>
                     </TouchableOpacity>
                 </View>

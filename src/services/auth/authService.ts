@@ -52,7 +52,7 @@ export async function signUpWithEmail({ email, password, fullName, phone, role, 
         password,
         options: {
             emailRedirectTo: makeRedirectUri({
-                scheme: 'wargapintar',
+                scheme: 'warlok',
                 path: 'auth/callback',
             }),
             data: {
@@ -114,7 +114,7 @@ export async function signInWithEmailOrUsername({ identifier, password }: { iden
  */
 export async function signInWithGoogle() {
     const redirectTo = makeRedirectUri({
-        scheme: 'wargapintar',
+        scheme: 'warlok',
         path: 'auth/callback',
     });
 
@@ -148,6 +148,7 @@ export async function signInWithGoogle() {
         const params = new URLSearchParams(url.split('#')[1] || url.split('?')[1] || '');
         const accessToken = params.get('access_token');
         const refreshToken = params.get('refresh_token');
+        const providerToken = params.get('provider_token');
 
         if (accessToken && refreshToken) {
             const { error: sessionError } = await supabase.auth.setSession({
@@ -155,6 +156,8 @@ export async function signInWithGoogle() {
                 refresh_token: refreshToken,
             });
             if (sessionError) throw sessionError;
+
+            return { providerToken };
         }
     } else if (result.type === 'cancel' || result.type === 'dismiss') {
         throw new Error('Login dibatalkan');
@@ -166,7 +169,7 @@ export async function signInWithGoogle() {
  */
 export async function resetPassword(email: string) {
     const redirectUrl = makeRedirectUri({
-        scheme: 'wargapintar',
+        scheme: 'warlok',
         path: 'auth/reset-password',
     });
 

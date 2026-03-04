@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { useAuth } from '../../../contexts/AuthContext';
+import { FeatureFlags } from '../../../constants/FeatureFlags';
 
 const { width } = Dimensions.get('window');
 
@@ -211,11 +212,19 @@ export default function LoginScreen() {
 
                     {/* Google Login — Admin only */}
                     <TouchableOpacity
-                        style={styles.googleLoginBtn}
+                        style={[
+                            styles.googleLoginBtn,
+                            !FeatureFlags.IS_GOOGLE_LOGIN_ENABLED && { backgroundColor: '#A0A0A0' }
+                        ]}
                         onPress={handleGoogleLogin}
                         activeOpacity={0.8}
+                        disabled={!FeatureFlags.IS_GOOGLE_LOGIN_ENABLED}
                     >
-                        <Ionicons name="logo-google" size={20} color="#FFF" />
+                        <Ionicons
+                            name={FeatureFlags.IS_GOOGLE_LOGIN_ENABLED ? "logo-google" : "lock-closed"}
+                            size={20}
+                            color="#FFF"
+                        />
                         <Text style={styles.googleLoginBtnText}>Masuk dengan Google</Text>
                     </TouchableOpacity>
 

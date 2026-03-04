@@ -4,6 +4,8 @@ import {
     View, Text, ScrollView, TouchableOpacity, Modal, Pressable,
     ActivityIndicator, RefreshControl, Linking
 } from 'react-native';
+import { Colors, Colors as colors } from '../../../constants/Colors';
+import { FeatureFlags } from '../../../constants/FeatureFlags';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useBackupManagementViewModel, BACKUP_SCHEDULE_OPTIONS } from './BackupManagementViewModel';
@@ -155,11 +157,13 @@ export default function BackupManagementScreen() {
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
                         <View style={{
                             width: 8, height: 8, borderRadius: 4, marginRight: 8,
-                            backgroundColor: vm.isDriveConnected ? '#2E7D32' : '#CCC',
+                            backgroundColor: vm.isGoogleLinked ? '#2E7D32' : '#CCC',
                         }} />
-                        <Text style={{ fontSize: 12, color: vm.isDriveConnected ? '#2E7D32' : '#999', flex: 1 }}>
-                            {vm.isDriveConnected
-                                ? `✅ Terhubung: ${vm.googleEmail}`
+                        <Text style={{ fontSize: 12, color: vm.isGoogleLinked ? '#2E7D32' : '#999', flex: 1 }}>
+                            {vm.isGoogleLinked
+                                ? (vm.isDriveConnected
+                                    ? `✅ Terhubung: ${vm.googleEmail || 'Akun Google'}`
+                                    : `⚠️ Terhubung (Akses Drive Belum Aktif)`)
                                 : '❌ Belum terhubung ke akun Google'}
                         </Text>
                     </View>
@@ -168,27 +172,49 @@ export default function BackupManagementScreen() {
                     <TouchableOpacity
                         style={[
                             styles.backupBtn,
-                            !vm.isDriveConnected && { backgroundColor: '#5F6368' },
+                            (!vm.isGoogleLinked && !vm.isDriveConnected) && { backgroundColor: '#5F6368' },
                             (vm.isBackingUp || vm.isLinkingGoogle) && styles.backupBtnDisabled,
+                            !FeatureFlags.IS_GOOGLE_LOGIN_ENABLED && { backgroundColor: '#A0A0A0' }
                         ]}
-                        onPress={() => vm.handleBackupToDrive()}
+                        onPress={() => {
+                            if (!FeatureFlags.IS_GOOGLE_LOGIN_ENABLED) {
+                                vm.showAlert(
+                                    '🔒 Fitur Dalam Pengembangan',
+                                    'Fitur login ulang Google saat ini masih dalam tahap pengembangan. Nantikan pembaruan selanjutnya!',
+                                    'info'
+                                );
+                            } else {
+                                vm.handleBackupToDrive();
+                            }
+                        }}
                         disabled={vm.isBackingUp || vm.isLinkingGoogle}
                     >
                         {vm.isBackingUp ? <ActivityIndicator size="small" color="#FFF" /> : (
                             <>
                                 <Ionicons
-                                    name={vm.isDriveConnected ? 'logo-google' : 'link-outline'}
-                                    size={20} color="#FFF"
+                                    name={
+                                        !FeatureFlags.IS_GOOGLE_LOGIN_ENABLED
+                                            ? "lock-closed"
+                                            : vm.isGoogleLinked
+                                                ? (vm.isDriveConnected ? 'logo-google' : 'alert-circle-outline')
+                                                : 'link-outline'
+                                    }
+                                    size={20}
+                                    color="#FFF"
                                 />
                                 <Text style={styles.backupBtnText}>
-                                    {vm.isDriveConnected ? 'Backup ke Google Drive' : 'Hubungkan & Backup'}
+                                    {!FeatureFlags.IS_GOOGLE_LOGIN_ENABLED
+                                        ? 'Segera Hadir'
+                                        : vm.isGoogleLinked
+                                            ? (vm.isDriveConnected ? 'Backup ke Google Drive' : 'Login Ulang Google')
+                                            : 'Hubungkan & Backup'}
                                 </Text>
                             </>
                         )}
                     </TouchableOpacity>
 
                     {/* If not connected — Link Google button */}
-                    {!vm.isDriveConnected && (
+                    {!vm.isGoogleLinked && (
                         <TouchableOpacity
                             style={{
                                 flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
@@ -208,27 +234,86 @@ export default function BackupManagementScreen() {
                         </TouchableOpacity>
                     )}
 
-                    {/* Auto Backup Row */}
-                    {vm.isAutoBackupEnabled && (
-                        <View style={[styles.autoBackupRow, { marginTop: 16 }]}>
+                    {/* Auto Backup Row — always visible */}
+                    <View style={[styles.autoBackupRow, { marginTop: 16 }]}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                            <Ionicons
+                                name={vm.isAutoBackupEnabled ? "sync-circle" : "lock-closed"}
+                                size={18}
+                                color={vm.isAutoBackupEnabled ? '#2E7D32' : '#A0A0A0'}
+                            />
                             <View>
-                                <Text style={styles.autoBackupLabel}>🔄 Backup Otomatis</Text>
-                                <Text style={{ fontSize: 11, color: '#888', marginTop: 2 }}>
-                                    Jadwal: {currentScheduleLabel}
+                                <Text style={[styles.autoBackupLabel, !vm.isAutoBackupEnabled && { color: '#A0A0A0' }]}>
+                                    {vm.isAutoBackupEnabled ? '🔄 Backup Otomatis' : '🔒 Backup Otomatis'}
+                                </Text>
+                                <Text style={{ fontSize: 11, color: vm.isAutoBackupEnabled ? '#888' : '#BBB', marginTop: 2 }}>
+                                    {vm.isAutoBackupEnabled
+                                        ? `Jadwal: ${currentScheduleLabel}`
+                                        : 'Fitur masih dalam tahap pengembangan'}
                                 </Text>
                             </View>
-                            <TouchableOpacity
-                                style={{
-                                    paddingHorizontal: 14, paddingVertical: 6,
-                                    backgroundColor: '#E8F5E9', borderRadius: 20,
-                                    borderWidth: 1, borderColor: '#A5D6A7',
-                                }}
-                                onPress={() => vm.setShowSchedulePicker(true)}
-                            >
-                                <Text style={{ color: '#2E7D32', fontWeight: '700', fontSize: 12 }}>Atur Jadwal</Text>
-                            </TouchableOpacity>
                         </View>
-                    )}
+                        <TouchableOpacity
+                            style={{
+                                paddingHorizontal: 14, paddingVertical: 6,
+                                backgroundColor: vm.isAutoBackupEnabled ? '#E8F5E9' : '#F0F0F0',
+                                borderRadius: 20,
+                                borderWidth: 1,
+                                borderColor: vm.isAutoBackupEnabled ? '#A5D6A7' : '#D0D0D0',
+                            }}
+                            onPress={() => {
+                                if (vm.isAutoBackupEnabled) {
+                                    vm.setShowSchedulePicker(true);
+                                } else {
+                                    vm.showAlert(
+                                        '🔒 Fitur Dalam Pengembangan',
+                                        'Fitur Backup Otomatis saat ini masih dalam tahap pengembangan. Fitur ini akan memungkinkan backup data secara terjadwal ke Google Drive. Nantikan pembaruan selanjutnya!',
+                                        'info'
+                                    );
+                                }
+                            }}
+                        >
+                            <Text style={{
+                                color: vm.isAutoBackupEnabled ? '#2E7D32' : '#A0A0A0',
+                                fontWeight: '700', fontSize: 12
+                            }}>
+                                {vm.isAutoBackupEnabled ? 'Atur Jadwal' : 'Segera Hadir'}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                {/* ── Restore Google Drive Backup (Under Development) ── */}
+                <View style={styles.backupSection}>
+                    <Text style={styles.backupTitle}>⏱️ Pulihkan Data (Restore)</Text>
+
+                    <TouchableOpacity
+                        style={[
+                            styles.backupBtn,
+                            !FeatureFlags.IS_BACKUP_RESTORE_ENABLED && { backgroundColor: '#A0A0A0' }
+                        ]}
+                        onPress={() => {
+                            if (!FeatureFlags.IS_BACKUP_RESTORE_ENABLED) {
+                                vm.showAlert(
+                                    '🔒 Fitur Dalam Pengembangan',
+                                    'Fitur pemulihan data (Restore) dari Google Drive saat ini masih dalam tahap pengembangan. Fitur ini akan memungkinkan Anda memulihkan seluruh data iuran dari file backup. Nantikan pembaruan selanjutnya!',
+                                    'info'
+                                );
+                            } else {
+                                // vm.handleRestoreFromDrive() 
+                            }
+                        }}
+                        activeOpacity={0.8}
+                    >
+                        <Ionicons
+                            name={FeatureFlags.IS_BACKUP_RESTORE_ENABLED ? "cloud-download-outline" : "lock-closed"}
+                            size={20}
+                            color="#FFF"
+                        />
+                        <Text style={styles.backupBtnText}>
+                            {FeatureFlags.IS_BACKUP_RESTORE_ENABLED ? 'Pulihkan dari Google Drive' : 'Pulihkan Data (Segera Hadir)'}
+                        </Text>
+                    </TouchableOpacity>
                 </View>
 
                 {/* ── Backup History ── */}
