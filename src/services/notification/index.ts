@@ -4,5 +4,6 @@ export * from './removePushToken';
 export * from './fetchMyNotifications';
 export * from './markNotificationAsRead';
 export * from './markAllNotificationsAsRead';
+export * from './triggerEdgePushNotification';
 export * from './getUnreadNotificationCount';
 export * from './soundSettingsService';

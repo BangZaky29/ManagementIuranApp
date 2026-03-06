@@ -1,6 +1,7 @@
 import { supabase } from '../../lib/supabaseConfig';
 import * as FileSystem from 'expo-file-system/legacy';
 import { decode } from 'base64-arraybuffer';
+import { triggerEdgePushNotification } from '../notification/triggerEdgePushNotification';
 
 export interface ChatSession {
     id: string;
@@ -151,14 +152,66 @@ export const sendMessage = async (sessionId: string, senderId: string, message: 
         throw error;
     }
 
+    const sessionUpdateMsg = message.startsWith('[IMAGE]') ? '📷 Foto' : message.startsWith('[DOCUMENT]') ? '📄 Dokumen' : message;
+
     // Update session last_message and updated_at
     await supabase
         .from('chat_sessions')
         .update({
-            last_message: message.startsWith('[IMAGE]') ? '📷 Foto' : message.startsWith('[DOCUMENT]') ? '📄 Dokumen' : message,
+            last_message: sessionUpdateMsg,
             updated_at: new Date().toISOString()
         })
         .eq('id', sessionId);
+
+    // --- TRIGGER NOTIFICATIONS ---
+    try {
+        // 1. Get session details to find recipient
+        const { data: sessionData } = await supabase
+            .from('chat_sessions')
+            .select('participant1_id, participant2_id')
+            .eq('id', sessionId)
+            .single();
+
+        if (sessionData) {
+            const recipientId = sessionData.participant1_id === senderId ? sessionData.participant2_id : sessionData.participant1_id;
+
+            if (recipientId) {
+                // 2. Get sender details for push title
+                const { data: senderData } = await supabase
+                    .from('profiles')
+                    .select('full_name')
+                    .eq('id', senderId)
+                    .single();
+
+                const senderName = senderData?.full_name || 'Penghuni';
+
+                // 3. Trigger Edge Function Push
+                await triggerEdgePushNotification(
+                    [recipientId],
+                    `Pesan Baru dari ${senderName}`,
+                    sessionUpdateMsg,
+                    { type: 'chat', sessionId: sessionId },
+                    'default' // Expo channel ID
+                );
+
+                // 4. Save In-App Notification
+                await supabase
+                    .from('notifications')
+                    .insert({
+                        user_id: recipientId,
+                        title: `Pesan Baru dari ${senderName}`,
+                        body: sessionUpdateMsg,
+                        data: { type: 'chat', sessionId: sessionId },
+                        is_read: false
+                    });
+            } else {
+                console.warn('[PushNotif] Recipient ID not found, skipping notifications.');
+            }
+        }
+    } catch (notifErr) {
+        console.error('Error triggering chat notifications:', notifErr);
+    }
+    // ----------------------------
 
     return data;
 };
