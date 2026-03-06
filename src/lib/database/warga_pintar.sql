@@ -59,6 +59,8 @@ CREATE TABLE public.chat_messages (
   message text NOT NULL,
   is_read boolean DEFAULT false,
   created_at timestamp with time zone DEFAULT now(),
+  is_edited boolean DEFAULT false,
+  deleted_by ARRAY DEFAULT '{}'::uuid[],
   CONSTRAINT chat_messages_pkey PRIMARY KEY (id),
   CONSTRAINT chat_messages_session_id_fkey FOREIGN KEY (session_id) REFERENCES public.chat_sessions(id),
   CONSTRAINT chat_messages_sender_id_fkey FOREIGN KEY (sender_id) REFERENCES public.profiles(id)

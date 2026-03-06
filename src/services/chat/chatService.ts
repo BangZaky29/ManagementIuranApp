@@ -368,7 +368,6 @@ export const subscribeToChatRoom = (
                 event: 'DELETE',
                 schema: 'public',
                 table: 'chat_messages',
-                filter: `session_id=eq.${sessionId}`,
             },
             onMessage
         )

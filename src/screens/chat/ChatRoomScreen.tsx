@@ -61,7 +61,11 @@ export default function ChatRoomScreen() {
                         markMessagesAsRead(sessionId, user.id);
                     } else if (payload.eventType === 'UPDATE') {
                         const newMsg = payload.new as ChatMessage;
-                        setMessages(prev => prev.map(msg => msg.id === newMsg.id ? newMsg : msg));
+                        if (newMsg.deleted_by?.includes(user?.id || '')) {
+                            setMessages(prev => prev.filter(msg => msg.id !== newMsg.id));
+                        } else {
+                            setMessages(prev => prev.map(msg => msg.id === newMsg.id ? newMsg : msg));
+                        }
                     } else if (payload.eventType === 'DELETE') {
                         const oldMsg = payload.old as ChatMessage;
                         setMessages(prev => prev.filter(msg => msg.id !== oldMsg.id));
@@ -291,7 +295,7 @@ export default function ChatRoomScreen() {
         const idsToDelete = selectedMessages.map(m => m.id);
         try {
             await deleteMessages(idsToDelete, type, user.id);
-            if (type === 'me') {
+            if (type === 'me' || type === 'everyone') {
                 setMessages(prev => prev.filter(m => !idsToDelete.includes(m.id)));
             }
         } catch (error) {
