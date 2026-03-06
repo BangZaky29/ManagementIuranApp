@@ -12,22 +12,22 @@
     {
         "schemaname": "public",
         "tablename": "activity_logs",
-        "policyname": "Admins can view activity logs of their complex",
-        "permissive": "PERMISSIVE",
-        "roles": "{public}",
-        "operation": "SELECT",
-        "using_expression": "(is_admin() AND (housing_complex_id = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid()))))",
-        "check_expression": null
-    },
-    {
-        "schemaname": "public",
-        "tablename": "activity_logs",
         "policyname": "Semua user bisa insert log aktivitas",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
         "operation": "INSERT",
         "using_expression": null,
         "check_expression": "true"
+    },
+    {
+        "schemaname": "public",
+        "tablename": "activity_logs",
+        "policyname": "Admins can view activity logs of their complex",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "operation": "SELECT",
+        "using_expression": "(is_admin() AND (housing_complex_id = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid()))))",
+        "check_expression": null
     },
     {
         "schemaname": "public",
@@ -52,6 +52,16 @@
     {
         "schemaname": "public",
         "tablename": "banners",
+        "policyname": "Users can view active banners in their complex",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "operation": "SELECT",
+        "using_expression": "((is_active = true) AND (housing_complex_id = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid()))) AND ((start_date IS NULL) OR (start_date <= now())) AND ((end_date IS NULL) OR (end_date >= now())))",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "banners",
         "policyname": "Admins can manage banners in their complex",
         "permissive": "PERMISSIVE",
         "roles": "{public}",
@@ -61,13 +71,63 @@
     },
     {
         "schemaname": "public",
-        "tablename": "banners",
-        "policyname": "Users can view active banners in their complex",
+        "tablename": "chat_messages",
+        "policyname": "Users can update messages in their sessions (mark as read)",
         "permissive": "PERMISSIVE",
-        "roles": "{public}",
-        "operation": "SELECT",
-        "using_expression": "((is_active = true) AND (housing_complex_id = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid()))) AND ((start_date IS NULL) OR (start_date <= now())) AND ((end_date IS NULL) OR (end_date >= now())))",
+        "roles": "{authenticated}",
+        "operation": "UPDATE",
+        "using_expression": "(EXISTS ( SELECT 1\n   FROM chat_sessions cs\n  WHERE ((cs.id = chat_messages.session_id) AND ((cs.participant1_id = auth.uid()) OR (cs.participant2_id = auth.uid())))))",
         "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "chat_messages",
+        "policyname": "Users can view messages in their sessions",
+        "permissive": "PERMISSIVE",
+        "roles": "{authenticated}",
+        "operation": "SELECT",
+        "using_expression": "(EXISTS ( SELECT 1\n   FROM chat_sessions cs\n  WHERE ((cs.id = chat_messages.session_id) AND ((cs.participant1_id = auth.uid()) OR (cs.participant2_id = auth.uid())))))",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "chat_messages",
+        "policyname": "Users can send messages to their sessions",
+        "permissive": "PERMISSIVE",
+        "roles": "{authenticated}",
+        "operation": "INSERT",
+        "using_expression": null,
+        "check_expression": "(auth.uid() = sender_id)"
+    },
+    {
+        "schemaname": "public",
+        "tablename": "chat_sessions",
+        "policyname": "Users can view their own chat sessions",
+        "permissive": "PERMISSIVE",
+        "roles": "{authenticated}",
+        "operation": "SELECT",
+        "using_expression": "((auth.uid() = participant1_id) OR (auth.uid() = participant2_id))",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "chat_sessions",
+        "policyname": "Users can update their own chat sessions",
+        "permissive": "PERMISSIVE",
+        "roles": "{authenticated}",
+        "operation": "UPDATE",
+        "using_expression": "((auth.uid() = participant1_id) OR (auth.uid() = participant2_id))",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "chat_sessions",
+        "policyname": "Users can create chat sessions if they are a participant",
+        "permissive": "PERMISSIVE",
+        "roles": "{authenticated}",
+        "operation": "INSERT",
+        "using_expression": null,
+        "check_expression": "((auth.uid() = participant1_id) OR (auth.uid() = participant2_id))"
     },
     {
         "schemaname": "public",
@@ -102,21 +162,21 @@
     {
         "schemaname": "public",
         "tablename": "fees",
-        "policyname": "Admins can manage fees",
-        "permissive": "PERMISSIVE",
-        "roles": "{authenticated}",
-        "operation": "ALL",
-        "using_expression": "is_admin()",
-        "check_expression": null
-    },
-    {
-        "schemaname": "public",
-        "tablename": "fees",
         "policyname": "Authenticated can view active fees",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
         "operation": "SELECT",
         "using_expression": "(is_active = true)",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "fees",
+        "policyname": "Admins can manage fees",
+        "permissive": "PERMISSIVE",
+        "roles": "{authenticated}",
+        "operation": "ALL",
+        "using_expression": "is_admin()",
         "check_expression": null
     },
     {
@@ -133,26 +193,6 @@
         "schemaname": "public",
         "tablename": "housing_complexes",
         "policyname": "Admin can insert housing complexes",
-        "permissive": "PERMISSIVE",
-        "roles": "{authenticated}",
-        "operation": "INSERT",
-        "using_expression": null,
-        "check_expression": "is_admin()"
-    },
-    {
-        "schemaname": "public",
-        "tablename": "news",
-        "policyname": "Admin can update news",
-        "permissive": "PERMISSIVE",
-        "roles": "{authenticated}",
-        "operation": "UPDATE",
-        "using_expression": "is_admin()",
-        "check_expression": null
-    },
-    {
-        "schemaname": "public",
-        "tablename": "news",
-        "policyname": "Admin can insert news",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
         "operation": "INSERT",
@@ -181,12 +221,22 @@
     },
     {
         "schemaname": "public",
-        "tablename": "notifications",
-        "policyname": "Users can update own notifications",
+        "tablename": "news",
+        "policyname": "Admin can insert news",
+        "permissive": "PERMISSIVE",
+        "roles": "{authenticated}",
+        "operation": "INSERT",
+        "using_expression": null,
+        "check_expression": "is_admin()"
+    },
+    {
+        "schemaname": "public",
+        "tablename": "news",
+        "policyname": "Admin can update news",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
         "operation": "UPDATE",
-        "using_expression": "(auth.uid() = user_id)",
+        "using_expression": "is_admin()",
         "check_expression": null
     },
     {
@@ -196,6 +246,16 @@
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
         "operation": "SELECT",
+        "using_expression": "(auth.uid() = user_id)",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "notifications",
+        "policyname": "Users can update own notifications",
+        "permissive": "PERMISSIVE",
+        "roles": "{authenticated}",
+        "operation": "UPDATE",
         "using_expression": "(auth.uid() = user_id)",
         "check_expression": null
     },
@@ -242,21 +302,21 @@
     {
         "schemaname": "public",
         "tablename": "payment_methods",
-        "policyname": "Users can view payment methods of their complex",
-        "permissive": "PERMISSIVE",
-        "roles": "{authenticated}",
-        "operation": "SELECT",
-        "using_expression": "((is_active = true) AND (housing_complex_id = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid()))))",
-        "check_expression": null
-    },
-    {
-        "schemaname": "public",
-        "tablename": "payment_methods",
         "policyname": "Admin can manage own complex payment methods",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
         "operation": "ALL",
         "using_expression": "(is_admin() AND (housing_complex_id = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid()))))",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "payment_methods",
+        "policyname": "Users can view payment methods of their complex",
+        "permissive": "PERMISSIVE",
+        "roles": "{authenticated}",
+        "operation": "SELECT",
+        "using_expression": "((is_active = true) AND (housing_complex_id = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid()))))",
         "check_expression": null
     },
     {
@@ -267,26 +327,6 @@
         "roles": "{public}",
         "operation": "UPDATE",
         "using_expression": "((auth.uid() = user_id) AND ((status = 'pending'::text) OR (status = 'rejected'::text)))",
-        "check_expression": null
-    },
-    {
-        "schemaname": "public",
-        "tablename": "payments",
-        "policyname": "Users can view own payments",
-        "permissive": "PERMISSIVE",
-        "roles": "{authenticated}",
-        "operation": "SELECT",
-        "using_expression": "(auth.uid() = user_id)",
-        "check_expression": null
-    },
-    {
-        "schemaname": "public",
-        "tablename": "payments",
-        "policyname": "Admins can manage payments in own complex",
-        "permissive": "PERMISSIVE",
-        "roles": "{authenticated}",
-        "operation": "ALL",
-        "using_expression": "(is_admin() AND (( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = payments.user_id)) = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid()))))",
         "check_expression": null
     },
     {
@@ -311,23 +351,23 @@
     },
     {
         "schemaname": "public",
-        "tablename": "profiles",
-        "policyname": "Insert Profiles Safe",
+        "tablename": "payments",
+        "policyname": "Admins can manage payments in own complex",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
-        "operation": "INSERT",
-        "using_expression": null,
-        "check_expression": "(auth.uid() = id)"
+        "operation": "ALL",
+        "using_expression": "(is_admin() AND (( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = payments.user_id)) = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid()))))",
+        "check_expression": null
     },
     {
         "schemaname": "public",
-        "tablename": "profiles",
-        "policyname": "Users can update own avatar",
+        "tablename": "payments",
+        "policyname": "Users can view own payments",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
-        "operation": "UPDATE",
-        "using_expression": "(auth.uid() = id)",
-        "check_expression": "(auth.uid() = id)"
+        "operation": "SELECT",
+        "using_expression": "(auth.uid() = user_id)",
+        "check_expression": null
     },
     {
         "schemaname": "public",
@@ -348,6 +388,26 @@
         "operation": "SELECT",
         "using_expression": "((auth.uid() = id) OR (role = ANY (ARRAY['admin'::user_role, 'security'::user_role])) OR check_is_admin() OR check_is_security())",
         "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "profiles",
+        "policyname": "Insert Profiles Safe",
+        "permissive": "PERMISSIVE",
+        "roles": "{authenticated}",
+        "operation": "INSERT",
+        "using_expression": null,
+        "check_expression": "(auth.uid() = id)"
+    },
+    {
+        "schemaname": "public",
+        "tablename": "profiles",
+        "policyname": "Users can update own avatar",
+        "permissive": "PERMISSIVE",
+        "roles": "{authenticated}",
+        "operation": "UPDATE",
+        "using_expression": "(auth.uid() = id)",
+        "check_expression": "(auth.uid() = id)"
     },
     {
         "schemaname": "public",
@@ -372,16 +432,6 @@
     {
         "schemaname": "public",
         "tablename": "reports",
-        "policyname": "Users can delete own reports",
-        "permissive": "PERMISSIVE",
-        "roles": "{authenticated}",
-        "operation": "DELETE",
-        "using_expression": "(auth.uid() = user_id)",
-        "check_expression": null
-    },
-    {
-        "schemaname": "public",
-        "tablename": "reports",
         "policyname": "Users can update own reports",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
@@ -392,11 +442,11 @@
     {
         "schemaname": "public",
         "tablename": "reports",
-        "policyname": "View Reports (Own)",
+        "policyname": "Users can delete own reports",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
-        "operation": "SELECT",
-        "using_expression": "(user_id = auth.uid())",
+        "operation": "DELETE",
+        "using_expression": "(auth.uid() = user_id)",
         "check_expression": null
     },
     {
@@ -411,11 +461,21 @@
     },
     {
         "schemaname": "public",
+        "tablename": "reports",
+        "policyname": "View Reports (Own)",
+        "permissive": "PERMISSIVE",
+        "roles": "{authenticated}",
+        "operation": "SELECT",
+        "using_expression": "(user_id = auth.uid())",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
         "tablename": "user_notification_settings",
-        "policyname": "Users can update own sound settings",
+        "policyname": "Users can select own sound settings",
         "permissive": "PERMISSIVE",
         "roles": "{public}",
-        "operation": "UPDATE",
+        "operation": "SELECT",
         "using_expression": "(auth.uid() = user_id)",
         "check_expression": null
     },
@@ -432,10 +492,30 @@
     {
         "schemaname": "public",
         "tablename": "user_notification_settings",
-        "policyname": "Users can select own sound settings",
+        "policyname": "Users can update own sound settings",
         "permissive": "PERMISSIVE",
         "roles": "{public}",
-        "operation": "SELECT",
+        "operation": "UPDATE",
+        "using_expression": "(auth.uid() = user_id)",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "user_tokens",
+        "policyname": "user_tokens_insert_own",
+        "permissive": "PERMISSIVE",
+        "roles": "{authenticated}",
+        "operation": "INSERT",
+        "using_expression": null,
+        "check_expression": "(auth.uid() = user_id)"
+    },
+    {
+        "schemaname": "public",
+        "tablename": "user_tokens",
+        "policyname": "user_tokens_delete_own",
+        "permissive": "PERMISSIVE",
+        "roles": "{authenticated}",
+        "operation": "DELETE",
         "using_expression": "(auth.uid() = user_id)",
         "check_expression": null
     },
@@ -461,22 +541,12 @@
     },
     {
         "schemaname": "public",
-        "tablename": "user_tokens",
-        "policyname": "user_tokens_insert_own",
+        "tablename": "verified_residents",
+        "policyname": "Allow read access for authenticated users to verified_residents",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
-        "operation": "INSERT",
-        "using_expression": null,
-        "check_expression": "(auth.uid() = user_id)"
-    },
-    {
-        "schemaname": "public",
-        "tablename": "user_tokens",
-        "policyname": "user_tokens_delete_own",
-        "permissive": "PERMISSIVE",
-        "roles": "{authenticated}",
-        "operation": "DELETE",
-        "using_expression": "(auth.uid() = user_id)",
+        "operation": "SELECT",
+        "using_expression": "true",
         "check_expression": null
     },
     {
@@ -487,16 +557,6 @@
         "roles": "{authenticated}",
         "operation": "ALL",
         "using_expression": "(is_admin() AND ((housing_complex_id IS NULL) OR (housing_complex_id = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid())))))",
-        "check_expression": null
-    },
-    {
-        "schemaname": "public",
-        "tablename": "verified_residents",
-        "policyname": "Allow read access for authenticated users to verified_residents",
-        "permissive": "PERMISSIVE",
-        "roles": "{authenticated}",
-        "operation": "SELECT",
-        "using_expression": "true",
         "check_expression": null
     },
     {
@@ -522,21 +582,21 @@
     {
         "schemaname": "public",
         "tablename": "visitors",
-        "policyname": "Admins and Security can manage all visitors",
-        "permissive": "PERMISSIVE",
-        "roles": "{public}",
-        "operation": "ALL",
-        "using_expression": "((is_admin() OR is_security()) AND ((( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid())) IS NULL) OR (housing_complex_id = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid())))))",
-        "check_expression": null
-    },
-    {
-        "schemaname": "public",
-        "tablename": "visitors",
         "policyname": "Residents can approve/reject walk-in visitors",
         "permissive": "PERMISSIVE",
         "roles": "{authenticated}",
         "operation": "UPDATE",
         "using_expression": "((destination_user_id = auth.uid()) AND (status = 'pending'::visitor_status))",
         "check_expression": "(destination_user_id = auth.uid())"
+    },
+    {
+        "schemaname": "public",
+        "tablename": "visitors",
+        "policyname": "Admins and Security can manage all visitors",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "operation": "ALL",
+        "using_expression": "((is_admin() OR is_security()) AND ((( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid())) IS NULL) OR (housing_complex_id = ( SELECT profiles.housing_complex_id\n   FROM profiles\n  WHERE (profiles.id = auth.uid())))))",
+        "check_expression": null
     }
 ]

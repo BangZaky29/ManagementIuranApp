@@ -184,7 +184,7 @@ export const useHomeViewModel = () => {
         { id: 'laporan', title: 'Laporan', icon: 'document-text-outline', route: '/(tabs)/laporan', color: '#E65100', bgColor: '#FFF3E0' },
         { id: 'tamu', title: 'Buku Tamu', icon: 'id-card-outline', route: '/warga/guests', color: '#00695C', bgColor: '#E0F2F1' },
         { id: 'panic', title: 'Darurat', icon: 'warning', color: '#C62828', bgColor: '#FFEBEE' },
-        { id: 'message', title: 'Message', icon: 'chatbox-ellipses-outline', color: '#0288D1', bgColor: '#E1F5FE' },
+        { id: 'message', title: 'Message', icon: 'chatbox-ellipses-outline', route: '/chat', color: '#0288D1', bgColor: '#E1F5FE' },
         { id: 'more', title: 'Lainnya', icon: 'grid-outline', color: '#333333', bgColor: '#F5F5F5' },
     ];
 

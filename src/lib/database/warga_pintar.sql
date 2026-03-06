@@ -52,6 +52,30 @@ CREATE TABLE public.banners (
   CONSTRAINT banners_pkey PRIMARY KEY (id),
   CONSTRAINT banners_housing_complex_id_fkey FOREIGN KEY (housing_complex_id) REFERENCES public.housing_complexes(id)
 );
+CREATE TABLE public.chat_messages (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  session_id uuid NOT NULL,
+  sender_id uuid NOT NULL,
+  message text NOT NULL,
+  is_read boolean DEFAULT false,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT chat_messages_pkey PRIMARY KEY (id),
+  CONSTRAINT chat_messages_session_id_fkey FOREIGN KEY (session_id) REFERENCES public.chat_sessions(id),
+  CONSTRAINT chat_messages_sender_id_fkey FOREIGN KEY (sender_id) REFERENCES public.profiles(id)
+);
+CREATE TABLE public.chat_sessions (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  housing_complex_id bigint NOT NULL,
+  participant1_id uuid NOT NULL,
+  participant2_id uuid NOT NULL,
+  last_message text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT chat_sessions_pkey PRIMARY KEY (id),
+  CONSTRAINT chat_sessions_housing_complex_id_fkey FOREIGN KEY (housing_complex_id) REFERENCES public.housing_complexes(id),
+  CONSTRAINT chat_sessions_participant1_id_fkey FOREIGN KEY (participant1_id) REFERENCES public.profiles(id),
+  CONSTRAINT chat_sessions_participant2_id_fkey FOREIGN KEY (participant2_id) REFERENCES public.profiles(id)
+);
 CREATE TABLE public.complex_info (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   housing_complex_id bigint NOT NULL UNIQUE,
@@ -222,6 +246,7 @@ CREATE TABLE public.user_notification_settings (
   vibration_enabled boolean DEFAULT true,
   updated_at timestamp with time zone DEFAULT now(),
   alert_duration integer DEFAULT 30,
+  theme_mode text DEFAULT 'system'::text CHECK (theme_mode = ANY (ARRAY['light'::text, 'dark'::text, 'system'::text])),
   CONSTRAINT user_notification_settings_pkey PRIMARY KEY (user_id),
   CONSTRAINT user_notification_settings_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
 );

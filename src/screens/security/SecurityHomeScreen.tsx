@@ -12,6 +12,7 @@ import Animated, {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSecurityHomeViewModel } from './SecurityHomeViewModel';
 import { createStyles } from './SecurityHomeStyles';
+import { useRouter } from 'expo-router';
 import { CustomAlertModal } from '../../components/common/CustomAlertModal';
 import { CustomHeader } from '../../components/common/CustomHeader';
 import { PanicLogCard } from '../../components/panic/PanicLogCard';
@@ -19,6 +20,7 @@ import { useSecurityTheme } from '../../contexts/ThemeContext';
 
 export default function SecurityHomeScreen() {
     const vm = useSecurityHomeViewModel();
+    const router = useRouter(); // For chat navigation
     const { colors } = useSecurityTheme();
     const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -186,6 +188,12 @@ export default function SecurityHomeScreen() {
                             </View>
                         </View>
                         <Text style={styles.quickLabel}>Laporan Warga</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.quickAction} onPress={() => router.push('/chat' as any)}>
+                        <View style={[styles.quickIcon, { backgroundColor: colors.success + '20' }]}>
+                            <Ionicons name="chatbubbles" size={24} color={colors.success} />
+                        </View>
+                        <Text style={styles.quickLabel}>Pesan</Text>
                     </TouchableOpacity>
                 </View>
 

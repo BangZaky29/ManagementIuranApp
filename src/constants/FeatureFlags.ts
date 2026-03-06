@@ -8,7 +8,7 @@ import { GoTrueAdminApi } from "@supabase/supabase-js";
 export const FeatureFlags = {
     // Set to false as requested for "Under Development" state
     IS_OTHERS_ENABLED: false,
-    IS_MESSAGE_ENABLED: false,
+    IS_MESSAGE_ENABLED: true,
     IS_DARK_MODE_ENABLED: true,
     IS_SOUND_SETTINGS_ENABLED: true,
     IS_AUTO_BACKUP_ENABLED: false,
