@@ -49,7 +49,8 @@ export async function refreshNotificationChannels(user: any) {
 
         await Notifications.setNotificationChannelAsync('default', {
             name: 'Warga Lokal',
-            importance: Notifications.AndroidImportance.DEFAULT,
+            importance: Notifications.AndroidImportance.MAX,
+            sound: 'default', // Pastikan sound 'default' aktif
         });
 
         console.log('Notification channels refreshed successfully');
