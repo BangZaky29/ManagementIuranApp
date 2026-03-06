@@ -22,6 +22,8 @@ export interface ChatMessage {
     message: string;
     is_read: boolean;
     created_at: string;
+    is_edited?: boolean;
+    deleted_by?: string[];
 }
 
 export const fetchChatSessions = async (userId: string) => {
@@ -115,7 +117,7 @@ export const createOrGetChatSession = async (
     return newSession;
 };
 
-export const fetchChatMessages = async (sessionId: string) => {
+export const fetchChatMessages = async (sessionId: string, currentUserId: string) => {
     const { data, error } = await supabase
         .from('chat_messages')
         .select('*')
@@ -126,7 +128,9 @@ export const fetchChatMessages = async (sessionId: string) => {
         console.error('Error fetching chat messages:', error);
         throw error;
     }
-    return data;
+
+    // Filter out messages deleted by "me"
+    return data?.filter(msg => !msg.deleted_by?.includes(currentUserId)) || [];
 };
 
 export const sendMessage = async (sessionId: string, senderId: string, message: string) => {
@@ -199,6 +203,82 @@ export const markMessagesAsRead = async (sessionId: string, userId: string) => {
 
     if (error) {
         console.error('Error marking messages as read:', error);
+    }
+};
+
+export const editMessage = async (messageId: string, newText: string) => {
+    const { data, error } = await supabase
+        .from('chat_messages')
+        .update({
+            message: newText,
+            is_edited: true
+        })
+        .eq('id', messageId)
+        .select()
+        .single();
+
+    if (error) {
+        console.error('Error editing message:', error);
+        throw error;
+    }
+    return data;
+};
+
+export const getParticipantInfo = async (userId: string) => {
+    const { data, error } = await supabase
+        .from('profiles')
+        .select(`
+            full_name,
+            role,
+            housing_complexes (
+                name
+            )
+        `)
+        .eq('id', userId)
+        .single();
+
+    if (error) {
+        console.error('Error fetching participant info:', error);
+        return null;
+    }
+    return data;
+};
+
+export const deleteMessages = async (messageIds: string[], deleteType: 'me' | 'everyone', userId: string) => {
+    if (deleteType === 'everyone') {
+        const { error } = await supabase
+            .from('chat_messages')
+            .delete()
+            .in('id', messageIds);
+
+        if (error) {
+            console.error('Error deleting messages for everyone:', error);
+            throw error;
+        }
+    } else if (deleteType === 'me') {
+        // We append the userId to the 'deleted_by' array using Postgres array functions
+        // Since we can't do array_append directly in Supabase .update() without an RPC, 
+        // we will fetch first, then update, or create a simpler approach:
+        // Actually, Supabase has rpc, but let's just fetch them and update them manually for simplicity
+
+        const { data: msgs } = await supabase
+            .from('chat_messages')
+            .select('id, deleted_by')
+            .in('id', messageIds);
+
+        if (msgs) {
+            const promises = msgs.map(msg => {
+                const currentDeletedBy = msg.deleted_by || [];
+                if (!currentDeletedBy.includes(userId)) {
+                    return supabase
+                        .from('chat_messages')
+                        .update({ deleted_by: [...currentDeletedBy, userId] })
+                        .eq('id', msg.id);
+                }
+                return Promise.resolve();
+            });
+            await Promise.all(promises);
+        }
     }
 };
 
@@ -276,6 +356,16 @@ export const subscribeToChatRoom = (
             'postgres_changes',
             {
                 event: 'INSERT',
+                schema: 'public',
+                table: 'chat_messages',
+                filter: `session_id=eq.${sessionId}`,
+            },
+            onMessage
+        )
+        .on(
+            'postgres_changes',
+            {
+                event: 'DELETE',
                 schema: 'public',
                 table: 'chat_messages',
                 filter: `session_id=eq.${sessionId}`,

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, FlatList, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Modal, Image, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Modal, Image, TouchableWithoutFeedback, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,7 +10,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import { CustomHeader } from '../../components/common/CustomHeader';
 import { CustomAlertModal } from '../../components/common/CustomAlertModal';
 import { ChatBubble } from '../../components/chat/ChatBubble';
-import { fetchChatMessages, sendMessage, uploadChatAttachment, subscribeToChatRoom, sendTypingStatus, markMessagesAsRead, ChatMessage } from '../../services/chat/chatService';
+import { fetchChatMessages, sendMessage, uploadChatAttachment, subscribeToChatRoom, sendTypingStatus, markMessagesAsRead, deleteMessages, editMessage, getParticipantInfo, ChatMessage } from '../../services/chat/chatService';
 
 export default function ChatRoomScreen() {
     const router = useRouter();
@@ -29,6 +29,13 @@ export default function ChatRoomScreen() {
     const [otherIsTyping, setOtherIsTyping] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+    // V6 States
+    const [selectedMessages, setSelectedMessages] = useState<ChatMessage[]>([]);
+    const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(null);
+    const [showAttachMenu, setShowAttachMenu] = useState(false);
+    const [otherParticipantInfo, setOtherParticipantInfo] = useState<any>(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     const flatListRef = useRef<FlatList>(null);
     const channelRef = useRef<any>(null);
@@ -55,6 +62,9 @@ export default function ChatRoomScreen() {
                     } else if (payload.eventType === 'UPDATE') {
                         const newMsg = payload.new as ChatMessage;
                         setMessages(prev => prev.map(msg => msg.id === newMsg.id ? newMsg : msg));
+                    } else if (payload.eventType === 'DELETE') {
+                        const oldMsg = payload.old as ChatMessage;
+                        setMessages(prev => prev.filter(msg => msg.id !== oldMsg.id));
                     }
                 },
                 (payload) => {
@@ -80,10 +90,34 @@ export default function ChatRoomScreen() {
         }
     }, [sessionId, user?.id]);
 
+    useEffect(() => {
+        if (otherId) {
+            getParticipantInfo(otherId as string).then(info => {
+                if (info) setOtherParticipantInfo(info);
+            });
+        }
+    }, [otherId]);
+
+    const getFormattedSenderName = () => {
+        const defaultName = decodeURIComponent(otherName || 'User');
+        if (!otherParticipantInfo) return defaultName;
+
+        const role = otherParticipantInfo.role;
+        const complexName = otherParticipantInfo.housing_complexes?.name || '';
+
+        if (role === 'admin') {
+            return `${defaultName}  ADMIN | ${complexName}`.trim();
+        } else if (role === 'security') {
+            return `(${defaultName} | securiti)`.toUpperCase();
+        } else {
+            return `${defaultName}  WARGA | ${complexName}`.trim();
+        }
+    };
+
     const loadMessages = async () => {
-        if (!sessionId) return;
+        if (!sessionId || !user?.id) return;
         try {
-            const data = await fetchChatMessages(sessionId);
+            const data = await fetchChatMessages(sessionId, user.id);
             // Backend returns ascending. For inverted FlatList, we need descending.
             setMessages(data ? data.reverse() : []);
         } catch (error) {
@@ -112,6 +146,20 @@ export default function ChatRoomScreen() {
         sendTypingStatus(channelRef.current, user.id, false);
         if (myTypingTimeoutRef.current) clearTimeout(myTypingTimeoutRef.current);
 
+        // Edit Mode
+        if (editingMessage) {
+            try {
+                // Optimistic visual update
+                setMessages(prev => prev.map(m => m.id === editingMessage.id ? { ...m, message: textToSend, is_edited: true } : m));
+                await editMessage(editingMessage.id, textToSend);
+            } catch (error) {
+                console.error('Failed to edit message', error);
+            } finally {
+                setEditingMessage(null);
+            }
+            return;
+        }
+
         // 🟢 OPTIMISTIC UI: Add immediately
         const tempMsg: ChatMessage = {
             id: `temp-${Date.now()}`,
@@ -133,7 +181,25 @@ export default function ChatRoomScreen() {
         }
     };
 
+    const handleCapturePhoto = async () => {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+            alert('Akses kamera dibutuhkan!');
+            return;
+        }
+
+        const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: 'images',
+            quality: 0.8,
+        });
+
+        if (!result.canceled && result.assets && result.assets.length > 0) {
+            handleUploadAttachment(result.assets[0].uri, 'image/jpeg', 'jpg');
+        }
+    };
+
     const handlePickImage = async () => {
+        setShowAttachMenu(false);
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: 'images',
             quality: 0.8,
@@ -145,6 +211,7 @@ export default function ChatRoomScreen() {
     };
 
     const handlePickDocument = async () => {
+        setShowAttachMenu(false);
         const result = await DocumentPicker.getDocumentAsync({
             type: '*/*',
             copyToCacheDirectory: true,
@@ -190,6 +257,57 @@ export default function ChatRoomScreen() {
         }
     };
 
+    // V6 SELECTION & ACTION LOGIC
+    const handleLongPress = (id: string, message: string, isOwn: boolean) => {
+        const msgObj = messages.find(m => m.id === id);
+        if (msgObj) {
+            setSelectedMessages(prev => prev.includes(msgObj) ? prev.filter(m => m.id !== id) : [...prev, msgObj]);
+        }
+    };
+
+    const handleBubblePress = (id: string) => {
+        if (selectedMessages.length > 0) {
+            const msgObj = messages.find(m => m.id === id);
+            if (msgObj) {
+                setSelectedMessages(prev => prev.includes(msgObj) ? prev.filter(m => m.id !== id) : [...prev, msgObj]);
+            }
+        }
+    };
+
+    const initiateEdit = () => {
+        if (selectedMessages.length === 1) {
+            setEditingMessage(selectedMessages[0]);
+            setInputText(selectedMessages[0].message);
+            setSelectedMessages([]);
+        }
+    };
+
+    const confirmDelete = () => {
+        setShowDeleteModal(true);
+    };
+
+    const executeDelete = async (type: 'me' | 'everyone') => {
+        if (!user?.id) return;
+        const idsToDelete = selectedMessages.map(m => m.id);
+        try {
+            await deleteMessages(idsToDelete, type, user.id);
+            if (type === 'me') {
+                setMessages(prev => prev.filter(m => !idsToDelete.includes(m.id)));
+            }
+        } catch (error) {
+            console.error('Delete failed:', error);
+            alert('Gagal menghapus pesan.');
+        } finally {
+            setSelectedMessages([]);
+        }
+    };
+
+    const isSelectionMode = selectedMessages.length > 0;
+    const canEdit = selectedMessages.length === 1 &&
+        selectedMessages[0].sender_id === user?.id &&
+        !selectedMessages[0].message.startsWith('[IMAGE]') &&
+        !selectedMessages[0].message.startsWith('[DOCUMENT]');
+
     const renderItem = ({ item }: { item: ChatMessage }) => {
         const isOwnMessage = item.sender_id === user?.id;
         const date = new Date(item.created_at);
@@ -208,12 +326,18 @@ export default function ChatRoomScreen() {
 
         return (
             <ChatBubble
+                id={item.id}
                 message={item.message}
                 isOwnMessage={isOwnMessage}
                 time={timeString}
-                senderName={!isOwnMessage ? decodeURIComponent(otherName || 'User') : undefined}
+                senderName={!isOwnMessage ? getFormattedSenderName() : undefined}
                 status={msgStatus}
                 onImagePress={(url) => setSelectedImage(url)}
+                onLongPress={handleLongPress}
+                onPress={handleBubblePress}
+                isSelected={selectedMessages.some(m => m.id === item.id)}
+                isSelectionMode={isSelectionMode}
+                isEdited={item.is_edited}
                 colors={colors}
             />
         );
@@ -226,14 +350,35 @@ export default function ChatRoomScreen() {
             keyboardVerticalOffset={0}
         >
             <SafeAreaView edges={['top']} style={styles.container}>
-                <CustomHeader
-                    title={decodeURIComponent(otherName || 'Chat')}
-                    showAvatar={true}
-                    avatarUrl={otherAvatar ? decodeURIComponent(otherAvatar) : null}
-                    onBack={() => router.back()}
-                    showBack={true}
-                    colors={colors}
-                />
+                {isSelectionMode ? (
+                    <View style={[styles.selectionHeader, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+                        <TouchableOpacity onPress={() => setSelectedMessages([])} style={styles.selectionIconButton}>
+                            <Ionicons name="close" size={24} color={colors.textPrimary} />
+                        </TouchableOpacity>
+                        <Text style={[styles.selectionCount, { color: colors.textPrimary }]}>
+                            {selectedMessages.length} Terpilih
+                        </Text>
+                        <View style={{ flexDirection: 'row' }}>
+                            {canEdit && (
+                                <TouchableOpacity onPress={initiateEdit} style={styles.selectionIconButton}>
+                                    <Ionicons name="pencil" size={24} color={colors.primary} />
+                                </TouchableOpacity>
+                            )}
+                            <TouchableOpacity onPress={confirmDelete} style={styles.selectionIconButton}>
+                                <Ionicons name="trash" size={24} color={colors.danger} />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                ) : (
+                    <CustomHeader
+                        title={decodeURIComponent(otherName || 'Chat')}
+                        showAvatar={true}
+                        avatarUrl={otherAvatar ? decodeURIComponent(otherAvatar) : null}
+                        onBack={() => router.back()}
+                        showBack={true}
+                        colors={colors}
+                    />
+                )}
 
                 {otherIsTyping && (
                     <View style={[styles.typingContainer, { backgroundColor: colors.surfaceSubtle }]}>
@@ -263,27 +408,62 @@ export default function ChatRoomScreen() {
                     }
                 ]}>
                     <View style={styles.attachmentIcons}>
-                        <TouchableOpacity style={styles.iconButton} onPress={handlePickImage} disabled={isUploading}>
-                            <Ionicons name="camera-outline" size={24} color={isUploading ? colors.textSecondary : colors.primary} />
+                        <TouchableOpacity style={styles.iconButton} onPress={handleCapturePhoto} disabled={isUploading}>
+                            <Ionicons name="camera" size={24} color={isUploading ? colors.textSecondary : colors.primary} />
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.iconButton} onPress={handlePickDocument} disabled={isUploading}>
-                            <Ionicons name="document-attach-outline" size={24} color={isUploading ? colors.textSecondary : colors.primary} />
+                        <TouchableOpacity style={styles.iconButton} onPress={() => setShowAttachMenu(!showAttachMenu)} disabled={isUploading}>
+                            <Ionicons name="attach" size={24} color={isUploading ? colors.textSecondary : colors.primary} />
                         </TouchableOpacity>
                     </View>
 
-                    <TextInput
-                        style={[styles.input, {
-                            color: colors.textPrimary,
-                            backgroundColor: colors.surfaceSubtle,
-                            borderColor: colors.border
-                        }]}
-                        placeholder="Ketik pesan..."
-                        placeholderTextColor={colors.textSecondary}
-                        value={inputText}
-                        onChangeText={handleTextChange}
-                        multiline
-                        maxLength={500}
-                    />
+                    {showAttachMenu && (
+                        <View style={[styles.attachMenuContainer, { backgroundColor: colors.surfaceSubtle, shadowColor: colors.textPrimary }]}>
+                            <TouchableOpacity style={styles.attachMenuItem} onPress={handlePickImage}>
+                                <View style={[styles.attachMenuIcon, { backgroundColor: '#E1BEE7' }]}>
+                                    <Ionicons name="image" size={24} color="#8E24AA" />
+                                </View>
+                                <Text style={[styles.attachMenuText, { color: colors.textPrimary }]}>Galeri</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.attachMenuItem} onPress={handlePickDocument}>
+                                <View style={[styles.attachMenuIcon, { backgroundColor: '#BBDEFB' }]}>
+                                    <Ionicons name="document-text" size={24} color="#1976D2" />
+                                </View>
+                                <Text style={[styles.attachMenuText, { color: colors.textPrimary }]}>Dokumen</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+
+                    <View style={styles.inputWrapper}>
+                        {editingMessage && (
+                            <View style={[styles.editingHighlight, { backgroundColor: colors.primary + '20' }]}>
+                                <View style={{ flex: 1 }}>
+                                    <Text style={{ fontSize: 12, color: colors.primary, fontWeight: 'bold' }}>Mengedit Pesan</Text>
+                                    <Text style={{ fontSize: 12, color: colors.textSecondary }} numberOfLines={1}>{editingMessage.message}</Text>
+                                </View>
+                                <TouchableOpacity onPress={() => { setEditingMessage(null); setInputText(''); }}>
+                                    <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                        <TextInput
+                            style={[
+                                styles.input,
+                                {
+                                    color: colors.textPrimary,
+                                    backgroundColor: colors.surfaceSubtle,
+                                    borderColor: colors.border,
+                                    borderTopLeftRadius: editingMessage ? 0 : 20,
+                                    borderTopRightRadius: editingMessage ? 0 : 20,
+                                }
+                            ]}
+                            placeholder={editingMessage ? "Edit pesan..." : "Ketik pesan..."}
+                            placeholderTextColor={colors.textSecondary}
+                            value={inputText}
+                            onChangeText={handleTextChange}
+                            multiline
+                            maxLength={500}
+                        />
+                    </View>
                     <TouchableOpacity
                         style={[styles.sendButton, {
                             backgroundColor: inputText.trim() ? colors.primary : colors.surfaceSubtle
@@ -299,6 +479,33 @@ export default function ChatRoomScreen() {
                         />
                     </TouchableOpacity>
                 </View>
+
+                <CustomAlertModal
+                    visible={showDeleteModal}
+                    title="Hapus Pesan"
+                    message="Pilih metode penghapusan pesan"
+                    type="warning"
+                    buttons={[
+                        { text: "Batal", style: 'cancel', onPress: () => setShowDeleteModal(false) },
+                        {
+                            text: "Hapus Untuk Saya",
+                            style: 'destructive',
+                            onPress: () => {
+                                setShowDeleteModal(false);
+                                executeDelete('me');
+                            }
+                        },
+                        ...(!selectedMessages.some(m => m.sender_id !== user?.id) ? [{
+                            text: "Hapus Semua",
+                            style: 'destructive' as const,
+                            onPress: () => {
+                                setShowDeleteModal(false);
+                                executeDelete('everyone');
+                            }
+                        }] : [])
+                    ]}
+                    onClose={() => setShowDeleteModal(false)}
+                />
 
                 <CustomAlertModal
                     visible={alertVisible}
@@ -363,15 +570,14 @@ const styles = StyleSheet.create({
         padding: 6,
     },
     input: {
-        flex: 1,
         minHeight: 40,
         maxHeight: 120,
-        borderRadius: 20,
         paddingHorizontal: 16,
         paddingTop: 10,
         paddingBottom: 10,
         borderWidth: StyleSheet.hairlineWidth,
         fontSize: 15,
+        borderRadius: 20
     },
     sendButton: {
         width: 44,
@@ -381,6 +587,68 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginLeft: 12,
         marginBottom: Platform.OS === 'android' ? 3 : 0,
+    },
+    selectionHeader: {
+        height: 60,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+    },
+    selectionIconButton: {
+        padding: 8,
+    },
+    selectionCount: {
+        flex: 1,
+        marginLeft: 8,
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    inputWrapper: {
+        flex: 1,
+        justifyContent: 'flex-end',
+    },
+    editingHighlight: {
+        flexDirection: 'row',
+        padding: 8,
+        borderTopLeftRadius: 16,
+        borderTopRightRadius: 16,
+        alignItems: 'center',
+    },
+    attachMenuContainer: {
+        position: 'absolute',
+        bottom: 70,
+        left: 10,
+        borderRadius: 12,
+        padding: 16,
+        flexDirection: 'row',
+        gap: 20,
+        elevation: 4,
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        zIndex: 50,
+    },
+    attachMenuItem: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    attachMenuIcon: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 8,
+    },
+    attachMenuText: {
+        fontSize: 12,
+        fontWeight: '500',
     },
     modalBackground: {
         flex: 1,
