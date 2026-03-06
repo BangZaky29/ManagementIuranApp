@@ -9,6 +9,7 @@ import { ThemeColors } from '../../theme/AppTheme';
 
 interface CustomHeaderProps {
     title: string;
+    subtitle?: string | null;
     showBack?: boolean;
     rightIcon?: React.ReactNode;
     onBack?: () => void;
@@ -19,6 +20,7 @@ interface CustomHeaderProps {
 
 export const CustomHeader: React.FC<CustomHeaderProps> = ({
     title,
+    subtitle,
     showBack = false,
     rightIcon,
     onBack,
@@ -61,7 +63,12 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({
                     </View>
                 )}
 
-                <Text style={[styles.title, { color: colors.textPrimary, flex: 1, marginLeft: showAvatar ? 12 : 0 }]} numberOfLines={1}>{title}</Text>
+                <View style={{ flex: 1, marginLeft: showAvatar ? 12 : 0, justifyContent: 'center' }}>
+                    <Text style={[styles.title, { color: colors.textPrimary }]} numberOfLines={1}>{title}</Text>
+                    {subtitle && (
+                        <Text style={[styles.subtitle, { color: colors.primary }]} numberOfLines={1}>{subtitle}</Text>
+                    )}
+                </View>
 
                 <View style={styles.rightContainer}>
                     {rightIcon}
@@ -95,6 +102,11 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 18,
         fontWeight: 'bold',
+    },
+    subtitle: {
+        fontSize: 12,
+        fontStyle: 'italic',
+        marginTop: 2,
     },
     avatarContainer: {
         marginLeft: 4,

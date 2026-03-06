@@ -174,6 +174,9 @@ export default function ChatRoomScreen() {
             created_at: new Date().toISOString()
         };
         setMessages(prev => [tempMsg, ...prev]);
+        setTimeout(() => {
+            flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+        }, 100);
 
         try {
             const sentMsg = await sendMessage(sessionId, user.id, textToSend);
@@ -350,8 +353,8 @@ export default function ChatRoomScreen() {
     return (
         <KeyboardAvoidingView
             style={{ flex: 1, backgroundColor: colors.background }}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
-            keyboardVerticalOffset={0}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
         >
             <SafeAreaView edges={['top']} style={styles.container}>
                 {isSelectionMode ? (
@@ -376,20 +379,13 @@ export default function ChatRoomScreen() {
                 ) : (
                     <CustomHeader
                         title={decodeURIComponent(otherName || 'Chat')}
+                        subtitle={otherIsTyping ? `${decodeURIComponent(otherName || 'User')} sedang mengetik...` : null}
                         showAvatar={true}
                         avatarUrl={otherAvatar ? decodeURIComponent(otherAvatar) : null}
                         onBack={() => router.back()}
                         showBack={true}
                         colors={colors}
                     />
-                )}
-
-                {otherIsTyping && (
-                    <View style={[styles.typingContainer, { backgroundColor: colors.surfaceSubtle }]}>
-                        <Text style={[styles.typingText, { color: colors.primary }]}>
-                            {decodeURIComponent(otherName || 'User')} sedang mengetik...
-                        </Text>
-                    </View>
                 )}
 
                 <FlatList

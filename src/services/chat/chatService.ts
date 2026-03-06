@@ -154,15 +154,6 @@ export const sendMessage = async (sessionId: string, senderId: string, message: 
 
     const sessionUpdateMsg = message.startsWith('[IMAGE]') ? '📷 Foto' : message.startsWith('[DOCUMENT]') ? '📄 Dokumen' : message;
 
-    // Update session last_message and updated_at
-    await supabase
-        .from('chat_sessions')
-        .update({
-            last_message: sessionUpdateMsg,
-            updated_at: new Date().toISOString()
-        })
-        .eq('id', sessionId);
-
     // --- TRIGGER NOTIFICATIONS ---
     try {
         // 1. Get session details to find recipient

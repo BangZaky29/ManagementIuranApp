@@ -56,21 +56,54 @@ Deno.serve(async (req) => {
             _displayInForeground: true,
         }))
 
-        console.log(`Sending ${notifications.length} notifications...`)
+        // 3. Chunking notifications (max 100 per chunk per Expo docs)
+        const chunks: any[][] = []
+        for (let i = 0; i < notifications.length; i += 100) {
+            chunks.push(notifications.slice(i, i + 100))
+        }
 
-        const expoRes = await fetch('https://exp.host/--/api/v2/push/send', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(notifications),
-        })
+        console.log(`Sending ${notifications.length} notifications in ${chunks.length} chunks...`)
 
-        const expoData = await expoRes.json()
-        console.log('Expo Response:', JSON.stringify(expoData));
+        const allDeliveryStatuses: any[] = []
+        const tokensToDelete: string[] = []
 
-        return new Response(JSON.stringify({ success: true, detail: expoData }), {
+        for (const chunk of chunks) {
+            try {
+                const expoRes = await fetch('https://exp.host/--/api/v2/push/send', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(chunk),
+                })
+                const expoData = await expoRes.json()
+
+                // Parse Expo response to find expired tokens
+                if (expoData?.data) {
+                    expoData.data.forEach((receipt: any, index: number) => {
+                        allDeliveryStatuses.push(receipt)
+                        if (receipt.status === 'error' && receipt.details?.error === 'DeviceNotRegistered') {
+                            const failedToken = chunk[index].to
+                            tokensToDelete.push(failedToken)
+                        }
+                    })
+                }
+            } catch (chunkError) {
+                console.error('Error sending chunk:', chunkError)
+            }
+        }
+
+        // 4. Cleanup expired tokens
+        if (tokensToDelete.length > 0) {
+            console.log(`Removing ${tokensToDelete.length} expired tokens...`)
+            await supabase
+                .from('user_tokens')
+                .delete()
+                .in('expo_push_token', tokensToDelete)
+        }
+
+        return new Response(JSON.stringify({ success: true, detail: allDeliveryStatuses }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 200
         })

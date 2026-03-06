@@ -123,7 +123,7 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
                                 <Ionicons name="time-outline" size={12} color="rgba(255,255,255,0.7)" />
                             )}
                             {status === 'sent' && (
-                                <Ionicons name="checkmark-done" size={14} color="rgba(255,255,255,0.7)" />
+                                <Ionicons name="checkmark" size={14} color="rgba(255,255,255,0.7)" />
                             )}
                             {status === 'read' && (
                                 <Ionicons name="checkmark-done" size={14} color="#4FC3F7" />
