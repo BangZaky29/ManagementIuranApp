@@ -49,6 +49,6 @@ app-example
 # Abaikan hanya file kunci akses Google Cloud (Keamanan)
 warga-pintar-*.json
 
-# File ini boleh diabaikan jika Anda sudah upload ke EAS, 
-# tapi pastikan package.json TIDAK ikut terabaikan.
-# google-services.json
+# Pastikan file konfigurasi Firebase terdeteksi oleh Git agar bisa diupload ke EAS
+!google-services.json
+google-services.json
