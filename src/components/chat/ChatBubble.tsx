@@ -8,10 +8,11 @@ interface ChatBubbleProps {
     isOwnMessage: boolean;
     time: string;
     senderName?: string;
+    status?: 'sending' | 'sent' | 'read';
     colors: ThemeColors;
 }
 
-export const ChatBubble: React.FC<ChatBubbleProps> = ({ message, isOwnMessage, time, senderName, colors }) => {
+export const ChatBubble: React.FC<ChatBubbleProps> = ({ message, isOwnMessage, time, senderName, status, colors }) => {
     return (
         <View style={[
             styles.container,
@@ -44,10 +45,17 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ message, isOwnMessage, t
                         onPress={() => Linking.openURL(message.replace('[DOCUMENT]', '').split('|')[0])}
                         style={[styles.documentContent, { backgroundColor: isOwnMessage ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.05)' }]}
                     >
-                        <Ionicons name="document-text" size={32} color={isOwnMessage ? colors.textWhite : colors.primary} />
-                        <Text style={[styles.documentText, { color: isOwnMessage ? colors.textWhite : colors.textPrimary }]} numberOfLines={2}>
-                            {message.replace('[DOCUMENT]', '').split('|')[1] || 'Dokumen'}
-                        </Text>
+                        <View style={[styles.documentIconContainer, { backgroundColor: isOwnMessage ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.08)' }]}>
+                            <Ionicons name="document-text" size={24} color={isOwnMessage ? colors.textWhite : colors.primary} />
+                        </View>
+                        <View style={{ flex: 1, marginLeft: 10 }}>
+                            <Text style={[styles.documentText, { color: isOwnMessage ? colors.textWhite : colors.textPrimary }]} numberOfLines={1}>
+                                {message.replace('[DOCUMENT]', '').split('|')[1] || 'Dokumen Terlampir'}
+                            </Text>
+                            <Text style={{ fontSize: 11, color: isOwnMessage ? 'rgba(255,255,255,0.7)' : colors.textSecondary, marginTop: 2 }}>
+                                Ketuk untuk membuka file
+                            </Text>
+                        </View>
                     </TouchableOpacity>
                 ) : (
                     <Text style={[
@@ -58,12 +66,27 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ message, isOwnMessage, t
                     </Text>
                 )}
 
-                <Text style={[
-                    styles.timeText,
-                    { color: isOwnMessage ? 'rgba(255,255,255,0.7)' : colors.textSecondary }
-                ]}>
-                    {time}
-                </Text>
+                <View style={styles.timeContainer}>
+                    <Text style={[
+                        styles.timeText,
+                        { color: isOwnMessage ? 'rgba(255,255,255,0.7)' : colors.textSecondary }
+                    ]}>
+                        {time}
+                    </Text>
+                    {isOwnMessage && status && (
+                        <View style={{ marginLeft: 4 }}>
+                            {status === 'sending' && (
+                                <Ionicons name="time-outline" size={12} color="rgba(255,255,255,0.7)" />
+                            )}
+                            {status === 'sent' && (
+                                <Ionicons name="checkmark-done" size={14} color="rgba(255,255,255,0.7)" />
+                            )}
+                            {status === 'read' && (
+                                <Ionicons name="checkmark-done" size={14} color="#4FC3F7" />
+                            )}
+                        </View>
+                    )}
+                </View>
             </View>
         </View>
     );
@@ -97,10 +120,14 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 2,
     },
-    timeText: {
-        fontSize: 11,
+    timeContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
         alignSelf: 'flex-end',
         marginTop: 4,
+    },
+    timeText: {
+        fontSize: 11,
     },
     imageContent: {
         width: 220,
@@ -111,14 +138,20 @@ const styles = StyleSheet.create({
     documentContent: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 8,
-        borderRadius: 8,
+        padding: 10,
+        borderRadius: 12,
         marginVertical: 4,
-        width: 220,
+        width: 240,
+    },
+    documentIconContainer: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     documentText: {
-        flex: 1,
-        marginLeft: 8,
         fontSize: 14,
+        fontWeight: 'bold',
     }
 });

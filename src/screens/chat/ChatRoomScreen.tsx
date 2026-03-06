@@ -194,12 +194,24 @@ export default function ChatRoomScreen() {
         const date = new Date(item.created_at);
         const timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+        let msgStatus: 'sending' | 'sent' | 'read' | undefined;
+        if (isOwnMessage) {
+            if (item.id.startsWith('temp-')) {
+                msgStatus = 'sending';
+            } else if (item.is_read) {
+                msgStatus = 'read';
+            } else {
+                msgStatus = 'sent';
+            }
+        }
+
         return (
             <ChatBubble
                 message={item.message}
                 isOwnMessage={isOwnMessage}
                 time={timeString}
                 senderName={!isOwnMessage ? decodeURIComponent(otherName || 'User') : undefined}
+                status={msgStatus}
                 colors={colors}
             />
         );
@@ -227,7 +239,7 @@ export default function ChatRoomScreen() {
             <KeyboardAvoidingView
                 style={styles.keyboardAvoid}
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
             >
                 <FlatList
                     ref={flatListRef}
@@ -237,6 +249,7 @@ export default function ChatRoomScreen() {
                     inverted
                     contentContainerStyle={styles.listContent}
                     showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
                 />
 
                 <View style={[
@@ -244,7 +257,7 @@ export default function ChatRoomScreen() {
                     {
                         backgroundColor: colors.surface,
                         borderTopColor: colors.border,
-                        paddingBottom: Platform.OS === 'ios' ? Math.max(insets.bottom, 12) : 12
+                        paddingBottom: Platform.OS === 'ios' ? 24 : 12
                     }
                 ]}>
                     <View style={styles.attachmentIcons}>
