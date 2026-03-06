@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Linking } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemeColors } from '../../theme/AppTheme';
 
 interface ChatBubbleProps {
@@ -29,12 +30,34 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ message, isOwnMessage, t
                         {senderName}
                     </Text>
                 )}
-                <Text style={[
-                    styles.messageText,
-                    { color: isOwnMessage ? colors.textWhite : colors.textPrimary }
-                ]}>
-                    {message}
-                </Text>
+
+                {message.startsWith('[IMAGE]') ? (
+                    <TouchableOpacity onPress={() => Linking.openURL(message.replace('[IMAGE]', ''))}>
+                        <Image
+                            source={{ uri: message.replace('[IMAGE]', '') }}
+                            style={styles.imageContent}
+                            resizeMode="cover"
+                        />
+                    </TouchableOpacity>
+                ) : message.startsWith('[DOCUMENT]') ? (
+                    <TouchableOpacity
+                        onPress={() => Linking.openURL(message.replace('[DOCUMENT]', '').split('|')[0])}
+                        style={[styles.documentContent, { backgroundColor: isOwnMessage ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.05)' }]}
+                    >
+                        <Ionicons name="document-text" size={32} color={isOwnMessage ? colors.textWhite : colors.primary} />
+                        <Text style={[styles.documentText, { color: isOwnMessage ? colors.textWhite : colors.textPrimary }]} numberOfLines={2}>
+                            {message.replace('[DOCUMENT]', '').split('|')[1] || 'Dokumen'}
+                        </Text>
+                    </TouchableOpacity>
+                ) : (
+                    <Text style={[
+                        styles.messageText,
+                        { color: isOwnMessage ? colors.textWhite : colors.textPrimary }
+                    ]}>
+                        {message}
+                    </Text>
+                )}
+
                 <Text style={[
                     styles.timeText,
                     { color: isOwnMessage ? 'rgba(255,255,255,0.7)' : colors.textSecondary }
@@ -79,4 +102,23 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-end',
         marginTop: 4,
     },
+    imageContent: {
+        width: 220,
+        height: 220,
+        borderRadius: 8,
+        marginVertical: 4,
+    },
+    documentContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 8,
+        borderRadius: 8,
+        marginVertical: 4,
+        width: 220,
+    },
+    documentText: {
+        flex: 1,
+        marginLeft: 8,
+        fontSize: 14,
+    }
 });

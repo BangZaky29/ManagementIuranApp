@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, StatusBar, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../../contexts/ThemeContext';
 import { ThemeColors } from '../../theme/AppTheme';
@@ -11,6 +12,8 @@ interface CustomHeaderProps {
     showBack?: boolean;
     rightIcon?: React.ReactNode;
     onBack?: () => void;
+    avatarUrl?: string | null;
+    showAvatar?: boolean;
     colors?: ThemeColors;
 }
 
@@ -19,6 +22,8 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({
     showBack = false,
     rightIcon,
     onBack,
+    avatarUrl,
+    showAvatar = false,
     colors: overrideColors,
 }) => {
     const router = useRouter();
@@ -44,7 +49,19 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({
                     )}
                 </View>
 
-                <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>
+                {showAvatar && (
+                    <View style={styles.avatarContainer}>
+                        {avatarUrl ? (
+                            <Image source={{ uri: avatarUrl }} style={styles.avatar} />
+                        ) : (
+                            <View style={[styles.avatar, { backgroundColor: colors.surfaceSubtle, justifyContent: 'center', alignItems: 'center' }]}>
+                                <Ionicons name="person" size={16} color={colors.textSecondary} />
+                            </View>
+                        )}
+                    </View>
+                )}
+
+                <Text style={[styles.title, { color: colors.textPrimary, flex: 1, marginLeft: showAvatar ? 12 : 0 }]} numberOfLines={1}>{title}</Text>
 
                 <View style={styles.rightContainer}>
                     {rightIcon}
@@ -76,8 +93,16 @@ const styles = StyleSheet.create({
         padding: 5,
     },
     title: {
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: 'bold',
+    },
+    avatarContainer: {
+        marginLeft: 4,
+    },
+    avatar: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
     },
 });
 

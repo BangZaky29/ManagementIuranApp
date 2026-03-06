@@ -1,4 +1,6 @@
 import { supabase } from '../../lib/supabaseConfig';
+import * as FileSystem from 'expo-file-system';
+import { decode } from 'base64-arraybuffer';
 
 export interface ChatSession {
     id: string;
@@ -149,12 +151,42 @@ export const sendMessage = async (sessionId: string, senderId: string, message: 
     await supabase
         .from('chat_sessions')
         .update({
-            last_message: message,
+            last_message: message.startsWith('[IMAGE]') ? '📷 Foto' : message.startsWith('[DOCUMENT]') ? '📄 Dokumen' : message,
             updated_at: new Date().toISOString()
         })
         .eq('id', sessionId);
 
     return data;
+};
+
+export const uploadChatAttachment = async (
+    uri: string,
+    sessionId: string,
+    fileExt: string,
+    mimeType: string
+) => {
+    try {
+        const fileName = `${sessionId}/${Date.now()}.${fileExt}`;
+        const base64 = await FileSystem.readAsStringAsync(uri, { encoding: 'base64' as any });
+
+        const { data, error } = await supabase.storage
+            .from('chat_attachments')
+            .upload(fileName, decode(base64), {
+                contentType: mimeType,
+                upsert: false
+            });
+
+        if (error) throw error;
+
+        const { data: { publicUrl } } = supabase.storage
+            .from('chat_attachments')
+            .getPublicUrl(fileName);
+
+        return publicUrl;
+    } catch (error) {
+        console.error('Error uploading attachment', error);
+        throw error;
+    }
 };
 
 export const markMessagesAsRead = async (sessionId: string, userId: string) => {
@@ -228,9 +260,18 @@ export const subscribeToChatSessions = (userId: string, callback: () => void) =>
         .subscribe();
 };
 
-export const subscribeToChatMessages = (sessionId: string, callback: (payload: any) => void) => {
-    return supabase
-        .channel(`chat_messages_${sessionId}`)
+export const subscribeToChatRoom = (
+    sessionId: string,
+    onMessage: (payload: any) => void,
+    onTyping: (payload: { userId: string, isTyping: boolean }) => void
+) => {
+    const channel = supabase.channel(`chat_room_${sessionId}`, {
+        config: {
+            broadcast: { ack: false }
+        }
+    });
+
+    channel
         .on(
             'postgres_changes',
             {
@@ -239,7 +280,7 @@ export const subscribeToChatMessages = (sessionId: string, callback: (payload: a
                 table: 'chat_messages',
                 filter: `session_id=eq.${sessionId}`,
             },
-            callback
+            onMessage
         )
         .on(
             'postgres_changes',
@@ -249,7 +290,28 @@ export const subscribeToChatMessages = (sessionId: string, callback: (payload: a
                 table: 'chat_messages',
                 filter: `session_id=eq.${sessionId}`,
             },
-            callback
+            onMessage
+        )
+        .on(
+            'broadcast',
+            { event: 'typing' },
+            (payload) => {
+                if (payload.payload) {
+                    onTyping(payload.payload as any);
+                }
+            }
         )
         .subscribe();
+
+    return channel;
+};
+
+export const sendTypingStatus = async (channel: any, userId: string, isTyping: boolean) => {
+    if (channel) {
+        await channel.send({
+            type: 'broadcast',
+            event: 'typing',
+            payload: { userId, isTyping }
+        });
+    }
 };

@@ -217,6 +217,25 @@ export default function HomeScreen() {
                                                 <Ionicons name="lock-closed" size={12} color={colors.textSecondary} />
                                             </View>
                                         )}
+                                        {!!action.badge && action.badge > 0 && (
+                                            <View style={{
+                                                position: 'absolute',
+                                                top: -4,
+                                                right: -4,
+                                                backgroundColor: colors.danger,
+                                                minWidth: 20,
+                                                height: 20,
+                                                borderRadius: 10,
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                borderWidth: 2,
+                                                borderColor: colors.surface
+                                            }}>
+                                                <Text style={{ color: 'white', fontSize: 10, fontWeight: '900' }}>
+                                                    {action.badge > 99 ? '99+' : action.badge}
+                                                </Text>
+                                            </View>
+                                        )}
                                     </View>
                                     <Text style={styles.actionText}>{action.title}</Text>
                                 </TouchableOpacity>

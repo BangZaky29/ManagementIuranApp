@@ -50,11 +50,11 @@ export default function NewChatScreen() {
         }
     };
 
-    const startChat = async (contactId: string, contactName: string) => {
+    const startChat = async (contactId: string, contactName: string, avatarUrl: string) => {
         if (!user?.id || !profile?.housing_complex_id) return;
         try {
             const session = await createOrGetChatSession(user.id, contactId, profile.housing_complex_id);
-            router.replace(`/chat/${session.id}?otherName=${encodeURIComponent(contactName)}&otherId=${contactId}` as any);
+            router.replace(`/chat/${session.id}?otherName=${encodeURIComponent(contactName)}&otherId=${contactId}&otherAvatar=${encodeURIComponent(avatarUrl || '')}` as any);
         } catch (error) {
             console.error('Error starting chat session:', error);
             alert('Gagal memulai percakapan.');
@@ -64,7 +64,7 @@ export default function NewChatScreen() {
     const renderItem = ({ item }: { item: any }) => (
         <TouchableOpacity
             style={[styles.contactCard, { borderBottomColor: colors.border }]}
-            onPress={() => startChat(item.id, item.full_name)}
+            onPress={() => startChat(item.id, item.full_name, item.avatar_url)}
         >
             <View style={styles.avatarContainer}>
                 {item.avatar_url ? (
