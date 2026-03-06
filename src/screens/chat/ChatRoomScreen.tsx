@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, FlatList, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Modal, Image, TouchableWithoutFeedback } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -28,6 +28,7 @@ export default function ChatRoomScreen() {
     const [alertVisible, setAlertVisible] = useState(false);
     const [otherIsTyping, setOtherIsTyping] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
     const flatListRef = useRef<FlatList>(null);
     const channelRef = useRef<any>(null);
@@ -212,35 +213,36 @@ export default function ChatRoomScreen() {
                 time={timeString}
                 senderName={!isOwnMessage ? decodeURIComponent(otherName || 'User') : undefined}
                 status={msgStatus}
+                onImagePress={(url) => setSelectedImage(url)}
                 colors={colors}
             />
         );
     };
 
     return (
-        <SafeAreaView edges={['top']} style={[styles.container, { backgroundColor: colors.background }]}>
-            <CustomHeader
-                title={decodeURIComponent(otherName || 'Chat')}
-                showAvatar={true}
-                avatarUrl={otherAvatar ? decodeURIComponent(otherAvatar) : null}
-                onBack={() => router.back()}
-                showBack={true}
-                colors={colors}
-            />
+        <KeyboardAvoidingView
+            style={{ flex: 1, backgroundColor: colors.background }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+            keyboardVerticalOffset={0}
+        >
+            <SafeAreaView edges={['top']} style={styles.container}>
+                <CustomHeader
+                    title={decodeURIComponent(otherName || 'Chat')}
+                    showAvatar={true}
+                    avatarUrl={otherAvatar ? decodeURIComponent(otherAvatar) : null}
+                    onBack={() => router.back()}
+                    showBack={true}
+                    colors={colors}
+                />
 
-            {otherIsTyping && (
-                <View style={[styles.typingContainer, { backgroundColor: colors.surfaceSubtle }]}>
-                    <Text style={[styles.typingText, { color: colors.primary }]}>
-                        {decodeURIComponent(otherName || 'User')} sedang mengetik...
-                    </Text>
-                </View>
-            )}
+                {otherIsTyping && (
+                    <View style={[styles.typingContainer, { backgroundColor: colors.surfaceSubtle }]}>
+                        <Text style={[styles.typingText, { color: colors.primary }]}>
+                            {decodeURIComponent(otherName || 'User')} sedang mengetik...
+                        </Text>
+                    </View>
+                )}
 
-            <KeyboardAvoidingView
-                style={styles.keyboardAvoid}
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
-            >
                 <FlatList
                     ref={flatListRef}
                     data={messages}
@@ -297,17 +299,30 @@ export default function ChatRoomScreen() {
                         />
                     </TouchableOpacity>
                 </View>
-            </KeyboardAvoidingView>
 
-            <CustomAlertModal
-                visible={alertVisible}
-                title="Informasi"
-                message="Fitur kirim gambar/dokumen masih dalam tahap pengembangan."
-                type="info"
-                buttons={[{ text: 'Mengerti', onPress: () => setAlertVisible(false) }]}
-                onClose={() => setAlertVisible(false)}
-            />
-        </SafeAreaView>
+                <CustomAlertModal
+                    visible={alertVisible}
+                    title="Informasi"
+                    message="Fitur kirim gambar/dokumen masih dalam tahap pengembangan."
+                    type="info"
+                    buttons={[{ text: 'Mengerti', onPress: () => setAlertVisible(false) }]}
+                    onClose={() => setAlertVisible(false)}
+                />
+
+                <Modal visible={!!selectedImage} transparent={true} animationType="fade" onRequestClose={() => setSelectedImage(null)}>
+                    <View style={styles.modalBackground}>
+                        <TouchableOpacity style={styles.closeModalButton} onPress={() => setSelectedImage(null)}>
+                            <Ionicons name="close" size={32} color="#FFFFFF" />
+                        </TouchableOpacity>
+                        {selectedImage && (
+                            <TouchableWithoutFeedback onPress={() => setSelectedImage(null)}>
+                                <Image source={{ uri: selectedImage }} style={styles.fullScreenImage} resizeMode="contain" />
+                            </TouchableWithoutFeedback>
+                        )}
+                    </View>
+                </Modal>
+            </SafeAreaView>
+        </KeyboardAvoidingView>
     );
 }
 
@@ -366,5 +381,22 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginLeft: 12,
         marginBottom: Platform.OS === 'android' ? 3 : 0,
+    },
+    modalBackground: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.9)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    closeModalButton: {
+        position: 'absolute',
+        top: 60,
+        right: 20,
+        zIndex: 10,
+        padding: 8,
+    },
+    fullScreenImage: {
+        width: '100%',
+        height: '100%',
     }
 });

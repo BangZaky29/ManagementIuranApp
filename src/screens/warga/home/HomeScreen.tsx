@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StatusBar, Image, Platform, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from 'expo-router';
 import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../../contexts/ThemeContext';
@@ -37,6 +38,12 @@ export default function HomeScreen() {
         panicTimeLeft,
         panicClickCount
     } = useHomeViewModel();
+
+    useFocusEffect(
+        React.useCallback(() => {
+            loadData();
+        }, [loadData])
+    );
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);

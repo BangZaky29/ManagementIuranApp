@@ -9,10 +9,11 @@ interface ChatBubbleProps {
     time: string;
     senderName?: string;
     status?: 'sending' | 'sent' | 'read';
+    onImagePress?: (imageUrl: string) => void;
     colors: ThemeColors;
 }
 
-export const ChatBubble: React.FC<ChatBubbleProps> = ({ message, isOwnMessage, time, senderName, status, colors }) => {
+export const ChatBubble: React.FC<ChatBubbleProps> = ({ message, isOwnMessage, time, senderName, status, onImagePress, colors }) => {
     return (
         <View style={[
             styles.container,
@@ -33,7 +34,14 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ message, isOwnMessage, t
                 )}
 
                 {message.startsWith('[IMAGE]') ? (
-                    <TouchableOpacity onPress={() => Linking.openURL(message.replace('[IMAGE]', ''))}>
+                    <TouchableOpacity onPress={() => {
+                        const url = message.replace('[IMAGE]', '');
+                        if (onImagePress) {
+                            onImagePress(url);
+                        } else {
+                            Linking.openURL(url);
+                        }
+                    }}>
                         <Image
                             source={{ uri: message.replace('[IMAGE]', '') }}
                             style={styles.imageContent}

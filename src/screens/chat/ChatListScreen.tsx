@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, Text } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme as useAppTheme, useSecurityTheme } from '../../contexts/ThemeContext';
@@ -31,6 +31,14 @@ export default function ChatListScreen() {
             };
         }
     }, [user?.id]);
+
+    useFocusEffect(
+        useCallback(() => {
+            if (user?.id) {
+                loadSessions();
+            }
+        }, [user?.id])
+    );
 
     const loadSessions = async () => {
         if (!user?.id) return;
