@@ -11,10 +11,11 @@ interface ChatSessionCardProps {
     onPress: () => void;
     colors: ThemeColors;
     isUnread?: boolean;
+    unreadCount?: number;
 }
 
 export const ChatSessionCard: React.FC<ChatSessionCardProps> = ({
-    name, avatarUrl, lastMessage, time, onPress, colors, isUnread
+    name, avatarUrl, lastMessage, time, onPress, colors, isUnread, unreadCount
 }) => {
     return (
         <TouchableOpacity
@@ -48,7 +49,13 @@ export const ChatSessionCard: React.FC<ChatSessionCardProps> = ({
                         {lastMessage || 'Memulai percakapan...'}
                     </Text>
                     {isUnread && (
-                        <View style={[styles.unreadBadge, { backgroundColor: colors.primary }]} />
+                        <View style={[styles.unreadBadge, { backgroundColor: colors.primary }]}>
+                            {unreadCount && unreadCount > 0 ? (
+                                <Text style={styles.unreadBadgeText}>
+                                    {unreadCount > 99 ? '99+' : unreadCount}
+                                </Text>
+                            ) : null}
+                        </View>
                     )}
                 </View>
             </View>
@@ -100,8 +107,16 @@ const styles = StyleSheet.create({
         paddingRight: 8,
     },
     unreadBadge: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
+        minWidth: 20,
+        height: 20,
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 6,
     },
+    unreadBadgeText: {
+        color: 'white',
+        fontSize: 10,
+        fontWeight: 'bold',
+    }
 });

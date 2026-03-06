@@ -52,7 +52,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
         else if (role === 'security') router.replace('/security/(tabs)');
         else router.replace('/(tabs)');
       } else {
-        if (inProfile || inLaporan || inIuran || inNews) return;
+        if (inProfile || inLaporan || inIuran || inNews || segments[0] === 'chat') return;
 
         if (role === 'admin' && !inAdmin) router.replace('/admin');
         else if (role === 'security' && !inSecurity) router.replace('/security/(tabs)');
@@ -84,10 +84,11 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     const isAtLaporan = segments[0] === 'laporan';
     const isAtIuran = segments[0] === 'iuran';
     const isAtNews = segments[0] === 'news';
+    const isAtChat = segments[0] === 'chat';
 
-    const isCorrectRoute = (role === 'admin' && (isAtAdmin || isAtProfile || isAtNews)) ||
-      (role === 'security' && (isAtSecurity || isAtProfile)) ||
-      (role === 'warga' && (isAtWarga || isAtProfile || isAtLaporan || isAtIuran || isAtNews));
+    const isCorrectRoute = (role === 'admin' && (isAtAdmin || isAtProfile || isAtNews || isAtChat)) ||
+      (role === 'security' && (isAtSecurity || isAtProfile || isAtChat)) ||
+      (role === 'warga' && (isAtWarga || isAtProfile || isAtLaporan || isAtIuran || isAtNews || isAtChat));
 
     // Jika sedang di halaman login/auth atau rute salah, tampilkan loading screen
     // PENGECUALIAN: Jika Warga sedang di halaman Login (Admin Login), jangan blokir UI.
@@ -122,6 +123,7 @@ function RootLayoutInner() {
           <Stack.Screen name="login" />
           <Stack.Screen name="admin" />
           <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="chat" />
 
           <Stack.Screen name="register" />
           <Stack.Screen name="forgot-password" />

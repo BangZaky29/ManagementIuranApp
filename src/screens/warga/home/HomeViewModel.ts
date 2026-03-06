@@ -5,6 +5,7 @@ import { fetchNews, NewsItem } from '../../../services/news';
 import { fetchBillingPeriods } from '../../../services/iuran';
 import { triggerPanicButton } from '../../../services/panic';
 import { getUnreadNotificationCount } from '../../../services/notification';
+import { countUnreadMessages } from '../../../services/chat/chatService';
 import { supabase } from '../../../lib/supabaseConfig';
 import * as Linking from 'expo-linking';
 import { Platform } from 'react-native';
@@ -19,6 +20,7 @@ export interface QuickAction {
     route?: string;
     color: string;
     bgColor: string;
+    badge?: number;
 }
 
 export const useHomeViewModel = () => {
@@ -38,6 +40,7 @@ export const useHomeViewModel = () => {
     const [billSummary, setBillSummary] = useState({ total: 'Rp 0', label: 'Iuran Keamanan & Sampah', dueDate: '-' });
     const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
     const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+    const [unreadChatCount, setUnreadChatCount] = useState(0);
     const [banners, setBanners] = useState<Banner[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -73,8 +76,33 @@ export const useHomeViewModel = () => {
                 console.log('Supabase Realtime Status (Notifications):', status);
             });
 
+        // 🟢 REALTIME SUBSCRIPTION FOR CHAT MESSAGES
+        const chatSubscription = supabase
+            .channel(`public:chat_messages:user_id=${user.id}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'chat_messages'
+                    // Cannot easily filter by nested session participants directly in the realtime filter
+                    // We check sender_id !== user.id on the client side, but we receive all inserts. 
+                    // Better approach: filter by receiver if we had one, but we don't.
+                    // For now, we will just reload the count if ANY message is inserted 
+                    // where sender != current user (Supabase realtime filter doesn't support neq nicely here without RLS, but RLS handles it).
+                },
+                (payload) => {
+                    if (payload.new && payload.new.sender_id !== user.id) {
+                        console.log('Realtime Chat Received!', payload);
+                        setUnreadChatCount((prev) => prev + 1);
+                    }
+                }
+            )
+            .subscribe();
+
         return () => {
             supabase.removeChannel(notificationSubscription);
+            supabase.removeChannel(chatSubscription);
         };
     }, [profile, user?.id]);
 
@@ -98,7 +126,11 @@ export const useHomeViewModel = () => {
                 const count = await getUnreadNotificationCount();
                 setUnreadNotifCount(count);
 
-                // 4. Fetch Banners
+                // 4. Unread Chat Count
+                const chatCount = await countUnreadMessages(user.id);
+                setUnreadChatCount(chatCount);
+
+                // 5. Fetch Banners
                 const activeBanners = await fetchActiveBanners();
                 setBanners(activeBanners);
             }
@@ -184,7 +216,7 @@ export const useHomeViewModel = () => {
         { id: 'laporan', title: 'Laporan', icon: 'document-text-outline', route: '/(tabs)/laporan', color: '#E65100', bgColor: '#FFF3E0' },
         { id: 'tamu', title: 'Buku Tamu', icon: 'id-card-outline', route: '/warga/guests', color: '#00695C', bgColor: '#E0F2F1' },
         { id: 'panic', title: 'Darurat', icon: 'warning', color: '#C62828', bgColor: '#FFEBEE' },
-        { id: 'message', title: 'Message', icon: 'chatbox-ellipses-outline', route: '/chat', color: '#0288D1', bgColor: '#E1F5FE' },
+        { id: 'message', title: 'Message', icon: 'chatbox-ellipses-outline', route: '/chat', color: '#0288D1', bgColor: '#E1F5FE', badge: unreadChatCount },
         { id: 'more', title: 'Lainnya', icon: 'grid-outline', color: '#333333', bgColor: '#F5F5F5' },
     ];
 
@@ -363,6 +395,7 @@ export const useHomeViewModel = () => {
         billSummary,
         newsItems,
         unreadNotifCount,
+        unreadChatCount,
         banners,
         quickActions,
         handleNavigation,

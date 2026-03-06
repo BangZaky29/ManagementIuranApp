@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme as useAppTheme, useSecurityTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { CustomHeader } from '../../components/common/CustomHeader';
+import { CustomAlertModal } from '../../components/common/CustomAlertModal';
 import { ChatBubble } from '../../components/chat/ChatBubble';
 import { fetchChatMessages, sendMessage, subscribeToChatMessages, markMessagesAsRead, ChatMessage } from '../../services/chat/chatService';
 
@@ -21,6 +22,7 @@ export default function ChatRoomScreen() {
 
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputText, setInputText] = useState('');
+    const [alertVisible, setAlertVisible] = useState(false);
     const flatListRef = useRef<FlatList>(null);
 
     useEffect(() => {
@@ -69,6 +71,10 @@ export default function ChatRoomScreen() {
         }
     };
 
+    const handleFeatureNotReady = () => {
+        setAlertVisible(true);
+    };
+
     const renderItem = ({ item }: { item: ChatMessage }) => {
         const isOwnMessage = item.sender_id === user?.id;
         const date = new Date(item.created_at);
@@ -79,6 +85,7 @@ export default function ChatRoomScreen() {
                 message={item.message}
                 isOwnMessage={isOwnMessage}
                 time={timeString}
+                senderName={!isOwnMessage ? decodeURIComponent(otherName || 'User') : undefined}
                 colors={colors}
             />
         );
@@ -108,6 +115,15 @@ export default function ChatRoomScreen() {
                 />
 
                 <View style={[styles.inputContainer, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
+                    <View style={styles.attachmentIcons}>
+                        <TouchableOpacity style={styles.iconButton} onPress={handleFeatureNotReady}>
+                            <Ionicons name="camera-outline" size={24} color={colors.textSecondary} />
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.iconButton} onPress={handleFeatureNotReady}>
+                            <Ionicons name="document-attach-outline" size={24} color={colors.textSecondary} />
+                        </TouchableOpacity>
+                    </View>
+
                     <TextInput
                         style={[styles.input, {
                             color: colors.textPrimary,
@@ -137,6 +153,15 @@ export default function ChatRoomScreen() {
                     </TouchableOpacity>
                 </View>
             </KeyboardAvoidingView>
+
+            <CustomAlertModal
+                visible={alertVisible}
+                title="Informasi"
+                message="Fitur kirim gambar/dokumen masih dalam tahap pengembangan."
+                type="info"
+                buttons={[{ text: 'Mengerti', onPress: () => setAlertVisible(false) }]}
+                onClose={() => setAlertVisible(false)}
+            />
         </SafeAreaView>
     );
 }
@@ -156,6 +181,15 @@ const styles = StyleSheet.create({
         padding: 12,
         borderTopWidth: StyleSheet.hairlineWidth,
         alignItems: 'flex-end',
+    },
+    attachmentIcons: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 8,
+        marginBottom: Platform.OS === 'android' ? 6 : 4,
+    },
+    iconButton: {
+        padding: 6,
     },
     input: {
         flex: 1,

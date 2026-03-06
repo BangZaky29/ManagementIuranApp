@@ -25,11 +25,12 @@ interface AdminSidebarProps {
     pendingPayments?: number;
     pendingReports?: number;
     processingReports?: number;
+    unreadChatCount?: number;
 }
 
 export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     visible, onClose, pendingPayments = 0,
-    pendingReports = 0, processingReports = 0,
+    pendingReports = 0, processingReports = 0, unreadChatCount = 0
 }) => {
     const router = useRouter();
     const { user, profile, signOut } = useAuth();
@@ -159,6 +160,12 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                             {item.key === 'iuran' && pendingPayments > 0 && (
                                 <View style={[styles.menuBadge, { backgroundColor: colors.status.pending.bg }]}>
                                     <Text style={[styles.menuBadgeText, { color: colors.status.pending.text }]}>{pendingPayments}</Text>
+                                </View>
+                            )}
+
+                            {item.key === 'chat' && unreadChatCount > 0 && (
+                                <View style={[styles.menuBadge, { backgroundColor: colors.success + '20' }]}>
+                                    <Text style={[styles.menuBadgeText, { color: colors.success }]}>{unreadChatCount}</Text>
                                 </View>
                             )}
                             <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} style={{ marginLeft: 'auto' }} />

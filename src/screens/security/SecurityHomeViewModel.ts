@@ -7,6 +7,7 @@ import { countActiveVisitors, countPendingVisitors } from '../../services/guest'
 import { getDashboardStats } from '../../services/admin';
 import { fetchRecentActivityLogs, ActivityLog } from '../../services/activityLog';
 import { fetchAllReports, Report } from '../../services/laporan';
+import { countUnreadMessages } from '../../services/chat/chatService';
 import { formatDateSafe } from '../../utils/dateUtils';
 import { supabase } from '../../lib/supabaseConfig';
 
@@ -23,6 +24,7 @@ export function useSecurityHomeViewModel() {
     const [pendingReportsCount, setPendingReportsCount] = useState(0);
     const [processingReportsCount, setProcessingReportsCount] = useState(0);
     const [pendingGuestsCount, setPendingGuestsCount] = useState(0);
+    const [unreadChatCount, setUnreadChatCount] = useState(0);
     const [securityProfile, setSecurityProfile] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -60,6 +62,11 @@ export function useSecurityHomeViewModel() {
             setPendingReportsCount(reportCount.count || 0);
             setProcessingReportsCount(procCount.count || 0);
             setSecurityProfile(profileData);
+
+            if (user?.id) {
+                const chatCount = await countUnreadMessages(user.id);
+                setUnreadChatCount(chatCount);
+            }
         } catch (error) {
             console.error('Failed to load security dashboard:', error);
         } finally {
@@ -88,11 +95,31 @@ export function useSecurityHomeViewModel() {
                 console.log('Supabase Realtime Status (Panic logs):', status);
             });
 
+        // 🟢 REALTIME SUBSCRIPTION FOR CHAT MESSAGES
+        const chatSubscription = supabase
+            .channel(`public:chat_messages:security_${user?.id}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'chat_messages'
+                },
+                (payload) => {
+                    if (user?.id && payload.new && payload.new.sender_id !== user.id) {
+                        console.log('Realtime Chat Received (Security)!', payload);
+                        setUnreadChatCount((prev) => prev + 1);
+                    }
+                }
+            )
+            .subscribe();
+
         return () => {
             clearInterval(interval);
             supabase.removeChannel(panicSubscription);
+            supabase.removeChannel(chatSubscription);
         };
-    }, [loadData]);
+    }, [loadData, user?.id]);
 
 
     const handleLogout = async () => {
@@ -143,7 +170,7 @@ export function useSecurityHomeViewModel() {
 
     return {
         user, stats, activePanics, activeGuests, pendingGuestsCount, recentPanics, isLoading, securityProfile,
-        recentReports, pendingReportsCount, processingReportsCount,
+        recentReports, pendingReportsCount, processingReportsCount, unreadChatCount,
         handleLogout, navigateToPanicLogs, navigateToGuestBook, navigateToProfile, navigateToReports,
         openPanicLocation, handleResolvePanic, formatTime,
         alertVisible, alertConfig, hideAlert, refresh: loadData,

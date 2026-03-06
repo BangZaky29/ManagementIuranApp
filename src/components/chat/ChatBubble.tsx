@@ -6,10 +6,11 @@ interface ChatBubbleProps {
     message: string;
     isOwnMessage: boolean;
     time: string;
+    senderName?: string;
     colors: ThemeColors;
 }
 
-export const ChatBubble: React.FC<ChatBubbleProps> = ({ message, isOwnMessage, time, colors }) => {
+export const ChatBubble: React.FC<ChatBubbleProps> = ({ message, isOwnMessage, time, senderName, colors }) => {
     return (
         <View style={[
             styles.container,
@@ -23,6 +24,11 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ message, isOwnMessage, t
                     borderBottomLeftRadius: isOwnMessage ? 16 : 0,
                 }
             ]}>
+                {!isOwnMessage && senderName && (
+                    <Text style={[styles.senderName, { color: colors.primary }]}>
+                        {senderName}
+                    </Text>
+                )}
                 <Text style={[
                     styles.messageText,
                     { color: isOwnMessage ? colors.textWhite : colors.textPrimary }
@@ -62,6 +68,11 @@ const styles = StyleSheet.create({
     messageText: {
         fontSize: 15,
         lineHeight: 22,
+    },
+    senderName: {
+        fontSize: 13,
+        fontWeight: 'bold',
+        marginBottom: 2,
     },
     timeText: {
         fontSize: 11,

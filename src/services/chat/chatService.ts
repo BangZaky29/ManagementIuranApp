@@ -10,6 +10,7 @@ export interface ChatSession {
     updated_at: string;
     participant1?: any;
     participant2?: any;
+    unread_count?: number;
 }
 
 export interface ChatMessage {
@@ -22,7 +23,7 @@ export interface ChatMessage {
 }
 
 export const fetchChatSessions = async (userId: string) => {
-    const { data, error } = await supabase
+    const { data: sessions, error } = await supabase
         .from('chat_sessions')
         .select(`
       *,
@@ -36,7 +37,36 @@ export const fetchChatSessions = async (userId: string) => {
         console.error('Error fetching chat sessions:', error);
         throw error;
     }
-    return data;
+
+    if (!sessions || sessions.length === 0) return [];
+
+    // Fetch unread counts for each session where sender != current user
+    const sessionIds = sessions.map(s => s.id);
+    const { data: unreadData, error: unreadError } = await supabase
+        .from('chat_messages')
+        .select('session_id')
+        .in('session_id', sessionIds)
+        .neq('sender_id', userId)
+        .eq('is_read', false);
+
+    if (unreadError) {
+        console.error('Error fetching unread counts for sessions:', unreadError);
+        return sessions as ChatSession[];
+    }
+
+    // Group counts by session_id
+    const unreadCounts: Record<string, number> = {};
+    if (unreadData) {
+        unreadData.forEach(msg => {
+            unreadCounts[msg.session_id] = (unreadCounts[msg.session_id] || 0) + 1;
+        });
+    }
+
+    // Attach to sessions
+    return sessions.map(session => ({
+        ...session,
+        unread_count: unreadCounts[session.id] || 0
+    })) as ChatSession[];
 };
 
 export const createOrGetChatSession = async (
@@ -138,6 +168,38 @@ export const markMessagesAsRead = async (sessionId: string, userId: string) => {
     if (error) {
         console.error('Error marking messages as read:', error);
     }
+};
+
+export const countUnreadMessages = async (userId: string) => {
+    // We want to count all messages where is_read is false, 
+    // and the message belongs to a session where the user is a participant,
+    // and the sender is NOT the user themselves.
+
+    // First, find sessions the user belongs to:
+    const { data: sessions, error: sessionError } = await supabase
+        .from('chat_sessions')
+        .select('id')
+        .or(`participant1_id.eq.${userId},participant2_id.eq.${userId}`);
+
+    if (sessionError || !sessions || sessions.length === 0) {
+        return 0;
+    }
+
+    const sessionIds = sessions.map(s => s.id);
+
+    const { count, error } = await supabase
+        .from('chat_messages')
+        .select('*', { count: 'exact', head: true })
+        .in('session_id', sessionIds)
+        .neq('sender_id', userId)
+        .eq('is_read', false);
+
+    if (error) {
+        console.error('Error counting unread messages:', error);
+        return 0;
+    }
+
+    return count || 0;
 };
 
 export const subscribeToChatSessions = (userId: string, callback: () => void) => {

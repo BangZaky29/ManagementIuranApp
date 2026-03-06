@@ -7,6 +7,7 @@ import { countActiveVisitors } from '../../../services/guest';
 import { countPendingPayments } from '../../../services/payment';
 import { getDashboardStats } from '../../../services/admin';
 import { fetchRecentActivityLogs, ActivityLog } from '../../../services/activityLog';
+import { countUnreadMessages } from '../../../services/chat/chatService';
 import { formatDateSafe } from '../../../utils/dateUtils';
 import { supabase } from '../../../lib/supabaseConfig';
 
@@ -23,6 +24,7 @@ export function useAdminHomeViewModel() {
     const [pendingPayments, setPendingPayments] = useState(0);
     const [pendingReports, setPendingReports] = useState(0);
     const [processingReports, setProcessingReports] = useState(0);
+    const [unreadChatCount, setUnreadChatCount] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
 
     // Alert
@@ -64,6 +66,11 @@ export function useAdminHomeViewModel() {
             setPendingReports(reportCount);
             setProcessingReports(processingCount);
             setActivityLogs(logsData);
+
+            if (user?.id) {
+                const chatCount = await countUnreadMessages(user.id);
+                setUnreadChatCount(chatCount);
+            }
         } catch (error) {
             console.error('Failed to load dashboard:', error);
         } finally {
@@ -75,8 +82,31 @@ export function useAdminHomeViewModel() {
         loadData();
         // Auto-refresh every 15 seconds
         const interval = setInterval(loadData, 15000);
-        return () => clearInterval(interval);
-    }, [loadData]);
+
+        // 🟢 REALTIME SUBSCRIPTION FOR CHAT MESSAGES
+        const chatSubscription = supabase
+            .channel(`public:chat_messages:admin_${user?.id}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'chat_messages'
+                },
+                (payload) => {
+                    if (user?.id && payload.new && payload.new.sender_id !== user.id) {
+                        console.log('Realtime Chat Received (Admin)!', payload);
+                        setUnreadChatCount((prev) => prev + 1);
+                    }
+                }
+            )
+            .subscribe();
+
+        return () => {
+            clearInterval(interval);
+            supabase.removeChannel(chatSubscription);
+        };
+    }, [loadData, user?.id]);
 
     const handleLogout = async () => {
         await signOut();
@@ -129,7 +159,7 @@ export function useAdminHomeViewModel() {
 
     return {
         user, profile, stats, activePanics, activeGuests, recentPanics, isLoading,
-        pendingPayments, pendingReports, processingReports, activityLogs,
+        pendingPayments, pendingReports, processingReports, activityLogs, unreadChatCount,
         handleLogout, navigateToManageResidents, navigateToPanicLogs,
         navigateToPaymentMethods, navigateToPaymentConfirmation, navigateToReports,
         navigateToActivityLog,

@@ -253,6 +253,7 @@ export default function AdminHomeScreen() {
                 pendingPayments={vm.pendingPayments}
                 pendingReports={vm.pendingReports}
                 processingReports={vm.processingReports}
+                unreadChatCount={vm.unreadChatCount}
             />
 
             <CustomAlertModal

@@ -61,7 +61,8 @@ export default function ChatListScreen() {
                 time={timeString}
                 colors={colors}
                 onPress={() => router.push(`/chat/${item.id}?otherName=${encodeURIComponent(otherUser?.full_name || 'User')}&otherId=${otherUser?.id}` as any)}
-                isUnread={false} // Would need unread count logic
+                isUnread={item.unread_count ? item.unread_count > 0 : false}
+                unreadCount={item.unread_count} // Optional, but helps UI
             />
         );
     };

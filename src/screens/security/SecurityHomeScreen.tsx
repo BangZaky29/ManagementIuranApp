@@ -192,6 +192,11 @@ export default function SecurityHomeScreen() {
                     <TouchableOpacity style={styles.quickAction} onPress={() => router.push('/chat' as any)}>
                         <View style={[styles.quickIcon, { backgroundColor: colors.success + '20' }]}>
                             <Ionicons name="chatbubbles" size={24} color={colors.success} />
+                            {vm.unreadChatCount > 0 && (
+                                <View style={styles.badge}>
+                                    <Text style={styles.badgeText}>{vm.unreadChatCount}</Text>
+                                </View>
+                            )}
                         </View>
                         <Text style={styles.quickLabel}>Pesan</Text>
                     </TouchableOpacity>
