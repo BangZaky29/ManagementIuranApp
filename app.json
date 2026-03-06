@@ -24,7 +24,7 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.ruangimaji29.ManagementIuranApp",
-      "softwareKeyboardLayoutMode": "adjustResize",
+      "softwareKeyboardLayoutMode": "resize",
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.ACCESS_NETWORK_STATE",
