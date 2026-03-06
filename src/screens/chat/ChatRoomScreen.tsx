@@ -353,7 +353,7 @@ export default function ChatRoomScreen() {
     return (
         <KeyboardAvoidingView
             style={{ flex: 1, backgroundColor: colors.background }}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
             keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
         >
             <SafeAreaView edges={['top']} style={styles.container}>
