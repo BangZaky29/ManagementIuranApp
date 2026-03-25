@@ -9,6 +9,7 @@ import { useHomeViewModel } from './HomeViewModel';
 import { createStyles } from './HomeStyles';
 import { BannerCarousel } from '../../../components/banner/BannerCarousel';
 import { PanicCountdown } from '../../../components/panic/PanicCountdown';
+import { SosLoadingOverlay } from '../../../components/panic/SosLoadingOverlay';
 import { CustomAlertModal } from '../../../components/common/CustomAlertModal';
 import { FeatureFlags } from '../../../constants/FeatureFlags';
 
@@ -36,7 +37,12 @@ export default function HomeScreen() {
         verifyLocation,
         isPanicSessionActive,
         panicTimeLeft,
-        panicClickCount
+        panicClickCount,
+        // SOS Overlay
+        sosOverlayVisible,
+        sosStep,
+        handleSmsFallback,
+        handleSosDismiss,
     } = useHomeViewModel();
 
     useFocusEffect(
@@ -64,6 +70,14 @@ export default function HomeScreen() {
                 visible={isPanicSessionActive}
                 timeLeft={panicTimeLeft}
                 clicksRemaining={3 - panicClickCount}
+            />
+
+            {/* SOS Loading Overlay */}
+            <SosLoadingOverlay
+                visible={sosOverlayVisible}
+                step={sosStep}
+                onSmsFallback={handleSmsFallback}
+                onDismiss={handleSosDismiss}
             />
 
             {/* Header */}

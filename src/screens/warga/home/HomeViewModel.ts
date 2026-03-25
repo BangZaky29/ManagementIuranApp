@@ -12,6 +12,7 @@ import { Platform } from 'react-native';
 import * as Location from 'expo-location';
 import { fetchActiveBanners, Banner } from '../../../services/banner';
 import { FeatureFlags } from '../../../constants/FeatureFlags';
+import type { SosStep } from '../../../components/panic/SosLoadingOverlay';
 
 export interface QuickAction {
     id: string;
@@ -43,6 +44,10 @@ export const useHomeViewModel = () => {
     const [unreadChatCount, setUnreadChatCount] = useState(0);
     const [banners, setBanners] = useState<Banner[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+
+    // ─── SOS Overlay State ───────────────────────────────────────
+    const [sosOverlayVisible, setSosOverlayVisible] = useState(false);
+    const [sosStep, setSosStep] = useState<SosStep>('idle');
 
     // Initial Fetch & Realtime Subscription
     useEffect(() => {
@@ -339,53 +344,59 @@ export const useHomeViewModel = () => {
             return;
         }
 
-        // Step 3: 3rd click — Send SOS!
+        // Step 3: 3rd click — Show overlay and send SOS!
         resetPanicSession();
+
+        // Show overlay immediately
+        setSosStep('permission');
+        setSosOverlayVisible(true);
 
         (async () => {
             try {
-                setAlertConfig({
-                    title: '📡 Mengirim SOS...',
-                    message: 'Mendeteksi lokasi dan mengirim sinyal darurat...',
-                    type: 'warning',
-                    buttons: []
-                });
-                setAlertVisible(true);
+                // Step 1: Request location permission
+                const { status } = await Location.requestForegroundPermissionsAsync();
 
+                if (status !== 'granted') {
+                    // Still continue, triggerPanicButton will handle missing location gracefully
+                }
+
+                // Step 2: GPS detection
+                setSosStep('gps');
+                await new Promise(resolve => setTimeout(resolve, 600)); // let GPS step be visible
+
+                // Step 3: Sending to server
+                setSosStep('sending');
                 await triggerPanicButton();
 
-                setAlertConfig({
-                    title: '🚨 SOS Terkirim!',
-                    message: 'Sinyal darurat beserta lokasi GPS Anda telah dikirim ke petugas keamanan.',
-                    type: 'error',
-                    buttons: [{ text: 'OK', style: 'destructive', onPress: hideAlert }]
-                });
-            } catch (error) {
-                // 🆘 SMS FALLBACK IF INTERNET/API FAILS
-                setAlertConfig({
-                    title: 'Gagal Mengirim SOS 📶',
-                    message: 'Tidak ada koneksi internet. Ingin memanggil satpam lewat SMS Standar (berlaku tarif pulsa)?',
-                    type: 'error',
-                    buttons: [
-                        { text: 'Batal', style: 'cancel', onPress: hideAlert },
-                        {
-                            text: 'Kirim SMS Darurat',
-                            style: 'destructive',
-                            onPress: () => {
-                                hideAlert();
-                                const securityPhone = '081234567890';
-                                const smsBody = '🚨 DARURAT (SOS) - Tolong secepatnya datang ke rumah saya!';
-                                const separator = Platform.OS === 'ios' ? '&' : '?';
-                                const smsUrl = `sms:${securityPhone}${separator}body=${encodeURIComponent(smsBody)}`;
+                // Success!
+                setSosStep('success');
 
-                                Linking.openURL(smsUrl).catch(err => console.error('Error opening SMS app', err));
-                            }
-                        }
-                    ]
-                });
+                // Auto-dismiss after 3.5 seconds
+                setTimeout(() => {
+                    setSosOverlayVisible(false);
+                    setSosStep('idle');
+                }, 3500);
+
+            } catch (error) {
+                // Show error state in overlay
+                setSosStep('error');
             }
-            setAlertVisible(true);
         })();
+    };
+
+    const handleSmsFallback = () => {
+        setSosOverlayVisible(false);
+        setSosStep('idle');
+        const securityPhone = '081234567890';
+        const smsBody = '🚨 DARURAT (SOS) - Tolong secepatnya datang ke rumah saya!';
+        const separator = Platform.OS === 'ios' ? '&' : '?';
+        const smsUrl = `sms:${securityPhone}${separator}body=${encodeURIComponent(smsBody)}`;
+        Linking.openURL(smsUrl).catch(err => console.error('Error opening SMS app', err));
+    };
+
+    const handleSosDismiss = () => {
+        setSosOverlayVisible(false);
+        setSosStep('idle');
     };
 
     return {
@@ -407,9 +418,14 @@ export const useHomeViewModel = () => {
         isLoading,
         refresh: loadData,
         verifyLocation,
-        // Added for visual feedback
+        // Panic session
         isPanicSessionActive,
         panicTimeLeft,
-        panicClickCount: panicClickCount.current // Pass as value for UI
+        panicClickCount: panicClickCount.current,
+        // SOS Overlay
+        sosOverlayVisible,
+        sosStep,
+        handleSmsFallback,
+        handleSosDismiss,
     };
 };

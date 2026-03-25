@@ -18,6 +18,10 @@ Notifications.setNotificationHandler({
     }),
 });
 
+// Channel IDs yang TETAP — jangan pernah dinamis agar cocok dengan yang dikirim Edge Function
+export const NOTIF_CHANNEL_ID = 'default';
+export const SOS_CHANNEL_ID = 'sos';
+
 export async function refreshNotificationChannels(user: any) {
     if (Platform.OS !== 'android') return;
 
@@ -28,34 +32,29 @@ export async function refreshNotificationChannels(user: any) {
         const alertSound = soundSettings?.alert_sound || 'alarm-sound-effect.wav';
         const vibrationEnabled = soundSettings?.vibration_enabled ?? true;
 
-        const notifChannelId = `default_${notifSound.split('.')[0]}`;
-        const sosChannelId = `sos_${alertSound.split('.')[0]}`;
-
-        await Notifications.setNotificationChannelAsync(notifChannelId, {
+        // ✅ Channel 'default' — untuk semua notifikasi umum (chat, iuran, dll)
+        await Notifications.setNotificationChannelAsync(NOTIF_CHANNEL_ID, {
             name: 'Warga Lokal (Pesan)',
             importance: Notifications.AndroidImportance.MAX,
             vibrationPattern: vibrationEnabled ? [0, 250, 250, 250] : undefined,
             lightColor: '#1B5E20',
-            sound: notifSound === 'default' ? undefined : notifSound,
+            sound: notifSound === 'default' ? 'default' : notifSound,
+            enableVibrate: vibrationEnabled,
         });
 
-        await Notifications.setNotificationChannelAsync(sosChannelId, {
+        // ✅ Channel 'sos' — untuk notifikasi darurat/panic button
+        await Notifications.setNotificationChannelAsync(SOS_CHANNEL_ID, {
             name: 'Warga Lokal (Darurat)',
             importance: Notifications.AndroidImportance.MAX,
             vibrationPattern: vibrationEnabled ? [0, 500, 200, 500, 200, 500] : undefined,
             lightColor: '#D32F2F',
-            sound: alertSound === 'default' ? undefined : alertSound,
+            sound: alertSound === 'default' ? 'default' : alertSound,
+            enableVibrate: vibrationEnabled,
         });
 
-        await Notifications.setNotificationChannelAsync('default', {
-            name: 'Warga Lokal',
-            importance: Notifications.AndroidImportance.MAX,
-            sound: 'default', // Pastikan sound 'default' aktif
-        });
-
-        console.log('Notification channels refreshed successfully');
+        console.log('[PushNotif] Channels created: default, sos');
     } catch (error) {
-        console.error('Error refreshing notification channels:', error);
+        console.error('[PushNotif] Error refreshing notification channels:', error);
     }
 }
 
