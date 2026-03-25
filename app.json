@@ -2,7 +2,7 @@
   "expo": {
     "name": "Warga Lokal",
     "slug": "ManagementIuranApp",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "orientation": "portrait",
     "icon": "./assets/logo_warlok/warlok_1024x1024_noTransparant.png",
     "scheme": "warlok",
