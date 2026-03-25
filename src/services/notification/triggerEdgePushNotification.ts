@@ -10,7 +10,7 @@ export const triggerEdgePushNotification = async (
     try {
         // Asumsi nama edge function yang dideploy adalah 'send-notification'.
         // Silakan diganti jika nama deploy Anda berbeda.
-        const { data: responseData, error } = await supabase.functions.invoke('send-notification', {
+        const { data: responseData, error } = await supabase.functions.invoke('send-push-notification', {
             body: {
                 user_ids: userIds,
                 title,
