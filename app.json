@@ -60,7 +60,14 @@
       ],
       "expo-media-library",
       "expo-file-system",
-      "expo-document-picker"
+      "expo-document-picker",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/logo_warlok/notifikasi_icon_mono_48x48.png",
+          "color": "#0D47A1"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
