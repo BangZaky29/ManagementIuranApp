@@ -36,7 +36,8 @@
         "android.permission.VIBRATE",
         "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.POST_NOTIFICATIONS",
-        "android.permission.WAKE_LOCK"
+        "android.permission.WAKE_LOCK",
+        "android.permission.ACCESS_FINE_LOCATION"
       ]
     },
     "web": {
@@ -59,7 +60,13 @@
       ],
       "expo-media-library",
       "expo-file-system",
-      "expo-document-picker"
+      "expo-document-picker",
+      [
+        "react-native-maps",
+        {
+          "apiKey": "AIzaSyDPA2Hay9rjNhASWytIShemTt0izt2jObA"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

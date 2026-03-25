@@ -1,13 +1,24 @@
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Colors } from '../../constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 
 interface ReportLocationViewerProps {
     locationUrl: string | null;
     onOpenLocation: () => void;
+}
+
+// Safe import for MapView — prevent crash if native module fails to load
+let MapView: any = null;
+let Marker: any = null;
+
+try {
+    const maps = require('react-native-maps');
+    MapView = maps.default;
+    Marker = maps.Marker;
+} catch (e) {
+    console.warn('react-native-maps failed to load, using fallback:', e);
 }
 
 export const ReportLocationViewer: React.FC<ReportLocationViewerProps> = ({ locationUrl, onOpenLocation }) => {
@@ -33,8 +44,8 @@ export const ReportLocationViewer: React.FC<ReportLocationViewerProps> = ({ loca
 
     const coords = getCoords(locationUrl);
 
-    if (!coords) {
-        // Fallback for non-coordinate URLs (e.g. plain address text if changed later)
+    // Fallback: show a button if coords can't be parsed OR MapView failed to load
+    if (!coords || !MapView || !Marker) {
         return (
             <TouchableOpacity style={styles.buttonFallback} onPress={onOpenLocation}>
                 <Ionicons name="map" size={18} color={Colors.primary} style={{ marginRight: 8 }} />
@@ -47,8 +58,48 @@ export const ReportLocationViewer: React.FC<ReportLocationViewerProps> = ({ loca
         <View style={styles.container}>
             <Text style={styles.label}>Lokasi Kejadian:</Text>
             <View style={styles.mapContainer}>
+                <MapViewSafe
+                    coords={coords}
+                    onOpenLocation={onOpenLocation}
+                />
+            </View>
+        </View>
+    );
+};
+
+// Separate component with error boundary protection
+class MapViewSafe extends React.Component<{
+    coords: { latitude: number; longitude: number };
+    onOpenLocation: () => void;
+}, { hasError: boolean }> {
+    constructor(props: any) {
+        super(props);
+        this.state = { hasError: false };
+    }
+
+    static getDerivedStateFromError() {
+        return { hasError: true };
+    }
+
+    componentDidCatch(error: any, info: any) {
+        console.warn('MapView crashed, showing fallback:', error, info);
+    }
+
+    render() {
+        if (this.state.hasError || !MapView || !Marker) {
+            return (
+                <TouchableOpacity style={styles.buttonFallback} onPress={this.props.onOpenLocation}>
+                    <Ionicons name="map" size={18} color={Colors.primary} style={{ marginRight: 8 }} />
+                    <Text style={styles.textFallback}>Lihat Lokasi di Peta</Text>
+                </TouchableOpacity>
+            );
+        }
+
+        const { coords, onOpenLocation } = this.props;
+
+        return (
+            <>
                 <MapView
-                    provider={PROVIDER_GOOGLE}
                     style={styles.map}
                     initialRegion={{
                         latitude: coords.latitude,
@@ -60,20 +111,20 @@ export const ReportLocationViewer: React.FC<ReportLocationViewerProps> = ({ loca
                     zoomEnabled={false}
                     pitchEnabled={false}
                     rotateEnabled={false}
-                    onPress={onOpenLocation} // Click map to open link
+                    onPress={onOpenLocation}
                 >
                     <Marker coordinate={coords} />
                 </MapView>
 
                 {/* Overlay link button */}
                 <TouchableOpacity style={styles.overlayButton} onPress={onOpenLocation}>
-                    <Ionicons name="open-outline" size={16} color="white.native" />
+                    <Ionicons name="open-outline" size={16} color="white" />
                     <Text style={styles.overlayText}>Buka Maps</Text>
                 </TouchableOpacity>
-            </View>
-        </View>
-    );
-};
+            </>
+        );
+    }
+}
 
 const styles = StyleSheet.create({
     container: {

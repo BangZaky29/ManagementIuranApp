@@ -3,7 +3,7 @@ export interface Report {
     user_id: string;
     title: string;
     description: string;
-    category: 'Fasilitas' | 'Kebersihan' | 'Keamanan' | 'Lainnya';
+    category: 'Fasilitas' | 'Kebersihan' | 'Keamanan' | 'Infrastruktur' | 'Lainnya';
     status: 'Menunggu' | 'Diproses' | 'Selesai' | 'Ditolak';
     image_url: string | null;
     location: string | null;
