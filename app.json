@@ -60,13 +60,7 @@
       ],
       "expo-media-library",
       "expo-file-system",
-      "expo-document-picker",
-      [
-        "react-native-maps",
-        {
-          "apiKey": "AIzaSyDPA2Hay9rjNhASWytIShemTt0izt2jObA"
-        }
-      ]
+      "expo-document-picker"
     ],
     "experiments": {
       "typedRoutes": true,
