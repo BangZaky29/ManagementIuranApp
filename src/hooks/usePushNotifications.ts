@@ -141,14 +141,17 @@ async function registerForPushNotificationsAsync(user: any) {
                 Constants?.easConfig?.projectId;
 
             if (!projectId) {
-                throw new Error('Project ID tidak ditemukan di app.json');
+                throw new Error('Project ID tidak ditemukan di app.json/eas.json');
             }
 
             token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
             console.log('Generated Token:', token);
-        } catch (e) {
+        } catch (e: any) {
             token = `Error: ${e}`;
             console.error('Gagal mengambil push token:', e);
+            import('react-native').then(({ Alert }) => {
+                Alert.alert('FCM/Push Token Error', e?.message || String(e));
+            });
         }
     } else {
         console.log('Push Notif hanya bisa dijalankan di perangkat fisik.');
