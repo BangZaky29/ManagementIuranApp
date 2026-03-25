@@ -50,5 +50,5 @@ app-example
 warga-pintar-*.json
 
 # File konfigurasi Firebase diabaikan karena menggunakan EAS Secrets (GOOGLE_SERVICES_JSON) di Cloud
-google-services.json
+# google-services.json
 !package.json
