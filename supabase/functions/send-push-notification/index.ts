@@ -61,7 +61,6 @@ Deno.serve(async (req) => {
             channelId: resolvedChannelId,
             mutableContent: true,
             _displayInForeground: true,
-            color: '#0D47A1',
         }))
 
         // 3. Chunking notifications (max 100 per chunk per Expo docs)
