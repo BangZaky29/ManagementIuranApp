@@ -1,6 +1,6 @@
 import { useTheme } from '../../../contexts/ThemeContext';
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StatusBar, Image, ActivityIndicator, Modal, TextInput, Pressable } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StatusBar, Image, ActivityIndicator, Modal, TextInput, Pressable, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { useAnimatedStyle, withTiming, useSharedValue } from 'react-native-reanimated';
@@ -82,7 +82,11 @@ export default function AdminProfileScreen() {
         setRedeemCode,
         isRedeeming,
         handleOpenRedeemModal,
-        submitRedeemCode
+        submitRedeemCode,
+        availablePlans,
+        isLoadingPlans,
+        plansModalVisible,
+        setPlansModalVisible
     } = useAdminProfileViewModel();
 
     const { isDark, toggleTheme } = useTheme();
@@ -158,7 +162,9 @@ export default function AdminProfileScreen() {
                 {/* Info Section */}
                 <Text style={styles.sectionTitle}>Informasi Admin</Text>
                 <View style={[styles.infoCard, { backgroundColor: colors.surface }]}>
-                    {renderInfoItem('star-outline', 'Paket Langganan', user.activePlanName, true)}
+                    <TouchableOpacity onPress={() => setPlansModalVisible(true)} activeOpacity={0.7}>
+                        {renderInfoItem('star-outline', 'Paket Langganan', user.activePlanName, true)}
+                    </TouchableOpacity>
                     {renderInfoItem('person-outline', 'Nama Lengkap', user.name)}
                     {renderInfoItem('at-outline', 'Username', user.username)}
                     {renderInfoItem('mail-outline', 'Email', user.email, true)}
@@ -296,6 +302,102 @@ export default function AdminProfileScreen() {
                                 )}
                             </TouchableOpacity>
                         </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Available Plans Modal (Dynamic from DB) */}
+            <Modal
+                visible={plansModalVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setPlansModalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={[styles.formContainer, { maxHeight: '80%', paddingBottom: 20 }]}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
+                            <Text style={styles.formTitle}>Daftar Paket Warlok</Text>
+                            <TouchableOpacity onPress={() => setPlansModalVisible(false)}>
+                                <Ionicons name="close" size={24} color={colors.textSecondary} />
+                            </TouchableOpacity>
+                        </View>
+
+                        {isLoadingPlans ? (
+                            <ActivityIndicator size="large" color={colors.primary} style={{ marginVertical: 30 }} />
+                        ) : (
+                            <ScrollView showsVerticalScrollIndicator={false}>
+                                {availablePlans.map((plan) => (
+                                    <View key={plan.id} style={{ 
+                                        backgroundColor: colors.background, 
+                                        borderRadius: 16, 
+                                        padding: 16, 
+                                        marginBottom: 12,
+                                        borderWidth: plan.name === user.activePlanName ? 2 : 1,
+                                        borderColor: plan.name === user.activePlanName ? colors.primary : colors.border
+                                    }}>
+                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                            <Text style={{ fontSize: 16, fontWeight: '700', color: colors.textPrimary }}>{plan.display_name}</Text>
+                                            {plan.is_popular && (
+                                                <View style={{ backgroundColor: colors.primary, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 }}>
+                                                    <Text style={{ fontSize: 10, color: '#FFF', fontWeight: 'bold' }}>POPULER</Text>
+                                                </View>
+                                            )}
+                                        </View>
+                                        
+                                        <Text style={{ fontSize: 18, color: colors.primary, fontWeight: 'bold', marginTop: 4 }}>
+                                            {plan.price === 0 ? 'Gratis' : `Rp ${plan.price.toLocaleString('id-ID')}`}
+                                            {plan.price > 0 && <Text style={{ fontSize: 12, fontWeight: 'normal', color: colors.textSecondary }}> / bln</Text>}
+                                        </Text>
+
+                                        <View style={{ marginTop: 10, gap: 5 }}>
+                                            {(plan.features_list || []).map((feat: string, i: number) => (
+                                                <View key={i} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                                    <Ionicons name="checkmark-circle" size={14} color={colors.success} />
+                                                    <Text style={{ fontSize: 12, color: colors.textSecondary, marginLeft: 6 }}>{feat}</Text>
+                                                </View>
+                                            ))}
+                                        </View>
+                                        
+                                        {plan.name === user.activePlanName && (
+                                            <View style={{ marginTop: 12, backgroundColor: colors.successBg, padding: 8, borderRadius: 8, alignItems: 'center' }}>
+                                                <Text style={{ color: colors.success, fontSize: 12, fontWeight: 'bold' }}>Paket Anda Saat Ini</Text>
+                                            </View>
+                                        )}
+                                    </View>
+                                ))}
+                                
+                                <Text style={{ fontSize: 11, color: colors.textSecondary, textAlign: 'center', marginTop: 10, fontStyle: 'italic' }}>
+                                    Lakukan perpanjangan paket melalui website warlok-website.nuansasolution.id menggunakan browser HP Anda.
+                                </Text>
+                            </ScrollView>
+                        )}
+                        
+                        <TouchableOpacity
+                            style={{
+                                backgroundColor: colors.primary,
+                                padding: 16,
+                                borderRadius: 12,
+                                marginTop: 15,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexDirection: 'row'
+                            }}
+                            onPress={() => Linking.openURL('https://warlok-website.nuansasolution.id/')}
+                        >
+                            <Ionicons name="globe-outline" size={20} color="#FFF" style={{ marginRight: 10 }} />
+                            <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 16 }}>Buka Website Warlok</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={{
+                                padding: 12,
+                                marginTop: 8,
+                                alignItems: 'center'
+                            }}
+                            onPress={() => setPlansModalVisible(false)}
+                        >
+                            <Text style={{ color: colors.textSecondary, fontWeight: '600' }}>Tutup</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
             </Modal>

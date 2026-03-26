@@ -9,10 +9,31 @@ export const useAdminProfileViewModel = () => {
     const router = useRouter();
     const { profile, signOut, updateUserProfile, refreshProfile } = useAuth();
     const [isUploading, setIsUploading] = useState(false);
+    const [availablePlans, setAvailablePlans] = useState<any[]>([]);
+    const [isLoadingPlans, setIsLoadingPlans] = useState(false);
 
     React.useEffect(() => {
         refreshProfile();
+        fetchAvailablePlans();
     }, []);
+
+    const fetchAvailablePlans = async () => {
+        try {
+            setIsLoadingPlans(true);
+            const { data, error } = await supabase
+                .from('subscription_plans')
+                .select('*')
+                .eq('is_active', true)
+                .order('price', { ascending: true });
+
+            if (error) throw error;
+            setAvailablePlans(data || []);
+        } catch (err) {
+            console.error('Error fetching plans:', err);
+        } finally {
+            setIsLoadingPlans(false);
+        }
+    };
 
     const user = {
         name: profile?.full_name || 'Administrator',
@@ -67,6 +88,7 @@ export const useAdminProfileViewModel = () => {
     const [redeemModalVisible, setRedeemModalVisible] = useState(false);
     const [redeemCode, setRedeemCode] = useState('');
     const [isRedeeming, setIsRedeeming] = useState(false);
+    const [plansModalVisible, setPlansModalVisible] = useState(false);
 
     // Auto-formatting logic for referral code (WLK-PRO-XXXXXX or WLK-FREE-XXXXXX)
     const handleRedeemCodeChange = (text: string) => {
@@ -280,6 +302,11 @@ export const useAdminProfileViewModel = () => {
         setRedeemCode: handleRedeemCodeChange, // Use custom handler for auto-formatting
         isRedeeming,
         handleOpenRedeemModal,
-        submitRedeemCode
+        submitRedeemCode,
+        availablePlans,
+        isLoadingPlans,
+        refreshPlans: fetchAvailablePlans,
+        plansModalVisible,
+        setPlansModalVisible
     };
 };
