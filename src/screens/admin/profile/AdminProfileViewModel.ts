@@ -68,6 +68,43 @@ export const useAdminProfileViewModel = () => {
     const [redeemCode, setRedeemCode] = useState('');
     const [isRedeeming, setIsRedeeming] = useState(false);
 
+    // Auto-formatting logic for referral code (WLK-PRO-XXXXXX or WLK-FREE-XXXXXX)
+    const handleRedeemCodeChange = (text: string) => {
+        // 1. Clean from all non-alphanumeric and uppercase it
+        let cleaned = text.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+        
+        // 2. Format Logic: WLK-
+        if (cleaned.length <= 3) {
+            setRedeemCode(cleaned);
+            return;
+        }
+        
+        // Always starts with WLK-
+        let formatted = cleaned.slice(0, 3) + '-';
+        let remaining = cleaned.slice(3);
+        
+        // Detection of PRO (3 chars) vs FREE (4 chars)
+        if (remaining.startsWith('PRO')) {
+            formatted += 'PRO-';
+            remaining = remaining.slice(3);
+        } else if (remaining.startsWith('FREE')) {
+            formatted += 'FREE-';
+            remaining = remaining.slice(4);
+        } else if (remaining.length > 3) {
+            // If it doesn't match PRO/FREE exactly, fallback to "every 3-4 chars" generic handling
+            // for the middle part before the final 6 chars
+            formatted += remaining.slice(0, 3) + '-';
+            remaining = remaining.slice(3);
+        } else {
+            setRedeemCode(formatted + remaining);
+            return;
+        }
+        
+        // Final part is up to 6 characters
+        formatted += remaining.slice(0, 6);
+        setRedeemCode(formatted);
+    };
+
     const handleOpenRedeemModal = () => {
         setRedeemCode('');
         setRedeemModalVisible(true);
@@ -240,7 +277,7 @@ export const useAdminProfileViewModel = () => {
         redeemModalVisible,
         setRedeemModalVisible,
         redeemCode,
-        setRedeemCode,
+        setRedeemCode: handleRedeemCodeChange, // Use custom handler for auto-formatting
         isRedeeming,
         handleOpenRedeemModal,
         submitRedeemCode
