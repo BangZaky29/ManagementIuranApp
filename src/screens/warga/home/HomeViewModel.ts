@@ -27,6 +27,11 @@ export interface QuickAction {
 export const useHomeViewModel = () => {
     const router = useRouter();
     const { user, profile } = useAuth();
+    
+    // Feature Checks
+    const hasLaporan = profile?.housing_complexes?.has_laporan ?? false;
+    const hasChat = profile?.housing_complexes?.has_chat ?? false;
+    const hasPanic = profile?.housing_complexes?.has_panic_button ?? false;
 
     // State
     const [userName, setUserName] = useState(profile?.full_name || 'Warga');
@@ -246,6 +251,16 @@ export const useHomeViewModel = () => {
         setAlertVisible(true);
     };
 
+    const showFeatureLockedAlert = () => {
+        setAlertConfig({
+            title: 'Fitur Terkunci',
+            message: 'Fitur ini tidak tersedia dalam paket berlangganan komplek Anda saat ini. Hubungi pengurus komplek untuk Upgrade Paket Warlok.',
+            type: 'warning',
+            buttons: [{ text: 'Mengerti', onPress: hideAlert }]
+        });
+        setAlertVisible(true);
+    };
+
     const handleNavigation = (route?: string) => {
         if (route) {
             router.push(route as any);
@@ -427,5 +442,9 @@ export const useHomeViewModel = () => {
         sosStep,
         handleSmsFallback,
         handleSosDismiss,
+        hasLaporan,
+        hasChat,
+        hasPanic,
+        showFeatureLockedAlert,
     };
 };

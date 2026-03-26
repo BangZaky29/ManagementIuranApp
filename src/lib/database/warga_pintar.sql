@@ -115,6 +115,12 @@ CREATE TABLE public.housing_complexes (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   name text NOT NULL,
   address text,
+  active_plan_name text DEFAULT 'Gratis'::text,
+  max_warga integer DEFAULT 30,
+  has_laporan boolean DEFAULT false,
+  has_chat boolean DEFAULT false,
+  has_panic_button boolean DEFAULT false,
+  subscription_code text,
   created_at timestamp with time zone DEFAULT now(),
   CONSTRAINT housing_complexes_pkey PRIMARY KEY (id)
 );
@@ -251,6 +257,21 @@ CREATE TABLE public.user_notification_settings (
   theme_mode text DEFAULT 'system'::text CHECK (theme_mode = ANY (ARRAY['light'::text, 'dark'::text, 'system'::text])),
   CONSTRAINT user_notification_settings_pkey PRIMARY KEY (user_id),
   CONSTRAINT user_notification_settings_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
+);
+CREATE TABLE public.subscription_codes (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  code text NOT NULL UNIQUE,
+  plan_name text NOT NULL,
+  max_warga integer NOT NULL DEFAULT 30,
+  has_laporan boolean DEFAULT false,
+  has_chat boolean DEFAULT false,
+  has_panic_button boolean DEFAULT false,
+  is_used boolean DEFAULT false,
+  used_by_complex_id bigint,
+  created_at timestamp with time zone DEFAULT now(),
+  used_at timestamp with time zone,
+  CONSTRAINT subscription_codes_pkey PRIMARY KEY (id),
+  CONSTRAINT subscription_codes_complex_fkey FOREIGN KEY (used_by_complex_id) REFERENCES public.housing_complexes(id)
 );
 CREATE TABLE public.user_tokens (
   id uuid NOT NULL DEFAULT gen_random_uuid(),

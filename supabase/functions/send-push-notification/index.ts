@@ -14,7 +14,16 @@ Deno.serve(async (req) => {
     try {
         const supabaseUrl = Deno.env.get('SUPABASE_URL') || Deno.env.get('SERVICE_URL')
         const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SERVICE_ROLE_KEY')
-        const supabase = createClient(supabaseUrl!, supabaseServiceKey!)
+        
+        if (!supabaseUrl || !supabaseServiceKey) {
+            console.error('[PushNotif] Missing critical environment variables!')
+            return new Response(JSON.stringify({ success: false, debug_error: 'Server is missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY.' }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 200
+            })
+        }
+
+        const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
         // ✅ Ambil Expo Access Token dari Secrets (opsional tapi sangat disarankan di production)
         const expoAccessToken = Deno.env.get('EXPO_ACCESS_TOKEN')
@@ -136,9 +145,10 @@ Deno.serve(async (req) => {
 
     } catch (error: any) {
         console.error('[PushNotif] Fatal Error:', error)
-        return new Response(JSON.stringify({ error: error.message }), {
+        // Bubble up error to frontend to see what crashed
+        return new Response(JSON.stringify({ success: false, debug_error: error.message || String(error) }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 500
+            status: 200
         })
     }
 })

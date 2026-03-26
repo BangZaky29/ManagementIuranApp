@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../../contexts/AuthContext';
 import { fetchMyPayments, PaymentRecord } from '../../../services/iuran';
 import { formatDateSafe } from '../../../utils/dateUtils';
@@ -28,8 +29,6 @@ export interface GroupedHistory {
 
 export const useHistoryViewModel = () => {
     const { user } = useAuth();
-    const [allHistory, setAllHistory] = useState<HistoryItem[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
 
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -37,41 +36,35 @@ export const useHistoryViewModel = () => {
     const [isCalendarVisible, setCalendarVisible] = useState(false);
     const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
     const [isDownloadingId, setIsDownloadingId] = useState<string | null>(null);
+    
+    // Pagination state
+    const [visibleCount, setVisibleCount] = useState(10);
 
-    // Load real payment data
-    useEffect(() => {
-        loadHistory();
-    }, [user?.id]);
-
-    const loadHistory = useCallback(async () => {
-        if (!user?.id) return;
-        setIsLoading(true);
-        try {
+    // Load real payment data using React Query
+    const {
+        data: allHistory = [],
+        isLoading,
+        refetch
+    } = useQuery({
+        queryKey: ['paymentHistory', user?.id],
+        queryFn: async () => {
             const payments = await fetchMyPayments();
-            const items: HistoryItem[] = payments.map(p => {
-                return {
-                    id: p.id,
-                    feeName: p.fees?.name || 'Iuran',
-                    amount: p.amount,
-                    amountFormatted: `Rp ${p.amount.toLocaleString('id-ID')}`,
-                    status: p.status === 'paid' ? 'Lunas' : (p.status === 'overdue' ? 'Terlambat' : (p.status === 'rejected' ? 'Ditolak' : 'Pending')),
-                    date: p.paid_at
-                        ? formatDateSafe(p.paid_at)
-                        : '-',
-                    methodName: p.payment_method || '-',
-                    periodRaw: p.period, // keep original for grouping
-                    rejectionReason: p.rejection_reason || 'Ditolak (hubungi admin)',
-                    rawPaymentId: p.id,
-                    feeId: p.fee_id,
-                } as any;
-            });
-            setAllHistory(items as any);
-        } catch (error) {
-            console.error('Failed to load history:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [user?.id]);
+            return payments.map(p => ({
+                id: p.id,
+                feeName: p.fees?.name || 'Iuran',
+                amount: p.amount,
+                amountFormatted: `Rp ${p.amount.toLocaleString('id-ID')}`,
+                status: p.status === 'paid' ? 'Lunas' : (p.status === 'overdue' ? 'Terlambat' : (p.status === 'rejected' ? 'Ditolak' : 'Pending')),
+                date: p.paid_at ? formatDateSafe(p.paid_at) : '-',
+                methodName: p.payment_method || '-',
+                periodRaw: p.period, // keep original for grouping
+                rejectionReason: p.rejection_reason || 'Ditolak (hubungi admin)',
+                rawPaymentId: p.id,
+                feeId: p.fee_id,
+            })) as HistoryItem[];
+        },
+        enabled: !!user?.id,
+    });
 
     // Filter
     const filteredHistory = useMemo(() => {
@@ -117,6 +110,18 @@ export const useHistoryViewModel = () => {
 
         return Array.from(historyMap.values()).sort((a, b) => b.id.localeCompare(a.id));
     }, [searchQuery, selectedDate, selectedStatus, allHistory, expandedIds]);
+
+    const paginatedHistory = filteredHistory.slice(0, visibleCount);
+    
+    const handleLoadMore = () => setVisibleCount(prev => prev + 10);
+    const handleShowLess = () => setVisibleCount(prev => Math.max(10, prev - 10));
+    const canLoadMore = visibleCount < filteredHistory.length;
+    const canShowLess = visibleCount > 10;
+    
+    // Reset pagination when filters change
+    useEffect(() => {
+        setVisibleCount(10);
+    }, [searchQuery, selectedDate, selectedStatus]);
 
     const statuses = ['All', 'Lunas', 'Pending', 'Terlambat', 'Ditolak'];
 
@@ -217,7 +222,7 @@ export const useHistoryViewModel = () => {
         searchQuery, setSearchQuery,
         selectedDate, setSelectedDate,
         selectedStatus, setSelectedStatus,
-        filteredHistory,
+        filteredHistory: paginatedHistory,
         statuses,
         handleDateSelect,
         isCalendarVisible, setCalendarVisible,
@@ -229,6 +234,10 @@ export const useHistoryViewModel = () => {
         handleDownloadAllReceipts,
         isDownloadingId,
         isLoading,
-        refresh: loadHistory,
+        refresh: refetch,
+        handleLoadMore,
+        handleShowLess,
+        canLoadMore,
+        canShowLess
     };
 };

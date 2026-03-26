@@ -20,6 +20,8 @@ export default function ManageUsersScreen() {
     const [housingComplexes, setHousingComplexes] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    
+    const maxWarga = profile?.housing_complexes?.max_warga || 30;
 
     // UI State
     const [showForm, setShowForm] = useState(false);
@@ -83,6 +85,18 @@ export default function ManageUsersScreen() {
     const handleSave = async () => {
         if (!nik || !fullName) {
             Alert.alert('Peringatan', 'NIK dan Nama Lengkap wajib diisi');
+            return;
+        }
+
+        if (!isEditing && residents.length >= maxWarga) {
+            setAlertConfig({
+                visible: true,
+                title: 'Batas Kuota Warga',
+                message: `Paket Warlok Anda saat ini membatasi masimal ${maxWarga} data masyarakat/warga. Silahkan Upgrade Paket Warga Lokal.`,
+                type: 'warning',
+                buttons: [{ text: 'Mengerti', onPress: hideAlert }]
+            });
+            setShowForm(false);
             return;
         }
 
@@ -236,6 +250,18 @@ export default function ManageUsersScreen() {
     };
 
     const handleImport = async () => {
+        if (residents.length >= maxWarga) {
+            setAlertConfig({
+                visible: true,
+                title: 'Batas Kuota Warga',
+                message: `Paket Warlok Anda saat ini membatasi masimal ${maxWarga} data masyarakat/warga. Silahkan Upgrade Paket Warga Lokal.`,
+                type: 'warning',
+                buttons: [{ text: 'Mengerti', onPress: hideAlert }]
+            });
+            setShowImportModal(false);
+            return;
+        }
+
         try {
             setIsImporting(true);
             const result = await importResidents(importRole, profile?.housing_complex_id || selectedComplexId);

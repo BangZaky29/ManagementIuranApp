@@ -43,6 +43,10 @@ export default function HomeScreen() {
         sosStep,
         handleSmsFallback,
         handleSosDismiss,
+        hasLaporan,
+        hasChat,
+        hasPanic,
+        showFeatureLockedAlert,
     } = useHomeViewModel();
 
     useFocusEffect(
@@ -205,7 +209,9 @@ export default function HomeScreen() {
                     <View style={styles.gridContainer}>
                         {quickActions.map((action, index) => {
                             const isGated =
-                                (action.id === 'message' && !FeatureFlags.IS_MESSAGE_ENABLED) ||
+                                (action.id === 'message' && (!FeatureFlags.IS_MESSAGE_ENABLED || !hasChat)) ||
+                                (action.id === 'laporan' && !hasLaporan) ||
+                                (action.id === 'panic' && !hasPanic) ||
                                 (action.id === 'more' && !FeatureFlags.IS_OTHERS_ENABLED);
 
                             return (
@@ -215,7 +221,11 @@ export default function HomeScreen() {
                                     activeOpacity={0.7}
                                     onPress={() => {
                                         if (isGated) {
-                                            handleNavigation();
+                                            if (!hasChat && action.id === 'message' || !hasLaporan && action.id === 'laporan' || !hasPanic && action.id === 'panic') {
+                                                showFeatureLockedAlert();
+                                            } else {
+                                                handleNavigation();
+                                            }
                                             return;
                                         }
                                         if (action.id === 'panic') {

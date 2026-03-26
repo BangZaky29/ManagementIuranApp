@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ActivityIndicator, StatusBar, Platform } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator, StatusBar, Platform } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
+import { useQuery } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,24 +12,19 @@ import { CustomHeader } from '../../src/components/common/CustomHeader';
 export default function AllNewsScreen() {
     const router = useRouter();
     const { colors } = useTheme();
-    const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [visibleCount, setVisibleCount] = useState(10);
 
-    useEffect(() => {
-        loadNews();
-    }, []);
-
-    const loadNews = async () => {
-        setIsLoading(true);
-        try {
-            const news = await fetchNews(false); // Fetch all news (not just dashboard ones if the flag implies that)
-            setNewsItems(news);
-        } catch (error) {
-            console.error('Failed to load news:', error);
-        } finally {
-            setIsLoading(false);
+    const { data: allNews = [], isLoading } = useQuery({
+        queryKey: ['allNews'],
+        queryFn: async () => {
+            return await fetchNews(false);
         }
-    };
+    });
+
+    const paginatedNews = allNews.slice(0, visibleCount);
+    const canLoadMore = visibleCount < allNews.length;
+    
+    const handleLoadMore = () => setVisibleCount(prev => prev + 10);
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -84,19 +81,33 @@ export default function AllNewsScreen() {
                     <Text style={[styles.loadingText, { color: colors.green5 }]}>Memuat informasi...</Text>
                 </View>
             ) : (
-                <FlatList
-                    data={newsItems}
-                    keyExtractor={(item) => item.id.toString()}
-                    contentContainerStyle={styles.listContainer}
-                    renderItem={renderItem}
-                    showsVerticalScrollIndicator={false}
-                    ListEmptyComponent={
-                        <View style={styles.emptyState}>
-                            <Ionicons name="newspaper-outline" size={48} color={colors.green3} />
-                            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Belum ada informasi terbaru.</Text>
-                        </View>
-                    }
-                />
+                <View style={{ flex: 1 }}>
+                    <FlashList
+                        data={paginatedNews}
+                        // @ts-ignore: React 19 typing compatibility
+                        estimatedItemSize={120}
+                        keyExtractor={(item) => item.id.toString()}
+                        contentContainerStyle={styles.listContainer}
+                        renderItem={renderItem}
+                        showsVerticalScrollIndicator={false}
+                        ListEmptyComponent={
+                            <View style={styles.emptyState}>
+                                <Ionicons name="newspaper-outline" size={48} color={colors.green3} />
+                                <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Belum ada informasi terbaru.</Text>
+                            </View>
+                        }
+                        ListFooterComponent={
+                            canLoadMore ? (
+                                <TouchableOpacity 
+                                    onPress={handleLoadMore}
+                                    style={{ paddingVertical: 10, paddingHorizontal: 20, backgroundColor: colors.primary, borderRadius: 8, alignSelf: 'center', marginTop: 10 }}
+                                >
+                                    <Text style={{ color: '#FFF', fontWeight: 'bold' }}>Tampilkan Lebih Banyak</Text>
+                                </TouchableOpacity>
+                            ) : null
+                        }
+                    />
+                </View>
             )}
         </SafeAreaView>
     );

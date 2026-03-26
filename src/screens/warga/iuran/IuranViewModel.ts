@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'expo-router';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../../contexts/AuthContext';
 import { fetchMyPayments, fetchBillingPeriods, BillingPeriod, BillItem, submitBulkPayments, PaymentRecord, SmartBillSummary } from '../../../services/iuran';
 import { formatDateSafe } from '../../../utils/dateUtils';
@@ -33,7 +34,6 @@ export const useIuranViewModel = () => {
     const [currentMonth, setCurrentMonth] = useState('');
     const [billSummary, setBillSummary] = useState<SmartBillSummary | null>(null);
     const [history, setHistory] = useState<GroupedHistory[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [expandedPeriodIds, setExpandedPeriodIds] = useState<Set<string>>(new Set());
     const [selectedItemKeys, setSelectedItemKeys] = useState<Set<string>>(new Set());
     const [isDownloadingReceiptId, setIsDownloadingReceiptId] = useState<string | null>(null);
@@ -47,76 +47,77 @@ export const useIuranViewModel = () => {
     useEffect(() => {
         const date = new Date();
         setCurrentMonth(date.toLocaleString('id-ID', { month: 'long', year: 'numeric' }));
-        loadData();
-    }, [user?.id]);
+    }, []);
 
-    const loadData = useCallback(async () => {
-        if (!user?.id) return;
-        setIsLoading(true);
-        try {
+    const { data: queryData, isLoading, refetch } = useQuery({
+        queryKey: ['iuranData', user?.id],
+        queryFn: async () => {
             const [bill, rawPayments] = await Promise.all([
-                fetchBillingPeriods(user.id),
+                fetchBillingPeriods(user!.id),
                 fetchMyPayments(),
             ]);
-            setBillSummary(bill);
+            return { bill, rawPayments };
+        },
+        enabled: !!user?.id,
+    });
 
-            // Auto-select all overdue, rejected, and unpaid current month periods
-            const toSelect = new Set<string>();
-            bill.periods.forEach(p => {
-                if (p.isOverdue || (p.isCurrentMonth && (p.status === 'unpaid' || p.status === 'partial' || p.status === 'rejected')) || p.items.some(i => i.status === 'rejected')) {
-                    p.items.forEach(i => {
-                        if (i.status === 'unpaid' || i.status === 'rejected') toSelect.add(`${p.id}|${i.fee.id}`);
-                    });
-                }
-            });
-            setSelectedItemKeys(toSelect);
+    useEffect(() => {
+        if (!queryData) return;
+        const { bill, rawPayments } = queryData;
+        setBillSummary(bill);
 
-            // Group history by month
-            const historyMap = new Map<string, GroupedHistory>();
+        // Auto-select all overdue, rejected, and unpaid current month periods
+        const toSelect = new Set<string>();
+        bill.periods.forEach(p => {
+            if (p.isOverdue || (p.isCurrentMonth && (p.status === 'unpaid' || p.status === 'partial' || p.status === 'rejected')) || p.items.some(i => i.status === 'rejected')) {
+                p.items.forEach(i => {
+                    if (i.status === 'unpaid' || i.status === 'rejected') toSelect.add(`${p.id}|${i.fee.id}`);
+                });
+            }
+        });
+        setSelectedItemKeys(toSelect);
 
-            rawPayments.forEach(p => {
-                const dateObj = new Date(p.period);
-                const periodId = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
-                const periodName = dateObj.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+        // Group history by month
+        const historyMap = new Map<string, GroupedHistory>();
 
-                const item: HistoryItem = {
-                    id: p.id,
-                    feeName: p.fees?.name || 'Iuran',
-                    amount: p.amount,
-                    amountFormatted: `Rp ${p.amount.toLocaleString('id-ID')}`,
-                    status: p.status === 'paid' ? 'Lunas' : (p.status === 'overdue' ? 'Terlambat' : (p.status === 'rejected' ? 'Ditolak' : 'Pending')),
-                    date: p.paid_at ? formatDateSafe(p.paid_at) : '-',
-                    methodName: p.payment_method || '-',
-                    rejectionReason: p.rejection_reason || 'Ditolak (hubungi admin)',
-                    feeId: p.fee_id?.toString() || '',
-                    rawPaymentId: p.id
-                };
+        rawPayments.forEach(p => {
+            const dateObj = new Date(p.period);
+            const periodId = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
+            const periodName = dateObj.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
 
-                if (!historyMap.has(periodId)) {
-                    historyMap.set(periodId, {
-                        id: periodId,
-                        periodName,
-                        totalAmount: 0,
-                        items: [],
-                        isExpanded: false
-                    });
-                }
+            const item: HistoryItem = {
+                id: p.id,
+                feeName: p.fees?.name || 'Iuran',
+                amount: p.amount,
+                amountFormatted: `Rp ${p.amount.toLocaleString('id-ID')}`,
+                status: p.status === 'paid' ? 'Lunas' : (p.status === 'overdue' ? 'Terlambat' : (p.status === 'rejected' ? 'Ditolak' : 'Pending')),
+                date: p.paid_at ? formatDateSafe(p.paid_at) : '-',
+                methodName: p.payment_method || '-',
+                rejectionReason: p.rejection_reason || 'Ditolak (hubungi admin)',
+                feeId: p.fee_id?.toString() || '',
+                rawPaymentId: p.id
+            };
 
-                const group = historyMap.get(periodId)!;
-                group.items.push(item);
-                group.totalAmount += item.amount;
-            });
+            if (!historyMap.has(periodId)) {
+                historyMap.set(periodId, {
+                    id: periodId,
+                    periodName,
+                    totalAmount: 0,
+                    items: [],
+                    isExpanded: false
+                });
+            }
 
-            const formatted = Array.from(historyMap.values())
-                .sort((a, b) => b.id.localeCompare(a.id))
-                .slice(0, 5);
-            setHistory(formatted);
-        } catch (error) {
-            console.error('Failed to load iuran data:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [user?.id]);
+            const group = historyMap.get(periodId)!;
+            group.items.push(item);
+            group.totalAmount += item.amount;
+        });
+
+        const formatted = Array.from(historyMap.values())
+            .sort((a, b) => b.id.localeCompare(a.id))
+            .slice(0, 5);
+        setHistory(formatted);
+    }, [queryData]);
 
     // Selection
     const toggleExpandPeriod = (periodId: string) => {
@@ -267,6 +268,6 @@ export const useIuranViewModel = () => {
         alertVisible,
         alertConfig,
         hideAlert,
-        refresh: loadData,
+        refresh: refetch,
     };
 };

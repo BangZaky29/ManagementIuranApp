@@ -23,6 +23,12 @@ export interface UserProfile {
     housing_complex_id?: number | null;
     housing_complexes?: {
         name: string;
+        active_plan_name?: string;
+        max_warga?: number;
+        has_laporan?: boolean;
+        has_chat?: boolean;
+        has_panic_button?: boolean;
+        subscription_code?: string;
     } | null;
 }
 
@@ -204,7 +210,13 @@ export async function getProfile(userId: string): Promise<UserProfile | null> {
         .select(`
             *,
             housing_complexes (
-                name
+                name,
+                active_plan_name,
+                max_warga,
+                has_laporan,
+                has_chat,
+                has_panic_button,
+                subscription_code
             )
         `)
         .eq('id', userId)

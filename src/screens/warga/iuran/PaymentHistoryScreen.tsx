@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, StatusBar, ScrollView, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, StatusBar, ScrollView, ActivityIndicator, Platform } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -34,7 +35,11 @@ export default function PaymentHistoryScreen() {
         handleDownloadPeriodReceipt,
         handleDownloadAllReceipts,
         isDownloadingId,
-        refresh
+        refresh,
+        handleLoadMore,
+        handleShowLess,
+        canLoadMore,
+        canShowLess
     } = useHistoryViewModel();
     const { colors } = useTheme();
     const s = React.useMemo(() => createStyles(colors), [colors]);
@@ -269,39 +274,64 @@ export default function PaymentHistoryScreen() {
             </View>
 
             {/* List */}
-            <FlatList
-                data={filteredHistory}
-                ListHeaderComponent={
-                    filteredHistory.length > 0 && filteredHistory.some((g: any) => g.items.some((i: any) => i.status === 'Lunas')) ? (
-                        <TouchableOpacity
-                            style={{
-                                flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-                                backgroundColor: colors.primary, paddingVertical: 14, borderRadius: 12, marginBottom: 16, marginHorizontal: 20
-                            }}
-                            onPress={handleDownloadAllReceipts}
-                            disabled={isDownloadingId === 'all'}
-                        >
-                            {isDownloadingId === 'all' ? (
-                                <ActivityIndicator size="small" color={colors.textWhite} />
-                            ) : (
-                                <>
-                                    <Ionicons name="download" size={18} color={colors.textWhite} style={{ marginRight: 8 }} />
-                                    <Text style={{ color: colors.textWhite, fontSize: 14, fontWeight: 'bold' }}>Unduh Semua Kuitansi Riwayat</Text>
-                                </>
+            <View style={{ flex: 1 }}>
+                <FlashList
+                    data={filteredHistory}
+                    // @ts-ignore: type incompatibility with React 19
+                    estimatedItemSize={200}
+                    ListHeaderComponent={
+                        filteredHistory.length > 0 && filteredHistory.some((g: any) => g.items.some((i: any) => i.status === 'Lunas')) ? (
+                            <TouchableOpacity
+                                style={{
+                                    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+                                    backgroundColor: colors.primary, paddingVertical: 14, borderRadius: 12, marginBottom: 16, marginHorizontal: 20
+                                }}
+                                onPress={handleDownloadAllReceipts}
+                                disabled={isDownloadingId === 'all'}
+                            >
+                                {isDownloadingId === 'all' ? (
+                                    <ActivityIndicator size="small" color={colors.textWhite} />
+                                ) : (
+                                    <>
+                                        <Ionicons name="download" size={18} color={colors.textWhite} style={{ marginRight: 8 }} />
+                                        <Text style={{ color: colors.textWhite, fontSize: 14, fontWeight: 'bold' }}>Unduh Semua Kuitansi Riwayat</Text>
+                                    </>
+                                )}
+                            </TouchableOpacity>
+                        ) : null
+                    }
+                    renderItem={renderItem}
+                    keyExtractor={item => item.id}
+                    contentContainerStyle={s.listContainer}
+                    showsVerticalScrollIndicator={false}
+                    ListEmptyComponent={
+                        <View style={s.emptyState}>
+                            <Ionicons name="document-text-outline" size={48} color={colors.border} />
+                            <Text style={s.emptyText}>Tidak ada riwayat ditemukan</Text>
+                        </View>
+                    }
+                    ListFooterComponent={
+                        <View style={{ flexDirection: 'row', justifyContent: 'center', marginVertical: 16, gap: 10 }}>
+                            {canShowLess && (
+                                <TouchableOpacity 
+                                    onPress={handleShowLess}
+                                    style={{ paddingVertical: 8, paddingHorizontal: 16, backgroundColor: colors.surfaceSubtle, borderRadius: 8, borderWidth: 1, borderColor: colors.border }}
+                                >
+                                    <Text style={{ color: colors.textSecondary, fontWeight: '500' }}>Tampilkan Lebih Sedikit</Text>
+                                </TouchableOpacity>
                             )}
-                        </TouchableOpacity>
-                    ) : null
-                }
-                renderItem={renderItem}
-                keyExtractor={item => item.id}
-                contentContainerStyle={s.listContainer}
-                ListEmptyComponent={
-                    <View style={s.emptyState}>
-                        <Ionicons name="document-text-outline" size={48} color={colors.border} />
-                        <Text style={s.emptyText}>Tidak ada riwayat ditemukan</Text>
-                    </View>
-                }
-            />
+                            {canLoadMore && (
+                                <TouchableOpacity 
+                                    onPress={handleLoadMore}
+                                    style={{ paddingVertical: 8, paddingHorizontal: 16, backgroundColor: colors.primary, borderRadius: 8 }}
+                                >
+                                    <Text style={{ color: colors.textWhite, fontWeight: '500' }}>Tampilkan Lebih Banyak</Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    }
+                />
+            </View>
 
             {/* Calendar Modal */}
             <FilterCalendar

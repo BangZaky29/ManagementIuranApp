@@ -75,7 +75,14 @@ export default function AdminProfileScreen() {
         handleSaveProfile,
         handleEditComplexInfo,
         handleSoundSettings,
-        isSubmitting
+        isSubmitting,
+        redeemModalVisible,
+        setRedeemModalVisible,
+        redeemCode,
+        setRedeemCode,
+        isRedeeming,
+        handleOpenRedeemModal,
+        submitRedeemCode
     } = useAdminProfileViewModel();
 
     const { isDark, toggleTheme } = useTheme();
@@ -151,6 +158,7 @@ export default function AdminProfileScreen() {
                 {/* Info Section */}
                 <Text style={styles.sectionTitle}>Informasi Admin</Text>
                 <View style={[styles.infoCard, { backgroundColor: colors.surface }]}>
+                    {renderInfoItem('star-outline', 'Paket Langganan', user.activePlanName, true)}
                     {renderInfoItem('person-outline', 'Nama Lengkap', user.name)}
                     {renderInfoItem('at-outline', 'Username', user.username)}
                     {renderInfoItem('mail-outline', 'Email', user.email, true)}
@@ -183,6 +191,7 @@ export default function AdminProfileScreen() {
                         <ThemeToggle isDark={isDark} onToggle={FeatureFlags.IS_DARK_MODE_ENABLED ? toggleTheme : () => { }} colors={colors} />
                     </Pressable>
 
+                    {renderMenuItem('key-outline', 'Klaim Kode Referral', handleOpenRedeemModal)}
                     {renderMenuItem('information-circle-outline', 'Edit Informasi Komplek', handleEditComplexInfo)}
                 </View>
 
@@ -236,6 +245,54 @@ export default function AdminProfileScreen() {
                                     <ActivityIndicator color="#FFF" />
                                 ) : (
                                     <Text style={styles.buttonText}>Simpan</Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Redeem Code Modal */}
+            <Modal
+                visible={redeemModalVisible}
+                animationType="fade"
+                transparent={true}
+                onRequestClose={() => setRedeemModalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.formContainer}>
+                        <Text style={styles.formTitle}>Masukkan Kode Referral</Text>
+                        <Text style={{ color: colors.textSecondary, fontSize: 13, marginBottom: 15 }}>
+                            Dapatkan kode referral dari halaman utama Warlok Website untuk mengaktifkan fitur tambahan.
+                        </Text>
+
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Kode Berlangganan</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={redeemCode}
+                                onChangeText={setRedeemCode}
+                                placeholder="Contoh: WLK-PRO-ABC123"
+                                autoCapitalize="characters"
+                            />
+                        </View>
+
+                        <View style={styles.formActions}>
+                            <TouchableOpacity
+                                style={[styles.button, styles.cancelButton]}
+                                onPress={() => setRedeemModalVisible(false)}
+                            >
+                                <Text style={styles.buttonTextCancel}>Batal</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.button, styles.saveButton]}
+                                onPress={submitRedeemCode}
+                                disabled={isRedeeming}
+                            >
+                                {isRedeeming ? (
+                                    <ActivityIndicator color="#FFF" />
+                                ) : (
+                                    <Text style={styles.buttonText}>Aktifkan</Text>
                                 )}
                             </TouchableOpacity>
                         </View>

@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter, useFocusEffect } from 'expo-router';
+import { useState } from 'react';
+import { useRouter } from 'expo-router';
+import { useQuery } from '@tanstack/react-query';
 import { fetchMyReports, Report } from '../../../services/laporan';
 import { useAuth } from '../../../contexts/AuthContext';
 import { formatDateSafe } from '../../../utils/dateUtils';
@@ -17,50 +18,50 @@ export const useLaporanViewModel = () => {
     const router = useRouter();
     const { user } = useAuth();
     const [selectedFilter, setSelectedFilter] = useState<'Semua' | 'Menunggu' | 'Diproses' | 'Selesai' | 'Ditolak'>('Semua');
-    const [reports, setReports] = useState<ReportItem[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [visibleCount, setVisibleCount] = useState(10);
 
-    // Initial load
-    useEffect(() => {
-        if (user?.id) {
-            loadReports();
-        }
-    }, [user?.id]);
-
-    // Reload when screen is focused (e.g. returning from detail or create)
-    useFocusEffect(
-        useCallback(() => {
-            loadReports();
-        }, [])
-    );
-
-    const loadReports = async () => {
-        setIsLoading(true);
-        try {
+    const {
+        data: reports = [],
+        isLoading,
+        refetch
+    } = useQuery({
+        queryKey: ['myReports', user?.id],
+        queryFn: async () => {
             const data = await fetchMyReports();
-
-            // Map Supabase data to UI model
-            const mappedReports: ReportItem[] = data.map(r => ({
+            return data.map(r => ({
                 id: r.id,
                 title: r.title,
                 status: r.status,
                 date: formatDateSafe(r.created_at),
                 category: r.category,
                 description: r.description
-            }));
+            })) as ReportItem[];
+        },
+        enabled: !!user?.id,
+    });
 
-            setReports(mappedReports);
-        } catch (error) {
-            console.error('Failed to load reports:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const filteredReports = reports.filter(item => {
+    const allFilteredReports = reports.filter(item => {
         if (selectedFilter === 'Semua') return true;
         return item.status === selectedFilter;
     });
+
+    const filteredReports = allFilteredReports.slice(0, visibleCount);
+
+    const handleLoadMore = () => {
+        setVisibleCount(prev => prev + 10);
+    };
+
+    const handleShowLess = () => {
+        setVisibleCount(prev => Math.max(10, prev - 10));
+    };
+
+    const canLoadMore = visibleCount < allFilteredReports.length;
+    const canShowLess = visibleCount > 10;
+
+    const handleFilterChange = (filter: 'Semua' | 'Menunggu' | 'Diproses' | 'Selesai' | 'Ditolak') => {
+        setSelectedFilter(filter);
+        setVisibleCount(10);
+    };
 
     const handleCreateReport = () => {
         router.push('/laporan/create');
@@ -75,11 +76,15 @@ export const useLaporanViewModel = () => {
 
     return {
         selectedFilter,
-        setSelectedFilter,
+        setSelectedFilter: handleFilterChange,
         filteredReports,
         handleCreateReport,
         handleReportClick,
         isLoading,
-        refresh: loadReports
+        refresh: refetch,
+        handleLoadMore,
+        handleShowLess,
+        canLoadMore,
+        canShowLess
     };
 };

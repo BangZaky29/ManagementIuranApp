@@ -26,6 +26,12 @@ export const useAdminProfileViewModel = () => {
         avatarUrl: profile?.avatar_url || null,
         isActive: profile?.is_active || false,
         housingComplexName: profile?.housing_complexes?.name || null,
+        activePlanName: profile?.housing_complexes?.active_plan_name || 'Gratis',
+        maxWarga: profile?.housing_complexes?.max_warga || 30,
+        hasLaporan: profile?.housing_complexes?.has_laporan || false,
+        hasChat: profile?.housing_complexes?.has_chat || false,
+        hasPanicButton: profile?.housing_complexes?.has_panic_button || false,
+        subscriptionCode: profile?.housing_complexes?.subscription_code || null,
     };
 
     // Alert State
@@ -55,6 +61,65 @@ export const useAdminProfileViewModel = () => {
     const handleSaveProfile = async () => {
         // ... (Legacy modal logic, main logic is in EditScreen)
         // Leaving this as-is for now, focusing on data mapping.
+    };
+
+    // --- Redeem Code Logic ---
+    const [redeemModalVisible, setRedeemModalVisible] = useState(false);
+    const [redeemCode, setRedeemCode] = useState('');
+    const [isRedeeming, setIsRedeeming] = useState(false);
+
+    const handleOpenRedeemModal = () => {
+        setRedeemCode('');
+        setRedeemModalVisible(true);
+    };
+
+    const submitRedeemCode = async () => {
+        if (!redeemCode.trim()) {
+            setAlertConfig({
+                title: 'Error',
+                message: 'Kode berlangganan tidak boleh kosong.',
+                type: 'error',
+                buttons: [{ text: 'OK', onPress: hideAlert }]
+            });
+            setAlertVisible(true);
+            return;
+        }
+
+        try {
+            setIsRedeeming(true);
+            const { error } = await supabase.rpc('redeem_subscription_code', {
+                p_code: redeemCode.trim(),
+                p_complex_id: profile?.housing_complex_id
+            });
+
+            if (error) {
+                throw error;
+            }
+
+            // Success
+            setRedeemModalVisible(false);
+            setAlertConfig({
+                title: 'Berhasil',
+                message: 'Kode langganan berhasil diaktifkan. Fitur baru sudah terbuka!',
+                type: 'success',
+                buttons: [{ text: 'OK', onPress: hideAlert }]
+            });
+            setAlertVisible(true);
+            
+            // Refresh profile to fetch new complex limits
+            await refreshProfile();
+        } catch (err: any) {
+            console.error('Redeem Code Error:', err);
+            setAlertConfig({
+                title: 'Gagal',
+                message: err.message || 'Gagal mengaktifkan kode langganan.',
+                type: 'error',
+                buttons: [{ text: 'OK', onPress: hideAlert }]
+            });
+            setAlertVisible(true);
+        } finally {
+            setIsRedeeming(false);
+        }
     };
 
     // We can also export a specialized hook for the Edit Screen if we want to share logic, 
@@ -171,6 +236,13 @@ export const useAdminProfileViewModel = () => {
         editName,
         setEditName,
         handleSaveProfile,
-        isSubmitting
+        isSubmitting,
+        redeemModalVisible,
+        setRedeemModalVisible,
+        redeemCode,
+        setRedeemCode,
+        isRedeeming,
+        handleOpenRedeemModal,
+        submitRedeemCode
     };
 };

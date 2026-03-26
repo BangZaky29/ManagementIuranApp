@@ -9,8 +9,11 @@ import { ActivityIndicator, View, Text } from 'react-native';
 
 import { ThemeProvider, useTheme } from '../src/contexts/ThemeContext';
 import { AuthProvider, useAuth } from '../src/contexts/AuthContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 SplashScreen.preventAutoHideAsync();
+
+const queryClient = new QueryClient();
 
 // Penting: Kosongkan ini atau arahkan ke rute login agar tidak memaksa ke (tabs)
 export const unstable_settings = {
@@ -155,10 +158,12 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <RootLayoutInner />
-      </ThemeProvider>
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <ThemeProvider>
+          <RootLayoutInner />
+        </ThemeProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }

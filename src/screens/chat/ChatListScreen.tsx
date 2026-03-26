@@ -13,6 +13,7 @@ export default function ChatListScreen() {
     const router = useRouter();
     const { user, profile } = useAuth();
     const isSecurity = profile?.role === 'security';
+    const hasChat = profile?.housing_complexes?.has_chat ?? false;
     const appTheme = useAppTheme();
     const securityTheme = useSecurityTheme();
     const { colors, isDark } = isSecurity ? securityTheme : appTheme;
@@ -74,6 +75,28 @@ export default function ChatListScreen() {
             />
         );
     };
+
+    if (!hasChat) {
+        return (
+            <SafeAreaView edges={['top', 'bottom']} style={[styles.container, { backgroundColor: colors.background }]}>
+                <CustomHeader
+                    title="Pesan"
+                    onBack={() => router.back()}
+                    showBack={true}
+                    colors={colors}
+                />
+                <View style={styles.center}>
+                    <Ionicons name="lock-closed" size={64} color={colors.textSecondary} style={{ marginBottom: 16 }} />
+                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.textPrimary, textAlign: 'center', marginBottom: 8 }}>
+                        Fitur Terkunci
+                    </Text>
+                    <Text style={{ fontSize: 14, color: colors.textSecondary, textAlign: 'center', paddingHorizontal: 20, lineHeight: 22 }}>
+                        Fitur Pesan Antar Warga tidak tersedia dalam paket berlangganan komplek Anda saat ini. Hubungi pengurus komplek untuk melakukan Upgrade Paket Warga Lokal.
+                    </Text>
+                </View>
+            </SafeAreaView>
+        );
+    }
 
     return (
         <SafeAreaView edges={['top', 'bottom']} style={[styles.container, { backgroundColor: colors.background }]}>
