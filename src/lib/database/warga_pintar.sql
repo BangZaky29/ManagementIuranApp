@@ -115,13 +115,13 @@ CREATE TABLE public.housing_complexes (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   name text NOT NULL,
   address text,
+  created_at timestamp with time zone DEFAULT now(),
   active_plan_name text DEFAULT 'Gratis'::text,
   max_warga integer DEFAULT 30,
   has_laporan boolean DEFAULT false,
   has_chat boolean DEFAULT false,
   has_panic_button boolean DEFAULT false,
   subscription_code text,
-  created_at timestamp with time zone DEFAULT now(),
   CONSTRAINT housing_complexes_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.news (
@@ -247,17 +247,6 @@ CREATE TABLE public.reports (
   CONSTRAINT reports_processed_by_id_fkey FOREIGN KEY (processed_by_id) REFERENCES public.profiles(id),
   CONSTRAINT reports_completed_by_id_fkey FOREIGN KEY (completed_by_id) REFERENCES public.profiles(id)
 );
-CREATE TABLE public.user_notification_settings (
-  user_id uuid NOT NULL,
-  notif_sound text DEFAULT 'notification_alert.wav'::text,
-  alert_sound text DEFAULT 'alarm-sound-effect.wav'::text,
-  vibration_enabled boolean DEFAULT true,
-  updated_at timestamp with time zone DEFAULT now(),
-  alert_duration integer DEFAULT 30,
-  theme_mode text DEFAULT 'system'::text CHECK (theme_mode = ANY (ARRAY['light'::text, 'dark'::text, 'system'::text])),
-  CONSTRAINT user_notification_settings_pkey PRIMARY KEY (user_id),
-  CONSTRAINT user_notification_settings_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
-);
 CREATE TABLE public.subscription_codes (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   code text NOT NULL UNIQUE,
@@ -271,7 +260,18 @@ CREATE TABLE public.subscription_codes (
   created_at timestamp with time zone DEFAULT now(),
   used_at timestamp with time zone,
   CONSTRAINT subscription_codes_pkey PRIMARY KEY (id),
-  CONSTRAINT subscription_codes_complex_fkey FOREIGN KEY (used_by_complex_id) REFERENCES public.housing_complexes(id)
+  CONSTRAINT subscription_codes_used_by_complex_id_fkey FOREIGN KEY (used_by_complex_id) REFERENCES public.housing_complexes(id)
+);
+CREATE TABLE public.user_notification_settings (
+  user_id uuid NOT NULL,
+  notif_sound text DEFAULT 'notification_alert.wav'::text,
+  alert_sound text DEFAULT 'alarm-sound-effect.wav'::text,
+  vibration_enabled boolean DEFAULT true,
+  updated_at timestamp with time zone DEFAULT now(),
+  alert_duration integer DEFAULT 30,
+  theme_mode text DEFAULT 'system'::text CHECK (theme_mode = ANY (ARRAY['light'::text, 'dark'::text, 'system'::text])),
+  CONSTRAINT user_notification_settings_pkey PRIMARY KEY (user_id),
+  CONSTRAINT user_notification_settings_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
 );
 CREATE TABLE public.user_tokens (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -317,4 +317,17 @@ CREATE TABLE public.visitors (
   CONSTRAINT visitors_housing_complex_id_fkey FOREIGN KEY (housing_complex_id) REFERENCES public.housing_complexes(id),
   CONSTRAINT visitors_destination_user_id_fkey FOREIGN KEY (destination_user_id) REFERENCES public.profiles(id),
   CONSTRAINT visitors_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id)
+);
+CREATE TABLE public.warlok_web_payments (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid,
+  username text NOT NULL,
+  wa_number text NOT NULL,
+  email text NOT NULL,
+  package_name text NOT NULL,
+  proof_url text NOT NULL,
+  status text DEFAULT 'pending'::text,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT warlok_web_payments_pkey PRIMARY KEY (id),
+  CONSTRAINT warlok_web_payments_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );
